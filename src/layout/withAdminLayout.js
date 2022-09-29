@@ -170,8 +170,9 @@ const ThemeLayout = WrappedComponent => {
                     to="/admin"
                   >
                     <img
-                      src={!darkMode ? require(`../static/img/Logo_Dark.svg`) : require(`../static/img/Logo_white.png`)}
-                      alt=""
+                      // src={!darkMode ? require(`../static/img/Logo_Dark.svg`) : require(`../static/img/Logo_white.png`)}
+                      src={!darkMode ? require(`../static/img/Logo_Dark_psp.svg`) : require(`../static/img/Logo_white_psp.svg`)}
+                      alt="logo"
                     />
                   </Link>
                 </Col>
