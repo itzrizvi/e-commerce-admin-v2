@@ -33,7 +33,9 @@ module.exports = override(
     test: /\.css$/,
     loaders: ['style-loader', 'css-loader?modules'],
   }),
-  supportMjs(),
+
+  // supportMjs(), //FN - COMMENTED TO SOLVE THE ISSUE WITH graphql
+
   (config, env) => {
     return hotLoader(config, env);
   },

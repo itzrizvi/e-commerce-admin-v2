@@ -11,6 +11,8 @@ import Auth from './routes/auth';
 import './static/css/style.css';
 import config from './config/config';
 import ProtectedRoute from './components/utilities/protectedRoute';
+import { ApolloProvider } from '@apollo/client';
+import apolloClient from './utility/apollo';
 
 const { theme } = config;
 
@@ -38,12 +40,15 @@ const ProviderConfig = () => {
   return (
     <ConfigProvider direction={rtl ? 'rtl' : 'ltr'}>
       <ThemeProvider theme={{ ...theme, rtl, topMenu, darkMode }}>
-        <Router basename={process.env.PUBLIC_URL}>
-          {!isLoggedIn ? <Route path="/" component={Auth} /> : <ProtectedRoute path="/admin" component={Admin} />}
-          {isLoggedIn && (path === process.env.PUBLIC_URL || path === `${process.env.PUBLIC_URL}/`) && (
-            <Redirect to="/admin" />
-          )}
-        </Router>
+        <ApolloProvider client={apolloClient} >
+          <Router basename={process.env.PUBLIC_URL}>
+            {!isLoggedIn ? <Route path="/" component={Auth} /> : <ProtectedRoute path="/admin" component={Admin} />}
+            {isLoggedIn && (path === process.env.PUBLIC_URL || path === `${process.env.PUBLIC_URL}/`) && (
+              <Redirect to="/admin" />
+            )}
+
+          </Router>
+        </ApolloProvider>
       </ThemeProvider>
     </ConfigProvider>
   );

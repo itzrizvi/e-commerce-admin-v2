@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Avatar } from 'antd';
 import { Link } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import FeatherIcon from 'feather-icons-react';
 import { InfoWraper, NavAuth, UserDropDwon } from './auth-info-style';
 import Message from './message';
@@ -15,6 +15,7 @@ import Heading from '../../heading/heading';
 
 const AuthInfo = () => {
   const dispatch = useDispatch();
+  const user = useSelector(state => state.auth.user);
   const [state, setState] = useState({
     flag: 'english',
   });
@@ -31,7 +32,7 @@ const AuthInfo = () => {
         <figure className="user-dropdwon__info">
           <img src={require('../../../static/img/avatar/chat-auth.png')} alt="" />
           <figcaption>
-            <Heading as="h5">Abdullah Bin Talha</Heading>
+            <Heading as="h5">{user.split('@')[0]}</Heading>
             <p>UI Expert</p>
           </figcaption>
         </figure>

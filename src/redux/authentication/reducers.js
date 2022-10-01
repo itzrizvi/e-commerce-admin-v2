@@ -5,9 +5,14 @@ const { LOGIN_BEGIN, LOGIN_SUCCESS, LOGIN_ERR, LOGOUT_BEGIN, LOGOUT_SUCCESS, LOG
 
 const initState = {
   login: Cookies.get('logedIn'),
+  token: Cookies.get('psp_t'),
+  roleId: Cookies.get('r_i'),
+  user: Cookies.get('user'),
   loading: false,
   error: null,
 };
+
+// FN - TODO : ADD token & roleId ON OTHER ACTION_CREATORS
 
 /**
  *
@@ -24,8 +29,11 @@ const AuthReducer = (state = initState, action) => {
     case LOGIN_SUCCESS:
       return {
         ...state,
-        login: data,
+        login: data.login,
         loading: false,
+        user: data.user,
+        token: data.token,
+        roleId: data.roleId,
       };
     case LOGIN_ERR:
       return {
@@ -43,6 +51,9 @@ const AuthReducer = (state = initState, action) => {
         ...state,
         login: data,
         loading: false,
+        user: undefined,
+        token: undefined,
+        roleId: undefined,
       };
     case LOGOUT_ERR:
       return {

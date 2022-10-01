@@ -10,18 +10,28 @@ import { Checkbox } from '../../../../components/checkbox/checkbox';
 import Heading from '../../../../components/heading/heading';
 
 const SignIn = () => {
+  const [email, setEmail] = useState('sumonskys@gmail.com');
+  const [password, setPassword] = useState('A1234567');
+
   const history = useHistory();
   const dispatch = useDispatch();
   const isLoading = useSelector(state => state.auth.loading);
+  const authError = useSelector(state => state.auth.error);
   const [form] = Form.useForm();
   const [state, setState] = useState({
     checked: null,
   });
 
-  const handleSubmit = () => {
-    dispatch(login());
-    history.push('/admin');
-  };
+  // const handleSubmit = () => {
+  //   dispatch(login());
+  //   history.push('/admin');
+  // };
+
+  const handleSubmit = e => {
+    e.preventDefault();
+
+    dispatch(login(email, password, history));
+  }
 
   const onChange = checked => {
     setState({ ...state, checked });
@@ -33,20 +43,40 @@ const SignIn = () => {
         Don&rsquo;t have an account? <NavLink to="#">Sign up now</NavLink>
       </p> */}
       <div className="auth-contents">
-        <Form name="login" form={form} onFinish={handleSubmit} layout="vertical">
+        <Form
+          name="login"
+          form={form}
+          // onFinish={handleSubmit}
+          onSubmitCapture={handleSubmit}
+          layout="vertical"
+        >
           <Heading as="h3">
             Sign in to <span className="color-secondary">Admin</span>
           </Heading>
           <Form.Item
             name="username"
             rules={[{ message: 'Please input your username or Email!', required: true }]}
-            initialValue="name@example.com"
+            // initialValue="name@example.com"
+            initialValue={email}
             label="Username or Email Address"
           >
-            <Input />
+            <Input
+              onChange={e => {
+                console.log(e.target.value)
+                setEmail(e.target.value)
+              }}
+            />
           </Form.Item>
-          <Form.Item name="password" initialValue="123456" label="Password">
-            <Input.Password placeholder="Password" />
+          <Form.Item
+            name="password"
+            // initialValue="123456"
+            initialValue={password}
+            label="Password"
+          >
+            <Input.Password
+              placeholder="Password"
+              onChange={e => setPassword(e.target.value)}
+            />
           </Form.Item>
           <div className="auth-form-action">
             <Checkbox onChange={onChange}>Keep me logged in</Checkbox>
@@ -59,6 +89,11 @@ const SignIn = () => {
               {isLoading ? 'Loading...' : 'Sign In'}
             </Button>
           </Form.Item>
+
+          {authError &&
+            <p style={{ color: '#ff4d4f' }}>{authError}</p>
+          }
+
           {/* <p className="form-divider">
             <span>Or</span>
           </p>
