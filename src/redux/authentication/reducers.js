@@ -54,6 +54,7 @@ const AuthReducer = (state = initState, action) => {
         user: undefined,
         token: undefined,
         roleId: undefined,
+        error: null,
       };
     case LOGOUT_ERR:
       return {
