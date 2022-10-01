@@ -4,6 +4,8 @@ import { NavLink, useRouteMatch } from 'react-router-dom';
 import FeatherIcon from 'feather-icons-react';
 import propTypes from 'prop-types';
 
+const { SubMenu } = Menu;
+
 const MenuItems = ({ darkMode, toggleCollapsed, topMenu }) => {
   const { path } = useRouteMatch();
   const pathName = window.location.pathname;
@@ -32,10 +34,9 @@ const MenuItems = ({ darkMode, toggleCollapsed, topMenu }) => {
       defaultSelectedKeys={
         !topMenu
           ? [
-              `${
-                mainPathSplit.length === 1 ? 'home' : mainPathSplit.length === 2 ? mainPathSplit[1] : mainPathSplit[2]
-              }`,
-            ]
+            `${mainPathSplit.length === 1 ? 'home' : mainPathSplit.length === 2 ? mainPathSplit[1] : mainPathSplit[2]
+            }`,
+          ]
           : []
       }
       defaultOpenKeys={!topMenu ? [`${mainPathSplit.length > 2 ? mainPathSplit[1] : 'dashboard'}`] : []}
@@ -47,6 +48,28 @@ const MenuItems = ({ darkMode, toggleCollapsed, topMenu }) => {
           Dashboard
         </NavLink>
       </Menu.Item>
+
+      <SubMenu key="admin" icon={!topMenu && <FeatherIcon icon="users" />} title="Admin">
+        <Menu.Item key="Add Admin">
+          <NavLink onClick={toggleCollapsed} to={`${path}/users/add`}>
+            Add Admin
+          </NavLink>
+        </Menu.Item>
+        {/* <Menu.Item key="single">
+          <NavLink onClick={toggleCollapsed} to={`${path}/email/single/1585118055048`}>
+            Read Email
+          </NavLink>
+        </Menu.Item> */}
+      </SubMenu>
+
+      <SubMenu key="products" icon={!topMenu && <FeatherIcon icon="shopping-cart" />} title="Products">
+        <Menu.Item key="addproducts">
+          <NavLink onClick={toggleCollapsed} to={`${path}/products/add`}>
+            Add Products
+          </NavLink>
+        </Menu.Item>
+      </SubMenu>
+
     </Menu>
   );
 };
