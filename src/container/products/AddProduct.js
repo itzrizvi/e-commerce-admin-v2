@@ -9,8 +9,9 @@ import { Main, BasicFormWrapper } from '../styled';
 import { Button } from '../../components/buttons/buttons';
 import { AddProductForm } from './Style';
 import Heading from '../../components/heading/heading';
-import apolloClient, { productMutation } from '../../utility/apollo';
+import apolloClient, { authMutation, productMutation } from '../../utility/apollo';
 import { useSelector } from 'react-redux';
+import { gql } from '@apollo/client';
 
 // import { ShareButtonPageHeader } from '../../../components/buttons/share-button/share-button';
 // import { ExportButtonPageHeader } from '../../../components/buttons/export-button/export-button';
@@ -69,12 +70,11 @@ const AddProduct = () => {
 
     apolloClient.mutate({
       mutation: productMutation.ADD_PRODUCT_MUTATION,
-      // variables: { ...values, product_available_from: availableFrom },
-      variables: { test: '1' },
+      variables: { data: { ...values, product_available_from: availableFrom } },
       context: {
         headers: {
-          Authorization: token,
-          TENANTID: 100001
+          TENANTID: 100001,
+          Authorization: token
         }
       }
     }).then(res => {
