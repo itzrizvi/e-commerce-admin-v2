@@ -1,5 +1,6 @@
-import React, { useLayoutEffect, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useState } from 'react';
 import { Row, Col, Form, Input, Select, InputNumber, Radio, Upload, message, Checkbox, DatePicker } from 'antd';
+import { toast, ToastContainer } from 'react-toastify'
 
 
 import FeatherIcon from 'feather-icons-react';
@@ -9,7 +10,7 @@ import { Main, BasicFormWrapper } from '../styled';
 import { Button } from '../../components/buttons/buttons';
 import { AddProductForm } from './Style';
 import Heading from '../../components/heading/heading';
-import apolloClient, { authMutation, productMutation } from '../../utility/apollo';
+import apolloClient, { authMutation, authQuery, productMutation } from '../../utility/apollo';
 import { useSelector } from 'react-redux';
 import { gql } from '@apollo/client';
 
@@ -22,55 +23,55 @@ const { Dragger } = Upload;
 
 const AddAdmin = () => {
     const [availableFrom, setAvailableFrom] = useState('');
+    const [roles, setRoles] = useState({
+        roles: [],
+        isLoading: true,
+        error: null,
+    })
     const [isLoading, setIsLoading] = useState(false);
     const token = useSelector(state => state.auth.token);
 
     const [form] = Form.useForm();
-    const [state, setState] = useState({
-        file: null,
-        list: null,
-        submitValues: {},
-    });
 
-    const fileList = [
-        {
-            uid: '1',
-            name: '1.png',
-            status: 'done',
-            url: require('../../static/img/products/1.png'),
-            thumbUrl: require('../../static/img/products/1.png'),
-        },
-    ];
+    useEffect(() => {
+        setRoles(state => ({ ...state, isLoading: true }))
 
-    const fileUploadProps = {
-        name: 'file',
-        multiple: true,
-        action: 'https://www.mocky.io/v2/5cc8019d300000980a055e76',
-        onChange(info) {
-            const { status } = info.file;
-            if (status !== 'uploading') {
-                setState({ ...state, file: info.file, list: info.fileList });
+        apolloClient.query({
+            query: authQuery.GET_ALL_ROLES_QUERY,
+            context: {
+                headers: {
+                    TENANTID: 100001,
+                    Authorization: token
+                }
             }
-            if (status === 'done') {
-                message.success(`${info.file.name} file uploaded successfully.`);
-            } else if (status === 'error') {
-                message.error(`${info.file.name} file upload failed.`);
+        }).then(res => {
+            console.log("🚀 ~ file: AddAdmin.js ~ line 44 ~ useEffect ~ res", res);
+            const roles = res?.data?.getAllRoles?.data
+            if (roles) {
+                setRoles(state => ({ ...state, roles }))
             }
-        },
-        listType: 'picture',
-        defaultFileList: fileList,
-        showUploadList: {
-            showRemoveIcon: true,
-            removeIcon: <FeatherIcon icon="trash-2" onClick={e => console.log(e, 'custom removeIcon event')} />,
-        },
-    };
+
+        }).catch(err => {
+            console.log("🚀 ~ file: AddAdmin.js ~ line 46 ~ useEffect ~ err", err);
+        }).finally(() => {
+            setRoles(state => ({ ...state, isLoading: false }))
+        })
+
+    }, [])
+
+
+
 
     const handleSubmit = values => {
+        console.log('-------', values);
+
+        // return;
+
         setIsLoading(true);
 
         apolloClient.mutate({
-            mutation: productMutation.ADD_PRODUCT_MUTATION,
-            variables: { data: { ...values, product_available_from: availableFrom } },
+            mutation: authMutation.ADMIN_SIGN_UP,
+            variables: { data: { ...values, roleNo: values.roleNo + '' } },
             context: {
                 headers: {
                     TENANTID: 100001,
@@ -79,8 +80,13 @@ const AddAdmin = () => {
             }
         }).then(res => {
             console.log("add product res", res)
+            if (res.data.adminSignUp.status) return toast.success('New Admin Added.');
+
+            toast.error('Soemthing Went wrong !!');
+
         }).catch(err => {
             console.log("add product err", err)
+            toast.error('Soemthing Went wrong !!');
 
         }).finally(() => setIsLoading(false))
 
@@ -128,35 +134,45 @@ const AddAdmin = () => {
                                                             <div className="add-product-content">
                                                                 <Cards title="About Admin">
                                                                     <Form.Item
-                                                                        rules={[{ required: true }]}
+                                                                        rules={[{ required: true, message: "Please enter First Name" }]}
                                                                         name="first_name" label="First Name">
                                                                         <Input />
                                                                     </Form.Item>
                                                                     <Form.Item
-                                                                        rules={[{ required: true }]}
+                                                                        rules={[{ required: true, message: "Please enter Last Name" }]}
                                                                         name="last_name" label="Last Name">
                                                                         <Input />
                                                                     </Form.Item>
                                                                     <Form.Item
-                                                                        rules={[{ required: true }]}
+                                                                        rules={[{
+                                                                            required: true, message: "Please enter an email",
+                                                                            // type: 'email'
+                                                                        }]}
                                                                         name="email" label="Email">
-                                                                        <Input />
+                                                                        <Input type='email' />
                                                                     </Form.Item>
                                                                     <Form.Item
-                                                                        rules={[{ required: true }]}
+                                                                        rules={[{
+                                                                            required: true,
+                                                                            message: "Please enter a password",
+                                                                        }]}
                                                                         name="password" label="Password">
-                                                                        <Input />
+                                                                        <Input.Password type="password" />
                                                                     </Form.Item>
 
                                                                     <Form.Item
-                                                                        rules={[{ required: true }]}
-                                                                        placeholder={'loading'}
+                                                                        rules={[{ required: true, message: "Please select a role" }]}
+                                                                        // placeholder={'loading'}
                                                                         name="roleNo" initialValue="" label="Role">
                                                                         <Select
+                                                                            // placeholder={roles.isLoading ? "Loading..." : "Select Role"}
+                                                                            loading={roles.isLoading}
+                                                                            disabled={roles.isLoading}
                                                                             style={{ width: '100%' }}
                                                                         >
-                                                                            <Option value="Active">Active</Option>
-                                                                            <Option value="Inactive">Inactive</Option>
+                                                                            {roles.roles.map(item => (
+                                                                                <Option key={item.role_uuid} value={item.role_no}>{item.role}</Option>
+                                                                            ))}
                                                                         </Select>
                                                                     </Form.Item>
 
@@ -176,7 +192,7 @@ const AddAdmin = () => {
                                                                 return form.resetFields();
                                                             }}
                                                         >
-                                                            Cancel
+                                                            CLear
                                                         </Button>
                                                         <Button loading={isLoading} size="large" htmlType="submit" type="primary" raised>
                                                             {isLoading ? 'Processing' : 'Add Admin'}
@@ -192,6 +208,21 @@ const AddAdmin = () => {
                     </Col>
                 </Row>
             </Main>
+
+
+            <ToastContainer
+                position="bottom-right"
+                autoClose={5000}
+                // hideProgressBar={false}
+                newestOnTop={false}
+                closeOnClick
+                rtl={false}
+                // pauseOnFocusLoss
+                // draggable
+                pauseOnHover
+            />
+
+
         </>
     );
 };

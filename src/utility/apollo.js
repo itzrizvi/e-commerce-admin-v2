@@ -29,6 +29,25 @@ export const authQuery = {
 
 
 export const authMutation = {
+  ADMIN_SIGN_UP: gql`
+      mutation adminSignUp($data:AdminSignUpInput){
+        adminSignUp(data:$data){
+          uid
+          email
+          authToken
+          message
+          status
+          emailVerified
+          first_name
+          last_name
+          role
+          roleNo
+          roleSlug
+          createdAt
+          updatedAt
+        }
+      }
+  `,
   LOGIN_MUTATION: gql`
         mutation adminSignIn($email: String!, $password: String!) {
             adminSignIn(email: $email, password: $password) {

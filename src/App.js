@@ -13,6 +13,7 @@ import config from './config/config';
 import ProtectedRoute from './components/utilities/protectedRoute';
 import { ApolloProvider } from '@apollo/client';
 import apolloClient from './utility/apollo';
+import 'react-toastify/dist/ReactToastify.css';
 
 const { theme } = config;
 
