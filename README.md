@@ -66,3 +66,10 @@ This section has moved here: https://facebook.github.io/create-react-app/docs/de
 ### `yarn build` fails to minify
 
 This section has moved here: https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify
+
+
+# FoysalN NOTES
+1. sorted table
+    [](http://localhost:3001/react/strikingdash/admin/tables/dataTable)
+    [ANT TABLE](https://ant.design/components/table/)
+    TODO: add action btn

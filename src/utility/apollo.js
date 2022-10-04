@@ -102,6 +102,27 @@ export const productMutation = {
     `
 }
 
+export const roleQuery = {
+  GETALLROLES: gql`
+    query getAllRoles{
+      getAllRoles{
+        isAuth
+        message
+        data{
+          role_uuid
+          role_no
+          role
+          role_slug
+          createdAt
+          updatedAt
+          tenant_id
+            
+        }
+      }
+    }
+  `,
+
+}
 
 
 export default apolloClient;
