@@ -20,7 +20,7 @@ const Admin = () => {
       >
         <Route path={path} component={Dashboard} />
         <Route path={`${path}/products`} component={Products} />
-        <Route path={`${path}/users`} component={Users} />
+        <Route path={`${path}/admin`} component={Users} />
       </Suspense>
     </Switch>
   );
