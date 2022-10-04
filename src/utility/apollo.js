@@ -24,6 +24,29 @@ export const authQuery = {
         }
       }
     `,
+  GET_ALL_STAFF: gql`
+    query getAllStaff{
+      getAllStaff{
+        isAuth
+        message
+        data{
+          uid
+          first_name
+          last_name
+          email
+          email_verified
+          roles{
+            role
+            role_no
+            role_slug
+            role_uuid
+          }
+        }
+      }
+    }
+    `,
+
+
 }
 
 
@@ -102,27 +125,6 @@ export const productMutation = {
     `
 }
 
-export const roleQuery = {
-  GETALLROLES: gql`
-    query getAllRoles{
-      getAllRoles{
-        isAuth
-        message
-        data{
-          role_uuid
-          role_no
-          role
-          role_slug
-          createdAt
-          updatedAt
-          tenant_id
-            
-        }
-      }
-    }
-  `,
-
-}
 
 
 export default apolloClient;

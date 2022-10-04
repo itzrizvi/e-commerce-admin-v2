@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Row, Col, Table, Input } from 'antd';
+import React, { useEffect, useState } from 'react';
+import { Row, Col, Table, Input, Spin } from 'antd';
 import FeatherIcon from 'feather-icons-react';
 import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
@@ -9,6 +9,8 @@ import { Button } from '../../components/buttons/buttons';
 import { ShareButtonPageHeader } from '../../components/buttons/share-button/share-button';
 import { ExportButtonPageHeader } from '../../components/buttons/export-button/export-button';
 import { CalendarButtonPageHeader } from '../../components/buttons/calendar-button/calendar-button';
+import apolloClient, { authQuery, roleQuery } from '../../utility/apollo';
+import { useSelector } from 'react-redux';
 
 
 const columns = [
@@ -149,15 +151,41 @@ const dummyUsers = [
 
 
 const BlankPage = () => {
+    const token = useSelector(state => state.auth.token);
     const [searchTest, setSearchTest] = useState('');
     const [filteredUser, setFilteredUser] = useState([]);
+    const [staffs, setStaffs] = useState({
+        data: [],
+        isLoading: true,
+        error: ''
+    })
+
+    useEffect(() => {
+        apolloClient.query({
+            query: authQuery.GET_ALL_STAFF,
+            context: {
+                headers: {
+                    TENANTID: 100001,
+                    Authorization: token
+                }
+            }
+        }).then(res => {
+            if (!res?.data?.getAllStaff?.isAuth) return setStaffs(s => ({ ...s, error: 'You Are not Authorized' }))
+            setStaffs(s => ({ ...s, data: res?.data?.getAllStaff?.data, error: '' }))
+
+        }).catch(err => {
+            setStaffs(s => ({ ...s, error: 'Something went Wrong.!! ' }))
+        }).finally(() => {
+            setStaffs(s => ({ ...s, isLoading: false }))
+        })
+
+    }, [])
+
 
     const onChangeSearch = e => {
         const value = e.target.value
         setSearchTest(value)
-
-        setFilteredUser(dummyUsers.filter(user => user.email.includes(value)))
-
+        setFilteredUser(staffs.data.filter(user => user.email.includes(value)))
     }
 
     return (
@@ -180,18 +208,29 @@ const BlankPage = () => {
                 <Row gutter={25}>
                     <Col sm={24} xs={24}>
                         <Cards headless>
-                            <Input placeholder="Search user by Email" prefix={<SearchOutlined />} onChange={onChangeSearch} />
-                            <br /><br />
+                            {staffs.isLoading ?
+                                <div className="spin">
+                                    <Spin />
+                                </div>
+                                :
+                                staffs.error ?
+                                    <p>{staffs.error}</p>
+                                    :
+                                    <>
+                                        <Input placeholder="Search user by Email" prefix={<SearchOutlined />} onChange={onChangeSearch} />
+                                        <br /><br />
 
-                            <Table
-                                className="table-responsive"
-                                pagination={false}
-                                // columns={columnsSort}
-                                columns={columns}
-                                dataSource={searchTest ? filteredUser : dummyUsers}
-                                rowKey={'uid'}
-                            // onChange={onChange}
-                            />
+                                        <Table
+                                            className="table-responsive"
+                                            pagination={false}
+                                            // columns={columnsSort}
+                                            columns={columns}
+                                            dataSource={searchTest ? filteredUser : staffs.data}
+                                            rowKey={'uid'}
+                                        // onChange={onChange}
+                                        />
+                                    </>
+                            }
 
 
                         </Cards>
