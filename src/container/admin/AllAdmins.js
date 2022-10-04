@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Row, Col, Table, Input } from 'antd';
 import FeatherIcon from 'feather-icons-react';
 import { PageHeader } from '../../components/page-headers/page-headers';
@@ -149,6 +149,17 @@ const dummyUsers = [
 
 
 const BlankPage = () => {
+    const [searchTest, setSearchTest] = useState('');
+    const [filteredUser, setFilteredUser] = useState([]);
+
+    const onChangeSearch = e => {
+        const value = e.target.value
+        setSearchTest(value)
+
+        setFilteredUser(dummyUsers.filter(user => user.email.includes(value)))
+
+    }
+
     return (
         <>
             <PageHeader
@@ -169,14 +180,15 @@ const BlankPage = () => {
                 <Row gutter={25}>
                     <Col sm={24} xs={24}>
                         <Cards headless>
-                            {/* <Input placeholder="Search user" prefix={<SearchOutlined />} /> */}
+                            <Input placeholder="Search user by Email" prefix={<SearchOutlined />} onChange={onChangeSearch} />
+                            <br /><br />
 
                             <Table
                                 className="table-responsive"
                                 pagination={false}
                                 // columns={columnsSort}
                                 columns={columns}
-                                dataSource={dummyUsers}
+                                dataSource={searchTest ? filteredUser : dummyUsers}
                                 rowKey={'uid'}
                             // onChange={onChange}
                             />
