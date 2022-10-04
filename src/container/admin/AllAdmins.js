@@ -169,7 +169,7 @@ const BlankPage = () => {
                 <Row gutter={25}>
                     <Col sm={24} xs={24}>
                         <Cards headless>
-                            <Input placeholder="Search user" prefix={<SearchOutlined />} />
+                            {/* <Input placeholder="Search user" prefix={<SearchOutlined />} /> */}
 
                             <Table
                                 className="table-responsive"
