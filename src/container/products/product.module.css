@@ -77,3 +77,13 @@ form .inactiveContent {
     margin-top: 2em;
     margin-left: .5em;
 }
+
+.radioInput {
+    display: flex;
+    align-items: center;
+    gap: .4em;
+}
+
+.radioInput label::after {
+    content: '';
+}
