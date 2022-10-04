@@ -1,0 +1,79 @@
+.tabs {
+    display: flex;
+    margin-top: 1em;
+    margin-bottom: 3em;
+    cursor: pointer;
+}
+
+.tabs li {
+    padding: .3em 1em;
+    color: #a5a5a5;
+    transition: color .3s;
+}
+
+.tabs li:hover {
+    color: black;
+
+}
+
+li.activeTab {
+    color: black;
+    border: 1px solid #80808040;
+    border-radius: 3px;
+    border-bottom: 0;
+}
+
+.inputGrpup {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    margin-top: 2em;
+    margin-left: .5em;
+}
+
+.inputGrpup input {
+    border: 1px solid #d9d9d9;
+    border-radius: 4px;
+    padding: .4em 1em;
+}
+
+.inputGrpup label::after {
+    content: " : ";
+}
+
+.inputGrpup input::placeholder {
+    color: rgb(150, 150, 150);
+}
+
+.rte {
+    border: 1px solid black;
+}
+
+
+.rteEditor {
+    border: 1px solid #d9d9d9;
+    border-radius: 3px;
+    padding: .2em .3em;
+    padding-bottom: 3em;
+}
+
+.rteToolbar {
+    border: 1px solid #d9d9d9;
+    border-radius: 3px;
+    padding-bottom: 3em;
+}
+
+/* content */
+form .inactiveContent {
+    display: none;
+}
+
+.activeContent {
+    display: block;
+}
+
+.checkbox {
+    display: grid;
+    grid-template-columns: 200px 30px;
+    margin-top: 2em;
+    margin-left: .5em;
+}
