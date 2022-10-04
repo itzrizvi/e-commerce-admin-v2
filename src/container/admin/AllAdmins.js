@@ -11,6 +11,7 @@ import { ExportButtonPageHeader } from '../../components/buttons/export-button/e
 import { CalendarButtonPageHeader } from '../../components/buttons/calendar-button/calendar-button';
 import apolloClient, { authQuery, roleQuery } from '../../utility/apollo';
 import { useSelector } from 'react-redux';
+import { Link } from 'react-router-dom';
 
 
 const columns = [
@@ -192,17 +193,23 @@ const BlankPage = () => {
         <>
             <PageHeader
                 title="Users"
-            // buttons={[
-            //     <div key="1" className="page-header-actions">
-            //         <CalendarButtonPageHeader />
-            //         <ExportButtonPageHeader />
-            //         <ShareButtonPageHeader />
-            //         <Button size="small" type="primary">
-            //             <FeatherIcon icon="plus" size={14} />
-            //             Add New
-            //         </Button>
-            //     </div>,
-            // ]}
+                buttons={[
+                    <Link to="/admin/admin/add">
+                        <Button size="default" type="primary">
+                            <FeatherIcon icon="user-plus" />
+                            Add Admin
+                        </Button>
+                    </Link>
+                    //     <div key="1" className="page-header-actions">
+                    //         <CalendarButtonPageHeader />
+                    //         <ExportButtonPageHeader />
+                    //         <ShareButtonPageHeader />
+                    //         <Button size="small" type="primary">
+                    //             <FeatherIcon icon="plus" size={14} />
+                    //             Add New
+                    //         </Button>
+                    //     </div>,
+                ]}
             />
             <Main>
                 <Row gutter={25}>
