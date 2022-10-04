@@ -172,8 +172,13 @@ const BlankPage = () => {
                                     </div>
                                     <div className={style.inputGrpup}>
                                         <label htmlFor="">Product Status</label>
-                                        <input type="text" placeholder='Product Status'
-                                        />
+                                        <div className={style.radioInput}>
+                                            <input type="radio" name="product_stock_status" value="male" />
+                                            <label for="">In-Stock</label>
+                                            <span style={{ width: '5px' }} />
+                                            <input type="radio" name="product_stock_status" value="female" id="" />
+                                            <label for="">Not-In-Stock</label>
+                                        </div>
                                     </div>
                                 </div>
 
