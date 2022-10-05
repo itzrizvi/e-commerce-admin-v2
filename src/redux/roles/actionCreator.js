@@ -1,5 +1,5 @@
 import Cookies from 'js-cookie';
-import apolloClient, { rolesQuery } from '../../utility/apollo';
+import apolloClient, { rolesMutation, rolesQuery } from '../../utility/apollo';
 import actions from './actions';
 
 const {
@@ -30,6 +30,28 @@ const rolesDataRead = () => {
       
   }
 };
+
+const roleDataAdd = (data) => {
+  return async dispatch => {
+    await dispatch(roleAddBegin());
+    apolloClient.mutate({
+      mutation: rolesMutation.ADD_ROLE_MUTATION,
+      variables: { data: {role: data.role, role_status: true } },
+      context: {
+        headers: {
+          TENANTID: process.env.REACT_APP_TENANTID,
+          Authorization: Cookies.get('psp_t')
+        }
+      }
+    }).then(res => {
+      console.log("add product res", res)
+      dispatch(roleAddSuccess(res));
+    }).catch(err => {
+      console.log("add product err", err)
+      dispatch(roleAddError(err));
+    })
+  }
+}
 
 
 

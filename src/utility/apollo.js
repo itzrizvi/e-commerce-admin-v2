@@ -111,17 +111,29 @@ export const rolesQuery = {
           message
           data{
             role_uuid
-            role_no
             role
-            role_slug
             createdAt
-            updatedAt
-            tenant_id
           }
         }
       }
     `,
 }
+
+export const rolesMutation = {
+  ADD_ROLE_MUTATION: gql`
+        mutation createRole($data: CreateRoleInput){
+          createRole(data: $data){
+            role
+            roleNo
+            roleSlug
+            role_status
+            roleUUID
+            message
+            status
+          }
+        }`
+}
+
 
 
 
