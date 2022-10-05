@@ -98,7 +98,7 @@ const AllAdmin = () => {
                 title="Users"
                 buttons={[
                     <div key="1" className="page-header-actions">
-                        <Link to="/admin/admin/add">
+                        <Link to="/admin/admin/add-admin">
                             <Button size="small" type="primary">
                                 <FeatherIcon icon="user-plus" />
                                 Add Admin

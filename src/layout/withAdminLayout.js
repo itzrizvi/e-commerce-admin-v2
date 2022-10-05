@@ -12,6 +12,7 @@ import TopMenu from './TopMenu';
 import { Div, SmallScreenAuthInfo, SmallScreenSearch, TopMenuSearch } from './style';
 import HeaderSearch from '../components/header-search/header-search';
 import AuthInfo from '../components/utilities/auth-info/info';
+import { ToastContainer } from 'react-toastify';
 
 const { darkTheme } = require('../config/theme/themeVariables');
 
@@ -286,7 +287,17 @@ const ThemeLayout = WrappedComponent => {
             </Layout>
           </Layout>
 
-
+          <ToastContainer
+            position="bottom-right"
+            autoClose={5000}
+            newestOnTop={false}
+            closeOnClick
+            rtl={false}
+            pauseOnHover
+          // hideProgressBar={false}
+          // pauseOnFocusLoss
+          // draggable
+          />
 
         </Div>
       );
