@@ -1,15 +1,15 @@
 import React, { lazy } from 'react';
 import { Switch, Route } from 'react-router-dom';
 import { useRouteMatch } from 'react-router-dom/cjs/react-router-dom.min';
-const AddProduct = lazy(() => import('../../container/products/AddProduct'));
+const ListRoles = lazy(() => import('../../../container/roles/ListRoles'));
 
-const ProductRoutes = () => {
+const RoleListRoutes = () => {
   const { path } = useRouteMatch();
   return (
     <Switch>
-      <Route path={`${path}/add`} component={AddProduct} />
+      <Route path={`${path}/list`} component={ListRoles} />
     </Switch>
   );
 };
 
-export default ProductRoutes;
+export default RoleListRoutes;
