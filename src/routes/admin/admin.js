@@ -12,6 +12,7 @@ const AdminRoutes = () => {
     <Switch>
       <Route path={`${path}/add-admin`} component={AddAdmin1} />
       <Route path={`${path}/admins`} component={AllAdmin} />
+      {/* test changes */}
     </Switch>
   );
 };
