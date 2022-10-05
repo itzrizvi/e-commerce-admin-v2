@@ -57,7 +57,7 @@ const MenuItems = ({ darkMode, toggleCollapsed, topMenu }) => {
         </Menu.Item>
         <Menu.Item key="add-admin">
           <NavLink onClick={toggleCollapsed} to={`${path}/admin/add-admin`}>
-            Add Admin test
+            Add Admin
           </NavLink>
         </Menu.Item>
         {/* <Menu.Item key="single">
