@@ -87,3 +87,16 @@ form .inactiveContent {
 .radioInput label::after {
     content: '';
 }
+
+@media (max-width: 768px) {
+    .inputGrpup {
+        grid-template-columns: 1fr;
+    }
+
+    .checkbox {
+        grid-template-columns: 1fr;
+
+    }
+
+
+}
