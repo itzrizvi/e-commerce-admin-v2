@@ -5,14 +5,19 @@ import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
 import { Cards } from '../../components/cards/frame/cards-frame';
 import { Button } from '../../components/buttons/buttons';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import apolloClient, { authMutation, authQuery } from '../../utility/apollo';
 import { toast } from 'react-toastify';
+import queryString from 'query-string'
 
 const { Option } = Select;
 
 const AddAdmin = () => {
+    const { search } = useLocation();
+    const params = queryString.parse(search)
+
+
     const [roles, setRoles] = useState({
         roles: [],
         isLoading: true,
@@ -64,7 +69,7 @@ const AddAdmin = () => {
             }
         }).then(res => {
             console.log("add product res", res)
-            if (res.data.adminSignUp.status) return toast.success('New Admin Added.');
+            if (res.data.adminSignUp.status) return toast.success(params.email ? 'Admin Updated' : 'New Admin Added.');
             toast.error('Soemthing Went wrong !!');
         }).catch(err => {
             console.log("add product err", err)
@@ -76,7 +81,7 @@ const AddAdmin = () => {
     return (
         <>
             <PageHeader
-                title="Add Admin"
+                title={params.email ? "Update Admin" : "Add Admin"}
                 buttons={[
                     <div key="1" className="page-header-actions">
                         {/* <Button size="small" type="white" key="3">
@@ -108,12 +113,16 @@ const AddAdmin = () => {
                             >
                                 <Form.Item
                                     rules={[{ required: true, message: "Please enter First Name" }]}
-                                    name="first_name" label="First Name">
+                                    name="first_name" label="First Name"
+                                    initialValue={params.first_name}
+                                >
                                     <Input placeholder='Enter First Name' />
                                 </Form.Item>
                                 <Form.Item
                                     rules={[{ required: true, message: "Please enter Last Name" }]}
-                                    name="last_name" label="Last Name">
+                                    name="last_name" label="Last Name"
+                                    initialValue={params.last_name}
+                                >
                                     <Input placeholder='Enter Last Name' />
                                 </Form.Item>
                                 <Form.Item
@@ -121,7 +130,9 @@ const AddAdmin = () => {
                                         required: true, message: "Please enter an email",
                                         // type: 'email'
                                     }]}
-                                    name="email" label="Email">
+                                    name="email" label="Email"
+                                    initialValue={params.email}
+                                >
                                     <Input type='email' placeholder='Enter Email Address' />
                                 </Form.Item>
                                 <Form.Item
@@ -170,7 +181,7 @@ const AddAdmin = () => {
                                             CLear
                                         </Button>
                                         <Button loading={isLoading} size="default" htmlType="submit" type="primary" raised>
-                                            {isLoading ? 'Processing' : 'Add Admin'}
+                                            {isLoading ? 'Processing' : params.email ? 'Update Admin' : 'Add Admin'}
                                         </Button>
                                     </Form.Item>
                                 </div>

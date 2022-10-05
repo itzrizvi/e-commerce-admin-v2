@@ -9,13 +9,14 @@ import { Button } from '../../components/buttons/buttons';
 import apolloClient, { authQuery } from '../../utility/apollo';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
+import FontAwesome from 'react-fontawesome';
 
 
 const columns = [
     {
         title: 'Roles',
         dataIndex: 'roles',
-        key: 'email_verified',
+        key: 'roles',
         render: (roles) => roles.role,
         sorter: (a, b) => a.roles.role_no - b.roles.role_no,
     },
@@ -45,6 +46,18 @@ const columns = [
         key: 'email_verified',
         render: (email_verified) => email_verified.toString(),
         sorter: (a, b) => Number(b.email_verified) - Number(a.email_verified)
+    },
+    {
+        title: 'Action',
+        dataIndex: 'action',
+        render: (text, record) => (
+            <Link to={`/admin/admin/add-admin?email=${record.email}&first_name=${record.first_name}&last_name=${record.last_name}`}>
+                <Button size="default" type="white">
+                    <FontAwesome name="edit" />
+                </Button>
+            </Link>
+        ),
+        key: 'last_name',
     },
     // {
     //     title: 'last_name',
