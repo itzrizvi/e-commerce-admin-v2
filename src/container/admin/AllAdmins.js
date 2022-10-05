@@ -54,7 +54,7 @@ const columns = [
 ]
 
 
-const BlankPage = () => {
+const AllAdmin = () => {
     const token = useSelector(state => state.auth.token);
     const [searchTest, setSearchTest] = useState('');
     const [filteredUser, setFilteredUser] = useState([]);
@@ -142,4 +142,4 @@ const BlankPage = () => {
     );
 };
 
-export default BlankPage;
+export default AllAdmin;
