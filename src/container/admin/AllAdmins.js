@@ -14,11 +14,14 @@ import FontAwesome from 'react-fontawesome';
 
 const columns = [
     {
-        title: 'Roles',
-        dataIndex: 'roles',
-        key: 'roles',
-        render: (roles) => roles?.role,
-        sorter: (a, b) => a?.roles?.role_no - b?.roles?.role_no,
+        title: 'UID',
+        dataIndex: 'uid',
+        key: 'uid',
+    },
+    {
+        title: 'email',
+        dataIndex: 'email',
+        key: 'email',
     },
     {
         title: 'First Name',
@@ -36,9 +39,11 @@ const columns = [
         key: 'last_name',
     },
     {
-        title: 'email',
-        dataIndex: 'email',
-        key: 'email',
+        title: 'Roles',
+        dataIndex: 'roles',
+        key: 'roles',
+        render: (roles) => roles?.role,
+        sorter: (a, b) => a?.roles?.role_no - b?.roles?.role_no,
     },
     {
         title: 'Email Verified',
@@ -108,13 +113,13 @@ const AllAdmin = () => {
     return (
         <>
             <PageHeader
-                title="Users"
+                title="Manage Users"
                 buttons={[
                     <div key="1" className="page-header-actions">
                         <Link to="/admin/admin/add-admin">
-                            <Button size="small" type="primary">
+                            <Button size="small" title="Add user" type="primary">
                                 <FeatherIcon icon="user-plus" />
-                                Add Admin
+                                {/* Add Admin */}
                             </Button>
                         </Link>
                     </div>
