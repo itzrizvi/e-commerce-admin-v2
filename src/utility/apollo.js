@@ -2,7 +2,7 @@ import { ApolloClient, gql, InMemoryCache } from "@apollo/client";
 
 const apolloClient = new ApolloClient({
   uri: 'https://api.primeserverparts.com/graphql',
-  cache: new InMemoryCache()
+  cache: new InMemoryCache(),
 })
 
 
