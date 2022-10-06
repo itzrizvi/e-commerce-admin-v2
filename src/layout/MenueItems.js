@@ -73,7 +73,7 @@ const MenuItems = ({ darkMode, toggleCollapsed, topMenu }) => {
       <SubMenu key="roles" icon={!topMenu && <FeatherIcon icon="shopping-cart" />} title="Roles">
         <Menu.Item key="roleList">
           <NavLink onClick={toggleCollapsed} to={`${path}/roles/list`}>
-            List Roles
+            Manage Roles
           </NavLink>
         </Menu.Item>
       </SubMenu>

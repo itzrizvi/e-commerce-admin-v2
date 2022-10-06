@@ -46,18 +46,25 @@ const columns = [
         sorter: (a, b) => a?.roles?.role_no - b?.roles?.role_no,
     },
     {
-        title: 'Email Verified',
+        title: 'Verified',
         dataIndex: 'email_verified',
         key: 'email_verified',
         render: (email_verified) => email_verified.toString(),
         sorter: (a, b) => Number(b.email_verified) - Number(a.email_verified)
     },
     {
+        title: 'Status',
+        dataIndex: 'status',
+        key: 'status',
+        render: (text, record) => (
+            <Switch defaultChecked title='Status' />
+        )
+    },
+    {
         title: 'Action',
         dataIndex: 'action',
         render: (text, record) => (
             <>
-                <Switch defaultChecked title='Status' />
                 <Link to={`/admin/admin/add-admin?email=${record.email}&first_name=${record.first_name}&last_name=${record.last_name}`}>
                     <Button size="default" type="white" title='Edit'>
                         <FontAwesome name="edit" />
