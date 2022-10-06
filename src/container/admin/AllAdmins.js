@@ -14,11 +14,14 @@ import FontAwesome from 'react-fontawesome';
 
 const columns = [
     {
-        title: 'Roles',
-        dataIndex: 'roles',
-        key: 'roles',
-        render: (roles) => roles.role,
-        sorter: (a, b) => a.roles.role_no - b.roles.role_no,
+        title: 'UID',
+        dataIndex: 'uid',
+        key: 'uid',
+    },
+    {
+        title: 'email',
+        dataIndex: 'email',
+        key: 'email',
     },
     {
         title: 'First Name',
@@ -36,9 +39,11 @@ const columns = [
         key: 'last_name',
     },
     {
-        title: 'email',
-        dataIndex: 'email',
-        key: 'email',
+        title: 'Roles',
+        dataIndex: 'roles',
+        key: 'roles',
+        render: (roles) => roles?.role,
+        sorter: (a, b) => a?.roles?.role_no - b?.roles?.role_no,
     },
     {
         title: 'Email Verified',
@@ -102,19 +107,19 @@ const AllAdmin = () => {
     const onChangeSearch = e => {
         const value = e.target.value
         setSearchTest(value)
-        setFilteredUser(staffs.data.filter(user => user.email.includes(value)))
+        setFilteredUser(staffs.data.filter(user => (user?.email + user?.first_name + user?.last_name + user?.roles?.role).toLowerCase().includes(value.toLowerCase())))
     }
 
     return (
         <>
             <PageHeader
-                title="Users"
+                title="Manage Users"
                 buttons={[
                     <div key="1" className="page-header-actions">
                         <Link to="/admin/admin/add-admin">
-                            <Button size="small" type="primary">
+                            <Button size="small" title="Add user" type="primary">
                                 <FeatherIcon icon="user-plus" />
-                                Add Admin
+                                {/* Add Admin */}
                             </Button>
                         </Link>
                     </div>
@@ -133,7 +138,7 @@ const AllAdmin = () => {
                                     <p>{staffs.error}</p>
                                     :
                                     <>
-                                        <Input placeholder="Search user by Email" prefix={<SearchOutlined />} onChange={onChangeSearch} />
+                                        <Input placeholder="Search user" prefix={<SearchOutlined />} onChange={onChangeSearch} />
                                         <br /><br />
 
                                         <Table
