@@ -17,8 +17,8 @@ const columns = [
         title: 'Roles',
         dataIndex: 'roles',
         key: 'roles',
-        render: (roles) => roles.role,
-        sorter: (a, b) => a.roles.role_no - b.roles.role_no,
+        render: (roles) => roles?.role,
+        sorter: (a, b) => a?.roles?.role_no - b?.roles?.role_no,
     },
     {
         title: 'First Name',
