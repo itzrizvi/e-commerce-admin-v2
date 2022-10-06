@@ -27,11 +27,11 @@ export default function ListRoles() {
                 title="Manage Role"
                 buttons={[
                     <div key="1" className="page-header-actions">
-                        <Link to="/admin/admin/add-admin">
-                            <Button title="Add Role" size="small" type="primary" onClick={() => setIsOpenModal(true)}>
-                                <FeatherIcon icon="plus" />
-                            </Button>
-                        </Link>
+                        {/* <Link to="/admin/admin/add-admin"> */}
+                        <Button title="Add Role" size="small" type="primary" onClick={() => setIsOpenModal(true)}>
+                            <FeatherIcon icon="plus" />
+                        </Button>
+                        {/* </Link> */}
                     </div>
                 ]}
             />
