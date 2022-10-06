@@ -16,6 +16,7 @@ const { Option } = Select;
 const AddAdmin = () => {
     const { search } = useLocation();
     const params = queryString.parse(search)
+    const [emailInput, setEmailInput] = useState(params.email || '')
 
 
     const [roles, setRoles] = useState({
@@ -69,7 +70,7 @@ const AddAdmin = () => {
             }
         }).then(res => {
             console.log("add product res", res)
-            if (res.data.adminSignUp.status) return toast.success(params.email ? 'Admin Updated' : 'New Admin Added.');
+            if (res.data.adminSignUp.status) return toast.success(params.email ? `${params.email} Updated` : `${emailInput} Added`);
             toast.error('Soemthing Went wrong !!');
         }).catch(err => {
             console.log("add product err", err)
@@ -133,7 +134,7 @@ const AddAdmin = () => {
                                     name="email" label="Email"
                                     initialValue={params.email}
                                 >
-                                    <Input type='email' placeholder='Enter Email Address' />
+                                    <Input type='email' placeholder='Enter Email Address' onChange={e => setEmailInput(e.target.value)} />
                                 </Form.Item>
                                 <Form.Item
                                     rules={[{

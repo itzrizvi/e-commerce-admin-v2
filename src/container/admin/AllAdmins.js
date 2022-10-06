@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Col, Table, Input, Spin } from 'antd';
+import { Row, Col, Table, Input, Spin, Switch } from 'antd';
 import FeatherIcon from 'feather-icons-react';
 import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
@@ -56,11 +56,14 @@ const columns = [
         title: 'Action',
         dataIndex: 'action',
         render: (text, record) => (
-            <Link to={`/admin/admin/add-admin?email=${record.email}&first_name=${record.first_name}&last_name=${record.last_name}`}>
-                <Button size="default" type="white">
-                    <FontAwesome name="edit" />
-                </Button>
-            </Link>
+            <>
+                <Switch defaultChecked title='Status' />
+                <Link to={`/admin/admin/add-admin?email=${record.email}&first_name=${record.first_name}&last_name=${record.last_name}`}>
+                    <Button size="default" type="white" title='Edit'>
+                        <FontAwesome name="edit" />
+                    </Button>
+                </Link>
+            </>
         ),
         key: 'last_name',
     },
