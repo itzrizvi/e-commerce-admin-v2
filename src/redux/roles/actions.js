@@ -41,7 +41,7 @@ const actions = {
       };
     },
 
-    roleAddErr: err => {
+    roleAddError: err => {
       return {
         type: actions.ROLE_ADD_ERR,
         err,

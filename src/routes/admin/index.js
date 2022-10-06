@@ -23,6 +23,7 @@ const Admin = () => {
         <Route path={`${path}/products`} component={Products} />
         <Route path={`${path}/users`} component={Users} />
         <Route path={`${path}/roles`} component={RoleListRoutes} />
+        <Route path={`${path}/admin`} component={Users} />
       </Suspense>
     </Switch>
   );

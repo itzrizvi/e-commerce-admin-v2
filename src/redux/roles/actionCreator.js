@@ -1,4 +1,5 @@
 import Cookies from 'js-cookie';
+import { toast } from 'react-toastify';
 import apolloClient, { rolesMutation, rolesQuery } from '../../utility/apollo';
 import actions from './actions';
 
@@ -36,7 +37,7 @@ const roleDataAdd = (data) => {
     await dispatch(roleAddBegin());
     apolloClient.mutate({
       mutation: rolesMutation.ADD_ROLE_MUTATION,
-      variables: { data: {role: data.role, role_status: true } },
+      variables: { data: {role: data.role, role_status: JSON.parse(data.status) } },
       context: {
         headers: {
           TENANTID: process.env.REACT_APP_TENANTID,
@@ -44,11 +45,11 @@ const roleDataAdd = (data) => {
         }
       }
     }).then(res => {
-      console.log("add product res", res)
       dispatch(roleAddSuccess(res));
+      toast.success("User group added successfully");
     }).catch(err => {
-      console.log("add product err", err)
       dispatch(roleAddError(err));
+      toast.error("User group added failed!");
     })
   }
 }
@@ -57,4 +58,5 @@ const roleDataAdd = (data) => {
 
 export {
     rolesDataRead,
+    roleDataAdd
 };

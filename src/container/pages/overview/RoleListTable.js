@@ -20,7 +20,7 @@ const RoleListTable = () => {
   let rolesTableData = [];
 
   const [tableData, setTableData] = useState([])
-  const [isFilter, setisFilter] = useState(false)
+  const [isFilter, setIsFilter] = useState(false)
 
   rolesData.map(roles => {
     const { role_uuid, role, createdAt } = roles;
@@ -35,9 +35,6 @@ const RoleListTable = () => {
           <>
             <Button className="btn-icon" type="info" to="#" shape="circle">
               <FeatherIcon icon="edit" size={16} />
-            </Button>
-            <Button className="btn-icon" type="danger" to="#" shape="circle">
-              <FeatherIcon icon="trash-2" size={16} />
             </Button>
           </>
         </div>
@@ -72,7 +69,7 @@ const RoleListTable = () => {
   ];
 
   const filterHandler = (val, type) => {
-    setisFilter(true);
+    setIsFilter(true);
     if (type === 'name') {
       setTableData(rolesTableData.filter(roles => roles.name.includes(val)))
     }

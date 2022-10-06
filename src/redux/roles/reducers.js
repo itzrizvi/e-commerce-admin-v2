@@ -12,6 +12,7 @@ const {
 
 const initialState = {
   data: [],
+  addData: [],
   url: null,
   fileLoading: false,
   loading: false,
@@ -51,7 +52,7 @@ const rolesCrudReducer = (state = initialState, action) => {
     case ROLE_ADD_SUCCESS:
       return {
         ...state,
-        data,
+        addData : data,
         error: false,
         loading: false,
       };
