@@ -102,7 +102,7 @@ const AllAdmin = () => {
     const onChangeSearch = e => {
         const value = e.target.value
         setSearchTest(value)
-        setFilteredUser(staffs.data.filter(user => user.email.includes(value)))
+        setFilteredUser(staffs.data.filter(user => (user?.email + user?.first_name + user?.last_name + user?.roles?.role).toLowerCase().includes(value.toLowerCase())))
     }
 
     return (
@@ -133,7 +133,7 @@ const AllAdmin = () => {
                                     <p>{staffs.error}</p>
                                     :
                                     <>
-                                        <Input placeholder="Search user by Email" prefix={<SearchOutlined />} onChange={onChangeSearch} />
+                                        <Input placeholder="Search user" prefix={<SearchOutlined />} onChange={onChangeSearch} />
                                         <br /><br />
 
                                         <Table
