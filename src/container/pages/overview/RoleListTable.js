@@ -85,12 +85,13 @@ const RoleListTable = () => {
           </Col>
         </Row> */}
 
-      <Input prefix={<FeatherIcon icon="search" size={14} />} placeholder="Search by Role" onChange={(e) => filterHandler(e.target.value, 'name')} />
+      <Input prefix={<FeatherIcon icon="search" size={14} />} placeholder="Search by Role" onChange={(e) => filterHandler(e.target.value, 'name')} style={{ marginBottom: '1em' }} />
       <TableWrapper className="table-responsive">
 
         <Table
           dataSource={isFilter ? tableData : rolesTableData}
           columns={rolesTableColumns}
+          size="small"
           pagination={{
             defaultPageSize: 10,
             total: isFilter ? tableData.length : rolesTableData.length,

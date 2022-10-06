@@ -156,6 +156,7 @@ const AllAdmin = () => {
                                             columns={columns}
                                             dataSource={searchTest ? filteredUser : staffs.data}
                                             rowKey={'uid'}
+                                            size="small"
                                         />
                                     </>
                             }
