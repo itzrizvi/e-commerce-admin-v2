@@ -154,9 +154,10 @@ const AllAdmin = () => {
                                             className="table-responsive"
                                             pagination={false}
                                             columns={columns}
-                                            dataSource={searchTest ? filteredUser : staffs.data}
                                             rowKey={'uid'}
                                             size="small"
+                                            dataSource={searchTest ? filteredUser : staffs.data}
+                                            rowClassName={(record, index) => (index % 2 == 0 ? "" : "altTableClass")}
                                         />
                                     </>
                             }

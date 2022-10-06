@@ -92,11 +92,14 @@ const RoleListTable = () => {
           dataSource={isFilter ? tableData : rolesTableData}
           columns={rolesTableColumns}
           size="small"
+          rowClassName={(record, index) => (index % 2 == 0 ? "" : "altTableClass")}
           pagination={{
             defaultPageSize: 10,
             total: isFilter ? tableData.length : rolesTableData.length,
             showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`,
           }}
+        // bordered
+        // loading={false}
         />
       </TableWrapper>
     </Cards>
