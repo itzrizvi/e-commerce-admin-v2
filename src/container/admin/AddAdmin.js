@@ -83,7 +83,7 @@ const AddAdmin = () => {
     return (
         <>
             <PageHeader
-                title={params.email ? `Edit user for ${params.email}` : "Add Admin"}
+                title={params.email ? `Edit user for ${params.email}` : "Edit Admin"}
                 buttons={[
                     <div key="1" className="page-header-actions">
                         {/* <Button size="small" type="white" key="3">

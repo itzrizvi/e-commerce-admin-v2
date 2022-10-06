@@ -45,7 +45,21 @@ export const authQuery = {
       }
     }
     `,
-
+  GET_ALL_FEATURE_PERMISSION: gql`
+      query getAllFeaturePermission{
+        getAllFeaturePermission{
+          isAuth
+          message
+          status
+          tenant_id
+          data{
+            feature_permission_uuid
+            feature_permission_name
+            feature_permission_slug
+          }
+        }
+      }
+    `,
 
 }
 
