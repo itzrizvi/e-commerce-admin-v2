@@ -17,6 +17,7 @@ const AddAdmin = () => {
     const { search } = useLocation();
     const params = queryString.parse(search)
     const [emailInput, setEmailInput] = useState(params.email || '')
+    const maxLength = 30;
 
 
     const [roles, setRoles] = useState({
@@ -113,9 +114,10 @@ const AddAdmin = () => {
                             // layout={'vertical'}
                             >
                                 <Form.Item
-                                    rules={[{ required: true, message: "Please enter First Name" }]}
+                                    rules={[{ required: true, max: maxLength, message: "Please enter First Name" }]}
                                     name="first_name" label="First Name"
                                     initialValue={params.first_name}
+                                // help={`Maximum length is ${maxLength}`}
                                 >
                                     <Input placeholder='Enter First Name' />
                                 </Form.Item>
@@ -123,24 +125,35 @@ const AddAdmin = () => {
                                     rules={[{ required: true, message: "Please enter Last Name" }]}
                                     name="last_name" label="Last Name"
                                     initialValue={params.last_name}
+
                                 >
                                     <Input placeholder='Enter Last Name' />
                                 </Form.Item>
                                 <Form.Item
                                     rules={[{
                                         required: true, message: "Please enter an email",
+                                        max: maxLength,
                                         // type: 'email'
                                     }]}
                                     name="email" label="Email"
                                     initialValue={params.email}
+                                // help={`Maximum length is ${maxLength}`}
                                 >
                                     <Input type='email' placeholder='Enter Email Address' onChange={e => setEmailInput(e.target.value)} />
                                 </Form.Item>
                                 <Form.Item
-                                    rules={[{
-                                        required: true,
-                                        message: "Please enter a password",
-                                    }]}
+                                    rules={[
+                                        {
+                                            required: true,
+                                            message: "Please enter a password",
+
+                                        },
+                                        // {
+                                        //     // pattern: /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/,
+                                        //     pattern: /^[2-9]{2}\d{8}$/,
+                                        //     message: `Password Pattern`
+                                        // }
+                                    ]}
                                     name="password" label="Password">
                                     <Input.Password type="password" placeholder='Enter Password...' />
                                 </Form.Item>
