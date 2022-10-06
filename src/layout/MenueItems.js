@@ -55,11 +55,6 @@ const MenuItems = ({ darkMode, toggleCollapsed, topMenu }) => {
             Manage Users
           </NavLink>
         </Menu.Item>
-        <Menu.Item key="add-admin">
-          <NavLink onClick={toggleCollapsed} to={`${path}/admin/add-admin`}>
-            Add Admin
-          </NavLink>
-        </Menu.Item>
         {/* <Menu.Item key="single">
           <NavLink onClick={toggleCollapsed} to={`${path}/email/single/1585118055048`}>
             Read Email

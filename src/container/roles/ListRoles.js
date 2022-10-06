@@ -1,11 +1,13 @@
-import { Col, Form, Input, Modal, PageHeader, Row, Select } from 'antd'
+import { Col, Form, Input, Modal, Row, Select } from 'antd'
 import { Button } from '../../components/buttons/buttons';
+import { PageHeader } from '../../components/page-headers/page-headers';
 import React, { lazy, useEffect, useState } from 'react'
 import { Cards } from '../../components/cards/frame/cards-frame'
 import { Main } from '../styled'
 import FeatherIcon from 'feather-icons-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { roleDataAdd, rolesDataRead } from '../../redux/roles/actionCreator';
+import { Link } from 'react-router-dom';
 const RoleListTable = lazy(() => import('../../container/pages/overview/RoleListTable'))
 
 export default function ListRoles() {
@@ -21,20 +23,23 @@ export default function ListRoles() {
 
     return (
         <>
-            <PageHeader>
-                <Row>
-                    <Col xs={24}>
-                        <Button size="32" type="primary" style={{ float: 'right' }} onClick={() => setIsOpenModal(true)}>
-                            <FeatherIcon icon="user-plus" />
-                            Add Group
-                        </Button>
-                    </Col>
-                </Row>
-            </PageHeader>
+            <PageHeader
+                title="Manage Role"
+                buttons={[
+                    <div key="1" className="page-header-actions">
+                        <Link to="/admin/admin/add-admin">
+                            <Button title="Add Role" size="small" type="primary" onClick={() => setIsOpenModal(true)}>
+                                <FeatherIcon icon="plus" />
+                            </Button>
+                        </Link>
+                    </div>
+                ]}
+            />
+
             <Main>
                 <Row gutter={15}>
                     <Col xs={24}>
-                        <Cards title="User Group">
+                        <Cards headless>
                             <RoleListTable />
                         </Cards>
                     </Col>

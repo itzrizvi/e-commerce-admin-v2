@@ -79,12 +79,13 @@ const RoleListTable = () => {
 
   return (
     <Cards headless>
-      <Row gutter={25} style={{ marginBottom: 20 }}>
+      {/* <Row gutter={25} style={{ marginBottom: 20 }}>
         <Col xl={8} lg={10} md={12} xs={24}>
           <Input prefix={<FeatherIcon icon="search" size={14} />} placeholder="Search by Role" onChange={(e) => filterHandler(e.target.value, 'name')} />
-        </Col>
-      </Row>
+          </Col>
+        </Row> */}
 
+      <Input prefix={<FeatherIcon icon="search" size={14} />} placeholder="Search by Role" onChange={(e) => filterHandler(e.target.value, 'name')} />
       <TableWrapper className="table-responsive">
 
         <Table

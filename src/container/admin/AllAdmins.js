@@ -116,10 +116,16 @@ const AllAdmin = () => {
                 title="Manage Users"
                 buttons={[
                     <div key="1" className="page-header-actions">
+                        <Link to="/admin/roles/list">
+                            <Button size="small" type="white" key="3">
+                                <FeatherIcon icon="settings" size={14} />
+                                Manage Role
+                            </Button>
+                        </Link>
+
                         <Link to="/admin/admin/add-admin">
                             <Button size="small" title="Add user" type="primary">
                                 <FeatherIcon icon="user-plus" />
-                                {/* Add Admin */}
                             </Button>
                         </Link>
                     </div>

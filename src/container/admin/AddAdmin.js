@@ -81,7 +81,7 @@ const AddAdmin = () => {
     return (
         <>
             <PageHeader
-                title={params.email ? "Update Admin" : "Add Admin"}
+                title={params.email ? `Edit user for ${params.email}` : "Add Admin"}
                 buttons={[
                     <div key="1" className="page-header-actions">
                         {/* <Button size="small" type="white" key="3">
@@ -91,7 +91,7 @@ const AddAdmin = () => {
                         <Link to="/admin/admin/admins">
                             <Button size="small" type="primary">
                                 <FeatherIcon icon="users" size={14} />
-                                List Admin
+                                Manage Users
                             </Button>
                         </Link>
                     </div>,
@@ -100,7 +100,7 @@ const AddAdmin = () => {
             <Main>
                 <Row gutter={25}>
                     <Col sm={24} xs={24}>
-                        <Cards title="About Admin" >
+                        <Cards headless>
                             <Form
                                 style={{ width: '100%' }}
                                 form={form}
@@ -171,18 +171,22 @@ const AddAdmin = () => {
                                     }}
                                 >
                                     <Form.Item>
-                                        <Button
-                                            className="btn-cancel"
-                                            size="large"
-                                            onClick={() => {
-                                                return form.resetFields();
-                                            }}
-                                        >
-                                            CLear
-                                        </Button>
+
                                         <Button loading={isLoading} size="default" htmlType="submit" type="primary" raised>
-                                            {isLoading ? 'Processing' : params.email ? 'Update Admin' : 'Add Admin'}
+                                            {isLoading ? 'Processing' : 'Save'}
                                         </Button>
+                                        <Link to="/admin/admin/admins">
+                                            <Button
+                                                // className="btn-cancel"
+                                                type='white'
+                                                size="large"
+                                            // onClick={() => {
+                                            //     return form.resetFields();
+                                            // }}
+                                            >
+                                                Cancel
+                                            </Button>
+                                        </Link>
                                     </Form.Item>
                                 </div>
 
