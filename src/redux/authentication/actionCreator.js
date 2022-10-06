@@ -27,14 +27,14 @@ const login = (email, password, history) => {
         Cookies.set('logedIn', true);
         Cookies.set('psp_t', adminSignIn?.authToken);
         Cookies.set('r_i', adminSignIn?.roleNo);
-        Cookies.set('user', adminSignIn?.email);
+        Cookies.set('user', JSON.stringify(adminSignIn));
 
 
         dispatch(loginSuccess({
           login: true,
           token: adminSignIn?.authToken,
           roleId: adminSignIn?.roleNo,
-          user: adminSignIn?.email,
+          user: adminSignIn,
         }));
         history.push('/admin');
       } else {

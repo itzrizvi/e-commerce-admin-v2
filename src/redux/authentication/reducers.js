@@ -7,7 +7,7 @@ const initState = {
   login: Cookies.get('logedIn'),
   token: Cookies.get('psp_t'),
   roleId: Cookies.get('r_i'),
-  user: Cookies.get('user'),
+  user: JSON.parse(Cookies.get('user') || null),
   loading: false,
   error: null,
 };
