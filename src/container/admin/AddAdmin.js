@@ -16,6 +16,8 @@ const { Option } = Select;
 const AddAdmin = () => {
     const { search } = useLocation();
     const params = queryString.parse(search)
+    const [emailInput, setEmailInput] = useState(params.email || '')
+    const maxLength = 30;
 
 
     const [roles, setRoles] = useState({
@@ -69,7 +71,7 @@ const AddAdmin = () => {
             }
         }).then(res => {
             console.log("add product res", res)
-            if (res.data.adminSignUp.status) return toast.success(params.email ? 'Admin Updated' : 'New Admin Added.');
+            if (res.data.adminSignUp.status) return toast.success(params.email ? `${params.email} Updated` : `${emailInput} Added`);
             toast.error('Soemthing Went wrong !!');
         }).catch(err => {
             console.log("add product err", err)
@@ -81,7 +83,7 @@ const AddAdmin = () => {
     return (
         <>
             <PageHeader
-                title={params.email ? "Update Admin" : "Add Admin"}
+                title={params.email ? `Edit user for ${params.email}` : "Add Admin"}
                 buttons={[
                     <div key="1" className="page-header-actions">
                         {/* <Button size="small" type="white" key="3">
@@ -91,7 +93,7 @@ const AddAdmin = () => {
                         <Link to="/admin/admin/admins">
                             <Button size="small" type="primary">
                                 <FeatherIcon icon="users" size={14} />
-                                List Admin
+                                Manage Users
                             </Button>
                         </Link>
                     </div>,
@@ -100,7 +102,7 @@ const AddAdmin = () => {
             <Main>
                 <Row gutter={25}>
                     <Col sm={24} xs={24}>
-                        <Cards title="About Admin" >
+                        <Cards headless>
                             <Form
                                 style={{ width: '100%' }}
                                 form={form}
@@ -112,9 +114,10 @@ const AddAdmin = () => {
                             // layout={'vertical'}
                             >
                                 <Form.Item
-                                    rules={[{ required: true, message: "Please enter First Name" }]}
+                                    rules={[{ required: true, max: maxLength, message: "Please enter First Name" }]}
                                     name="first_name" label="First Name"
                                     initialValue={params.first_name}
+                                // help={`Maximum length is ${maxLength}`}
                                 >
                                     <Input placeholder='Enter First Name' />
                                 </Form.Item>
@@ -122,24 +125,35 @@ const AddAdmin = () => {
                                     rules={[{ required: true, message: "Please enter Last Name" }]}
                                     name="last_name" label="Last Name"
                                     initialValue={params.last_name}
+
                                 >
                                     <Input placeholder='Enter Last Name' />
                                 </Form.Item>
                                 <Form.Item
                                     rules={[{
                                         required: true, message: "Please enter an email",
+                                        max: maxLength,
                                         // type: 'email'
                                     }]}
                                     name="email" label="Email"
                                     initialValue={params.email}
+                                // help={`Maximum length is ${maxLength}`}
                                 >
-                                    <Input type='email' placeholder='Enter Email Address' />
+                                    <Input type='email' placeholder='Enter Email Address' onChange={e => setEmailInput(e.target.value)} />
                                 </Form.Item>
                                 <Form.Item
-                                    rules={[{
-                                        required: true,
-                                        message: "Please enter a password",
-                                    }]}
+                                    rules={[
+                                        {
+                                            required: true,
+                                            message: "Please enter a password",
+
+                                        },
+                                        // {
+                                        //     // pattern: /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/,
+                                        //     pattern: /^[2-9]{2}\d{8}$/,
+                                        //     message: `Password Pattern`
+                                        // }
+                                    ]}
                                     name="password" label="Password">
                                     <Input.Password type="password" placeholder='Enter Password...' />
                                 </Form.Item>
@@ -171,18 +185,22 @@ const AddAdmin = () => {
                                     }}
                                 >
                                     <Form.Item>
-                                        <Button
-                                            className="btn-cancel"
-                                            size="large"
-                                            onClick={() => {
-                                                return form.resetFields();
-                                            }}
-                                        >
-                                            CLear
-                                        </Button>
+
                                         <Button loading={isLoading} size="default" htmlType="submit" type="primary" raised>
-                                            {isLoading ? 'Processing' : params.email ? 'Update Admin' : 'Add Admin'}
+                                            {isLoading ? 'Processing' : 'Save'}
                                         </Button>
+                                        <Link to="/admin/admin/admins">
+                                            <Button
+                                                // className="btn-cancel"
+                                                type='white'
+                                                size="large"
+                                            // onClick={() => {
+                                            //     return form.resetFields();
+                                            // }}
+                                            >
+                                                Cancel
+                                            </Button>
+                                        </Link>
                                     </Form.Item>
                                 </div>
 

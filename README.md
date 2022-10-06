@@ -73,6 +73,11 @@ This section has moved here: https://facebook.github.io/create-react-app/docs/tr
     [](http://localhost:3001/react/strikingdash/admin/tables/dataTable)
     [ANT TABLE](https://ant.design/components/table/)
     TODO: add action btn
+2. antd table  
+    [table stylle](./config/customTable.css)
+    antd table row color
+    `rowClassName={(record, index) => (index % 2 == 0 ? "" : "altTableClass")}`
+
 
 ## TODOS:
 1.  delete addProduct1

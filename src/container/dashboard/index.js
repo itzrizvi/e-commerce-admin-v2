@@ -8,13 +8,16 @@ import { Main } from '../styled';
 import { ShareButtonPageHeader } from '../../components/buttons/share-button/share-button';
 import { ExportButtonPageHeader } from '../../components/buttons/export-button/export-button';
 import { CalendarButtonPageHeader } from '../../components/buttons/calendar-button/calendar-button';
+import { useSelector } from 'react-redux';
 
 const Dashboard = () => {
+  const user = useSelector(state => state.auth.user);
+
   return (
     <>
       <PageHeader
         ghost
-        title="Sample Page"
+        title="Dashboard"
         buttons={[
           <div key="6" className="page-header-actions">
             <CalendarButtonPageHeader key="1" />
@@ -32,7 +35,7 @@ const Dashboard = () => {
           <Col lg={24} xs={24}>
             <Cards headless>
               <div style={{ minHeight: 'calc(100vh - 320px)' }}>
-                <h2>Welcome to Prime Server Parts</h2>
+                <h2>Welcome {user.email}</h2>
               </div>
             </Cards>
           </Col>

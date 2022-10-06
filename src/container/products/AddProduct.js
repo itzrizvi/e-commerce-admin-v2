@@ -65,18 +65,25 @@ const BlankPage = () => {
                                 <div className={activeTab == 'General' ? style.activeContent : style.inactiveContent}>
 
                                     <div className={style.inputGrpup}>
-                                        <label htmlFor="">Product Name</label>
+                                        <label htmlFor="">Name</label>
                                         <input
                                             type="text"
                                             placeholder='Product Name'
                                         />
                                     </div>
                                     <div className={style.inputGrpup}>
-                                        <label htmlFor="">Product Description</label>
+                                        <label htmlFor="">Short Description</label>
+                                        <input
+                                            type="text"
+                                            placeholder='Short Description'
+                                        />
+                                    </div>
+                                    <div className={style.inputGrpup}>
+                                        <label htmlFor="">Long Description</label>
                                         <RichTextEditor
                                             value={description}
                                             onChange={onChangeRte}
-                                            placeholder='Product Description'
+                                            placeholder='Long Description'
                                             className={style.rte}
 
                                             editorClassName={style.rteEditor}
@@ -84,19 +91,19 @@ const BlankPage = () => {
                                         />
                                     </div>
                                     <div className={style.inputGrpup}>
-                                        <label htmlFor="">"Product Meta Title</label>
+                                        <label htmlFor="">"Meta Title</label>
                                         <input type="text" placeholder='Product Meta title' />
                                     </div>
                                     <div className={style.inputGrpup}>
-                                        <label htmlFor="">Product Meta Description</label>
+                                        <label htmlFor="">Meta Description</label>
                                         <input type="text" placeholder='Product Meta Description' />
                                     </div>
                                     <div className={style.inputGrpup}>
-                                        <label htmlFor="">Product Meta Keywords</label>
+                                        <label htmlFor="">Meta Keywords</label>
                                         <input type="text" placeholder='Product Meta Keywords' />
                                     </div>
                                     <div className={style.inputGrpup}>
-                                        <label htmlFor="">Product Tags</label>
+                                        <label htmlFor="">Tags</label>
                                         <input type="text" placeholder='Product Tags' />
                                     </div>
                                 </div>
@@ -104,17 +111,17 @@ const BlankPage = () => {
                                 <div className={activeTab == 'Data' ? style.activeContent : style.inactiveContent}>
 
                                     <div className={style.inputGrpup}>
-                                        <label htmlFor="">Product Stock Quantity</label>
+                                        <label htmlFor="">Stock Quantity</label>
                                         <input type="text" placeholder='Product SKU'
                                         />
                                     </div>
                                     <div className={style.inputGrpup}>
-                                        <label htmlFor="">Product Category</label>
+                                        <label htmlFor="">Category</label>
                                         <input type="text" placeholder='Product Category'
                                         />
                                     </div>
                                     <div className={style.inputGrpup}>
-                                        <label htmlFor="">Product Barcode</label>
+                                        <label htmlFor="">Barcode</label>
                                         <input type="text" placeholder='Product Barcode'
                                         />
                                     </div>
@@ -123,12 +130,12 @@ const BlankPage = () => {
                                 <div className={activeTab == 'Price' ? style.activeContent : style.inactiveContent}>
 
                                     <div className={style.inputGrpup}>
-                                        <label htmlFor="">Product Regular Price</label>
+                                        <label htmlFor="">Regular Price</label>
                                         <input type="text" placeholder='Product Regular Price'
                                         />
                                     </div>
                                     <div className={style.inputGrpup}>
-                                        <label htmlFor="">Product Sale Price</label>
+                                        <label htmlFor="">Sale Price</label>
                                         <input type="text" placeholder='Product Sale Price'
                                         />
                                     </div>
@@ -136,7 +143,7 @@ const BlankPage = () => {
                                     <div className={style.checkbox}>
                                         <label htmlFor="">Tax Include</label>
 
-                                        <input type="checkbox" />
+                                        <input type="checkbox" defaultChecked />
                                     </div>
 
                                     {/* todo */}

@@ -2,7 +2,7 @@ import { ApolloClient, gql, InMemoryCache } from "@apollo/client";
 
 const apolloClient = new ApolloClient({
   uri: 'https://api.primeserverparts.com/graphql',
-  cache: new InMemoryCache()
+  cache: new InMemoryCache(),
 })
 
 
@@ -124,6 +124,40 @@ export const productMutation = {
       
     `
 }
+
+
+export const rolesQuery = {
+  GET_ALL_ROLES_QUERY: gql`
+    query getAllRoles{
+        getAllRoles{
+          isAuth
+          message
+          data{
+            role_uuid
+            role
+            createdAt
+          }
+        }
+      }
+    `,
+}
+
+export const rolesMutation = {
+  ADD_ROLE_MUTATION: gql`
+        mutation createRole($data: CreateRoleInput){
+          createRole(data: $data){
+            role
+            roleNo
+            roleSlug
+            role_status
+            roleUUID
+            message
+            status
+          }
+        }`
+}
+
+
 
 
 

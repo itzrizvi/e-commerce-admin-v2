@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Col, Table, Input, Spin } from 'antd';
+import { Row, Col, Table, Input, Spin, Switch } from 'antd';
 import FeatherIcon from 'feather-icons-react';
 import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
@@ -56,11 +56,14 @@ const columns = [
         title: 'Action',
         dataIndex: 'action',
         render: (text, record) => (
-            <Link to={`/admin/admin/add-admin?email=${record.email}&first_name=${record.first_name}&last_name=${record.last_name}`}>
-                <Button size="default" type="white">
-                    <FontAwesome name="edit" />
-                </Button>
-            </Link>
+            <>
+                <Switch defaultChecked title='Status' />
+                <Link to={`/admin/admin/add-admin?email=${record.email}&first_name=${record.first_name}&last_name=${record.last_name}`}>
+                    <Button size="default" type="white" title='Edit'>
+                        <FontAwesome name="edit" />
+                    </Button>
+                </Link>
+            </>
         ),
         key: 'last_name',
     },
@@ -116,10 +119,16 @@ const AllAdmin = () => {
                 title="Manage Users"
                 buttons={[
                     <div key="1" className="page-header-actions">
+                        <Link to="/admin/roles/list">
+                            <Button size="small" type="white" key="3">
+                                <FeatherIcon icon="settings" size={14} />
+                                Manage Role
+                            </Button>
+                        </Link>
+
                         <Link to="/admin/admin/add-admin">
                             <Button size="small" title="Add user" type="primary">
                                 <FeatherIcon icon="user-plus" />
-                                {/* Add Admin */}
                             </Button>
                         </Link>
                     </div>
@@ -145,8 +154,10 @@ const AllAdmin = () => {
                                             className="table-responsive"
                                             pagination={false}
                                             columns={columns}
-                                            dataSource={searchTest ? filteredUser : staffs.data}
                                             rowKey={'uid'}
+                                            size="small"
+                                            dataSource={searchTest ? filteredUser : staffs.data}
+                                            rowClassName={(record, index) => (index % 2 == 0 ? "" : "altTableClass")}
                                         />
                                     </>
                             }

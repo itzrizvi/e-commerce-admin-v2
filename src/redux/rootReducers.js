@@ -5,6 +5,7 @@ import authReducer from './authentication/reducers';
 import ChangeLayoutMode from './themeLayout/reducers';
 import { userReducer } from './users/reducers';
 import { headerSearchReducer } from './headerSearch/reducers';
+import { rolesCrudReducer } from './roles/reducers';
 
 const rootReducers = combineReducers({
   headerSearchData: headerSearchReducer,
@@ -12,6 +13,7 @@ const rootReducers = combineReducers({
   notification: readNotificationReducer,
   users: userReducer,
   auth: authReducer,
+  roles: rolesCrudReducer,
   ChangeLayoutMode,
 });
 
