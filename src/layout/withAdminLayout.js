@@ -1,7 +1,10 @@
+/* eslint-disable jsx-a11y/no-static-element-interactions */
+/* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable no-shadow */
 import React, { Component } from 'react';
 import { Layout, Button, Row, Col } from 'antd';
 import FeatherIcon from 'feather-icons-react';
+import FontAwesome from 'react-fontawesome';
 import { NavLink, Link } from 'react-router-dom';
 import { Scrollbars } from 'react-custom-scrollbars';
 import { ThemeProvider } from 'styled-components';
@@ -13,6 +16,7 @@ import { Div, SmallScreenAuthInfo, SmallScreenSearch, TopMenuSearch } from './st
 import HeaderSearch from '../components/header-search/header-search';
 import AuthInfo from '../components/utilities/auth-info/info';
 import { ToastContainer } from 'react-toastify';
+import { changeRtlMode, changeLayoutMode, changeMenuMode } from '../redux/themeLayout/actionCreator';
 
 const { darkTheme } = require('../config/theme/themeVariables');
 
@@ -27,6 +31,7 @@ const ThemeLayout = WrappedComponent => {
         collapsed: false,
         hide: true,
         searchHide: true,
+        customizerAction: false,
         activeSearch: false,
       };
       this.updateDimensions = this.updateDimensions.bind(this);
@@ -48,8 +53,8 @@ const ThemeLayout = WrappedComponent => {
     }
 
     render() {
-      const { collapsed, hide, searchHide, activeSearch } = this.state;
-      const { ChangeLayoutMode, rtl, topMenu } = this.props;
+      const { collapsed, hide, searchHide, customizerAction, activeSearch } = this.state;
+      const { ChangeLayoutMode, rtl, changeRtl, changeLayout, topMenu, changeMenuMode } = this.props;
 
       const left = !rtl ? 'left' : 'right';
       const darkMode = ChangeLayoutMode;
@@ -73,6 +78,12 @@ const ThemeLayout = WrappedComponent => {
           searchHide: true,
         });
       };
+      const showCustomizer = () => {
+        this.setState({
+          customizerAction: !customizerAction,
+        });
+      };
+
 
       const toggleSearch = () => {
         this.setState({
@@ -146,6 +157,37 @@ const ThemeLayout = WrappedComponent => {
           backgroundColor: ChangeLayoutMode ? '#ffffff16' : '#F1F2F6',
         };
         return <div style={{ ...style, ...thumbStyle }} props={props} />;
+      };
+
+      const onRtlChange = () => {
+        const html = document.querySelector('html');
+        html.setAttribute('dir', 'rtl');
+        changeRtl(true);
+      };
+      const onLtrChange = () => {
+        const html = document.querySelector('html');
+        html.setAttribute('dir', 'ltr');
+        changeRtl(false);
+      };
+      const modeChangeDark = () => {
+        changeLayout(true);
+      };
+      const modeChangeLight = () => {
+        changeLayout(false);
+      };
+      const modeChangeTopNav = () => {
+        changeMenuMode(true);
+      };
+      const modeChangeSideNav = () => {
+        changeMenuMode(false);
+      };
+      const onEventChange = {
+        onRtlChange,
+        onLtrChange,
+        modeChangeDark,
+        modeChangeLight,
+        modeChangeTopNav,
+        modeChangeSideNav,
       };
 
       return (
@@ -260,6 +302,7 @@ const ThemeLayout = WrappedComponent => {
                         rtl={rtl}
                         toggleCollapsed={toggleCollapsedMobile}
                         darkMode={darkMode}
+                        events={onEventChange}
                       />
                     </Scrollbars>
                   </Sider>
@@ -286,6 +329,135 @@ const ThemeLayout = WrappedComponent => {
               </Layout>
             </Layout>
           </Layout>
+          <Link
+            to="#"
+            className="customizer-trigger"
+            onClick={() => {
+              showCustomizer();
+            }}
+          >
+            <FeatherIcon icon="settings" />
+          </Link>
+          <div className={`${customizerAction ? 'customizer-wrapper show' : 'customizer-wrapper'}`}>
+            <div className="customizer">
+              <div className="customizer__head">
+                <h4 className="customizer__title">Customizer</h4>
+                <span className="customizer__sub-title">Customize your overview Page layout</span>
+                <Link
+                  to="#"
+                  className="customizer-close"
+                  onClick={() => {
+                    showCustomizer();
+                  }}
+                >
+                  <FeatherIcon icon="x" />
+                </Link>
+              </div>
+              <div className="customizer__body">
+                <div className="customizer__single">
+                  <h4>Layout Type</h4>
+                  <ul className="customizer-list d-flex">
+                    <li className="customizer-list__item">
+                      <Link
+                        className={!rtl ? 'active' : 'deactivate'}
+                        onClick={() => {
+                          showCustomizer();
+                          onLtrChange();
+                        }}
+                        to="#"
+                      >
+                        <img src={require('../static/img/ltr.png')} alt="" />
+                        <FontAwesome name="check-circle" />
+                      </Link>
+                    </li>
+                    <li className="customizer-list__item">
+                      <Link
+                        className={rtl ? 'active' : 'deactivate'}
+                        onClick={() => {
+                          showCustomizer();
+                          onRtlChange();
+                        }}
+                        to="#"
+                      >
+                        <img src={require(`../static/img/rtl.png`)} alt="" />
+                        <FontAwesome name="check-circle" />
+                      </Link>
+                    </li>
+                  </ul>
+                </div>
+                <div className="customizer__single">
+                  <h4>Sidebar Type</h4>
+                  <ul className="customizer-list d-flex">
+                    <li className="customizer-list__item">
+                      <Link
+                        className={!darkMode ? 'active' : 'deactivate'}
+                        onClick={() => {
+                          showCustomizer();
+                          modeChangeLight();
+                        }}
+                        to="#"
+                      >
+                        <img src={require('../static/img/light.png')} alt="" />
+                        <FontAwesome name="check-circle" />
+                      </Link>
+                    </li>
+                    <li className="customizer-list__item">
+                      <Link
+                        className={darkMode ? 'active' : 'deactivate'}
+                        onClick={() => {
+                          showCustomizer();
+                          modeChangeDark();
+                        }}
+                        to="#"
+                      >
+                        <img src={require(`../static/img/dark.png`)} alt="" />
+                        <FontAwesome name="check-circle" />
+                      </Link>
+                    </li>
+                  </ul>
+                </div>
+                <div className="customizer__single">
+                  <h4>Navbar Type</h4>
+                  <ul className="customizer-list d-flex">
+                    <li className="customizer-list__item">
+                      <Link
+                        className={!topMenu ? 'active' : 'deactivate'}
+                        onClick={() => {
+                          showCustomizer();
+                          modeChangeSideNav();
+                        }}
+                        to="#"
+                      >
+                        <img src={require('../static/img/side.png')} alt="" />
+                        <FontAwesome name="check-circle" />
+                      </Link>
+                    </li>
+                    <li className="customizer-list__item top">
+                      <Link
+                        className={topMenu ? 'active' : 'deactivate'}
+                        onClick={() => {
+                          showCustomizer();
+                          modeChangeTopNav();
+                        }}
+                        to="#"
+                      >
+                        <img src={require(`../static/img/top.png`)} alt="" />
+                        <FontAwesome name="check-circle" />
+                      </Link>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+          <span
+            type="button"
+            className={`${customizerAction ? 'overlay-dark show' : 'overlay-dark'}`}
+            onClick={() => {
+              showCustomizer();
+            }}
+          />
+
 
           <ToastContainer
             position="bottom-right"
@@ -312,6 +484,14 @@ const ThemeLayout = WrappedComponent => {
     };
   };
 
+  const mapStateToDispatch = dispatch => {
+    return {
+      changeRtl: rtl => dispatch(changeRtlMode(rtl)),
+      changeLayout: show => dispatch(changeLayoutMode(show)),
+      changeMenuMode: show => dispatch(changeMenuMode(show)),
+    };
+  };
+
   LayoutComponent.propTypes = {
     ChangeLayoutMode: propTypes.bool,
     rtl: propTypes.bool,
@@ -321,6 +501,7 @@ const ThemeLayout = WrappedComponent => {
     changeMenuMode: propTypes.func,
   };
 
-  return connect(mapStateToProps)(LayoutComponent);
+  // return connect(mapStateToProps)(LayoutComponent);
+  return connect(mapStateToProps, mapStateToDispatch)(LayoutComponent)
 };
 export default ThemeLayout;
