@@ -203,7 +203,7 @@ const AddRole = () => {
                                         <Button loading={isLoading} size="default" htmlType="submit" type="primary" raised>
                                             {isLoading ? 'Processing' : 'Save'}
                                         </Button>
-                                        <Link to="/admin/admin/admins">
+                                        <Link to="/admin/roles/list">
                                             <Button
                                                 // className="btn-cancel"
                                                 type='white'
