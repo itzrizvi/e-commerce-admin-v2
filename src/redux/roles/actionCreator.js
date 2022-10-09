@@ -1,6 +1,6 @@
 import Cookies from 'js-cookie';
 import { toast } from 'react-toastify';
-import apolloClient, { rolesMutation, rolesQuery } from '../../utility/apollo';
+import apolloClient, { authQuery, rolesMutation } from '../../utility/apollo';
 import actions from './actions';
 
 const {
@@ -16,7 +16,7 @@ const rolesDataRead = () => {
   return async dispatch => {
     await dispatch(rolesReadBegin());
     apolloClient.query({
-      query: rolesQuery.GET_ALL_ROLES_QUERY,
+      query: authQuery.GET_ALL_ROLES,
       context: {
         headers: {
           TENANTID: process.env.REACT_APP_TENANTID,

@@ -7,19 +7,30 @@ const apolloClient = new ApolloClient({
 
 
 export const authQuery = {
-  GET_ALL_ROLES_QUERY: gql`
-    query getAllRoles{
-        getAllRoles{
-          isAuth
+  GET_ALL_ROLES: gql`
+      query getAllRoles {
+        getAllRoles {
           message
-          data{
+          status
+          data {
             role_uuid
             role_no
             role
             role_slug
-            createdAt
-            updatedAt
+            role_status
+            role_description
             tenant_id
+            permissions {
+              permission_data_uuid
+              rolesPermission {
+                roles_permission_uuid
+                roles_permission_name
+                roles_permission_slug
+                roles_permission_status
+              }
+              edit_access
+              read_access
+            }
           }
         }
       }
@@ -165,21 +176,6 @@ export const productMutation = {
 }
 
 
-export const rolesQuery = {
-  GET_ALL_ROLES_QUERY: gql`
-    query getAllRoles{
-        getAllRoles{
-          isAuth
-          message
-          data{
-            role_uuid
-            role
-            createdAt
-          }
-        }
-      }
-    `,
-}
 
 export const rolesMutation = {
   ADD_ROLE_MUTATION: gql`

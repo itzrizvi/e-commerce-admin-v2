@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Col, Input, Row, Table } from 'antd';
+import { Col, Input, Row, Spin, Switch, Table } from 'antd';
 import FeatherIcon from 'feather-icons-react';
 import { TableWrapper } from '../../styled';
 import { Button } from '../../../components/buttons/buttons';
@@ -7,6 +7,7 @@ import { Cards } from '../../../components/cards/frame/cards-frame';
 import { useDispatch, useSelector } from 'react-redux';
 import { rolesDataRead } from '../../../redux/roles/actionCreator';
 import Moment from 'react-moment';
+import { Link } from 'react-router-dom';
 
 
 const RoleListTable = () => {
@@ -21,15 +22,18 @@ const RoleListTable = () => {
 
   let rolesTableData = [];
 
-  const [tableData, setTableData] = useState([])
+  const [filteredRoles, setFilteredRoles] = useState([]);
   const [isFilter, setIsFilter] = useState(false)
 
   rolesData.map(roles => {
-    const { role_uuid, role, createdAt } = roles;
+    const { role_uuid, role, createdAt, role_description, permissions, role_status, } = roles;
 
     return rolesTableData.push({
       key: role_uuid,
       name: role,
+      role_description,
+      permissions,
+      role_status,
       createdAt: createdAt,
       dateTime: <span className={"status-text"}>{<Moment format="DD MMMM  YYYY ">{parseInt(createdAt)}</Moment>}</span>,
       action: (
@@ -57,53 +61,100 @@ const RoleListTable = () => {
       sortDirections: ['descend'],
     },
     {
-      title: 'Date Time',
-      dataIndex: 'dateTime',
-      key: 'dateTime',
-      sorter: (a, b) => parseInt(a.createdAt) - parseInt(b.createdAt),
-      sortDirections: ['descend'],
+      title: 'Description',
+      dataIndex: 'role_description',
+      key: 'role_description',
+      // render: (text) => (<p style={{ width: "10px" }}>{text}</p>)
     },
     {
-      title: 'Actions',
+      title: 'Permissions',
+      dataIndex: 'permissions',
+      key: 'permissions',
+      render: (permissions) => (
+        <>
+          {permissions.map(item => (
+            <p>
+              {item.rolesPermission.roles_permission_name}<br />
+              Access: {item.read_access.toString()}<br />
+              Modify: {item.edit_access.toString()}
+            </p>
+          ))
+          }
+        </>
+      )
+    },
+    {
+      title: 'Status',
+      dataIndex: 'role_status',
+      key: 'role_status',
+      render: (role_status, record) => (
+        <Switch checked={role_status} title='Status' />
+      )
+    },
+    // {
+    //   title: 'Date Time',
+    //   dataIndex: 'dateTime',
+    //   key: 'dateTime',
+    //   sorter: (a, b) => parseInt(a.createdAt) - parseInt(b.createdAt),
+    //   sortDirections: ['descend'],
+    // },
+    // {
+    //   title: 'Actions',
+    //   dataIndex: 'action',
+    //   key: 'action'
+    // },
+    {
+      title: 'Action',
       dataIndex: 'action',
-      key: 'action'
+      render: (text, record) => (
+        <Link to={`#`}>
+          <Button size="default" type="white" title='Edit'>
+            <FeatherIcon icon="edit" size={16} />
+          </Button>
+        </Link>
+      ),
+      key: 'last_name',
     },
   ];
 
-  const filterHandler = (val, type) => {
-    setIsFilter(true);
-    if (type === 'name') {
-      setTableData(rolesTableData.filter(roles => roles.name.includes(val)))
-    }
+  const [searchText, setSearchText] = useState('');
+  const onChangeSearch = e => {
+    const value = e.target.value
+    setSearchText(value)
+    setFilteredRoles(rolesTableData.filter(role => (role.name + role.role_description).toLowerCase().includes(value.toLowerCase())))
   }
 
 
 
   return (
     <Cards headless>
-      {/* <Row gutter={25} style={{ marginBottom: 20 }}>
-        <Col xl={8} lg={10} md={12} xs={24}>
-          <Input prefix={<FeatherIcon icon="search" size={14} />} placeholder="Search by Role" onChange={(e) => filterHandler(e.target.value, 'name')} />
-          </Col>
-        </Row> */}
+      {!rolesTableData.length ?
+        <div className="spin">
+          <Spin />
+        </div>
+        : <>
+          <Input
+            prefix={<FeatherIcon icon="search" size={14} />}
+            placeholder="Search Roles.."
+            onChange={onChangeSearch}
+            style={{ marginBottom: '1em' }}
+          />
 
-      <Input prefix={<FeatherIcon icon="search" size={14} />} placeholder="Search by Role" onChange={(e) => filterHandler(e.target.value, 'name')} style={{ marginBottom: '1em' }} />
-      <TableWrapper className="table-responsive">
-
-        <Table
-          dataSource={isFilter ? tableData : rolesTableData}
-          columns={rolesTableColumns}
-          size="small"
-          rowClassName={(record, index) => (index % 2 == 0 ? "" : "altTableClass")}
-          pagination={{
-            defaultPageSize: 10,
-            total: isFilter ? tableData.length : rolesTableData.length,
-            showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`,
-          }}
-        // bordered
-        // loading={false}
-        />
-      </TableWrapper>
+          <Table
+            // dataSource={isFilter ? tableData : rolesTableData}
+            dataSource={searchText ? filteredRoles : rolesTableData}
+            columns={rolesTableColumns}
+            size="small"
+            rowClassName={(record, index) => (index % 2 == 0 ? "" : "altTableClass")}
+            pagination={false}
+            rowKey={'key'}
+          // pagination={{
+          //   defaultPageSize: 10,
+          //   total: isFilter ? tableData.length : rolesTableData.length,
+          //   showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`,
+          // }}
+          />
+        </>}
     </Cards>
   );
 };

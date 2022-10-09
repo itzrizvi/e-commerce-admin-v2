@@ -50,11 +50,20 @@ const MenuItems = ({ darkMode, toggleCollapsed, topMenu }) => {
       </Menu.Item>
 
       <SubMenu key="admin" icon={!topMenu && <FeatherIcon icon="users" />} title="Admin">
-        <Menu.Item key="admins">
-          <NavLink onClick={toggleCollapsed} to={`${path}/admin/admins`}>
-            Manage Users
+
+        <Menu.Item key="roles">
+          <NavLink onClick={toggleCollapsed} to={`${path}/roles/list`}>
+            Roles
           </NavLink>
         </Menu.Item>
+
+        <Menu.Item key="users">
+          <NavLink onClick={toggleCollapsed} to={`${path}/admin/admins`}>
+            Users
+          </NavLink>
+        </Menu.Item>
+
+
         {/* <Menu.Item key="single">
           <NavLink onClick={toggleCollapsed} to={`${path}/email/single/1585118055048`}>
             Read Email
@@ -70,13 +79,13 @@ const MenuItems = ({ darkMode, toggleCollapsed, topMenu }) => {
         </Menu.Item>
       </SubMenu>
 
-      <SubMenu key="roles" icon={!topMenu && <FeatherIcon icon="shopping-cart" />} title="Roles">
+      {/* <SubMenu key="roles" icon={!topMenu && <FeatherIcon icon="shopping-cart" />} title="Roles">
         <Menu.Item key="roleList">
           <NavLink onClick={toggleCollapsed} to={`${path}/roles/list`}>
             Manage Roles
           </NavLink>
         </Menu.Item>
-      </SubMenu>
+      </SubMenu> */}
 
     </Menu>
   );

@@ -24,7 +24,7 @@ export default function ListRoles() {
     return (
         <>
             <PageHeader
-                title="Manage Role"
+                title="Roles"
                 buttons={[
                     <div key="1" className="page-header-actions">
                         <Link to="/admin/roles/add">
