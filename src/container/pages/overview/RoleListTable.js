@@ -105,15 +105,15 @@ const RoleListTable = () => {
     // },
     {
       title: 'Action',
-      dataIndex: 'action',
+      dataIndex: 'key',
+      key: 'action',
       render: (text, record) => (
-        <Link to={`#`}>
+        <Link to={`/admin/roles/update?id=${record.key}&role=${record.name}`}>
           <Button size="default" type="white" title='Edit'>
             <FeatherIcon icon="edit" size={16} />
           </Button>
         </Link>
       ),
-      key: 'last_name',
     },
   ];
 

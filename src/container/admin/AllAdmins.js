@@ -123,7 +123,7 @@ const AllAdmin = () => {
     return (
         <>
             <PageHeader
-                title="Manage Users"
+                title="Users"
                 buttons={[
                     <div key="1" className="page-header-actions">
                         <Link to="/admin/roles/list">

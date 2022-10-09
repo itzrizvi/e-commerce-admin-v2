@@ -88,6 +88,34 @@ export const authQuery = {
       }
     `,
 
+  GET_SINGLE_ROLE: gql`
+        query getSingleRole($query: GetSingleRoleInput){
+          getSingleRole(query: $query){
+            message
+            status
+            data {
+              role_uuid
+              role_no
+              role
+              role_slug
+              role_status
+              role_description
+              tenant_id
+              permissions {
+                permission_data_uuid
+                rolesPermission {
+                  roles_permission_uuid
+                  roles_permission_name
+                  roles_permission_slug
+                  roles_permission_status
+                }
+                edit_access
+                read_access
+              }
+            }
+          }
+        }
+    `,
 }
 
 
