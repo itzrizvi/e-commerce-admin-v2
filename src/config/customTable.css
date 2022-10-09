@@ -1,8 +1,8 @@
 /* Header style */
-/* .ant-table-thead .ant-table-cell {
-    background-color: green;
-} */
+.psp_list .ant-table-thead .ant-table-cell {
+    background-color: #5f63f24d;
+}
 
 .altTableClass {
-    background-color: #f8f9fb;
+    background-color: #cfd0fb54;
 }

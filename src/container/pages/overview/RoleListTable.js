@@ -140,20 +140,23 @@ const RoleListTable = () => {
             style={{ marginBottom: '1em' }}
           />
 
-          <Table
-            // dataSource={isFilter ? tableData : rolesTableData}
-            dataSource={searchText ? filteredRoles : rolesTableData}
-            columns={rolesTableColumns}
-            size="small"
-            rowClassName={(record, index) => (index % 2 == 0 ? "" : "altTableClass")}
-            pagination={false}
-            rowKey={'key'}
-          // pagination={{
-          //   defaultPageSize: 10,
-          //   total: isFilter ? tableData.length : rolesTableData.length,
-          //   showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`,
-          // }}
-          />
+          <span className={"psp_list"} >
+
+            <Table
+              // dataSource={isFilter ? tableData : rolesTableData}
+              dataSource={searchText ? filteredRoles : rolesTableData}
+              columns={rolesTableColumns}
+              size="small"
+              rowClassName={(record, index) => (index % 2 == 0 ? "" : "altTableClass")}
+              pagination={false}
+              rowKey={'key'}
+            // pagination={{
+            //   defaultPageSize: 10,
+            //   total: isFilter ? tableData.length : rolesTableData.length,
+            //   showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`,
+            // }}
+            />
+          </span>
         </>}
     </Cards>
   );

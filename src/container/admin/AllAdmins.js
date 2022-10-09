@@ -157,15 +157,17 @@ const AllAdmin = () => {
                                         <Input placeholder="Search user" prefix={<SearchOutlined />} onChange={onChangeSearch} />
                                         <br /><br />
 
-                                        <Table
-                                            className="table-responsive"
-                                            pagination={false}
-                                            columns={columns}
-                                            rowKey={'uid'}
-                                            size="small"
-                                            dataSource={searchTest ? filteredUser : staffs.data}
-                                            rowClassName={(record, index) => (index % 2 == 0 ? "" : "altTableClass")}
-                                        />
+                                        <span className={"psp_list"} >
+                                            <Table
+                                                className="table-responsive"
+                                                pagination={false}
+                                                columns={columns}
+                                                rowKey={'uid'}
+                                                size="small"
+                                                dataSource={searchTest ? filteredUser : staffs.data}
+                                                rowClassName={(record, index) => (index % 2 == 0 ? "" : "altTableClass")}
+                                            />
+                                        </span>
                                     </>
                             }
 

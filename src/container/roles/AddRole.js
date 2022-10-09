@@ -5,7 +5,7 @@ import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
 import { Cards } from '../../components/cards/frame/cards-frame';
 import { Button } from '../../components/buttons/buttons';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useHistory, useLocation } from 'react-router-dom';
 import apolloClient, { authMutation, authQuery } from '../../utility/apollo';
 import { useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
@@ -13,6 +13,7 @@ const { TextArea } = Input;
 import queryString from 'query-string'
 
 const AddRole = () => {
+    const history = useHistory();
     const { search } = useLocation();
     const params = queryString.parse(search)
     const [emailInput, setEmailInput] = useState(params.email || '')
@@ -114,8 +115,9 @@ const AddRole = () => {
         }).then(res => {
             console.log("add role res", res)
             const data = res?.data?.createRoleWithPermission
-            if (data?.status) return toast.success(`Role created successfully.`);
-            toast.error('Something Went wrong !!');
+            if (!data?.status) return toast.error('Something Went wrong !!');
+            toast.success(`${values.role} Role created successfully.`);
+            history.push("/admin/roles/list");
         }).catch(err => {
             console.log("add role err", err)
             toast.error('Something Went wrong !!');

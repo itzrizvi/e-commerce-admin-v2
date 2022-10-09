@@ -55,6 +55,7 @@ const ListPermission = () => {
             title: 'Status',
             dataIndex: 'roles_permission_status',
             key: 'roles_permission_status',
+            align: 'right',
             render: (text, record) => (
                 <Switch defaultChecked={text} title='Status' />
             )
@@ -62,6 +63,7 @@ const ListPermission = () => {
         {
             title: 'Action',
             dataIndex: 'action',
+            align: 'right',
             render: (text, record) => (
                 <>
                     <Link to={`/admin/permission/add?name=${record.roles_permission_name}&status=${record.roles_permission_status}&id=${record.roles_permission_uuid}`}>
@@ -112,15 +114,17 @@ const ListPermission = () => {
                                         <Input placeholder="Search Permission..." prefix={<SearchOutlined />} onChange={onChangeSearch} />
                                         <br /><br />
 
-                                        <Table
-                                            className="table-responsive"
-                                            pagination={false}
-                                            columns={columns}
-                                            rowKey={'roles_permission_uuid'}
-                                            size="small"
-                                            dataSource={searchTest ? filteredPermissions : permissions.data}
-                                            rowClassName={(record, index) => (index % 2 == 0 ? "" : "altTableClass")}
-                                        />
+                                        <span className={"psp_list"} >
+                                            <Table
+                                                className="table-responsive"
+                                                pagination={false}
+                                                columns={columns}
+                                                rowKey={'roles_permission_uuid'}
+                                                size="small"
+                                                dataSource={searchTest ? filteredPermissions : permissions.data}
+                                                rowClassName={(record, index) => (index % 2 == 0 ? "" : "altTableClass")}
+                                            />
+                                        </span>
                                     </>
                             }
 

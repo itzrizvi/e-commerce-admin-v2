@@ -460,7 +460,7 @@ const ThemeLayout = WrappedComponent => {
 
 
           <ToastContainer
-            position="bottom-right"
+            position="top-center"
             autoClose={5000}
             newestOnTop={false}
             closeOnClick
