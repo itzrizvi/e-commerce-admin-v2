@@ -60,6 +60,22 @@ export const authQuery = {
         }
       }
     `,
+  GET_ALL_ROLES_PERMISSION: gql`
+      {
+        getAllRolesPermission {
+          isAuth
+          message
+          status
+          tenant_id
+          data {
+            roles_permission_uuid
+            roles_permission_name
+            roles_permission_slug
+            roles_permission_status
+          }
+        }
+      }
+    `,
 
 }
 
@@ -98,7 +114,16 @@ export const authMutation = {
             status
             }
         }
-        `
+  `,
+  CREATE_ROLE_WITH_PERMISSION: gql`
+        mutation createRoleWithPermission($data: CreateRoleWithPermissionInput){
+          createRoleWithPermission(data: $data){
+            tenant_id
+            message
+            status
+          }
+        }  
+        `,
 }
 
 export const productMutation = {

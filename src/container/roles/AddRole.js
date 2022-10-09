@@ -1,36 +1,66 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Col, Form, Input, Table, Spin, Switch } from 'antd';
+import { Row, Col, Form, Input, Table, Spin, Switch, Checkbox, Select } from 'antd';
 import FeatherIcon from 'feather-icons-react';
 import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
 import { Cards } from '../../components/cards/frame/cards-frame';
 import { Button } from '../../components/buttons/buttons';
-import { ShareButtonPageHeader } from '../../components/buttons/share-button/share-button';
-import { ExportButtonPageHeader } from '../../components/buttons/export-button/export-button';
-import { CalendarButtonPageHeader } from '../../components/buttons/calendar-button/calendar-button';
 import { Link } from 'react-router-dom';
-import apolloClient, { authQuery } from '../../utility/apollo';
+import apolloClient, { authMutation, authQuery } from '../../utility/apollo';
 import { useSelector } from 'react-redux';
+import { toast } from 'react-toastify';
 const { TextArea } = Input;
 
 const AddRole = () => {
     const token = useSelector(state => state.auth.token);
     const [selectedPermission, setSelectedPermission] = useState([])
     const [isLoading, setIsLoading] = useState(false)
+    const [role_status, setRole_status] = useState(true)
     const [allPermission, setAllPermission] = useState({
         data: [],
         isLoading: true,
         error: ''
     })
-    const [dummyInputValue, setDummyInputValue] = useState("")
     const maxLength = 30
     const [form] = Form.useForm();
 
 
+    const columns = [
+        {
+            title: '',
+            dataIndex: 'roles_permission_name',
+        },
+        {
+            title: 'Access',
+            dataIndex: 'roles_permission_uuid',
+            render: (value, item, index) => <Checkbox onChange={e => {
+                const isChecked = e.target.checked
+                setSelectedPermission(state => {
+                    let copy = [...state]
+                    let data = { ...copy[index], read_access: isChecked }
+                    copy[index] = data
+                    return copy
+                })
+            }} />,
+        },
+        {
+            title: 'Modify',
+            dataIndex: 'Modify',
+            render: (value, item, index) => <Checkbox onChange={e => {
+                const isChecked = e.target.checked
+                setSelectedPermission(state => {
+                    let copy = [...state]
+                    let data = { ...copy[index], edit_access: isChecked }
+                    copy[index] = data
+                    return copy
+                })
+            }} />,
+        },
+    ];
 
     useEffect(() => {
         apolloClient.query({
-            query: authQuery.GET_ALL_FEATURE_PERMISSION,
+            query: authQuery.GET_ALL_ROLES_PERMISSION,
             context: {
                 headers: {
                     TENANTID: 100001,
@@ -38,8 +68,19 @@ const AddRole = () => {
                 }
             }
         }).then(res => {
-            if (!res?.data?.getAllFeaturePermission?.isAuth) return setAllPermission(s => ({ ...s, error: 'You Are not Authorized' }))
-            setAllPermission(s => ({ ...s, data: res?.data?.getAllFeaturePermission?.data, error: '' }))
+
+            const data = res?.data?.getAllRolesPermission
+
+            if (!data?.isAuth) return setAllPermission(s => ({ ...s, error: 'You Are not Authorized' }))
+            setAllPermission(s => ({ ...s, data: data?.data, error: '' }))
+            setSelectedPermission(state => {
+                const newState = data?.data.map(item => ({
+                    permission_uuid: item.roles_permission_uuid,
+                    read_access: false,
+                    edit_access: false
+                }))
+                return newState;
+            })
 
         }).catch(err => {
             setAllPermission(s => ({ ...s, error: 'Something went Wrong.!! ' }))
@@ -51,21 +92,13 @@ const AddRole = () => {
 
 
     const handleSubmit = values => {
-        console.log("🚀 ~ file: AddRole.js ~ line 54 ~ handleSubmit ~ values", values);
+        setIsLoading(true)
+        const data = { ...values, role_status: role_status, permissionsData: selectedPermission }
 
-        if (!selectedPermission.length) return;
-
-
-        const permissionUUIDList = selectedPermission.map(u => u.feature_permission_uuid).join('@')
-
-        console.log("🚀 ~ file: AddRole.js ~ line 61 ~ handleSubmit ~ permissionUUIDList", permissionUUIDList);
-
-
-
-
+        // return;
         apolloClient.mutate({
-            mutation: authMutation.ADMIN_SIGN_UP,
-            variables: { data: { ...values, roleNo: values.roleNo + '' } },
+            mutation: authMutation.CREATE_ROLE_WITH_PERMISSION,
+            variables: { data },
             context: {
                 headers: {
                     TENANTID: 100001,
@@ -73,63 +106,14 @@ const AddRole = () => {
                 }
             }
         }).then(res => {
-            console.log("add product res", res)
-            if (res.data.adminSignUp.status) return toast.success(params.email ? `${params.email} Updated` : `${emailInput} Added`);
-            toast.error('Soemthing Went wrong !!');
+            console.log("add role res", res)
+            const data = res?.data?.createRoleWithPermission
+            if (data?.status) return toast.success(`Role created successfully.`);
+            toast.error('Something Went wrong !!');
         }).catch(err => {
-            console.log("add product err", err)
-            toast.error('Soemthing Went wrong !!');
+            console.log("add role err", err)
+            toast.error('Something Went wrong !!');
         }).finally(() => setIsLoading(false))
-    };
-
-
-
-
-
-    const columns = [
-        {
-            title: 'All Permissions',
-            dataIndex: 'feature_permission_name',
-            // render: (text) => <a>{text}</a>,
-        },
-    ];
-
-    const data = [
-        {
-            feature_permission_uuid: "142e1dfb-86cd-43f6-aeef-2c372f504619",
-            feature_permission_name: "Category View",
-            feature_permission_slug: "category-view"
-        },
-        {
-            feature_permission_uuid: "a2048c66-1a39-4aa2-b819-2c5dc1b55ccd",
-            feature_permission_name: "Product Edit",
-            feature_permission_slug: "product-edit"
-        },
-        {
-            feature_permission_uuid: "a8876f30-b83c-4c73-a888-c05c9a240676",
-            feature_permission_name: "Category Edit",
-            feature_permission_slug: "category-edit"
-        },
-        {
-            feature_permission_uuid: "abccefc0-ed67-4669-b8dc-4706a0ac830c",
-            feature_permission_name: "Product View",
-            feature_permission_slug: "product-view"
-        }
-    ]
-
-
-
-    const rowSelection = {
-        onChange: (selectedRowKeys, selectedRows) => {
-            // console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
-            console.log("selected", selectedRows)
-            setSelectedPermission(selectedRows)
-        },
-        getCheckboxProps: (record) => ({
-            disabled: record.name === 'Disabled User',
-            // Column configuration not to be checked
-            name: record.name,
-        }),
     };
 
 
@@ -140,16 +124,16 @@ const AddRole = () => {
         <>
             <PageHeader
                 title="Add Role"
-                buttons={[
-                    <div key="1" className="page-header-actions">
-                        <Link to="/admin/roles/list">
-                            <Button size="small" type="primary">
-                                <FeatherIcon icon="users" size={14} />
-                                Manage Roles
-                            </Button>
-                        </Link>
-                    </div>,
-                ]}
+            // buttons={[
+            //     <div key="1" className="page-header-actions">
+            //         <Link to="/admin/roles/list">
+            //             <Button size="small" type="primary">
+            //                 <FeatherIcon icon="users" size={14} />
+            //                 Manage Roles
+            //             </Button>
+            //         </Link>
+            //     </div>,
+            // ]}
             />
             <Main>
                 <Row gutter={25}>
@@ -169,7 +153,7 @@ const AddRole = () => {
                                     rules={[{ required: true, max: maxLength, message: "Please enter Role Name" }]}
                                     name="role" label="Name"
                                 // initialValue={params.first_name}
-                                // help={`Maximum length is ${maxLength}`}
+                                // help={`Maximum length is ${ maxLength }`}
                                 >
                                     <Input placeholder='Enter Role Name' />
                                 </Form.Item>
@@ -181,16 +165,14 @@ const AddRole = () => {
                                 </Form.Item>
 
                                 <Form.Item
-                                    // rules={[{ required: true, max: maxLength, message: "Please enter Role Name" }]}
                                     name="role_status" label="Status"
                                 >
-                                    <Switch defaultChecked />
+                                    <Switch checked={role_status} onChange={checked => setRole_status(checked)} />
                                 </Form.Item>
 
 
                                 <Form.Item
-                                    // rules={[{ required: true, message: "Please select Permission" }]}
-                                    name="row" label="Permissions"
+                                    name="permissionsData" label="Permissions"
                                 >
                                     {allPermission.isLoading ?
                                         <div className="spin">
@@ -200,25 +182,14 @@ const AddRole = () => {
                                         allPermission.error ?
                                             <p>{allPermission.error}</p>
                                             :
-                                            <>
-
-                                                <Table
-                                                    rowSelection={{
-                                                        type: "checkbox",
-                                                        ...rowSelection,
-                                                    }}
-                                                    pagination={false}
-                                                    columns={columns}
-                                                    // dataSource={data}
-                                                    dataSource={allPermission.data}
-                                                    rowKey={'feature_permission_uuid'}
-                                                />
-                                                {/* <Input value={dummyInputValue} style={{ display: "none" }} /> */}
-                                            </>
+                                            <Table
+                                                pagination={false}
+                                                columns={columns}
+                                                rowKey={'roles_permission_uuid'}
+                                                dataSource={allPermission.data}
+                                            />
                                     }
-
                                 </Form.Item>
-
 
                                 <div
                                     style={{
@@ -246,11 +217,7 @@ const AddRole = () => {
                                         </Link>
                                     </Form.Item>
                                 </div>
-
                             </Form>
-
-
-
                         </Cards>
                     </Col>
                 </Row>
