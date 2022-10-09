@@ -17,11 +17,15 @@ const columns = [
         title: 'UID',
         dataIndex: 'uid',
         key: 'uid',
+        width: 120,
+        ellipsis: true
     },
     {
         title: 'email',
         dataIndex: 'email',
         key: 'email',
+        width: 200,
+        ellipsis: true
     },
     {
         title: 'First Name',
@@ -42,8 +46,12 @@ const columns = [
         title: 'Roles',
         dataIndex: 'roles',
         key: 'roles',
-        render: (roles) => roles?.role,
-        sorter: (a, b) => a?.roles?.role_no - b?.roles?.role_no,
+        render: (roles) => (
+            roles.map(role => (
+                <p>{role.role}</p>
+            ))
+        ),
+        // sorter: (a, b) => a?.roles?.role_no - b?.roles?.role_no,
     },
     {
         title: 'Verified',
@@ -65,7 +73,7 @@ const columns = [
         dataIndex: 'action',
         render: (text, record) => (
             <>
-                <Link to={`/admin/admin/add-admin?email=${record.email}&first_name=${record.first_name}&last_name=${record.last_name}`}>
+                <Link to={`/admin/admin/add-admin?uid=${record.uid}&first_name=${record.first_name}&last_name=${record.last_name}`}>
                     <Button size="default" type="white" title='Edit'>
                         <FontAwesome name="edit" />
                     </Button>
@@ -97,7 +105,7 @@ const AllAdmin = () => {
             query: authQuery.GET_ALL_STAFF,
             context: {
                 headers: {
-                    TENANTID: 100001,
+                    TENANTID: process.env.REACT_APP_TENANTID,
                     Authorization: token
                 }
             }
@@ -126,13 +134,6 @@ const AllAdmin = () => {
                 title="Users"
                 buttons={[
                     <div key="1" className="page-header-actions">
-                        <Link to="/admin/roles/list">
-                            <Button size="small" type="white" key="3">
-                                <FeatherIcon icon="settings" size={14} />
-                                Manage Role
-                            </Button>
-                        </Link>
-
                         <Link to="/admin/admin/add-admin">
                             <Button size="small" title="Add user" type="primary">
                                 <FeatherIcon icon="user-plus" />

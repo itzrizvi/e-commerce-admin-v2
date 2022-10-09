@@ -36,25 +36,25 @@ export const authQuery = {
       }
     `,
   GET_ALL_STAFF: gql`
-    query getAllStaff{
-      getAllStaff{
-        isAuth
-        message
-        data{
-          uid
-          first_name
-          last_name
-          email
-          email_verified
-          roles{
-            role
-            role_no
-            role_slug
-            role_uuid
-          }
+  query getAllStaff {
+    getAllStaff {
+      isAuth
+      message
+      status
+      data {
+        uid
+        first_name
+        last_name
+        email
+        email_verified
+        user_status
+        roles {
+          role
+          role_slug
         }
       }
     }
+  }
     `,
   GET_ALL_FEATURE_PERMISSION: gql`
       query getAllFeaturePermission{
@@ -122,23 +122,13 @@ export const authQuery = {
 
 export const authMutation = {
   ADMIN_SIGN_UP: gql`
-      mutation adminSignUp($data:AdminSignUpInput){
-        adminSignUp(data:$data){
-          uid
-          email
-          authToken
-          message
-          status
-          emailVerified
-          first_name
-          last_name
-          role
-          roleNo
-          roleSlug
-          createdAt
-          updatedAt
-        }
+    mutation adminSignUp($data: AdminSignUpInput) {
+      adminSignUp(data: $data) {
+        message
+        status
+        tenant_id
       }
+    }
   `,
   LOGIN_MUTATION: gql`
     mutation adminSignIn($email: String!, $password: String!) {

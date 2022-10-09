@@ -1,23 +1,27 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Col, Form, Input, Select } from 'antd';
+import { Row, Col, Form, Input, Select, Spin, Switch } from 'antd';
 import FeatherIcon from 'feather-icons-react';
 import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
 import { Cards } from '../../components/cards/frame/cards-frame';
 import { Button } from '../../components/buttons/buttons';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useHistory, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import apolloClient, { authMutation, authQuery } from '../../utility/apollo';
 import { toast } from 'react-toastify';
 import queryString from 'query-string'
+import Cookies from 'js-cookie';
 
 const { Option } = Select;
 
 const AddAdmin = () => {
+    const history = useHistory();
     const { search } = useLocation();
     const params = queryString.parse(search)
     const [emailInput, setEmailInput] = useState(params.email || '')
     const maxLength = 30;
+    const [userStatus, setUserStatus] = useState(true);
+    const [selectedRoles, setSelectedRoles] = useState([])
 
 
     const [roles, setRoles] = useState({
@@ -34,19 +38,18 @@ const AddAdmin = () => {
         setRoles(state => ({ ...state, isLoading: true }))
 
         apolloClient.query({
-            query: authQuery.GET_ALL_ROLES_QUERY,
+            query: authQuery.GET_ALL_ROLES,
             context: {
                 headers: {
-                    TENANTID: 100001,
-                    Authorization: token
+                    TENANTID: process.env.REACT_APP_TENANTID,
+                    Authorization: Cookies.get('psp_t')
                 }
             }
         }).then(res => {
-            const roles = res?.data?.getAllRoles?.data
-            if (roles) {
-                setRoles(state => ({ ...state, roles }))
+            const data = res?.data?.getAllRoles
+            if (data.status) {
+                setRoles(state => ({ ...state, roles: data.data }))
             }
-
         }).catch(err => {
             console.log("🚀 ~ file: AddAdmin.js ~ line 46 ~ useEffect ~ err", err);
         }).finally(() => {
@@ -58,21 +61,38 @@ const AddAdmin = () => {
 
 
     const handleSubmit = values => {
-        setIsLoading(true);
+        if (!selectedRoles.length) return toast.warn("Select At List 1 Role..")
 
+
+        const variables = { data: { ...values, roleUUID: selectedRoles.map(item => ({ role_uuid: item })), userStatus } }
+        setIsLoading(true);
         apolloClient.mutate({
             mutation: authMutation.ADMIN_SIGN_UP,
-            variables: { data: { ...values, roleNo: values.roleNo + '' } },
+            variables,
+            refetchQueries: [
+                {
+                    query: authQuery.GET_ALL_STAFF,
+                    context: {
+                        headers: {
+                            TENANTID: process.env.REACT_APP_TENANTID,
+                            Authorization: Cookies.get('psp_t')
+                        }
+                    }
+                },
+                'getAllStaff'
+            ],
             context: {
                 headers: {
-                    TENANTID: 100001,
-                    Authorization: token
+                    TENANTID: process.env.REACT_APP_TENANTID,
+                    Authorization: Cookies.get('psp_t')
                 }
             }
         }).then(res => {
-            console.log("add product res", res)
-            if (res.data.adminSignUp.status) return toast.success(params.email ? `${params.email} Updated` : `${emailInput} Added`);
-            toast.error('Soemthing Went wrong !!');
+            const data = res.data.adminSignUp
+            if (!data.status) return toast.error(message);
+            toast.success(`${values.email} added successfully.`)
+            history.push("/admin/admin/admins");
+
         }).catch(err => {
             console.log("add product err", err)
             toast.error('Soemthing Went wrong !!');
@@ -159,21 +179,36 @@ const AddAdmin = () => {
                                 </Form.Item>
 
                                 <Form.Item
-                                    rules={[{ required: true, message: "Please select a role" }]}
-                                    name="roleNo" initialValue="" label="Role"
-                                    tooltip={roles.isLoading ? 'Loading roles....' : null}
+                                    name="userStatus"
+                                    label="User Status"
                                 >
-                                    <Select
-                                        placeholder="Select Company"
-                                        loading={roles.isLoading}
-                                        disabled={roles.isLoading}
-                                        style={{ width: '100%' }}
-                                        size={"large"}
-                                    >
-                                        {roles.roles.map(item => (
-                                            <Option key={item.role_uuid} value={item.role_no}>{item.role}</Option>
-                                        ))}
-                                    </Select>
+                                    <Switch checked={userStatus} onChange={checked => setUserStatus(checked)} />
+                                </Form.Item>
+
+
+
+                                <Form.Item
+                                    // rules={[{ required: true, message: "Please select a role" }]}
+                                    name="roleUUID" initialValue="" label="Role"
+                                // tooltip={roles.isLoading ? 'Loading roles....' : null}
+                                >
+                                    {roles.isLoading
+                                        ? <Spin />
+                                        : <>
+                                            <Select
+                                                mode="multiple"
+                                                allowClear
+                                                placeholder="Please select"
+                                                onChange={value => setSelectedRoles(value)}
+                                            >
+                                                {roles.roles.map(item => (
+                                                    <Option key={item.role_uuid} value={item.role_uuid}>{item.role}</Option>
+                                                ))}
+
+                                            </Select>
+                                        </>
+                                    }
+
                                 </Form.Item>
 
 
@@ -186,7 +221,10 @@ const AddAdmin = () => {
                                 >
                                     <Form.Item>
 
-                                        <Button loading={isLoading} size="default" htmlType="submit" type="primary" raised>
+                                        <Button
+                                            loading={isLoading}
+                                            disabled={roles.isLoading}
+                                            size="default" htmlType="submit" type="primary" raised>
                                             {isLoading ? 'Processing' : 'Save'}
                                         </Button>
                                         <Link to="/admin/admin/admins">
