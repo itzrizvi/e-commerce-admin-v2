@@ -73,7 +73,7 @@ const columns = [
         dataIndex: 'action',
         render: (text, record) => (
             <>
-                <Link to={`/admin/admin/add-admin?email=${record.email}&first_name=${record.first_name}&last_name=${record.last_name}`}>
+                <Link to={`/admin/admin/add-admin?uid=${record.uid}&first_name=${record.first_name}&last_name=${record.last_name}`}>
                     <Button size="default" type="white" title='Edit'>
                         <FontAwesome name="edit" />
                     </Button>
