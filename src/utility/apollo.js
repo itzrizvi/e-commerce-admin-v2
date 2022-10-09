@@ -163,6 +163,15 @@ export const authMutation = {
           }
         }  
         `,
+  CREATE_ROLES_PERMISSION: gql`
+        mutation createRolesPermission($data: RolesPermissionInput) {
+          createRolesPermission(data: $data) {
+            tenant_id
+            message
+            status
+          }
+        }
+        `,
 }
 
 export const productMutation = {

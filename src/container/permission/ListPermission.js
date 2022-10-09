@@ -88,9 +88,9 @@ const ListPermission = () => {
                 title="Permissions"
                 buttons={[
                     <div key="1" className="page-header-actions">
-                        <Link to="/admin/admin/add-admin">
+                        <Link to="/admin/permission/add">
                             <Button size="small" title="Add user" type="primary">
-                                <FeatherIcon icon="user-plus" />
+                                <FeatherIcon icon="plus" />
                             </Button>
                         </Link>
                     </div>
