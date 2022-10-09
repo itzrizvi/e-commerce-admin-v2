@@ -51,6 +51,11 @@ const MenuItems = ({ darkMode, toggleCollapsed, topMenu }) => {
 
       <SubMenu key="admin" icon={!topMenu && <FeatherIcon icon="users" />} title="Admin">
 
+        <Menu.Item key="permission">
+          <NavLink onClick={toggleCollapsed} to={`${path}/permission/list`}>
+            Permissions
+          </NavLink>
+        </Menu.Item>
         <Menu.Item key="roles">
           <NavLink onClick={toggleCollapsed} to={`${path}/roles/list`}>
             Roles

@@ -14,9 +14,19 @@
 			"path": "src/routes/admin/index.js",
 			"bookmarks": [
 				{
-					"line": 24,
+					"line": 25,
 					"column": 13,
 					"label": "-index routes"
+				}
+			]
+		},
+		{
+			"path": "src/layout/MenueItems.js",
+			"bookmarks": [
+				{
+					"line": 54,
+					"column": 67,
+					"label": "-side menue"
 				}
 			]
 		},
