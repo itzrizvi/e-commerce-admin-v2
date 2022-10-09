@@ -169,7 +169,7 @@ const UpdateRole = () => {
 
     useEffect(() => {
         if (singleRole.loading || allPermissions.loading) return;
-
+        console.log('2nd ue')
 
 
         const data = allPermissions.data.map(item => {
@@ -185,7 +185,7 @@ const UpdateRole = () => {
             return copyItem
         })
         setPermissionList(data)
-    }, [])
+    }, [singleRole, allPermissions])
 
 
 
