@@ -49,6 +49,16 @@
 					"label": "-refetch query"
 				}
 			]
+		},
+		{
+			"path": "src/container/admin/AddAdmin.js",
+			"bookmarks": [
+				{
+					"line": 55,
+					"column": 26,
+					"label": "--"
+				}
+			]
 		}
 	]
 }
