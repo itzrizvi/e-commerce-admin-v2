@@ -64,7 +64,7 @@ const ListPermission = () => {
             dataIndex: 'action',
             render: (text, record) => (
                 <>
-                    <Link to={`/admin/admin/add-admin?email=${record.email}&first_name=${record.first_name}&last_name=${record.last_name}`}>
+                    <Link to={`/admin/permission/add?name=${record.roles_permission_name}&status=${record.roles_permission_status}&id=${record.roles_permission_uuid}`}>
                         <Button size="default" type="white" title='Edit'>
                             <FontAwesome name="edit" />
                         </Button>

@@ -141,18 +141,18 @@ export const authMutation = {
       }
   `,
   LOGIN_MUTATION: gql`
-        mutation adminSignIn($email: String!, $password: String!) {
-            adminSignIn(email: $email, password: $password) {
-            email
-            emailVerified
-            authToken
-            uid
-            message
-            first_name
-                roleNo
-            status
-            }
-        }
+    mutation adminSignIn($email: String!, $password: String!) {
+      adminSignIn(email: $email, password: $password) {
+        email
+        emailVerified
+        authToken
+        uid
+        message
+        first_name
+        status
+        user_status
+      }
+    }
   `,
   CREATE_ROLE_WITH_PERMISSION: gql`
         mutation createRoleWithPermission($data: CreateRoleWithPermissionInput){
@@ -169,6 +169,33 @@ export const authMutation = {
             tenant_id
             message
             status
+          }
+        }
+        `,
+  UPDATE_ROLES_PERMISSION: gql`
+        mutation updateRolesPermission($data:UpdateRolesPermissionInput){
+          updateRolesPermission(data:$data){
+            message
+            status
+            tenant_id
+          }
+        }
+        `,
+  UPDATE_ROLE: gql`
+        mutation updateRole($data:UpdateRoleInput){
+          updateRole(data:$data){
+            message
+            status
+            tenant_id
+          }
+        }
+        `,
+  UPDATE_ROLE_PERMISSIONS_ONCHANGE: gql`
+        mutation updateRolePermissions($data:UpdateRolePermissionsInput){
+          updateRolePermissions(data:$data){
+            message
+            status
+            tenant_id
           }
         }
         `,

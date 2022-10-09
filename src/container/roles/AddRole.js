@@ -5,13 +5,19 @@ import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
 import { Cards } from '../../components/cards/frame/cards-frame';
 import { Button } from '../../components/buttons/buttons';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import apolloClient, { authMutation, authQuery } from '../../utility/apollo';
 import { useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 const { TextArea } = Input;
+import queryString from 'query-string'
 
 const AddRole = () => {
+    const { search } = useLocation();
+    const params = queryString.parse(search)
+    const [emailInput, setEmailInput] = useState(params.email || '')
+
+
     const token = useSelector(state => state.auth.token);
     const [selectedPermission, setSelectedPermission] = useState([])
     const [isLoading, setIsLoading] = useState(false)

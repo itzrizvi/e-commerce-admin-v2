@@ -10,7 +10,7 @@ import { Checkbox } from '../../../../components/checkbox/checkbox';
 import Heading from '../../../../components/heading/heading';
 
 const SignIn = () => {
-  const [email, setEmail] = useState('sumonskys@gmail.com');
+  const [email, setEmail] = useState('shahriar.rizvi02@gmail.com');
   const [password, setPassword] = useState('A1234567');
 
   const history = useHistory();
