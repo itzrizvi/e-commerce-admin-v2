@@ -36,25 +36,25 @@ export const authQuery = {
       }
     `,
   GET_ALL_STAFF: gql`
-    query getAllStaff{
-      getAllStaff{
-        isAuth
-        message
-        data{
-          uid
-          first_name
-          last_name
-          email
-          email_verified
-          roles{
-            role
-            role_no
-            role_slug
-            role_uuid
-          }
+  query getAllStaff {
+    getAllStaff {
+      isAuth
+      message
+      status
+      data {
+        uid
+        first_name
+        last_name
+        email
+        email_verified
+        user_status
+        roles {
+          role
+          role_slug
         }
       }
     }
+  }
     `,
   GET_ALL_FEATURE_PERMISSION: gql`
       query getAllFeaturePermission{
