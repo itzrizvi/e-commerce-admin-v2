@@ -9,6 +9,9 @@ import { rolesDataRead } from '../../../redux/roles/actionCreator';
 import Moment from 'react-moment';
 import { Link } from 'react-router-dom';
 import FontAwesome from 'react-fontawesome';
+import apolloClient, { authMutation } from '../../../utility/apollo';
+import Cookies from 'js-cookie';
+import { toast } from 'react-toastify';
 
 
 const RoleListTable = () => {
@@ -53,6 +56,34 @@ const RoleListTable = () => {
     dispatch(rolesDataRead());
   }, [dispatch])
 
+
+  const handleStatusChange = (record, checked) => {
+
+    const variables = { data: { role_uuid: record.key, role_status: checked } }
+
+
+    apolloClient.mutate({
+      mutation: authMutation.UPDATE_ROLE,
+      variables,
+      context: {
+        headers: {
+          TENANTID: process.env.REACT_APP_TENANTID,
+          Authorization: Cookies.get('psp_t')
+        }
+      }
+    }).then(res => {
+      const data = res?.data?.updateRole
+      if (!data?.status) return toast.error(data.message)
+      toast.success(`${record.name} Role Status updated successfully.`)
+    }).catch(err => {
+      toast.error('Something went wrong.!')
+      console.log("🚀 ~ file: UpdateRole.js ~ line 193 ~ handleSubmit ~ err", err);
+    })
+
+  }
+
+
+
   const rolesTableColumns = [
     {
       title: 'Name',
@@ -87,7 +118,7 @@ const RoleListTable = () => {
       dataIndex: 'role_status',
       key: 'role_status',
       render: (role_status, record) => (
-        <Switch checked={role_status} title='Status' />
+        <Switch defaultChecked={role_status} title='Status' onChange={checked => handleStatusChange(record, checked)} />
       )
     },
     {
