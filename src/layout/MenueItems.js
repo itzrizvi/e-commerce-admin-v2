@@ -77,6 +77,11 @@ const MenuItems = ({ darkMode, toggleCollapsed, topMenu }) => {
       </SubMenu>
 
       <SubMenu key="products" icon={!topMenu && <FeatherIcon icon="shopping-cart" />} title="Products">
+        <Menu.Item key="listCategory">
+          <NavLink onClick={toggleCollapsed} to={`${path}/categories/list`}>
+            Category
+          </NavLink>
+        </Menu.Item>
         <Menu.Item key="addproducts">
           <NavLink onClick={toggleCollapsed} to={`${path}/products/add`}>
             Add Products

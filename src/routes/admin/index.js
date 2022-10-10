@@ -5,6 +5,7 @@ import Dashboard from './dashboard';
 import Products from './products';
 import Users from './admin';
 import Permission from './permission';
+import Categories from './categories';
 import RoleListRoutes from './role/role_list';
 import withAdminLayout from '../../layout/withAdminLayout';
 import Pages from './pages';
@@ -28,6 +29,7 @@ const Admin = () => {
         <Route path={`${path}/roles`} component={RoleListRoutes} />
         <Route path={`${path}/permission`} component={Permission} />
         <Route path={`${path}/admin`} component={Users} />
+        <Route path={`${path}/categories`} component={Categories} />
       </Suspense>
     </Switch>
   );
