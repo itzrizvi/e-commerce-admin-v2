@@ -116,6 +116,29 @@ export const authQuery = {
           }
         }
     `,
+  GET_SINGLE_ADMIN: gql`
+    query getSingleAdmin($query:GetSingleAdminInput){
+      getSingleAdmin(query:$query){
+        message
+        status
+        tenant_id
+        data {
+          uid
+          first_name
+          last_name
+          user_status
+          email_verified
+          roles {
+            role_uuid
+            role
+            role_slug
+            role_no
+            role_status
+          }
+        }
+      }
+    }
+    `,
 }
 
 

@@ -31,6 +31,7 @@ const AddAdmin = () => {
     })
     const [isLoading, setIsLoading] = useState(false);
     const token = useSelector(state => state.auth.token);
+    const [existingRoles, setExistingRoles] = useState({ data: [], isLoading: true })
 
     const [form] = Form.useForm();
 
@@ -58,29 +59,12 @@ const AddAdmin = () => {
 
     }, [])
 
+    useEffect(() => {
+        if (!params.uid) return
 
-
-    const handleSubmit = values => {
-        if (!selectedRoles.length) return toast.warn("Select At List 1 Role..")
-
-
-        const variables = { data: { ...values, roleUUID: selectedRoles.map(item => ({ role_uuid: item })), userStatus } }
-        setIsLoading(true);
-        apolloClient.mutate({
-            mutation: authMutation.ADMIN_SIGN_UP,
-            variables,
-            refetchQueries: [
-                {
-                    query: authQuery.GET_ALL_STAFF,
-                    context: {
-                        headers: {
-                            TENANTID: process.env.REACT_APP_TENANTID,
-                            Authorization: Cookies.get('psp_t')
-                        }
-                    }
-                },
-                'getAllStaff'
-            ],
+        apolloClient.query({
+            query: authQuery.GET_SINGLE_ADMIN,
+            variables: { query: { uid: params.uid } },
             context: {
                 headers: {
                     TENANTID: process.env.REACT_APP_TENANTID,
@@ -88,36 +72,101 @@ const AddAdmin = () => {
                 }
             }
         }).then(res => {
-            const data = res.data.adminSignUp
-            if (!data.status) return toast.error(message);
-            toast.success(`${values.email} added successfully.`)
-            history.push("/admin/admin/admins");
-
+            const data = res?.data?.getSingleAdmin
+            if (data.status) {
+                const roles = data?.data?.roles;
+                const rolesArray = roles.map(item => item.role_uuid)
+                setExistingRoles({ data: rolesArray, isLoading: false })
+                setSelectedRoles(rolesArray)
+            }
         }).catch(err => {
-            console.log("add product err", err)
-            toast.error('Soemthing Went wrong !!');
-        }).finally(() => setIsLoading(false))
+            console.log("🚀 ~ file: AddAdmin.js ~ line 46 ~ useEffect ~ err", err);
+        }).finally(() => {
+            setRoles(state => ({ ...state, isLoading: false }))
+        })
+
+
+    }, [])
+
+
+
+    const handleSubmit = values => {
+        if (!selectedRoles.length) return toast.warn("Select At List 1 Role..")
+
+        setIsLoading(true);
+        if (!params.uid) {
+            const variables = { data: { ...values, roleUUID: selectedRoles.map(item => ({ role_uuid: item })), userStatus } }
+            apolloClient.mutate({
+                mutation: authMutation.ADMIN_SIGN_UP,
+                variables,
+                refetchQueries: [
+                    {
+                        query: authQuery.GET_ALL_STAFF,
+                        context: {
+                            headers: {
+                                TENANTID: process.env.REACT_APP_TENANTID,
+                                Authorization: Cookies.get('psp_t')
+                            }
+                        }
+                    },
+                    'getAllStaff'
+                ],
+                context: {
+                    headers: {
+                        TENANTID: process.env.REACT_APP_TENANTID,
+                        Authorization: Cookies.get('psp_t')
+                    }
+                }
+            }).then(res => {
+                const data = res.data.adminSignUp
+                if (!data.status) return toast.error(message);
+                toast.success(`${values.email} added successfully.`)
+                history.push("/admin/admin/admins");
+
+            }).catch(err => {
+                console.log("add product err", err)
+                toast.error('Soemthing Went wrong !!');
+            }).finally(() => setIsLoading(false))
+
+        } else {
+            const { first_name, last_name } = values
+            const variables = {
+                data: {
+                    uid: params.uid,
+                    first_name,
+                    last_name,
+                    roleUUID: selectedRoles.map(item => ({ role_uuid: item })),
+                    user_status: userStatus
+                }
+            }
+
+            // console.log(variables)
+            // return
+            apolloClient.mutate({
+                mutation: authMutation.ADMIN_UPDATE,
+                variables,
+                context: {
+                    headers: {
+                        TENANTID: process.env.REACT_APP_TENANTID,
+                        Authorization: Cookies.get('psp_t')
+                    }
+                }
+            }).then(res => {
+                const status = res?.data?.adminUpdate?.status
+                if (!status) return toast.error(data.message)
+                toast.success(`${params.email} user Status updated successfully.`)
+            }).catch(err => {
+                console.log("🚀 ~ file: AllAdmins.js ~ line 33 ~ handleStatusChange ~ err", err);
+                toast.error(`Something went wrong!!`)
+            }).finally(() => setIsLoading(false))
+        }
     };
 
 
     return (
         <>
             <PageHeader
-                title={params.email ? `Edit user for ${params.email}` : "Edit Admin"}
-                buttons={[
-                    <div key="1" className="page-header-actions">
-                        {/* <Button size="small" type="white" key="3">
-                            <FeatherIcon icon="share-2" size={14} />
-                            Share
-                        </Button> */}
-                        <Link to="/admin/admin/admins">
-                            <Button size="small" type="primary">
-                                <FeatherIcon icon="users" size={14} />
-                                Manage Users
-                            </Button>
-                        </Link>
-                    </div>,
-                ]}
+                title={params.uid ? `Edit user for ${params.email}` : "Add Admin"}
             />
             <Main>
                 <Row gutter={25}>
@@ -149,7 +198,7 @@ const AddAdmin = () => {
                                 >
                                     <Input placeholder='Enter Last Name' />
                                 </Form.Item>
-                                <Form.Item
+                                {!params.uid && <Form.Item
                                     rules={[{
                                         required: true, message: "Please enter an email",
                                         max: maxLength,
@@ -160,7 +209,7 @@ const AddAdmin = () => {
                                 // help={`Maximum length is ${maxLength}`}
                                 >
                                     <Input type='email' placeholder='Enter Email Address' onChange={e => setEmailInput(e.target.value)} />
-                                </Form.Item>
+                                </Form.Item>}
                                 <Form.Item
                                     rules={[
                                         {
@@ -192,14 +241,18 @@ const AddAdmin = () => {
                                     name="roleUUID" initialValue="" label="Role"
                                 // tooltip={roles.isLoading ? 'Loading roles....' : null}
                                 >
-                                    {roles.isLoading
-                                        ? <Spin />
+                                    {(params.uid && existingRoles.isLoading) || roles.isLoading
+                                        ?
+                                        <div className="spin">
+                                            <Spin />
+                                        </div>
                                         : <>
                                             <Select
                                                 mode="multiple"
                                                 allowClear
                                                 placeholder="Please select"
                                                 onChange={value => setSelectedRoles(value)}
+                                                defaultValue={existingRoles.data}
                                             >
                                                 {roles.roles.map(item => (
                                                     <Option key={item.role_uuid} value={item.role_uuid}>{item.role}</Option>

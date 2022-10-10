@@ -46,7 +46,7 @@ const columns = [
         ellipsis: true
     },
     {
-        title: 'email',
+        title: 'Email',
         dataIndex: 'email',
         key: 'email',
         width: 200,
@@ -71,10 +71,14 @@ const columns = [
         title: 'Roles',
         dataIndex: 'roles',
         key: 'roles',
+        width: 60,
+        ellipsis: true,
         render: (roles) => (
-            roles.map(role => (
-                <>{role.role}<br /></>
-            ))
+            <p>
+                {roles.map(role => (
+                    <>{role.role},</>
+                ))}
+            </p>
         ),
         // sorter: (a, b) => a?.roles?.role_no - b?.roles?.role_no,
     },
@@ -98,10 +102,10 @@ const columns = [
         dataIndex: 'action',
         render: (text, record) => (
             <>
-                <Link to={`/admin/admin/add-admin?uid=${record.uid}&first_name=${record.first_name}&last_name=${record.last_name}`}>
-                    <Button size="default" type="white" title='Edit'>
-                        <FontAwesome name="edit" />
-                    </Button>
+                <Link to={`/admin/admin/add-admin?uid=${record.uid}&first_name=${record.first_name}&last_name=${record.last_name}&email=${record.email}&status=${record.status}`}>
+                    {/* <Button size="default" type="white" title='Edit'> */}
+                    <FontAwesome name="edit" />
+                    {/* </Button> */}
                 </Link>
             </>
         ),
