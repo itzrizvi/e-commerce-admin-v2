@@ -189,6 +189,14 @@ export const authMutation = {
           }
         }
         `,
+  ADMIN_UPDATE: gql`
+        mutation adminUpdate($data: UpdateAdminInput){
+          adminUpdate(data:$data){
+            message
+            status
+          }
+        }
+        `,
 }
 
 export const productMutation = {

@@ -6,10 +6,35 @@ import { Main } from '../styled';
 import { Cards } from '../../components/cards/frame/cards-frame';
 import { SearchOutlined } from '@ant-design/icons';
 import { Button } from '../../components/buttons/buttons';
-import apolloClient, { authQuery } from '../../utility/apollo';
+import apolloClient, { authMutation, authQuery } from '../../utility/apollo';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import FontAwesome from 'react-fontawesome';
+import Cookies from 'js-cookie';
+import { toast } from 'react-toastify';
+
+const handleStatusChange = (record, checked) => {
+    const variables = { data: { uid: record.uid, user_status: checked } }
+
+    apolloClient.mutate({
+        mutation: authMutation.ADMIN_UPDATE,
+        variables,
+        context: {
+            headers: {
+                TENANTID: process.env.REACT_APP_TENANTID,
+                Authorization: Cookies.get('psp_t')
+            }
+        }
+    }).then(res => {
+        const status = res?.data?.adminUpdate?.status
+        if (!status) return toast.error(data.message)
+        toast.success(`${record.email} user Status updated successfully.`)
+    }).catch(err => {
+        console.log("🚀 ~ file: AllAdmins.js ~ line 33 ~ handleStatusChange ~ err", err);
+        toast.error(`Something went wrong!!`)
+    })
+
+}
 
 
 const columns = [
@@ -65,7 +90,7 @@ const columns = [
         dataIndex: 'status',
         key: 'status',
         render: (text, record) => (
-            <Switch defaultChecked title='Status' />
+            <Switch defaultChecked={record.user_status} title='Status' onChange={checked => handleStatusChange(record, checked)} />
         )
     },
     {
