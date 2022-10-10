@@ -38,7 +38,7 @@ const AuthInfo = () => {
         </figure>
         <ul className="user-dropdwon__links">
           <li>
-            <Link to="#">
+            <Link to="/admin/settings">
               <FeatherIcon icon="user" /> Profile
             </Link>
           </li>

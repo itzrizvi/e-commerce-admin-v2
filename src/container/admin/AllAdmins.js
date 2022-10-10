@@ -73,7 +73,7 @@ const columns = [
         key: 'roles',
         render: (roles) => (
             roles.map(role => (
-                <p>{role.role}</p>
+                <>{role.role}<br /></>
             ))
         ),
         // sorter: (a, b) => a?.roles?.role_no - b?.roles?.role_no,
