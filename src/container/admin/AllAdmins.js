@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Col, Table, Input, Spin, Switch } from 'antd';
+import { Row, Col, Table, Input, Spin, Switch, Typography } from 'antd';
 import FeatherIcon from 'feather-icons-react';
 import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
@@ -71,15 +71,12 @@ const columns = [
         title: 'Roles',
         dataIndex: 'roles',
         key: 'roles',
-        width: 60,
+        width: 150,
         ellipsis: true,
-        render: (roles) => (
-            <p>
-                {roles.map(role => (
-                    <>{role.role},</>
-                ))}
-            </p>
-        ),
+        render: (roles) => {
+            const data = roles.map(role => role.role).join(", ")
+            return (<p>{data}</p>)
+        }
         // sorter: (a, b) => a?.roles?.role_no - b?.roles?.role_no,
     },
     {

@@ -102,21 +102,29 @@ const RoleListTable = () => {
       title: 'Permissions',
       dataIndex: 'permissions',
       key: 'permissions',
-      render: (permissions) => (
-        <>
-          {permissions.map(item => (
-            <>
-              {item.rolesPermission.roles_permission_name}<br />
-            </>
-          ))
-          }
-        </>
-      )
+      // width: 150,
+      ellipsis: true,
+      render: (permissions) => {
+        const data = permissions.map(item => item.rolesPermission.roles_permission_name).join(", ")
+        return (<p>{data}</p>)
+      }
+
+      // render: (permissions) => (
+      //   <>
+      //     {permissions.map(item => (
+      //       <>
+      //         {item.rolesPermission.roles_permission_name}<br />
+      //       </>
+      //     ))
+      //     }
+      //   </>
+      // )
     },
     {
       title: 'Status',
       dataIndex: 'role_status',
       key: 'role_status',
+      align: 'center',
       render: (role_status, record) => (
         <Switch defaultChecked={role_status} title='Status' onChange={checked => handleStatusChange(record, checked)} />
       )
