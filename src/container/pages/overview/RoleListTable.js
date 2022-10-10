@@ -8,6 +8,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { rolesDataRead } from '../../../redux/roles/actionCreator';
 import Moment from 'react-moment';
 import { Link } from 'react-router-dom';
+import FontAwesome from 'react-fontawesome';
 
 
 const RoleListTable = () => {
@@ -73,11 +74,9 @@ const RoleListTable = () => {
       render: (permissions) => (
         <>
           {permissions.map(item => (
-            <p>
+            <>
               {item.rolesPermission.roles_permission_name}<br />
-              Access: {item.read_access.toString()}<br />
-              Modify: {item.edit_access.toString()}
-            </p>
+            </>
           ))
           }
         </>
@@ -91,27 +90,13 @@ const RoleListTable = () => {
         <Switch checked={role_status} title='Status' />
       )
     },
-    // {
-    //   title: 'Date Time',
-    //   dataIndex: 'dateTime',
-    //   key: 'dateTime',
-    //   sorter: (a, b) => parseInt(a.createdAt) - parseInt(b.createdAt),
-    //   sortDirections: ['descend'],
-    // },
-    // {
-    //   title: 'Actions',
-    //   dataIndex: 'action',
-    //   key: 'action'
-    // },
     {
       title: 'Action',
       dataIndex: 'key',
       key: 'action',
       render: (text, record) => (
-        <Link to={`/admin/roles/update?id=${record.key}&role=${record.name}`}>
-          <Button size="default" type="white" title='Edit'>
-            <FeatherIcon icon="edit" size={16} />
-          </Button>
+        <Link to={`/admin/roles/update?id=${record.key}&role=${record.name}`} style={{ cursor: 'pointer' }} >
+          <FontAwesome name="edit" style={{ margin: ".5em 1em" }} />
         </Link>
       ),
     },
