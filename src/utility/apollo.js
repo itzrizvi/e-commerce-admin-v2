@@ -139,6 +139,7 @@ export const authMutation = {
         uid
         message
         first_name
+        last_name
         status
         user_status
       }
