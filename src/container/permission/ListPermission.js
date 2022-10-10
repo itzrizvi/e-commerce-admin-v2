@@ -10,9 +10,10 @@ import { ShareButtonPageHeader } from '../../components/buttons/share-button/sha
 import { ExportButtonPageHeader } from '../../components/buttons/export-button/export-button';
 import { CalendarButtonPageHeader } from '../../components/buttons/calendar-button/calendar-button';
 import { Link } from 'react-router-dom';
-import apolloClient, { authQuery } from '../../utility/apollo';
+import apolloClient, { authMutation, authQuery } from '../../utility/apollo';
 import Cookies from 'js-cookie';
 import FontAwesome from 'react-fontawesome';
+import { toast } from 'react-toastify';
 
 
 
@@ -45,6 +46,29 @@ const ListPermission = () => {
 
     }, [])
 
+    const handleStatusChange = (record, checked) => {
+        const variables = { data: { roles_permission_uuid: record.roles_permission_uuid, roles_permission_status: checked } }
+
+        apolloClient.mutate({
+            mutation: authMutation.UPDATE_ROLES_PERMISSION,
+            variables,
+            context: {
+                headers: {
+                    TENANTID: process.env.REACT_APP_TENANTID,
+                    Authorization: Cookies.get('psp_t')
+                }
+            }
+        }).then(res => {
+            const status = res?.data?.updateRolesPermission?.status
+            if (!status) return toast.error(data.message)
+            toast.success(`${record.roles_permission_name} Permission Status updated successfully.`)
+        }).catch(err => {
+            console.log("🚀 ~ file: AllAdmins.js ~ line 33 ~ handleStatusChange ~ err", err);
+            toast.error(`Something went wrong!!`)
+        })
+
+    }
+
     const columns = [
         {
             title: 'Permission Name',
@@ -57,7 +81,7 @@ const ListPermission = () => {
             key: 'roles_permission_status',
             align: 'right',
             render: (text, record) => (
-                <Switch defaultChecked={text} title='Status' />
+                <Switch defaultChecked={text} title='Status' onChange={checked => handleStatusChange(record, checked)} />
             )
         },
         {
