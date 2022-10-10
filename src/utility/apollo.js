@@ -221,6 +221,15 @@ export const authMutation = {
           }
         }
         `,
+  ADMIN_PASSWORD_CHANGE: gql`
+        mutation adminPasswordChange($data: AdminPasswordChangeInput){
+          adminPasswordChange(data:$data){
+            message
+            status
+            tenant_id
+          }
+        }
+        `,
 }
 
 export const productMutation = {
