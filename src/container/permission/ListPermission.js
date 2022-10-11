@@ -14,12 +14,13 @@ import apolloClient, { authMutation, authQuery } from '../../utility/apollo';
 import Cookies from 'js-cookie';
 import FontAwesome from 'react-fontawesome';
 import { toast } from 'react-toastify';
+import config from '../../config/config';
 
 
 
 const ListPermission = () => {
     const [permissions, setPermissions] = useState({ data: [], loading: true, error: '' })
-    const [searchTest, setSearchTest] = useState('');
+    const [searchText, setSearchText] = useState('');
     const [filteredPermissions, setFilteredPermissions] = useState([]);
 
     useEffect(() => {
@@ -74,12 +75,14 @@ const ListPermission = () => {
             title: 'Permission Name',
             dataIndex: 'roles_permission_name',
             key: 'roles_permission_name',
+            sorter: (a, b) => a.roles_permission_name.toUpperCase() > b.roles_permission_name.toUpperCase() ? 1 : -1,
         },
         {
             title: 'Status',
             dataIndex: 'roles_permission_status',
             key: 'roles_permission_status',
             align: 'right',
+            sorter: (a, b) => (a.roles_permission_status === b.roles_permission_status) ? 0 : a.roles_permission_status ? -1 : 1,
             render: (text, record) => (
                 <Switch defaultChecked={text} title='Status' onChange={checked => handleStatusChange(record, checked)} />
             )
@@ -103,7 +106,7 @@ const ListPermission = () => {
 
     const onChangeSearch = e => {
         const value = e.target.value
-        setSearchTest(value)
+        setSearchText(value)
         setFilteredPermissions(permissions.data.filter(permission => permission?.roles_permission_name.toLowerCase().includes(value.toLowerCase())))
     }
 
@@ -141,12 +144,17 @@ const ListPermission = () => {
                                         <span className={"psp_list"} >
                                             <Table
                                                 className="table-responsive"
-                                                pagination={false}
                                                 columns={columns}
                                                 rowKey={'roles_permission_uuid'}
                                                 size="small"
-                                                dataSource={searchTest ? filteredPermissions : permissions.data}
+                                                dataSource={searchText ? filteredPermissions : permissions.data}
                                                 rowClassName={(record, index) => (index % 2 == 0 ? "" : "altTableClass")}
+                                                // pagination={false}
+                                                pagination={{
+                                                    defaultPageSize: config.PERMISSIONS_PER_PAGE,
+                                                    total: searchText ? filteredPermissions.length : permissions.length,
+                                                    showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`,
+                                                }}
                                             />
                                         </span>
                                     </>
