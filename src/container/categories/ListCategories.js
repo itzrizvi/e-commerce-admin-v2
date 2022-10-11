@@ -9,6 +9,7 @@ import { SearchOutlined } from '@ant-design/icons';
 import { Link } from 'react-router-dom';
 import FontAwesome from 'react-fontawesome';
 import apolloClient, { productQuery } from '../../utility/apollo';
+import config from '../../config/config';
 
 const categories1 = [
     {
@@ -70,6 +71,8 @@ const categories1 = [
 const ListCategories = () => {
     const [categories, setCategories] = useState([])
     const [categoriesData, setCategoriesData] = useState({ data: [], loading: true })
+    const [filteredCategoryData, setFilteredCategoryData] = useState([])
+    const [searchText, setSearchText] = useState("")
 
     useEffect(() => {
         apolloClient.query({
@@ -208,7 +211,12 @@ const ListCategories = () => {
     ]
 
 
-
+    const onChangeSearch = e => {
+        const value = e.target.value
+        console.log("🚀 ~ file: ListCategories.js ~ line 216 ~ onChangeSearch ~ value", value);
+        setSearchText(value)
+        setFilteredCategoryData(categoriesData.data.filter(category => (category?.cat_name + category?.cat_des + category?.cat_id + category?.cat_sort_order).toLowerCase().includes(value.toLowerCase())))
+    }
 
     return (
         <>
@@ -239,20 +247,25 @@ const ListCategories = () => {
                                     <Input
                                         placeholder="Search Permission..."
                                         prefix={<SearchOutlined />}
-                                    // onChange={onChangeSearch}
+                                        onChange={onChangeSearch}
                                     />
                                     <br /><br />
 
                                     <span className={"psp_list"} >
                                         <Table
                                             className="table-responsive"
-                                            pagination={false}
                                             columns={columns}
                                             rowKey={'cat_id'}
                                             size="small"
-                                            dataSource={categoriesData.data}
-                                            // dataSource={searchTest ? filteredPermissions : permissions.data}
+                                            // dataSource={categoriesData.data}
+                                            dataSource={searchText ? filteredCategoryData : categoriesData.data}
                                             rowClassName={(record, index) => (index % 2 == 0 ? "" : "altTableClass")}
+                                            // pagination={false}
+                                            pagination={{
+                                                defaultPageSize: config.CATEGORY_PER_PAGE,
+                                                total: searchText ? filteredCategoryData.length : categoriesData.data.length,
+                                                showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`,
+                                            }}
                                         />
                                     </span>
                                 </>
