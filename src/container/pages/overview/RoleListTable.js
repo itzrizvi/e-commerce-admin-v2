@@ -111,16 +111,6 @@ const RoleListTable = () => {
         return (<p>{data}</p>)
       }
 
-      // render: (permissions) => (
-      //   <>
-      //     {permissions.map(item => (
-      //       <>
-      //         {item.rolesPermission.roles_permission_name}<br />
-      //       </>
-      //     ))
-      //     }
-      //   </>
-      // )
     },
     {
       title: 'Status',

@@ -12,6 +12,7 @@ import { Link } from 'react-router-dom';
 import FontAwesome from 'react-fontawesome';
 import Cookies from 'js-cookie';
 import { toast } from 'react-toastify';
+import config from '../../config/config';
 
 const handleStatusChange = (record, checked) => {
     const variables = { data: { uid: record.uid, user_status: checked } }
@@ -43,19 +44,25 @@ const columns = [
         dataIndex: 'uid',
         key: 'uid',
         width: 120,
-        ellipsis: true
+        ellipsis: true,
+        sorter: (a, b) => a.uid.toUpperCase() > b.uid.toUpperCase() ? 1 : -1,
+
     },
     {
         title: 'Email',
         dataIndex: 'email',
         key: 'email',
         width: 200,
-        ellipsis: true
+        ellipsis: true,
+        sorter: (a, b) => a.email.toUpperCase() > b.email.toUpperCase() ? 1 : -1,
+
     },
     {
         title: 'First Name',
         dataIndex: 'first_name',
         key: 'first_name',
+        sorter: (a, b) => a.first_name.toUpperCase() > b.first_name.toUpperCase() ? 1 : -1,
+
         // filters: [
         //     { text: 'test', value: 'test' },
         //     // { text: 'Female', value: 'female' },
@@ -66,6 +73,8 @@ const columns = [
         title: 'Last Name',
         dataIndex: 'last_name',
         key: 'last_name',
+        sorter: (a, b) => a.last_name.toUpperCase() > b.last_name.toUpperCase() ? 1 : -1,
+
         // sorter: (a, b) => a?.roles?.role_no - b?.roles?.role_no,
     },
     {
@@ -74,6 +83,7 @@ const columns = [
         key: 'roles',
         width: 150,
         ellipsis: true,
+        sorter: (a, b) => a.roles.length > b.roles.length ? -1 : 1,
         render: (roles) => {
             const data = roles.map(role => role.role).join(", ")
             return (<p>{data}</p>)
@@ -85,12 +95,13 @@ const columns = [
         dataIndex: 'email_verified',
         key: 'email_verified',
         render: (email_verified) => email_verified.toString(),
-        sorter: (a, b) => Number(b.email_verified) - Number(a.email_verified)
+        sorter: (a, b) => (a.email_verified === b.email_verified) ? 0 : a.email_verified ? -1 : 1,
     },
     {
         title: 'Status',
         dataIndex: 'status',
         key: 'status',
+        sorter: (a, b) => (a.status === b.status) ? 0 : a.status ? -1 : 1,
         render: (text, record) => (
             <Switch defaultChecked={record.user_status} title='Status' onChange={checked => handleStatusChange(record, checked)} />
         )
@@ -119,7 +130,7 @@ const columns = [
 
 const AllAdmin = () => {
     const token = useSelector(state => state.auth.token);
-    const [searchTest, setSearchTest] = useState('');
+    const [searchText, setSearchText] = useState('');
     const [filteredUser, setFilteredUser] = useState([]);
     const [staffs, setStaffs] = useState({
         data: [],
@@ -151,7 +162,7 @@ const AllAdmin = () => {
 
     const onChangeSearch = e => {
         const value = e.target.value
-        setSearchTest(value)
+        setSearchText(value)
         setFilteredUser(staffs.data.filter(user => (user?.email + user?.first_name + user?.last_name + user?.roles?.role).toLowerCase().includes(value.toLowerCase())))
     }
 
@@ -188,12 +199,17 @@ const AllAdmin = () => {
                                         <span className={"psp_list"} >
                                             <Table
                                                 className="table-responsive"
-                                                pagination={false}
                                                 columns={columns}
                                                 rowKey={'uid'}
                                                 size="small"
-                                                dataSource={searchTest ? filteredUser : staffs.data}
+                                                dataSource={searchText ? filteredUser : staffs.data}
                                                 rowClassName={(record, index) => (index % 2 == 0 ? "" : "altTableClass")}
+                                                // pagination={false}
+                                                pagination={{
+                                                    defaultPageSize: config.USERS_PER_PAGE,
+                                                    total: searchText ? filteredUser.length : staffs.data.length,
+                                                    showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`,
+                                                }}
                                             />
                                         </span>
                                     </>
