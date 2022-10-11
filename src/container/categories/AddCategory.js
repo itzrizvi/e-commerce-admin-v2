@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Col, Form, Input, Checkbox, Switch, Tabs, Spin, Select } from 'antd';
+import { Row, Col, Form, Input, Checkbox, Switch, Tabs, Spin, Select, Upload } from 'antd';
 import FeatherIcon from 'feather-icons-react';
 import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
@@ -7,8 +7,11 @@ import { Cards } from '../../components/cards/frame/cards-frame';
 import { Link } from 'react-router-dom';
 import { Button } from '../../components/buttons/buttons';
 import apolloClient, { productQuery } from '../../utility/apollo';
+import Heading from '../../components/heading/heading';
+
 const { TextArea } = Input;
 const { Option } = Select;
+const { Dragger } = Upload;
 
 const AddCategory = () => {
     const [form] = Form.useForm();
@@ -19,6 +22,47 @@ const AddCategory = () => {
 
     const [categories, setCategories] = useState([])
     const [categoriesData, setCategoriesData] = useState({ data: [], loading: true })
+
+    const [state, setState] = useState({
+        file: null,
+        list: null,
+        submitValues: {},
+    });
+
+    const fileList = [
+        {
+            uid: '1',
+            name: '1.png',
+            status: 'done',
+            url: require('../../static/img/products/1.png'),
+            thumbUrl: require('../../static/img/products/1.png'),
+        },
+    ];
+
+    const fileUploadProps = {
+        name: 'file',
+        multiple: true,
+        action: 'https://www.mocky.io/v2/5cc8019d300000980a055e76',
+        onChange(info) {
+            const { status } = info.file;
+            if (status !== 'uploading') {
+                setState({ ...state, file: info.file, list: info.fileList });
+            }
+            if (status === 'done') {
+                message.success(`${info.file.name} file uploaded successfully.`);
+            } else if (status === 'error') {
+                message.error(`${info.file.name} file upload failed.`);
+            }
+        },
+        listType: 'picture',
+        defaultFileList: fileList,
+        showUploadList: {
+            showRemoveIcon: true,
+            removeIcon: <FeatherIcon icon="trash-2" onClick={e => console.log(e, 'custom removeIcon event')} />,
+        },
+    };
+
+
 
     useEffect(() => {
         apolloClient.query({
@@ -183,6 +227,34 @@ const AddCategory = () => {
                                                 onChange={checked => setCategoryStatus(checked)}
                                             />
                                         </Form.Item>
+
+                                        <Form.Item
+                                            name="img" label="Image"
+                                        >
+                                            {/* <div className="add-product-block">
+                                            <Row gutter={15}>
+                                                <Col xs={24}>
+                                                    <div className="add-product-content">
+                                                        <Cards title="Product Image"> */}
+                                            <Dragger {...fileUploadProps} style={{ marginTop: '3em' }}>
+                                                <p className="ant-upload-drag-icon">
+                                                    <FeatherIcon icon="upload" size={50} />
+                                                </p>
+                                                <Heading as="h4" className="ant-upload-text">
+                                                    Drag and drop an image
+                                                </Heading>
+                                                <p className="ant-upload-hint">
+                                                    or <span>Browse</span> to choose a file
+                                                </p>
+                                            </Dragger>
+                                            {/* </Cards>
+                                                    </div>
+                                                </Col>
+                                            </Row>
+                                        </div> */}
+                                        </Form.Item>
+
+
 
 
 
