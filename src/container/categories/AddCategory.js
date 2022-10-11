@@ -152,7 +152,7 @@ const AddCategory = () => {
                                         <Form.Item
                                             rules={[{ required: true, max: maxLength, message: "Please enter Role Name" }]}
                                             name="categoryName" label="Category Name"
-                                            initialValue={params.name || ""}
+                                        // initialValue={params.name || ""}
                                         >
                                             <Input placeholder='Enter Category Name' />
                                         </Form.Item>
