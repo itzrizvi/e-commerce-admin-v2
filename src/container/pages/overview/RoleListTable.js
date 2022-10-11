@@ -12,6 +12,7 @@ import FontAwesome from 'react-fontawesome';
 import apolloClient, { authMutation } from '../../../utility/apollo';
 import Cookies from 'js-cookie';
 import { toast } from 'react-toastify';
+import config from '../../../config/config';
 
 
 const RoleListTable = () => {
@@ -175,13 +176,13 @@ const RoleListTable = () => {
               columns={rolesTableColumns}
               size="small"
               rowClassName={(record, index) => (index % 2 == 0 ? "" : "altTableClass")}
-              pagination={false}
               rowKey={'key'}
-            // pagination={{
-            //   defaultPageSize: 10,
-            //   total: isFilter ? tableData.length : rolesTableData.length,
-            //   showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`,
-            // }}
+              // pagination={false}
+              pagination={{
+                defaultPageSize: config.ROLES_PER_PAGE,
+                total: searchText ? filteredRoles.length : rolesTableData.length,
+                showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`,
+              }}
             />
           </span>
         </>}

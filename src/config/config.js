@@ -6,6 +6,7 @@ const config = {
   rtl: false,
   theme,
   darkTheme,
+  ROLES_PER_PAGE: 10,
 };
 
 export default config;
