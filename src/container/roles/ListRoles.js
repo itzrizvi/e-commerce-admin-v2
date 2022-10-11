@@ -21,7 +21,7 @@ export default function ListRoles() {
                         <Link to="/admin/roles/add">
                             <Button title="Add Role" size="small" type="primary"
                             >
-                                <FeatherIcon icon="plus" />
+                                <FeatherIcon icon="file-plus" />
                             </Button>
                         </Link>
                     </div>

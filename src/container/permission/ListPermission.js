@@ -119,7 +119,7 @@ const ListPermission = () => {
                     <div key="1" className="page-header-actions">
                         <Link to="/admin/permission/add">
                             <Button size="small" title="Add Permission" type="primary">
-                                <FeatherIcon icon="plus" />
+                                <FeatherIcon icon="file-plus" />
                             </Button>
                         </Link>
                     </div>
