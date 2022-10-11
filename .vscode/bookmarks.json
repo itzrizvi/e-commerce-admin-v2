@@ -51,16 +51,6 @@
 			]
 		},
 		{
-			"path": "src/container/admin/AddAdmin.js",
-			"bookmarks": [
-				{
-					"line": 123,
-					"column": 26,
-					"label": "--"
-				}
-			]
-		},
-		{
 			"path": "src/container/profile/settings/overview/Profile.js",
 			"bookmarks": [
 				{

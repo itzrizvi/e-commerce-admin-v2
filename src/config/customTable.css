@@ -6,3 +6,8 @@
 .altTableClass {
     background-color: #cfd0fb54;
 }
+
+/* for from lable */
+.wrap-label .ant-form-item-label {
+    white-space: normal;
+}

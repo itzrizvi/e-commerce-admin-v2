@@ -19,8 +19,7 @@ export default function ListRoles() {
                 buttons={[
                     <div key="1" className="page-header-actions">
                         <Link to="/admin/roles/add">
-                            <Button title="Add Role" size="small" type="primary"
-                            >
+                            <Button title="Add Role" size="small" type="primary">
                                 <FeatherIcon icon="file-plus" />
                             </Button>
                         </Link>

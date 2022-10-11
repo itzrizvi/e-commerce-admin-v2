@@ -232,6 +232,40 @@ export const authMutation = {
         `,
 }
 
+export const productQuery = {
+  GET_ALL_CATEGORIES: gql`
+  query getAllCategories{
+    getAllCategories{
+      message
+      status
+      tenant_id
+      categories {
+        cat_id
+        cat_name
+        cat_slug
+        cat_parent_id
+        tenant_id
+        cat_sort_order
+        subcategories {
+          cat_id
+          cat_name
+          cat_slug
+          cat_parent_id
+          tenant_id
+          subsubcategories{
+            cat_id
+            cat_name
+            cat_slug
+            cat_parent_id
+          }
+        }
+      }
+    }
+  }
+  `,
+
+}
+
 export const productMutation = {
   ADD_PRODUCT_MUTATION: gql`
         mutation addProduct($data: AddProductInput) {
