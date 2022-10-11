@@ -89,13 +89,13 @@ const RoleListTable = () => {
       title: 'Name',
       dataIndex: 'name',
       key: 'name',
-      sorter: (a, b) => a.name.length - b.name.length,
-      sortDirections: ['descend'],
+      sorter: (a, b) => a.name.toUpperCase() > b.name.toUpperCase() ? 1 : -1,
     },
     {
       title: 'Description',
       dataIndex: 'role_description',
       key: 'role_description',
+      sorter: (a, b) => a.role_description.toUpperCase() > b.role_description.toUpperCase() ? 1 : -1,
       // render: (text) => (<p style={{ width: "10px" }}>{text}</p>)
     },
     {
@@ -104,6 +104,7 @@ const RoleListTable = () => {
       key: 'permissions',
       // width: 150,
       ellipsis: true,
+      sorter: (a, b) => a.permissions.length > b.permissions.length ? -1 : 1,
       render: (permissions) => {
         const data = permissions.map(item => item.rolesPermission.roles_permission_name).join(", ")
         return (<p>{data}</p>)
@@ -125,6 +126,8 @@ const RoleListTable = () => {
       dataIndex: 'role_status',
       key: 'role_status',
       align: 'center',
+      sorter: (a, b) => (a.role_status === b.role_status) ? 0 : a.role_status ? -1 : 1,
+      // (x === y)? 0 : x? -1 : 1
       render: (role_status, record) => (
         <Switch defaultChecked={role_status} title='Status' onChange={checked => handleStatusChange(record, checked)} />
       )

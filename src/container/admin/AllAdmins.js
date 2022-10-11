@@ -66,6 +66,7 @@ const columns = [
         title: 'Last Name',
         dataIndex: 'last_name',
         key: 'last_name',
+        // sorter: (a, b) => a?.roles?.role_no - b?.roles?.role_no,
     },
     {
         title: 'Roles',
