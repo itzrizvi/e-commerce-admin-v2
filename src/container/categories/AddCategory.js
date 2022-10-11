@@ -4,10 +4,11 @@ import FeatherIcon from 'feather-icons-react';
 import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
 import { Cards } from '../../components/cards/frame/cards-frame';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Button } from '../../components/buttons/buttons';
 import apolloClient, { productQuery } from '../../utility/apollo';
 import Heading from '../../components/heading/heading';
+import queryString from 'query-string'
 
 const { TextArea } = Input;
 const { Option } = Select;
@@ -19,6 +20,8 @@ const AddCategory = () => {
     const [isFeatured, setIsFeatured] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
     const maxLength = 30;
+    const { search } = useLocation();
+    const params = queryString.parse(search)
 
     const [categories, setCategories] = useState([])
     const [categoriesData, setCategoriesData] = useState({ data: [], loading: true })
@@ -127,7 +130,7 @@ const AddCategory = () => {
     return (
         <>
             <PageHeader
-                title="Add Category"
+                title={params.id ? `Edit category - ${params.name}` : "Add Category"}
             />
             <Main>
                 <Row gutter={25}>
