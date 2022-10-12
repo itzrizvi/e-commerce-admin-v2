@@ -81,7 +81,7 @@ const columns = [
         title: 'Roles',
         dataIndex: 'roles',
         key: 'roles',
-        width: 150,
+        // width: 150,
         ellipsis: true,
         sorter: (a, b) => a.roles.length > b.roles.length ? -1 : 1,
         render: (roles) => {
@@ -94,6 +94,8 @@ const columns = [
         title: 'Verified',
         dataIndex: 'email_verified',
         key: 'email_verified',
+        width: 100,
+        align: 'center',
         render: (email_verified) => email_verified.toString(),
         sorter: (a, b) => (a.email_verified === b.email_verified) ? 0 : a.email_verified ? -1 : 1,
     },
@@ -101,6 +103,8 @@ const columns = [
         title: 'Status',
         dataIndex: 'status',
         key: 'status',
+        width: 100,
+        align: 'center',
         sorter: (a, b) => (a.status === b.status) ? 0 : a.status ? -1 : 1,
         render: (text, record) => (
             <Switch defaultChecked={record.user_status} title='Status' onChange={checked => handleStatusChange(record, checked)} />
@@ -109,6 +113,8 @@ const columns = [
     {
         title: 'Action',
         dataIndex: 'action',
+        width: 90,
+        align: 'center',
         render: (text, record) => (
             <>
                 <Link to={`/admin/admin/add-admin?uid=${record.uid}&first_name=${record.first_name}&last_name=${record.last_name}&email=${record.email}&status=${record.status}`}>

@@ -116,6 +116,7 @@ const RoleListTable = () => {
       title: 'Status',
       dataIndex: 'role_status',
       key: 'role_status',
+      width: 100,
       align: 'center',
       sorter: (a, b) => (a.role_status === b.role_status) ? 0 : a.role_status ? -1 : 1,
       // (x === y)? 0 : x? -1 : 1
@@ -127,6 +128,8 @@ const RoleListTable = () => {
       title: 'Action',
       dataIndex: 'key',
       key: 'action',
+      width: 90,
+      align: "center",
       render: (text, record) => (
         <Link to={`/admin/roles/update?id=${record.key}&role=${record.name}`} style={{ cursor: 'pointer' }} >
           <FontAwesome name="edit" style={{ margin: ".5em 1em" }} />
