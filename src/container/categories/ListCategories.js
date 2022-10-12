@@ -169,10 +169,21 @@ const ListCategories = () => {
         {
             title: 'Featured',
             dataIndex: 'cat_isFeatured',
-            width: 90,
+            width: 110,
             align: 'center',
             key: 'cat_isFeatured',
             sorter: (a, b) => (a.cat_isFeatured === b.cat_isFeatured) ? 0 : a.cat_isFeatured ? -1 : 1,
+            filters: [
+                {
+                    text: 'Featured',
+                    value: true,
+                },
+                {
+                    text: 'Not Featured',
+                    value: false,
+                }
+            ],
+            onFilter: (value, record) => record.cat_isFeatured === value,
             render: (value, record) => (
                 <Checkbox
                     defaultChecked={value}
@@ -186,6 +197,17 @@ const ListCategories = () => {
             width: 90,
             key: 'cat_status',
             sorter: (a, b) => (a.status === b.status) ? 0 : a.status ? -1 : 1,
+            filters: [
+                {
+                    text: 'Active',
+                    value: true,
+                },
+                {
+                    text: 'Inactive',
+                    value: false,
+                }
+            ],
+            onFilter: (value, record) => record.cat_status === value,
             render: (value, record) => (
                 <Switch
                     defaultChecked={value}

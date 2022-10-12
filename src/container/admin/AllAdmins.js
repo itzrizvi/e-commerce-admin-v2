@@ -98,6 +98,17 @@ const columns = [
         align: 'center',
         render: (email_verified) => email_verified.toString(),
         sorter: (a, b) => (a.email_verified === b.email_verified) ? 0 : a.email_verified ? -1 : 1,
+        filters: [
+            {
+                text: 'Verified',
+                value: true,
+            },
+            {
+                text: 'Not Verified',
+                value: false,
+            }
+        ],
+        onFilter: (value, record) => record.email_verified === value,
     },
     {
         title: 'Status',
@@ -106,6 +117,17 @@ const columns = [
         width: 100,
         align: 'center',
         sorter: (a, b) => (a.status === b.status) ? 0 : a.status ? -1 : 1,
+        filters: [
+            {
+                text: 'Active',
+                value: true,
+            },
+            {
+                text: 'Inactive',
+                value: false,
+            }
+        ],
+        onFilter: (value, record) => record.user_status === value,
         render: (text, record) => (
             <Switch defaultChecked={record.user_status} title='Status' onChange={checked => handleStatusChange(record, checked)} />
         )
