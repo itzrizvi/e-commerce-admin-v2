@@ -7,6 +7,7 @@ import Users from './admin';
 import Permission from './permission';
 import RoleListRoutes from './role/role_list';
 import withAdminLayout from '../../layout/withAdminLayout';
+import BrandRoutes from './brand';
 
 const Admin = () => {
   const { path } = useRouteMatch();
@@ -26,6 +27,7 @@ const Admin = () => {
         <Route path={`${path}/roles`} component={RoleListRoutes} />
         <Route path={`${path}/permission`} component={Permission} />
         <Route path={`${path}/admin`} component={Users} />
+        <Route path={`${path}/brand`} component={BrandRoutes} />
       </Suspense>
     </Switch>
   );
