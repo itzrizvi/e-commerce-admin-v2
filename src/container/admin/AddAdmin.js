@@ -166,7 +166,7 @@ const AddAdmin = () => {
     return (
         <>
             <PageHeader
-                title={params.uid ? `Edit user for ${params.email}` : "Add Admin"}
+                title={params.uid ? `Manage User | Edit user (${params.email})` : "Add Admin"}
             />
             <Main>
                 <Row gutter={25}>
