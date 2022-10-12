@@ -72,7 +72,12 @@ const ListCategories = () => {
     const [categories, setCategories] = useState([])
     const [categoriesData, setCategoriesData] = useState({ data: [], loading: true })
     const [filteredCategoryData, setFilteredCategoryData] = useState([])
+
+    const [isFilter, setIsFilter] = useState(false)
     const [searchText, setSearchText] = useState("")
+    const [isFeatured, setIsFeatured] = useState(false)
+
+
 
     useEffect(() => {
         apolloClient.query({
@@ -98,22 +103,20 @@ const ListCategories = () => {
         if (!categories.length) return
         let arrData = []
 
-        const dummyDes = `Lorem ipsum dolor sit amet consectetur adipisicing elit. Sint, vitae autem quidem maiores incidunt fugiat eaque odit numquam inventore ad pariatur est itaque possimus, dolorum minima quo! Optio, sed harum.`
-
         categories.forEach(item => {
 
             const parent = item.cat_name
             const cat_sort_order = item.cat_sort_order
 
-            arrData.push({ cat_name: parent, cat_id: item.cat_id, cat_sort_order, cat_des: dummyDes, cat_isFeatured: true })
+            arrData.push({ cat_name: parent, cat_id: item.cat_id, cat_sort_order, cat_des: item.cat_description, cat_isFeatured: item.is_featured, cat_status: item.cat_status })
             if (item.subcategories) {
                 item.subcategories.forEach(subCat => {
                     const sub = subCat.cat_name
-                    arrData.push({ cat_name: `${parent} > ${sub}`, cat_id: subCat.cat_id, cat_des: dummyDes, cat_isFeatured: false })
+                    arrData.push({ cat_name: `${parent} > ${sub}`, cat_id: subCat.cat_id, cat_des: subCat.cat_description, cat_isFeatured: subCat.is_featured, cat_status: subCat.cat_status })
                     if (subCat.subsubcategories) {
                         subCat.subsubcategories.forEach(subSubCat => {
                             const subSub = subSubCat.cat_name
-                            arrData.push({ cat_name: `${parent} > ${sub} > ${subSub}`, cat_id: subSubCat.cat_id, cat_des: dummyDes, cat_isFeatured: false })
+                            arrData.push({ cat_name: `${parent} > ${sub} > ${subSub}`, cat_id: subSubCat.cat_id, cat_des: subSubCat.cat_description, cat_isFeatured: subSubCat.is_featured, cat_status: subSubCat.cat_status })
                         })
                     }
                 })
@@ -156,13 +159,13 @@ const ListCategories = () => {
             ellipsis: true,
             sorter: (a, b) => a.cat_des.toUpperCase() > b.cat_des.toUpperCase() ? 1 : -1,
         },
-        {
-            title: 'Sort Order',
-            dataIndex: 'cat_sort_order',
-            key: 'cat_sort_order',
-            align: 'center',
-            width: 90,
-        },
+        // {
+        //     title: 'Sort Order',
+        //     dataIndex: 'cat_sort_order',
+        //     key: 'cat_sort_order',
+        //     align: 'center',
+        //     width: 90,
+        // },
         {
             title: 'Featured',
             dataIndex: 'cat_isFeatured',
@@ -172,7 +175,7 @@ const ListCategories = () => {
             sorter: (a, b) => (a.cat_isFeatured === b.cat_isFeatured) ? 0 : a.cat_isFeatured ? -1 : 1,
             render: (value, record) => (
                 <Checkbox
-                    checked={value}
+                    defaultChecked={value}
                 // onChange={onChange}
                 />
             )
@@ -181,13 +184,12 @@ const ListCategories = () => {
             title: 'Status',
             dataIndex: 'status',
             width: 90,
-            key: 'status',
+            key: 'cat_status',
             sorter: (a, b) => (a.status === b.status) ? 0 : a.status ? -1 : 1,
-            render: (text, record) => (
+            render: (value, record) => (
                 <Switch
-                    defaultChecked={true}
+                    defaultChecked={value}
                     title='Status'
-                // defaultChecked={record.user_status}
                 // onChange={checked => handleStatusChange(record, checked)}
                 />
             )
@@ -218,12 +220,25 @@ const ListCategories = () => {
         setFilteredCategoryData(categoriesData.data.filter(category => (category?.cat_name + category?.cat_des + category?.cat_id + category?.cat_sort_order).toLowerCase().includes(value.toLowerCase())))
     }
 
+    // Search & filter
+    // useEffect(() => { }, [])
+
+
     return (
         <>
             <PageHeader
                 title="Categories"
                 buttons={[
                     <div key="1" className="page-header-actions">
+                        <Button
+                            size="small"
+                            onClick={() => setIsFilter(state => !state)}
+                            outlined
+                            type="white"
+                        >
+                            <FeatherIcon icon="filter" />
+                            filter
+                        </Button>
                         <Link to="/admin/categories/add">
                             <Button size="small" title="Add Category" type="primary">
                                 <FeatherIcon icon="file-plus" />
@@ -244,12 +259,26 @@ const ListCategories = () => {
                                 :
 
                                 <>
+
+
                                     <Input
                                         placeholder="Search Permission..."
                                         prefix={<SearchOutlined />}
                                         onChange={onChangeSearch}
-                                    />
-                                    <br /><br />
+                                    /> <br /> <br />
+
+                                    {isFilter &&
+                                        <div style={{
+                                            marginBottom: '1.5em',
+                                            display: 'flex',
+                                            gap: "2em"
+                                        }}
+                                        >
+                                            <Checkbox >Is Featured</Checkbox>
+                                            <span>Status:  <Switch>Status</Switch>
+                                            </span>
+
+                                        </div>}
 
                                     <span className={"psp_list"} >
                                         <Table

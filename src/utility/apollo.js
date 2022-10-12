@@ -234,8 +234,8 @@ export const authMutation = {
 
 export const productQuery = {
   GET_ALL_CATEGORIES: gql`
-  query getAllCategories{
-    getAllCategories{
+  query getAllCategories {
+    getAllCategories {
       message
       status
       tenant_id
@@ -243,20 +243,38 @@ export const productQuery = {
         cat_id
         cat_name
         cat_slug
+        cat_status
+        is_featured
         cat_parent_id
-        tenant_id
         cat_sort_order
+        cat_description
+        cat_meta_tag_title
+        cat_meta_tag_description
+        cat_meta_tag_keywords
         subcategories {
           cat_id
           cat_name
           cat_slug
+          cat_status
+          is_featured
           cat_parent_id
-          tenant_id
-          subsubcategories{
+          cat_sort_order
+          cat_description
+          cat_meta_tag_title
+          cat_meta_tag_description
+          cat_meta_tag_keywords
+          subsubcategories {
             cat_id
             cat_name
             cat_slug
+            cat_status
+            is_featured
             cat_parent_id
+            cat_sort_order
+            cat_description
+            cat_meta_tag_title
+            cat_meta_tag_description
+            cat_meta_tag_keywords
           }
         }
       }
