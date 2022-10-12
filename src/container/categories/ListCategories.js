@@ -230,7 +230,7 @@ const ListCategories = () => {
                 title="Categories"
                 buttons={[
                     <div key="1" className="page-header-actions">
-                        <Button
+                        {/* <Button
                             size="small"
                             onClick={() => setIsFilter(state => !state)}
                             outlined
@@ -238,7 +238,7 @@ const ListCategories = () => {
                         >
                             <FeatherIcon icon="filter" />
                             filter
-                        </Button>
+                        </Button> */}
                         <Link to="/admin/categories/add">
                             <Button size="small" title="Add Category" type="primary">
                                 <FeatherIcon icon="file-plus" />
@@ -267,7 +267,7 @@ const ListCategories = () => {
                                         onChange={onChangeSearch}
                                     /> <br /> <br />
 
-                                    {isFilter &&
+                                    {/* {isFilter &&
                                         <div style={{
                                             marginBottom: '1.5em',
                                             display: 'flex',
@@ -278,7 +278,7 @@ const ListCategories = () => {
                                             <span>Status:  <Switch>Status</Switch>
                                             </span>
 
-                                        </div>}
+                                        </div>} */}
 
                                     <span className={"psp_list"} >
                                         <Table

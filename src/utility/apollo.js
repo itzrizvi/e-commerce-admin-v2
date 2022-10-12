@@ -281,6 +281,54 @@ export const productQuery = {
     }
   }
   `,
+  GET_SINGLE_CATEGORY: gql`
+  query getSingleCategory($query: GetSingleCategoryInput) {
+    getSingleCategory(query: $query) {
+      message
+      status
+      tenant_id
+      category {
+        cat_id
+        cat_name
+        cat_slug
+        cat_status
+        is_featured
+        cat_parent_id
+        cat_sort_order
+        cat_description
+        cat_meta_tag_title
+        cat_meta_tag_description
+        cat_meta_tag_keywords
+        subcategories {
+          cat_id
+          cat_name
+          cat_slug
+          cat_status
+          is_featured
+          cat_parent_id
+          cat_sort_order
+          cat_description
+          cat_meta_tag_title
+          cat_meta_tag_description
+          cat_meta_tag_keywords
+          subsubcategories {
+            cat_id
+            cat_name
+            cat_slug
+            cat_status
+            is_featured
+            cat_parent_id
+            cat_sort_order
+            cat_description
+            cat_meta_tag_title
+            cat_meta_tag_description
+            cat_meta_tag_keywords
+          }
+        }
+      }
+    }
+  }
+  `,
 
 }
 

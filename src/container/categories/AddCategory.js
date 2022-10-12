@@ -24,7 +24,9 @@ const AddCategory = () => {
     const params = queryString.parse(search)
 
     const [categories, setCategories] = useState([])
-    const [categoriesData, setCategoriesData] = useState({ data: [], loading: true })
+    const [structuredCategories, setStructuredCategories] = useState({ data: [], loading: true })
+    const [singleCategory, setSingleCategory] = useState({})
+
 
     const [state, setState] = useState({
         file: null,
@@ -67,7 +69,7 @@ const AddCategory = () => {
 
 
 
-    useEffect(() => {
+    useEffect(() => { // load category
         apolloClient.query({
             query: productQuery.GET_ALL_CATEGORIES,
             context: {
@@ -86,7 +88,7 @@ const AddCategory = () => {
 
     }, [])
 
-    useEffect(() => {
+    useEffect(() => { // category structure
 
         if (!categories.length) return
         let arrData = []
@@ -112,9 +114,14 @@ const AddCategory = () => {
 
             }
         })
-        setCategoriesData({ data: arrData, loading: false })
+        setStructuredCategories({ data: arrData, loading: false })
 
     }, [categories])
+
+    // useEffect(() => { // get single category
+    //     apolloClient.
+
+    // }, [])
 
 
 
@@ -189,7 +196,7 @@ const AddCategory = () => {
                                             label="Parent"
                                         // tooltip={roles.isLoading ? 'Loading roles....' : null}
                                         >
-                                            {categoriesData.loading
+                                            {structuredCategories.loading
                                                 ?
                                                 <div style={{ display: 'flex', justifyContent: 'center' }}>
                                                     <Spin />
@@ -201,7 +208,7 @@ const AddCategory = () => {
                                                     // onChange={value => setSelectedRoles(value)}
                                                     // defaultValue={existingRoles.data}
                                                     >
-                                                        {categoriesData.data.map(item => (
+                                                        {structuredCategories.data.map(item => (
                                                             <Option key={item.cat_id} value={item.cat_id}>{item.cat_name}</Option>
                                                         ))}
 
