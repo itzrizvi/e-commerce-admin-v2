@@ -10,6 +10,7 @@ import RoleListRoutes from './role/role_list';
 import withAdminLayout from '../../layout/withAdminLayout';
 import BrandRoutes from './brand';
 import Pages from './pages';
+import Attributes from './Attributes';
 
 const Admin = () => {
   const { path } = useRouteMatch();
@@ -32,6 +33,7 @@ const Admin = () => {
         <Route path={`${path}/admin`} component={Users} />
         <Route path={`${path}/brand`} component={BrandRoutes} />
         <Route path={`${path}/categories`} component={Categories} />
+        <Route path={`${path}/attributes`} component={Attributes} />
       </Suspense>
     </Switch>
   );

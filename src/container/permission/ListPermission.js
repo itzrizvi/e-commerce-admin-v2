@@ -83,6 +83,17 @@ const ListPermission = () => {
             key: 'roles_permission_status',
             align: 'right',
             sorter: (a, b) => (a.roles_permission_status === b.roles_permission_status) ? 0 : a.roles_permission_status ? -1 : 1,
+            filters: [
+                {
+                    text: 'Active',
+                    value: true,
+                },
+                {
+                    text: 'Inactive',
+                    value: false,
+                }
+            ],
+            onFilter: (value, record) => record.roles_permission_status === value,
             render: (text, record) => (
                 <Switch defaultChecked={text} title='Status' onChange={checked => handleStatusChange(record, checked)} />
             )

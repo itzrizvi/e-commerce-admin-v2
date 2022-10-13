@@ -118,6 +118,17 @@ const RoleListTable = () => {
       key: 'role_status',
       width: 100,
       align: 'center',
+      filters: [
+        {
+          text: 'Active',
+          value: true,
+        },
+        {
+          text: 'Inactive',
+          value: false,
+        }
+      ],
+      onFilter: (value, record) => record.role_status === value,
       sorter: (a, b) => (a.role_status === b.role_status) ? 0 : a.role_status ? -1 : 1,
       // (x === y)? 0 : x? -1 : 1
       render: (role_status, record) => (

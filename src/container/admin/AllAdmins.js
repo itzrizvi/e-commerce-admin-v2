@@ -38,100 +38,7 @@ const handleStatusChange = (record, checked) => {
 }
 
 
-const columns = [
-    {
-        title: 'UID',
-        dataIndex: 'uid',
-        key: 'uid',
-        width: 120,
-        ellipsis: true,
-        sorter: (a, b) => a.uid.toUpperCase() > b.uid.toUpperCase() ? 1 : -1,
 
-    },
-    {
-        title: 'Email',
-        dataIndex: 'email',
-        key: 'email',
-        width: 200,
-        ellipsis: true,
-        sorter: (a, b) => a.email.toUpperCase() > b.email.toUpperCase() ? 1 : -1,
-
-    },
-    {
-        title: 'First Name',
-        dataIndex: 'first_name',
-        key: 'first_name',
-        sorter: (a, b) => a.first_name.toUpperCase() > b.first_name.toUpperCase() ? 1 : -1,
-
-        // filters: [
-        //     { text: 'test', value: 'test' },
-        //     // { text: 'Female', value: 'female' },
-        // ],
-        // filterMultiple: false,
-    },
-    {
-        title: 'Last Name',
-        dataIndex: 'last_name',
-        key: 'last_name',
-        sorter: (a, b) => a.last_name.toUpperCase() > b.last_name.toUpperCase() ? 1 : -1,
-
-        // sorter: (a, b) => a?.roles?.role_no - b?.roles?.role_no,
-    },
-    {
-        title: 'Roles',
-        dataIndex: 'roles',
-        key: 'roles',
-        // width: 150,
-        ellipsis: true,
-        sorter: (a, b) => a.roles.length > b.roles.length ? -1 : 1,
-        render: (roles) => {
-            const data = roles.map(role => role.role).join(", ")
-            return (<p>{data}</p>)
-        }
-        // sorter: (a, b) => a?.roles?.role_no - b?.roles?.role_no,
-    },
-    {
-        title: 'Verified',
-        dataIndex: 'email_verified',
-        key: 'email_verified',
-        width: 100,
-        align: 'center',
-        render: (email_verified) => email_verified.toString(),
-        sorter: (a, b) => (a.email_verified === b.email_verified) ? 0 : a.email_verified ? -1 : 1,
-    },
-    {
-        title: 'Status',
-        dataIndex: 'status',
-        key: 'status',
-        width: 100,
-        align: 'center',
-        sorter: (a, b) => (a.status === b.status) ? 0 : a.status ? -1 : 1,
-        render: (text, record) => (
-            <Switch defaultChecked={record.user_status} title='Status' onChange={checked => handleStatusChange(record, checked)} />
-        )
-    },
-    {
-        title: 'Action',
-        dataIndex: 'action',
-        width: 90,
-        align: 'center',
-        render: (text, record) => (
-            <>
-                <Link to={`/admin/admin/add-admin?uid=${record.uid}&first_name=${record.first_name}&last_name=${record.last_name}&email=${record.email}&status=${record.status}`}>
-                    {/* <Button size="default" type="white" title='Edit'> */}
-                    <FontAwesome name="edit" />
-                    {/* </Button> */}
-                </Link>
-            </>
-        ),
-        key: 'last_name',
-    },
-    // {
-    //     title: 'last_name',
-    //     dataIndex: 'last_name',
-    //     key: 'last_name',
-    // },
-]
 
 
 const AllAdmin = () => {
@@ -143,6 +50,8 @@ const AllAdmin = () => {
         isLoading: true,
         error: ''
     })
+    const [allRole, setAllRole] = useState({ data: [], isLoading: true })
+    const [roleFilters, setRoleFilters] = useState([])
 
     useEffect(() => {
         apolloClient.query({
@@ -163,7 +72,132 @@ const AllAdmin = () => {
             setStaffs(s => ({ ...s, isLoading: false }))
         })
 
+
+
+        // apolloClient.query({
+        //     query: authQuery.GET_ALL_ROLES,
+        //     context: {
+        //         headers: {
+        //             TENANTID: process.env.REACT_APP_TENANTID,
+        //             Authorization: token
+        //         }
+        //     }
+        // }).then(res => {
+        //     if (res?.data?.getAllRoles?.isAuth) {
+        //         setAllRole(s => ({ ...s, data: res?.data?.getAllRoles?.data, error: '' }))
+        //         setRoleFilters(res?.data?.getAllRoles?.data?.map(role => ({ text: "aa", value: role.role_uuid })))
+        //     }
+        // }).catch(err => {
+        //     setAllRole(s => ({ ...s, error: 'Something went Wrong.!! ' }))
+        // }).finally(() => {
+        //     setAllRole(s => ({ ...s, isLoading: false }))
+        // })
+
     }, [])
+
+    const columns = [
+        {
+            title: 'UID',
+            dataIndex: 'uid',
+            key: 'uid',
+            width: 120,
+            ellipsis: true,
+            sorter: (a, b) => a.uid.toUpperCase() > b.uid.toUpperCase() ? 1 : -1,
+
+        },
+        {
+            title: 'Email',
+            dataIndex: 'email',
+            key: 'email',
+            width: 200,
+            ellipsis: true,
+            sorter: (a, b) => a.email.toUpperCase() > b.email.toUpperCase() ? 1 : -1,
+
+        },
+        {
+            title: 'First Name',
+            dataIndex: 'first_name',
+            key: 'first_name',
+            sorter: (a, b) => a.first_name.toUpperCase() > b.first_name.toUpperCase() ? 1 : -1,
+        },
+        {
+            title: 'Last Name',
+            dataIndex: 'last_name',
+            key: 'last_name',
+            sorter: (a, b) => a.last_name.toUpperCase() > b.last_name.toUpperCase() ? 1 : -1,
+        },
+        {
+            title: 'Roles',
+            dataIndex: 'roles',
+            key: 'roles',
+            // width: 150,
+            ellipsis: true,
+            sorter: (a, b) => a.roles.length > b.roles.length ? -1 : 1,
+            render: (roles) => {
+                const data = roles.map(role => role.role).join(", ")
+                return (<p>{data}</p>)
+            },
+            filters: roleFilters,
+        },
+        {
+            title: 'Verified',
+            dataIndex: 'email_verified',
+            key: 'email_verified',
+            width: 100,
+            align: 'center',
+            render: (email_verified) => email_verified.toString(),
+            sorter: (a, b) => (a.email_verified === b.email_verified) ? 0 : a.email_verified ? -1 : 1,
+            filters: [
+                {
+                    text: 'Verified',
+                    value: true,
+                },
+                {
+                    text: 'Not Verified',
+                    value: false,
+                }
+            ],
+            onFilter: (value, record) => record.email_verified === value,
+        },
+        {
+            title: 'Status',
+            dataIndex: 'status',
+            key: 'status',
+            width: 100,
+            align: 'center',
+            sorter: (a, b) => (a.status === b.status) ? 0 : a.status ? -1 : 1,
+            filters: [
+                {
+                    text: 'Active',
+                    value: true,
+                },
+                {
+                    text: 'Inactive',
+                    value: false,
+                }
+            ],
+            onFilter: (value, record) => record.user_status === value,
+            render: (text, record) => (
+                <Switch defaultChecked={record.user_status} title='Status' onChange={checked => handleStatusChange(record, checked)} />
+            )
+        },
+        {
+            title: 'Action',
+            dataIndex: 'action',
+            width: 90,
+            align: 'center',
+            render: (text, record) => (
+                <>
+                    <Link to={`/admin/admin/add-admin?uid=${record.uid}&first_name=${record.first_name}&last_name=${record.last_name}&email=${record.email}&status=${record.status}`}>
+                        {/* <Button size="default" type="white" title='Edit'> */}
+                        <FontAwesome name="edit" />
+                        {/* </Button> */}
+                    </Link>
+                </>
+            ),
+            key: 'last_name',
+        },
+    ]
 
 
     const onChangeSearch = e => {
@@ -190,6 +224,7 @@ const AllAdmin = () => {
                 <Row gutter={25}>
                     <Col sm={24} xs={24}>
                         <Cards headless>
+                            {/* {(staffs.isLoading || allRole.isLoading) ? */}
                             {staffs.isLoading ?
                                 <div className="spin">
                                     <Spin />
@@ -206,6 +241,7 @@ const AllAdmin = () => {
                                             <Table
                                                 className="table-responsive"
                                                 columns={columns}
+
                                                 rowKey={'uid'}
                                                 size="small"
                                                 dataSource={searchText ? filteredUser : staffs.data}

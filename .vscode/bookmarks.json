@@ -14,7 +14,7 @@
 			"path": "src/routes/admin/index.js",
 			"bookmarks": [
 				{
-					"line": 28,
+					"line": 29,
 					"column": 13,
 					"label": "-index routes"
 				}
@@ -67,6 +67,21 @@
 					"line": 31,
 					"column": 35,
 					"label": "--setting menue"
+				}
+			]
+		},
+		{
+			"path": "src/container/categories/AddCategory.js",
+			"bookmarks": [
+				{
+					"line": 355,
+					"column": 98,
+					"label": "-----"
+				},
+				{
+					"line": 412,
+					"column": 1,
+					"label": ""
 				}
 			]
 		}

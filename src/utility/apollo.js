@@ -1,9 +1,18 @@
 import { ApolloClient, gql, InMemoryCache } from "@apollo/client";
+import { createUploadLink } from "apollo-upload-client";
 
 const apolloClient = new ApolloClient({
   uri: 'https://api.primeserverparts.com/graphql',
   cache: new InMemoryCache(),
 })
+
+export const apolloUploadClient = new ApolloClient({
+  cache: new InMemoryCache(),
+  link: createUploadLink({
+    uri: 'https://api.primeserverparts.com/graphql'
+  }),
+})
+
 
 
 export const authQuery = {
@@ -281,7 +290,7 @@ export const productQuery = {
     }
   }
   `,
-  GET_SINGLE_CATEGORY: gql`
+  GET_SINGLE_CATEGORY_FOR_UPDATE: gql`
   query getSingleCategory($query: GetSingleCategoryInput) {
     getSingleCategory(query: $query) {
       message
@@ -299,32 +308,6 @@ export const productQuery = {
         cat_meta_tag_title
         cat_meta_tag_description
         cat_meta_tag_keywords
-        subcategories {
-          cat_id
-          cat_name
-          cat_slug
-          cat_status
-          is_featured
-          cat_parent_id
-          cat_sort_order
-          cat_description
-          cat_meta_tag_title
-          cat_meta_tag_description
-          cat_meta_tag_keywords
-          subsubcategories {
-            cat_id
-            cat_name
-            cat_slug
-            cat_status
-            is_featured
-            cat_parent_id
-            cat_sort_order
-            cat_description
-            cat_meta_tag_title
-            cat_meta_tag_description
-            cat_meta_tag_keywords
-          }
-        }
       }
     }
   }
@@ -367,7 +350,26 @@ export const productMutation = {
           }
         }
       
-    `
+    `,
+  CREATE_CATEGORY: gql`
+  mutation createCategory($data:CategoryCreateInput, $file:Upload){
+    createCategory(data:$data, file:$file){
+      message
+      tenant_id
+      status
+    }
+  }
+    `,
+  UPDATE_CATEGORY: gql`
+    mutation updateCategory($data: UpdateCategoryInput) {
+      updateCategory(data: $data) {
+        message
+        status
+        tenant_id
+      }
+    }
+    
+    `,
 }
 
 
