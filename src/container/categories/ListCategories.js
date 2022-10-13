@@ -108,15 +108,15 @@ const ListCategories = () => {
             const parent = item.cat_name
             const cat_sort_order = item.cat_sort_order
 
-            arrData.push({ cat_name: parent, cat_id: item.cat_id, cat_sort_order, cat_des: item.cat_description, cat_isFeatured: item.is_featured, cat_status: item.cat_status })
+            arrData.push({ cat_name: parent, cat_id: item.cat_id, cat_sort_order, cat_des: item.cat_description, cat_isFeatured: item.is_featured, cat_status: item.cat_status, img: item.image })
             if (item.subcategories) {
                 item.subcategories.forEach(subCat => {
                     const sub = subCat.cat_name
-                    arrData.push({ cat_name: `${parent} > ${sub}`, cat_id: subCat.cat_id, cat_des: subCat.cat_description, cat_isFeatured: subCat.is_featured, cat_status: subCat.cat_status })
+                    arrData.push({ cat_name: `${parent} > ${sub}`, cat_id: subCat.cat_id, cat_des: subCat.cat_description, cat_isFeatured: subCat.is_featured, cat_status: subCat.cat_status, img: subCat.image })
                     if (subCat.subsubcategories) {
                         subCat.subsubcategories.forEach(subSubCat => {
                             const subSub = subSubCat.cat_name
-                            arrData.push({ cat_name: `${parent} > ${sub} > ${subSub}`, cat_id: subSubCat.cat_id, cat_des: subSubCat.cat_description, cat_isFeatured: subSubCat.is_featured, cat_status: subSubCat.cat_status })
+                            arrData.push({ cat_name: `${parent} > ${sub} > ${subSub}`, cat_id: subSubCat.cat_id, cat_des: subSubCat.cat_description, cat_isFeatured: subSubCat.is_featured, cat_status: subSubCat.cat_status, img: subSubCat.image })
                         })
                     }
                 })
@@ -144,6 +144,7 @@ const ListCategories = () => {
             key: 'cat_id',
             width: 70,
             render: (text, record) => (<img src={require('../../static/img/avatar/NoPath (3).png')} alt="" />),
+            // render: (text, record) => record.img ? <img src={`https://api.primeserverparts.com/images/category/${record.cat_id}/${record.img}`} /> : '',
         },
         {
             title: 'Category Name',

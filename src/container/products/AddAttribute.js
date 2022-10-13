@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Row, Col, Form, Input } from 'antd';
+import { Row, Col, Form, Input, Select } from 'antd';
 import FeatherIcon from 'feather-icons-react';
 import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
@@ -8,7 +8,7 @@ import { Button } from '../../components/buttons/buttons';
 import { Link, useHistory, useLocation } from 'react-router-dom';
 import queryString from 'query-string'
 
-const AddAttributeGroup = () => {
+const AddAttribute = () => {
     const { search } = useLocation();
     const params = queryString.parse(search)
     const history = useHistory();
@@ -20,7 +20,7 @@ const AddAttributeGroup = () => {
     return (
         <>
             <PageHeader
-                title={params.id ? `Manage Group | Edit - (${params.name})` : "Add Attribute Group"}
+                title={params.id ? `Manage Attribute | Edit - (${params.name})` : "Add Attribute"}
             />
             <Main>
                 <Row gutter={25}>
@@ -36,17 +36,32 @@ const AddAttributeGroup = () => {
                                 labelCol={{ span: 4 }}
                             >
                                 <Form.Item
-                                    rules={[{ required: true, max: maxLength, message: "Please enter Attribute Group Name" }]}
-                                    name="gn" label="Group Name"
+                                    rules={[{ required: true, max: maxLength, message: "Please enter Attribute Name" }]}
+                                    name="gn" label="Attribute Name"
                                     initialValue={params.name || ""}
                                 >
-                                    <Input placeholder='Enter Attribute Group Name' />
+                                    <Input placeholder='Enter Attribute Name' />
+                                </Form.Item>
+
+                                <Form.Item
+                                    name="roleUUID" initialValue="" label="Attribute Group"
+                                // tooltip={roles.isLoading ? 'Loading roles....' : null}
+                                >
+                                    <Select
+                                        // mode="multiple"
+                                        allowClear
+                                        placeholder="Select Attribute Group"
+                                    // onChange={value => setSelectedRoles(value)}
+                                    // defaultValue={existingRoles.data}
+                                    >
+
+                                    </Select>
+
                                 </Form.Item>
 
 
-
                                 <Form.Item
-                                    rules={[{ required: true, max: maxLength, message: "Please enter Role Name" }]}
+                                    rules={[{ required: true, max: maxLength, message: "Please enter sort order" }]}
                                     name="gs" label="Sort order"
                                 // initialValue={params.name || ""}
                                 >
@@ -65,7 +80,7 @@ const AddAttributeGroup = () => {
                                         <Button loading={isLoading} size="default" htmlType="submit" type="primary" raised>
                                             {isLoading ? 'Processing' : 'Save'}
                                         </Button>
-                                        <Link to="/admin/attributes/list-group">
+                                        <Link to="/admin/attributes/list">
                                             <Button
                                                 type='white'
                                                 size="large"
@@ -86,4 +101,4 @@ const AddAttributeGroup = () => {
     );
 };
 
-export default AddAttributeGroup;
+export default AddAttribute;

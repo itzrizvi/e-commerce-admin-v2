@@ -253,6 +253,7 @@ export const productQuery = {
         cat_name
         cat_slug
         cat_status
+        image
         is_featured
         cat_parent_id
         cat_sort_order
@@ -265,6 +266,7 @@ export const productQuery = {
           cat_name
           cat_slug
           cat_status
+          image
           is_featured
           cat_parent_id
           cat_sort_order
@@ -277,6 +279,7 @@ export const productQuery = {
             cat_name
             cat_slug
             cat_status
+            image
             is_featured
             cat_parent_id
             cat_sort_order
@@ -289,6 +292,7 @@ export const productQuery = {
       }
     }
   }
+  
   `,
   GET_SINGLE_CATEGORY_FOR_UPDATE: gql`
   query getSingleCategory($query: GetSingleCategoryInput) {

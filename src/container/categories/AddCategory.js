@@ -253,8 +253,6 @@ const AddCategory = () => {
             }).finally(() => {
                 setIsLoading(false)
             })
-
-
         }
 
 
@@ -266,14 +264,14 @@ const AddCategory = () => {
         <>
             <PageHeader
                 title={params.id ? `Edit category - ${params.name}` : "Add Category"}
-                buttons={[
-                    <div key="1" className="page-header-actions">
-                        <Switch
-                            checked={categoryStatus}
-                            onChange={checked => setCategoryStatus(checked)}
-                        />
-                    </div>
-                ]}
+            // buttons={[
+            //     <div key="1" className="page-header-actions">
+            //         <Switch
+            //             checked={categoryStatus}
+            //             onChange={checked => setCategoryStatus(checked)}
+            //         />
+            //     </div>
+            // ]}
             />
             <Main>
                 <Row gutter={25}>

@@ -35,7 +35,7 @@ const ListAttributes = () => {
             title: 'Sort Order',
             dataIndex: 'g_s',
             key: 'g_s',
-            sorter: (a, b) => a.g_s.toUpperCase() > b.g_s.toUpperCase() ? 1 : -1,
+            sorter: (a, b) => (a.g_s === b.g_s) ? 0 : a.g_s ? -1 : 1,
         },
         {
             title: 'Action',
@@ -44,7 +44,7 @@ const ListAttributes = () => {
             align: 'right',
             render: (text, record) => (
                 <>
-                    <Link to={`/admin/attributes/add-group?id=${1}&name=${record.a_n}`}>
+                    <Link to={`/admin/attributes/add?id=${1}&name=${record.a_n}`}>
                         {/* <Button size="default" type="white" title='Edit'> */}
                         <FontAwesome name="edit" style={{ margin: ".5em 1em" }} />
                         {/* </Button> */}
@@ -68,7 +68,7 @@ const ListAttributes = () => {
                 title="Attributes"
                 buttons={[
                     <div key="1" className="page-header-actions">
-                        <Link to="/admin/attributes/add-group">
+                        <Link to="/admin/attributes/add">
                             <Button size="small" title="Add Attribute" type="primary">
                                 <FeatherIcon icon="file-plus" />
                             </Button>
