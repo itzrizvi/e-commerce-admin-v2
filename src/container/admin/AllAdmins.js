@@ -224,8 +224,8 @@ const AllAdmin = () => {
                 <Row gutter={25}>
                     <Col sm={24} xs={24}>
                         <Cards headless>
-                            {/* {staffs.isLoading ? */}
-                            {(staffs.isLoading || allRole.isLoading) ?
+                            {/* {(staffs.isLoading || allRole.isLoading) ? */}
+                            {staffs.isLoading ?
                                 <div className="spin">
                                     <Spin />
                                 </div>
