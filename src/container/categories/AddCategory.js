@@ -6,7 +6,7 @@ import { Main } from '../styled';
 import { Cards } from '../../components/cards/frame/cards-frame';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '../../components/buttons/buttons';
-import apolloClient, { productMutation, productQuery } from '../../utility/apollo';
+import apolloClient, { apolloUploadClient, productMutation, productQuery } from '../../utility/apollo';
 import Heading from '../../components/heading/heading';
 import queryString from 'query-string'
 import { toast } from 'react-toastify';
@@ -193,7 +193,7 @@ const AddCategory = () => {
             console.log(variables);
 
 
-            apolloClient.mutate({
+            apolloUploadClient.mutate({
                 mutation: productMutation.CREATE_CATEGORY,
                 variables,
                 context: {
