@@ -20,7 +20,7 @@ const AddAttributeGroup = () => {
     return (
         <>
             <PageHeader
-                title={params.id ? `Manage Group | Edit - (${params.name})` : "Add Attribute Group"}
+                title={params.id ? `Manage Group | Edit (${params.name})` : "Add Attribute Group"}
             />
             <Main>
                 <Row gutter={25}>

@@ -30,6 +30,7 @@ const AddCategory = () => {
     const [singleCategory, setSingleCategory] = useState({})
     const [parentUid, setParentUid] = useState("")
     const [image, setImage] = useState(null);
+    const [thumbUrl, setThumbUrl] = useState('')
 
 
     const [state, setState] = useState({
@@ -386,17 +387,6 @@ const AddCategory = () => {
                                             </Form.Item>
 
 
-                                            {/* <input
-                                                type="file"
-                                                name="myImage"
-                                                accept="image/*"
-                                                onChange={e => {
-                                                    console.log(e.target.files[0]);
-                                                    setImage(e.target.files[0])
-                                                }}
-                                            /> */}
-
-
                                             <Form.Item
                                                 name="img" label="Image"
                                             >
@@ -409,14 +399,21 @@ const AddCategory = () => {
 
                                                     // }}
                                                     beforeUpload={file => {
-                                                        console.log(file);
-                                                        console.log(typeof file);
+                                                        const isJpg = file.type === 'image/jpeg';
+                                                        if (!isJpg) return toast.error('You can only upload JPG file!')
+                                                        const isLt2M = file.size / 1024 / 1024 < 2;
+                                                        if (!isLt2M) return toast.error('Image must smaller than 2MB!');
 
+                                                        setThumbUrl(URL.createObjectURL(file))
 
                                                         setImage(file)
                                                         return false;
                                                     }}
-                                                    onRemove={file => setImage(null)}
+                                                    onRemove={file => {
+                                                        setThumbUrl('')
+                                                        setImage(null)
+                                                    }
+                                                    }
                                                     fileList={image ? [image] : []}
                                                     style={{ marginTop: '3em' }}
                                                 >
@@ -429,6 +426,8 @@ const AddCategory = () => {
                                                     <p className="ant-upload-hint">
                                                         or <span>Browse</span> to choose a file
                                                     </p>
+
+
                                                 </Dragger>
                                             </Form.Item>
 

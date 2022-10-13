@@ -143,8 +143,8 @@ const ListCategories = () => {
             dataIndex: 'cat_id',
             key: 'cat_id',
             width: 70,
-            render: (text, record) => (<img src={require('../../static/img/avatar/NoPath (3).png')} alt="" />),
-            // render: (text, record) => record.img ? <img src={`https://api.primeserverparts.com/images/category/${record.cat_id}/${record.img}`} /> : '',
+            // render: (text, record) => (<img src={require('../../static/img/avatar/NoPath (3).png')} alt="" />),
+            render: (text, record) => record.img ? <img height="46px" width="46px" src={`https://api.primeserverparts.com/images/category/${record.cat_id}/${record.cat_id}.jpg`} /> : ''
         },
         {
             title: 'Category Name',
