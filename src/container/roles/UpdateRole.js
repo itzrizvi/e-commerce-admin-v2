@@ -223,7 +223,7 @@ const UpdateRole = () => {
     return (
         <>
             <PageHeader
-                title={`Manage role - ${role}`}
+                title={`Manage Role | Edit Role (${role})`}
             />
             <Main>
                 <Row gutter={25}>

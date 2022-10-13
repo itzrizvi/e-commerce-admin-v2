@@ -77,6 +77,11 @@ const MenuItems = ({ darkMode, toggleCollapsed, topMenu }) => {
       </SubMenu>
 
       <SubMenu key="products" icon={!topMenu && <FeatherIcon icon="shopping-cart" />} title="Products">
+        <Menu.Item key="listCategory">
+          <NavLink onClick={toggleCollapsed} to={`${path}/categories/list`}>
+            Category
+          </NavLink>
+        </Menu.Item>
         <Menu.Item key="addproducts">
           <NavLink onClick={toggleCollapsed} to={`${path}/products/add`}>
             Add Products
@@ -92,15 +97,15 @@ const MenuItems = ({ darkMode, toggleCollapsed, topMenu }) => {
         </Menu.Item>
       </SubMenu> */}
 
-      <SubMenu key="brand" icon={!topMenu && <FeatherIcon icon="aperture" />} title="Brand">
+      <SubMenu key="brand" icon={!topMenu && <FeatherIcon icon="aperture" />} title="Manufacture">
         <Menu.Item key="list_brand">
           <NavLink onClick={toggleCollapsed} to={`${path}/brand/list`}>
-            List Brand
+            List Manufacture
           </NavLink>
         </Menu.Item>
         <Menu.Item key="add_brand">
           <NavLink onClick={toggleCollapsed} to={`${path}/brand/add`}>
-            Add Brand
+            Add Manufacture
           </NavLink>
         </Menu.Item>
       </SubMenu>

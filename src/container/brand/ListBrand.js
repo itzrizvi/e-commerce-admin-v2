@@ -7,89 +7,159 @@ import { Main } from '../styled';
 import { Cards } from '../../components/cards/frame/cards-frame';
 import { Button } from '../../components/buttons/buttons';
 import { Link } from 'react-router-dom';
-import apolloClient, { authQuery } from '../../utility/apollo';
-import Cookies from 'js-cookie';
 import FontAwesome from 'react-fontawesome';
+import apolloClient from '../../apollo';
+import { brandQuery } from '../../apollo/brand';
+import { useSelector } from 'react-redux';
+import Moment from 'react-moment';
+import { toast } from 'react-toastify';
 
 
 
 const ListBrand = () => {
     const [brand, setBrand] = useState({ data: [], loading: true, error: '' })
-    const [search, setSearch] = useState('');
     const [filteredBrand, setFilteredBrand] = useState([]);
     const [isFilter, setIsFilter] = useState(false)
+    const token = useSelector(state => state.auth.token);
 
     useEffect(() => {
         apolloClient.query({
-            query: authQuery.GET_ALL_ROLES_PERMISSION,
+            query: brandQuery.GET_ALL_BRAND,
             context: {
                 headers: {
                     TENANTID: process.env.REACT_APP_TENANTID,
-                    Authorization: Cookies.get('psp_t')
+                    Authorization: token
                 }
             }
         }).then(res => {
-
-            const data = res?.data?.getAllRolesPermission
-
-            if (!data?.isAuth) return setBrand(s => ({ ...s, error: 'You Are not Authorized' }))
+            const data = res?.data?.getAllBrands
             setBrand(s => ({ ...s, data: data?.data, error: '' }))
-
         }).catch(err => {
             setBrand(s => ({ ...s, error: 'Something went Wrong.!! ' }))
         }).finally(() => {
             setBrand(s => ({ ...s, loading: false }))
         })
 
-        console.log(brand);
-
     }, [brand.data])
+
+    const handleStatusChange = (record, checked) => {
+        const variables = { data: { brand_uuid: record.brand_uuid, brand_status: checked } }
+    
+        apolloClient.mutate({
+            mutation: brandQuery.BRAND_UPDATE,
+            variables,
+            context: {
+                headers: {
+                    TENANTID: process.env.REACT_APP_TENANTID,
+                    Authorization: token
+                }
+            }
+        }).then(res => {
+            const status = res?.data?.updateBrand?.status
+            if (!status) return toast.error(data.message)
+            toast.success(`${record.brand_name} Status updated.`)
+        }).catch(err => {
+            console.log(err);
+            toast.error(`Something went wrong!!`)
+        })
+    
+    }
 
     const columns = [
         {
-            title: 'Permission Name',
-            dataIndex: 'roles_permission_name',
-            key: 'roles_permission_name',
+            title: 'ID',
+            dataIndex: 'brand_uuid',
+            key: 'brand_uuid',
+            width: 120,
+            ellipsis: true,
+            sorter: (a, b) => a.brand_uuid.toUpperCase() > b.brand_uuid.toUpperCase() ? 1 : -1,
+        },
+        {
+            title: 'Name',
+            dataIndex: 'brand_name',
+            key: 'brand_name',
+            sorter: (a, b) => a.brand_name.toUpperCase() > b.brand_name.toUpperCase() ? 1 : -1,
+        },
+        {
+            title: 'Image',
+            dataIndex: 'brand_uuid',
+            key: 'brand_uuid',
+            width: 70,
+            render: (text, record) => (<img src={require('../../static/img/avatar/NoPath (3).png')} alt="" />),
+        },
+        {
+            title: 'Alias',
+            dataIndex: 'brand_slug',
+            key: 'brand_slug',
+            sorter: (a, b) => a.brand_slug.toUpperCase() > b.brand_slug.toUpperCase() ? 1 : -1,
+        },
+        {
+            title: 'Description',
+            dataIndex: 'brand_description',
+            key: 'brand_description',
+            width: 200,
+            ellipsis: true
         },
         {
             title: 'Status',
-            dataIndex: 'roles_permission_status',
-            key: 'roles_permission_status',
+            dataIndex: 'brand_status',
+            key: 'brand_status',
             align: 'right',
             render: (text, record) => (
-                <Switch defaultChecked={text} title='Status' />
+                <Switch defaultChecked={text} title='Status' onChange={checked => handleStatusChange(record, checked)} />
+            ),
+            filters: [
+                {
+                  text: "Enable",
+                  value: true,
+                },
+                {
+                  text: 'Disable',
+                  value: false,
+                }
+            ],
+            onFilter: (value, record) => record.brand_status === value,
+            sorter: (a, b) => a.brand_status - b.brand_status,
+        },
+        {
+            title: 'Date',
+            dataIndex: 'createdAt',
+            key: 'createdAt',
+            align: 'center',
+            render: (text, record) => (
+                <span className={"status-text"}>{<Moment format="DD MMMM YYYY">{parseInt(text)}</Moment>}</span>
             )
         },
         {
             title: 'Action',
             dataIndex: 'action',
             align: 'right',
+            key: 'action',
             render: (text, record) => (
                 <>
-                    <Link to={`/admin/brand/edit?id=${record.roles_permission_uuid}`}>
+                    <Link to={`/admin/brand/edit?id=${record.brand_uuid}`}>
                         <FontAwesome name="edit" />
                     </Link>
                 </>
             ),
-            key: 'last_name',
         },
     ]
 
     const onChangeSearch = e => {
         const value = e.target.value
-        setSearch(value)
-        setFilteredBrand(brand.data.filter(brand => permission?.roles_permission_name.toLowerCase().includes(value.toLowerCase())))
+        setIsFilter(value)
+        setFilteredBrand(brand.data.filter(brand => (brand?.brand_name + brand?.brand_slug + brand?.brand_uuid).toLowerCase().includes(value.toLowerCase())))
     }
 
 
     return (
         <>
             <PageHeader
-                title="Brand"
+                title="Manufacture"
                 buttons={[
                     <div key="1" className="page-header-actions">
                         <Link to="/admin/brand/add">
-                            <Button size="small" title="Add Brand" type="primary">
+                            <Button size="small" title="Add Manufacture" type="primary">
                                 <FeatherIcon icon="plus" />
                             </Button>
                         </Link>
@@ -109,7 +179,7 @@ const ListBrand = () => {
                                     <p>{brand.error}</p>
                                     :
                                     <>
-                                        <Input placeholder="Search Brand..." prefix={<SearchOutlined />} onChange={onChangeSearch} />
+                                        <Input placeholder="Search in Manufacture..." prefix={<SearchOutlined />} onChange={onChangeSearch} />
                                         <br /><br />
 
                                         <span className={"psp_list"} >
@@ -121,9 +191,9 @@ const ListBrand = () => {
                                                     total: isFilter ? brand.data.length : brand.data.length,
                                                     showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`,
                                                 }}
-                                                rowKey={'roles_permission_uuid'}
+                                                rowKey={'brand_uuid'}
                                                 size="small"
-                                                dataSource={search ? filteredBrand : brand.data}
+                                                dataSource={isFilter ? filteredBrand : brand.data}
                                                 rowClassName={(record, index) => (index % 2 == 0 ? "" : "altTableClass")}
                                             />
                                         </span>

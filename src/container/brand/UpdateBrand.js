@@ -1,61 +1,42 @@
-import React, { useEffect, useState } from 'react';
-import { Row, Col, Form, Input, Switch, Table, Checkbox, Spin } from 'antd';
+import React, { useState } from 'react';
+import { Row, Col, Form, Input, Switch, Select, Upload, InputNumber } from 'antd';
 import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
 import { Cards } from '../../components/cards/frame/cards-frame';
 import { Button } from '../../components/buttons/buttons';
-import { Link, useHistory, useLocation } from 'react-router-dom';
-import queryString from 'query-string'
-import apolloClient, { authMutation, authQuery } from '../../utility/apollo';
-import { toast } from 'react-toastify';
+import { Link, useHistory } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-const { TextArea } = Input;
+import { toast } from 'react-toastify';
+import { PlusOutlined } from '@ant-design/icons';
+import { brandQuery } from '../../apollo/brand';
+import apolloClient from '../../apollo';
 
-const UpdateBrand = () => {
+const AddBrand = () => {
+    const { TextArea } = Input;
     const history = useHistory();
-    const { search } = useLocation();
-    const params = queryString.parse(search)
-    const [isLoading, setIsLoading] = useState(false)
     const token = useSelector(state => state.auth.token);
-
-    const [brand, setBrand] = useState({ data: {}, loading: true, error: '' })
+    const [isLoading, setIsLoading] = useState(false)
+    const [role_status, setRole_status] = useState(true)
+    const [image, setImage] = useState('');
+    const [thumbnail, setThumbnail] = useState('');
+    const [order, setOrder] = useState(0);
+    const [category, setCategory] = useState([]);
     const maxLength = 30
     const [form] = Form.useForm();
 
-    useEffect(() => {
-        if (!params.id) return;
-
-        apolloClient.query({
-            query: authQuery.GET_SINGLE_ROLE,
-            variables: {
-                query: {
-                    role_uuid: params.id
-                }
-            },
-            context: {
-                headers: {
-                    TENANTID: process.env.REACT_APP_TENANTID,
-                    Authorization: token
-                }
-            }
-        }).then(res => {
-            const data = res?.data?.getSingleRole
-            if (!data.status) return;
-            setBrand({ data: data?.data, loading: false, error: '' })
-        }).catch(err => {
-            console.log("got error loading single", err);
-            setBrand({ data: {}, loading: false, error: 'Something went worng' })
-        })
-
-    }, [])
-
     const handleSubmit = values => {
-        setIsLoading(true)
-        const variables = { data: { ...values, role_status, role_uuid: singleRole.data.role_uuid } }
-
+       setIsLoading(true)
+       const modify_category = [];
+       category.forEach(val => {
+           modify_category.push(
+               {"cat_id": val},
+           )
+       })
+       const data = { ...values, brandStatus: role_status, image, brandSortOrder: order }
+       console.log(data);
         apolloClient.mutate({
-            mutation: authMutation.UPDATE_ROLE,
-            variables,
+            mutation: brandQuery.BRAND_ADD,
+            variables: { data },
             context: {
                 headers: {
                     TENANTID: process.env.REACT_APP_TENANTID,
@@ -63,97 +44,140 @@ const UpdateBrand = () => {
                 }
             }
         }).then(res => {
-            const data = res?.data?.updateRole
-            if (!data?.status) return toast.error('Something Went wrong !!')
-            toast.success(`${brand.data.role} updated successfully.`)
+            console.log(res);
+            // const data = res?.data?.createRoleWithPermission
+            // if (!data?.status) return toast.error('Something Went wrong !!');
+            // toast.success(`${values.role} Role created successfully.`);
             history.push("/admin/brand/list");
-
         }).catch(err => {
-            console.log("🚀 ~ file: UpdateRole.js ~ line 193 ~ handleSubmit ~ err", err);
-        }).finally(() => {
-            setIsLoading(false)
-        })
+            toast.error('Something Went wrong !!');
+        }).finally(() => setIsLoading(false))
+    };
 
+    const beforeImageUpload = (file) => {
+        const isJpg = file.type === 'image/jpeg';
+        if (!isJpg) toast.error('You can only upload JPG file!')
+        const isLt2M = file.size / 1024 / 1024 < 2;
+        if (!isLt2M) toast.error('Image must smaller than 2MB!');
 
-    }
+        if( isJpg && isLt2M ){
+            setThumbnail(URL.createObjectURL(file))
+            setImage(file)
+        }
 
+        return false;
+    };
+
+    const uploadButton = (
+        <div>
+            <PlusOutlined />
+            <div style={{ marginTop: 8 }}> Upload </div>
+        </div>
+    );
 
     return (
         <>
-            <PageHeader title={`Manage Brand - ${brand.data?.role}`} />
+            <PageHeader 
+                title="Edit Manufacture" 
+                buttons={[
+                    <div key="1">
+                        <Switch checked={role_status} onChange={checked => setRole_status(checked)} checkedChildren="ON" unCheckedChildren="OFF" />
+                    </div>
+                ]}
+            />
             <Main>
                 <Row gutter={25}>
                     <Col sm={24} xs={24}>
                         <Cards headless>
-                            {brand.loading || !brand.data?.role ? 
-                                <div className="spin">
-                                    <Spin />
-                                </div>
-                                :
-                                <>
-                                    <Form
+                            <Form
+                                style={{ width: '100%' }}
+                                form={form}
+                                name="addRole"
+                                onFinish={handleSubmit}
+                                onFinishFailed={errorInfo => console.log('form error info:\n', errorInfo)}
+                                labelCol={{ span: 4 }} >
+                                <Form.Item
+                                    rules={[{ required: true, max: maxLength, message: "Please enter Manufacture Name" }]}
+                                    name="brandName" label="Name" >
+                                    <Input placeholder='Enter Manufacture Name' />
+                                </Form.Item>
+                                <Form.Item
+                                    rules={[{ required: true, message: "Please enter Manufacture Description" }]}
+                                    name="brandDescription" label="Description"
+                                >
+                                    <TextArea rows={4} placeholder="Enter Manufacture Description" />
+                                </Form.Item>
+
+                                <Form.Item label="Categories">
+                                    <Select
+                                        mode="multiple"
                                         style={{ width: '100%' }}
-                                        form={form}
-                                        name="addRole"
-                                        onFinish={handleSubmit}
-                                        onFinishFailed={errorInfo => console.log('form error info:\n', errorInfo)}
-                                        labelCol={{ span: 4 }}
+                                        placeholder="Select Categories"
+                                        initialvalues={['china']}
+                                        onChange={(e) => setCategory(e)}
+                                        optionLabelProp="label"
                                     >
-                                        <Form.Item
-                                            rules={[{ required: true, max: maxLength, message: "Please enter Role Name" }]}
-                                            name="role" label="Name"
-                                            initialValue={role.data.role}
-                                        // help={`Maximum length is ${ maxLength }`}
-                                        >
-                                            <Input placeholder='Enter Role Name' />
-                                        </Form.Item>
-                                        <Form.Item
-                                            rules={[{ required: true, message: "Please enter Role Description" }]}
-                                            name="roleDescription" label="Description"
-                                            initialValue={role.data.role_description}
+                                        <Select.Option value="china" label="China">
+                                            <div className="demo-option-label-item">
+                                                China
+                                            </div>
+                                        </Select.Option>
+                                        <Select.Option value="usa" label="USA">
+                                            <div className="demo-option-label-item">
+                                                USA
+                                            </div>
+                                        </Select.Option>
+                                        <Select.Option value="japan" label="Japan">
+                                            <div className="demo-option-label-item">
+                                                Japan
+                                            </div>
+                                        </Select.Option>
+                                    </Select>
+                                </Form.Item>
 
-                                        >
-                                            <TextArea rows={4} placeholder="Enter Role Description" />
-                                        </Form.Item>
+                                <Form.Item label="Sort Order">
+                                    <InputNumber initialvalues={0} onChange={setOrder} style={{ width: '100%' }} />
+                                </Form.Item>
 
-                                        <Form.Item
-                                            name="role_status" label="Status"
-                                        >
-                                            <Switch
-                                                // defaultChecked={singleRole.data.role_status}
-                                                checked={role_status}
-                                                onChange={checked => setRole_status(checked)}
+                                <Form.Item label="Image">
+                                    <Upload
+                                        name="avatar"
+                                        listType="picture-card"
+                                        className="avatar-uploader"
+                                        showUploadList={false}
+                                        beforeUpload={beforeImageUpload}
+                                        fileList={[]}
+                                    >
+                                        {thumbnail ? (
+                                            <img
+                                                src={thumbnail}
+                                                alt="image"
+                                                style={{
+                                                    width: '100%',
+                                                }}
                                             />
-                                        </Form.Item>
+                                        ) : (
+                                            uploadButton
+                                        )}
+                                    </Upload>
+                                </Form.Item>
 
-                                        <div
-                                            style={{
-                                                display: 'flex',
-                                                justifyContent: 'flex-end',
-                                                marginTop: '3em'
-                                            }}
-                                        >
-                                            <Form.Item>
-
-                                                <Button loading={isLoading} size="default" htmlType="submit" type="primary" raised>
-                                                    {isLoading ? 'Processing' : 'Save'}
-                                                </Button>
-                                                <Link to="/admin/brand/list">
-                                                    <Button
-                                                        // className="btn-cancel"
-                                                        type='white'
-                                                        size="large">
-                                                        Cancel
-                                                    </Button>
-                                                </Link>
-                                            </Form.Item>
-                                        </div>
-
-                                    </Form>
-
-
-                                </>}
-
+                                <div style={{ display: 'flex', justifyContent: 'flex-end'}}>
+                                    <Form.Item>
+                                        <Button loading={isLoading} size="default" htmlType="submit" type="primary" raised>
+                                            {isLoading ? 'Processing' : 'Save'}
+                                        </Button>
+                                        <Link to="/admin/brand/list">
+                                            <Button
+                                                style={{ marginLeft: 10 }}
+                                                type='light'
+                                                size="default">
+                                                Cancel
+                                            </Button>
+                                        </Link>
+                                    </Form.Item>
+                                </div>
+                            </Form>
                         </Cards>
                     </Col>
                 </Row>
@@ -162,4 +186,4 @@ const UpdateBrand = () => {
     );
 };
 
-export default UpdateBrand;
+export default AddBrand;

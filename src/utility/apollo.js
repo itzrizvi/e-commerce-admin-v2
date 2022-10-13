@@ -116,6 +116,29 @@ export const authQuery = {
           }
         }
     `,
+  GET_SINGLE_ADMIN: gql`
+    query getSingleAdmin($query:GetSingleAdminInput){
+      getSingleAdmin(query:$query){
+        message
+        status
+        tenant_id
+        data {
+          uid
+          first_name
+          last_name
+          user_status
+          email_verified
+          roles {
+            role_uuid
+            role
+            role_slug
+            role_no
+            role_status
+          }
+        }
+      }
+    }
+    `,
 }
 
 
@@ -139,6 +162,7 @@ export const authMutation = {
         uid
         message
         first_name
+        last_name
         status
         user_status
       }
@@ -189,6 +213,123 @@ export const authMutation = {
           }
         }
         `,
+  ADMIN_UPDATE: gql`
+        mutation adminUpdate($data: UpdateAdminInput){
+          adminUpdate(data:$data){
+            message
+            status
+          }
+        }
+        `,
+  ADMIN_PASSWORD_CHANGE: gql`
+        mutation adminPasswordChange($data: AdminPasswordChangeInput){
+          adminPasswordChange(data:$data){
+            message
+            status
+            tenant_id
+          }
+        }
+        `,
+}
+
+export const productQuery = {
+  GET_ALL_CATEGORIES: gql`
+  query getAllCategories {
+    getAllCategories {
+      message
+      status
+      tenant_id
+      categories {
+        cat_id
+        cat_name
+        cat_slug
+        cat_status
+        is_featured
+        cat_parent_id
+        cat_sort_order
+        cat_description
+        cat_meta_tag_title
+        cat_meta_tag_description
+        cat_meta_tag_keywords
+        subcategories {
+          cat_id
+          cat_name
+          cat_slug
+          cat_status
+          is_featured
+          cat_parent_id
+          cat_sort_order
+          cat_description
+          cat_meta_tag_title
+          cat_meta_tag_description
+          cat_meta_tag_keywords
+          subsubcategories {
+            cat_id
+            cat_name
+            cat_slug
+            cat_status
+            is_featured
+            cat_parent_id
+            cat_sort_order
+            cat_description
+            cat_meta_tag_title
+            cat_meta_tag_description
+            cat_meta_tag_keywords
+          }
+        }
+      }
+    }
+  }
+  `,
+  GET_SINGLE_CATEGORY: gql`
+  query getSingleCategory($query: GetSingleCategoryInput) {
+    getSingleCategory(query: $query) {
+      message
+      status
+      tenant_id
+      category {
+        cat_id
+        cat_name
+        cat_slug
+        cat_status
+        is_featured
+        cat_parent_id
+        cat_sort_order
+        cat_description
+        cat_meta_tag_title
+        cat_meta_tag_description
+        cat_meta_tag_keywords
+        subcategories {
+          cat_id
+          cat_name
+          cat_slug
+          cat_status
+          is_featured
+          cat_parent_id
+          cat_sort_order
+          cat_description
+          cat_meta_tag_title
+          cat_meta_tag_description
+          cat_meta_tag_keywords
+          subsubcategories {
+            cat_id
+            cat_name
+            cat_slug
+            cat_status
+            is_featured
+            cat_parent_id
+            cat_sort_order
+            cat_description
+            cat_meta_tag_title
+            cat_meta_tag_description
+            cat_meta_tag_keywords
+          }
+        }
+      }
+    }
+  }
+  `,
+
 }
 
 export const productMutation = {

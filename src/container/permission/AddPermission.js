@@ -113,7 +113,7 @@ const AddPermission = () => {
     return (
         <>
             <PageHeader
-                title={params.name ? `Edit Permission - ${params.name}` : "Add Permission"}
+                title={params.name ? `Manage Permission | Edit Permission (${params.name})` : "Add Permission"}
             />
             <Main>
                 <Row gutter={25}>

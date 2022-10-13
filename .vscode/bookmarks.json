@@ -14,7 +14,7 @@
 			"path": "src/routes/admin/index.js",
 			"bookmarks": [
 				{
-					"line": 25,
+					"line": 28,
 					"column": 13,
 					"label": "-index routes"
 				}
@@ -51,12 +51,22 @@
 			]
 		},
 		{
-			"path": "src/container/admin/AddAdmin.js",
+			"path": "src/container/profile/settings/overview/Profile.js",
 			"bookmarks": [
 				{
-					"line": 93,
-					"column": 26,
-					"label": "--"
+					"line": 22,
+					"column": 17,
+					"label": "-edit profile form"
+				}
+			]
+		},
+		{
+			"path": "src/container/profile/settings/overview/ProfileAuthorBox.js",
+			"bookmarks": [
+				{
+					"line": 31,
+					"column": 35,
+					"label": "--setting menue"
 				}
 			]
 		}

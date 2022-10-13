@@ -8,6 +8,11 @@ import { useDispatch, useSelector } from 'react-redux';
 import { rolesDataRead } from '../../../redux/roles/actionCreator';
 import Moment from 'react-moment';
 import { Link } from 'react-router-dom';
+import FontAwesome from 'react-fontawesome';
+import apolloClient, { authMutation } from '../../../utility/apollo';
+import Cookies from 'js-cookie';
+import { toast } from 'react-toastify';
+import config from '../../../config/config';
 
 
 const RoleListTable = () => {
@@ -52,66 +57,82 @@ const RoleListTable = () => {
     dispatch(rolesDataRead());
   }, [dispatch])
 
+
+  const handleStatusChange = (record, checked) => {
+
+    const variables = { data: { role_uuid: record.key, role_status: checked } }
+
+
+    apolloClient.mutate({
+      mutation: authMutation.UPDATE_ROLE,
+      variables,
+      context: {
+        headers: {
+          TENANTID: process.env.REACT_APP_TENANTID,
+          Authorization: Cookies.get('psp_t')
+        }
+      }
+    }).then(res => {
+      const data = res?.data?.updateRole
+      if (!data?.status) return toast.error(data.message)
+      toast.success(`${record.name} Role Status updated successfully.`)
+    }).catch(err => {
+      toast.error('Something went wrong.!')
+      console.log("🚀 ~ file: UpdateRole.js ~ line 193 ~ handleSubmit ~ err", err);
+    })
+
+  }
+
+
+
   const rolesTableColumns = [
     {
       title: 'Name',
       dataIndex: 'name',
       key: 'name',
-      sorter: (a, b) => a.name.length - b.name.length,
-      sortDirections: ['descend'],
+      sorter: (a, b) => a.name.toUpperCase() > b.name.toUpperCase() ? 1 : -1,
     },
     {
       title: 'Description',
       dataIndex: 'role_description',
       key: 'role_description',
+      sorter: (a, b) => a.role_description.toUpperCase() > b.role_description.toUpperCase() ? 1 : -1,
       // render: (text) => (<p style={{ width: "10px" }}>{text}</p>)
     },
     {
       title: 'Permissions',
       dataIndex: 'permissions',
       key: 'permissions',
-      render: (permissions) => (
-        <>
-          {permissions.map(item => (
-            <p>
-              {item.rolesPermission.roles_permission_name}<br />
-              Access: {item.read_access.toString()}<br />
-              Modify: {item.edit_access.toString()}
-            </p>
-          ))
-          }
-        </>
-      )
+      // width: 150,
+      ellipsis: true,
+      sorter: (a, b) => a.permissions.length > b.permissions.length ? -1 : 1,
+      render: (permissions) => {
+        const data = permissions.map(item => item.rolesPermission.roles_permission_name).join(", ")
+        return (<p>{data}</p>)
+      }
+
     },
     {
       title: 'Status',
       dataIndex: 'role_status',
       key: 'role_status',
+      width: 100,
+      align: 'center',
+      sorter: (a, b) => (a.role_status === b.role_status) ? 0 : a.role_status ? -1 : 1,
+      // (x === y)? 0 : x? -1 : 1
       render: (role_status, record) => (
-        <Switch checked={role_status} title='Status' />
+        <Switch defaultChecked={role_status} title='Status' onChange={checked => handleStatusChange(record, checked)} />
       )
     },
-    // {
-    //   title: 'Date Time',
-    //   dataIndex: 'dateTime',
-    //   key: 'dateTime',
-    //   sorter: (a, b) => parseInt(a.createdAt) - parseInt(b.createdAt),
-    //   sortDirections: ['descend'],
-    // },
-    // {
-    //   title: 'Actions',
-    //   dataIndex: 'action',
-    //   key: 'action'
-    // },
     {
       title: 'Action',
       dataIndex: 'key',
       key: 'action',
+      width: 90,
+      align: "center",
       render: (text, record) => (
-        <Link to={`/admin/roles/update?id=${record.key}&role=${record.name}`}>
-          <Button size="default" type="white" title='Edit'>
-            <FeatherIcon icon="edit" size={16} />
-          </Button>
+        <Link to={`/admin/roles/update?id=${record.key}&role=${record.name}`} style={{ cursor: 'pointer' }} >
+          <FontAwesome name="edit" style={{ margin: ".5em 1em" }} />
         </Link>
       ),
     },
@@ -148,13 +169,13 @@ const RoleListTable = () => {
               columns={rolesTableColumns}
               size="small"
               rowClassName={(record, index) => (index % 2 == 0 ? "" : "altTableClass")}
-              pagination={false}
               rowKey={'key'}
-            // pagination={{
-            //   defaultPageSize: 10,
-            //   total: isFilter ? tableData.length : rolesTableData.length,
-            //   showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`,
-            // }}
+              // pagination={false}
+              pagination={{
+                defaultPageSize: config.ROLES_PER_PAGE,
+                total: searchText ? filteredRoles.length : rolesTableData.length,
+                showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`,
+              }}
             />
           </span>
         </>}

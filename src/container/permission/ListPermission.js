@@ -10,15 +10,17 @@ import { ShareButtonPageHeader } from '../../components/buttons/share-button/sha
 import { ExportButtonPageHeader } from '../../components/buttons/export-button/export-button';
 import { CalendarButtonPageHeader } from '../../components/buttons/calendar-button/calendar-button';
 import { Link } from 'react-router-dom';
-import apolloClient, { authQuery } from '../../utility/apollo';
+import apolloClient, { authMutation, authQuery } from '../../utility/apollo';
 import Cookies from 'js-cookie';
 import FontAwesome from 'react-fontawesome';
+import { toast } from 'react-toastify';
+import config from '../../config/config';
 
 
 
 const ListPermission = () => {
     const [permissions, setPermissions] = useState({ data: [], loading: true, error: '' })
-    const [searchTest, setSearchTest] = useState('');
+    const [searchText, setSearchText] = useState('');
     const [filteredPermissions, setFilteredPermissions] = useState([]);
 
     useEffect(() => {
@@ -45,19 +47,44 @@ const ListPermission = () => {
 
     }, [])
 
+    const handleStatusChange = (record, checked) => {
+        const variables = { data: { roles_permission_uuid: record.roles_permission_uuid, roles_permission_status: checked } }
+
+        apolloClient.mutate({
+            mutation: authMutation.UPDATE_ROLES_PERMISSION,
+            variables,
+            context: {
+                headers: {
+                    TENANTID: process.env.REACT_APP_TENANTID,
+                    Authorization: Cookies.get('psp_t')
+                }
+            }
+        }).then(res => {
+            const status = res?.data?.updateRolesPermission?.status
+            if (!status) return toast.error(data.message)
+            toast.success(`${record.roles_permission_name} Permission Status updated successfully.`)
+        }).catch(err => {
+            console.log("🚀 ~ file: AllAdmins.js ~ line 33 ~ handleStatusChange ~ err", err);
+            toast.error(`Something went wrong!!`)
+        })
+
+    }
+
     const columns = [
         {
             title: 'Permission Name',
             dataIndex: 'roles_permission_name',
             key: 'roles_permission_name',
+            sorter: (a, b) => a.roles_permission_name.toUpperCase() > b.roles_permission_name.toUpperCase() ? 1 : -1,
         },
         {
             title: 'Status',
             dataIndex: 'roles_permission_status',
             key: 'roles_permission_status',
             align: 'right',
+            sorter: (a, b) => (a.roles_permission_status === b.roles_permission_status) ? 0 : a.roles_permission_status ? -1 : 1,
             render: (text, record) => (
-                <Switch defaultChecked={text} title='Status' />
+                <Switch defaultChecked={text} title='Status' onChange={checked => handleStatusChange(record, checked)} />
             )
         },
         {
@@ -67,9 +94,9 @@ const ListPermission = () => {
             render: (text, record) => (
                 <>
                     <Link to={`/admin/permission/add?name=${record.roles_permission_name}&status=${record.roles_permission_status}&id=${record.roles_permission_uuid}`}>
-                        <Button size="default" type="white" title='Edit'>
-                            <FontAwesome name="edit" />
-                        </Button>
+                        {/* <Button size="default" type="white" title='Edit'> */}
+                        <FontAwesome name="edit" style={{ margin: ".5em 1em" }} />
+                        {/* </Button> */}
                     </Link>
                 </>
             ),
@@ -79,7 +106,7 @@ const ListPermission = () => {
 
     const onChangeSearch = e => {
         const value = e.target.value
-        setSearchTest(value)
+        setSearchText(value)
         setFilteredPermissions(permissions.data.filter(permission => permission?.roles_permission_name.toLowerCase().includes(value.toLowerCase())))
     }
 
@@ -92,7 +119,7 @@ const ListPermission = () => {
                     <div key="1" className="page-header-actions">
                         <Link to="/admin/permission/add">
                             <Button size="small" title="Add Permission" type="primary">
-                                <FeatherIcon icon="plus" />
+                                <FeatherIcon icon="file-plus" />
                             </Button>
                         </Link>
                     </div>
@@ -117,12 +144,17 @@ const ListPermission = () => {
                                         <span className={"psp_list"} >
                                             <Table
                                                 className="table-responsive"
-                                                pagination={false}
                                                 columns={columns}
                                                 rowKey={'roles_permission_uuid'}
                                                 size="small"
-                                                dataSource={searchTest ? filteredPermissions : permissions.data}
+                                                dataSource={searchText ? filteredPermissions : permissions.data}
                                                 rowClassName={(record, index) => (index % 2 == 0 ? "" : "altTableClass")}
+                                                // pagination={false}
+                                                pagination={{
+                                                    defaultPageSize: config.PERMISSIONS_PER_PAGE,
+                                                    total: searchText ? filteredPermissions.length : permissions.length,
+                                                    showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`,
+                                                }}
                                             />
                                         </span>
                                     </>

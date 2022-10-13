@@ -5,9 +5,11 @@ import Dashboard from './dashboard';
 import Products from './products';
 import Users from './admin';
 import Permission from './permission';
+import Categories from './categories';
 import RoleListRoutes from './role/role_list';
 import withAdminLayout from '../../layout/withAdminLayout';
 import BrandRoutes from './brand';
+import Pages from './pages';
 
 const Admin = () => {
   const { path } = useRouteMatch();
@@ -22,12 +24,14 @@ const Admin = () => {
         }
       >
         <Route path={path} component={Dashboard} />
+        <Route path={`${path}`} component={Pages} />
         <Route path={`${path}/products`} component={Products} />
         <Route path={`${path}/users`} component={Users} />
         <Route path={`${path}/roles`} component={RoleListRoutes} />
         <Route path={`${path}/permission`} component={Permission} />
         <Route path={`${path}/admin`} component={Users} />
         <Route path={`${path}/brand`} component={BrandRoutes} />
+        <Route path={`${path}/categories`} component={Categories} />
       </Suspense>
     </Switch>
   );
