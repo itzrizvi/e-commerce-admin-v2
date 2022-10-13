@@ -9,19 +9,27 @@ import { Button } from '../../components/buttons/buttons';
 import { Link } from 'react-router-dom';
 import FontAwesome from 'react-fontawesome';
 
-const AttributeGroup = () => {
-    const dummyData = [...Array(10).keys()].map(i => ({ g_n: `Group ${i + 1}`, g_s: i + 1 }))
+const ListAttributes = () => {
+    const dummyData = [...Array(6).keys()].map(i => ({ a_n: `Attribute ${i + 1}`, a_g: `Group 2`, g_s: i + 1 }))
 
-    const [attributeGroups, setAttributeGroups] = useState({ data: dummyData, isLoading: false })
-    const [filteredAttributeGroups, setFilteredAttributeGroups] = useState([])
+    const [attributes, setAttributes] = useState({ data: dummyData, isLoading: false })
+    const [filteredAttributes, setFilteredAttributes] = useState([])
     const [searchText, setSearchText] = useState('')
+
+
 
     const columns = [
         {
-            title: 'Group Name',
-            dataIndex: 'g_n',
-            key: 'g_n',
-            sorter: (a, b) => a.g_n.toUpperCase() > b.g_n.toUpperCase() ? 1 : -1,
+            title: 'Attribute Name',
+            dataIndex: 'a_n',
+            key: 'a_n',
+            sorter: (a, b) => a.a_n.toUpperCase() > b.a_n.toUpperCase() ? 1 : -1,
+        },
+        {
+            title: 'Attribute Group',
+            dataIndex: 'a_g',
+            key: 'a_g',
+            sorter: (a, b) => a.a_g.toUpperCase() > b.a_g.toUpperCase() ? 1 : -1,
         },
         {
             title: 'Sort Order',
@@ -36,7 +44,7 @@ const AttributeGroup = () => {
             align: 'right',
             render: (text, record) => (
                 <>
-                    <Link to={`/admin/attributes/add-group?id=${1}&name=${record.g_n}`}>
+                    <Link to={`/admin/attributes/add-group?id=${1}&name=${record.a_n}`}>
                         {/* <Button size="default" type="white" title='Edit'> */}
                         <FontAwesome name="edit" style={{ margin: ".5em 1em" }} />
                         {/* </Button> */}
@@ -50,18 +58,18 @@ const AttributeGroup = () => {
     const onChangeSearch = e => {
         const value = e.target.value
         setSearchText(value)
-        setFilteredAttributeGroups(attributeGroups.data.filter(attr => attr?.g_n.toLowerCase().includes(value.toLowerCase())))
+        setFilteredAttributes(attributes.data.filter(attr => attr?.a_n.toLowerCase().includes(value.toLowerCase())))
     }
 
 
     return (
         <>
             <PageHeader
-                title="Attribute Groups"
+                title="Attributes"
                 buttons={[
                     <div key="1" className="page-header-actions">
                         <Link to="/admin/attributes/add-group">
-                            <Button size="small" title="Add Attribute Group" type="primary">
+                            <Button size="small" title="Add Attribute" type="primary">
                                 <FeatherIcon icon="file-plus" />
                             </Button>
                         </Link>
@@ -72,7 +80,7 @@ const AttributeGroup = () => {
                 <Row gutter={25}>
                     <Col sm={24} xs={24}>
                         <Cards headless>
-                            {attributeGroups.isLoading ?
+                            {attributes.isLoading ?
                                 <div className="spin">
                                     <Spin />
                                 </div>
@@ -87,7 +95,7 @@ const AttributeGroup = () => {
                                             columns={columns}
                                             rowKey={'g_s'}
                                             size="small"
-                                            dataSource={searchText ? filteredAttributeGroups : attributeGroups.data}
+                                            dataSource={searchText ? filteredAttributes : attributes.data}
                                             rowClassName={(record, index) => (index % 2 == 0 ? "" : "altTableClass")}
                                         // pagination={false}
                                         // pagination={{
@@ -114,4 +122,4 @@ const AttributeGroup = () => {
     );
 };
 
-export default AttributeGroup;
+export default ListAttributes;
