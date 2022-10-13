@@ -341,7 +341,26 @@ export const productMutation = {
           }
         }
       
-    `
+    `,
+  CREATE_CATEGORY: gql`
+  mutation createCategory($data:CategoryCreateInput, $file:Upload){
+    createCategory(data:$data, file:$file){
+      message
+      tenant_id
+      status
+    }
+  }
+    `,
+  UPDATE_CATEGORY: gql`
+    mutation updateCategory($data: UpdateCategoryInput) {
+      updateCategory(data: $data) {
+        message
+        status
+        tenant_id
+      }
+    }
+    
+    `,
 }
 
 

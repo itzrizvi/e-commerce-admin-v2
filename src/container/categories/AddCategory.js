@@ -6,10 +6,11 @@ import { Main } from '../styled';
 import { Cards } from '../../components/cards/frame/cards-frame';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '../../components/buttons/buttons';
-import apolloClient, { productQuery } from '../../utility/apollo';
+import apolloClient, { productMutation, productQuery } from '../../utility/apollo';
 import Heading from '../../components/heading/heading';
 import queryString from 'query-string'
 import { toast } from 'react-toastify';
+import Cookies from 'js-cookie';
 
 const { TextArea } = Input;
 const { Option } = Select;
@@ -27,6 +28,8 @@ const AddCategory = () => {
     const [categories, setCategories] = useState([])
     const [structuredCategories, setStructuredCategories] = useState({ data: [], loading: true })
     const [singleCategory, setSingleCategory] = useState({})
+    const [parentUid, setParentUid] = useState("")
+    const [image, setImage] = useState(null);
 
 
     const [state, setState] = useState({
@@ -147,7 +150,113 @@ const AddCategory = () => {
 
 
     const handleSubmit = values => {
-        console.log(values);
+
+        console.log(image)
+
+        // return;
+        setIsLoading(true)
+        const {
+            categoryName,
+            categoryDescription,
+            categoryMetaTagDescription,
+            categoryMetaTagKeywords,
+            categoryMetaTagTitle,
+            // categoryParentId,
+            categorySortOrder
+        } = values
+
+
+
+        if (!params.id) {
+
+            const data = {
+                categoryName,
+                categoryDescription,
+                categoryMetaTagDescription,
+                categoryMetaTagKeywords,
+                categoryMetaTagTitle,
+                isFeatured,
+                categoryStatus,
+            }
+            if (parentUid) {
+                data.categoryParentId = parentUid
+            }
+            if (categorySortOrder) {
+                data.categorySortOrder = parseInt(categorySortOrder)
+            }
+            const variables = { data }
+
+            if (image) {
+                variables.file = image
+            }
+
+            console.log(variables);
+
+
+            apolloClient.mutate({
+                mutation: productMutation.CREATE_CATEGORY,
+                variables,
+                context: {
+                    headers: {
+                        TENANTID: process.env.REACT_APP_TENANTID,
+                        Authorization: Cookies.get('psp_t')
+                    }
+                }
+            }).then(res => {
+                const data = res?.data?.createCategory
+                if (!data?.status) return toast.error(data?.message)
+                toast.success(data?.message)
+
+
+            }).catch(err => {
+
+            }).finally(() => {
+                setIsLoading(false)
+            })
+        } else {
+
+            const data = {
+                cat_id: params.id,
+                cat_name: categoryName,
+                cat_description: categoryDescription,
+                cat_meta_tag_title: categoryMetaTagTitle,
+                cat_meta_tag_description: categoryMetaTagDescription,
+                cat_meta_tag_keywords: categoryMetaTagKeywords,
+                is_featured: isFeatured,
+                cat_status: categoryStatus,
+            }
+            if (parentUid) {
+                data.categoryParentId = parentUid
+            } if (image.file) {
+                data.categoryImage = image.file
+            } if (categorySortOrder) {
+                data.cat_sort_order = parseInt(categorySortOrder)
+            }
+
+            apolloClient.mutate({
+                mutation: productMutation.UPDATE_CATEGORY,
+                variables: { data },
+                context: {
+                    headers: {
+                        TENANTID: process.env.REACT_APP_TENANTID,
+                        Authorization: Cookies.get('psp_t')
+                    }
+                }
+            }).then(res => {
+                const data = res?.data?.updateCategory
+                if (!data?.status) return toast.error(data?.message)
+                toast.success(data?.message)
+
+
+            }).catch(err => {
+
+            }).finally(() => {
+                setIsLoading(false)
+            })
+
+
+        }
+
 
     }
 
@@ -157,6 +266,14 @@ const AddCategory = () => {
         <>
             <PageHeader
                 title={params.id ? `Edit category - ${params.name}` : "Add Category"}
+                buttons={[
+                    <div key="1" className="page-header-actions">
+                        <Switch
+                            checked={categoryStatus}
+                            onChange={checked => setCategoryStatus(checked)}
+                        />
+                    </div>
+                ]}
             />
             <Main>
                 <Row gutter={25}>
@@ -180,13 +297,14 @@ const AddCategory = () => {
                                     <Tabs>
                                         <Tabs.TabPane tab="General" key="general">
                                             <Form.Item
-                                                rules={[{ required: true, max: maxLength, message: "Please enter Role Name" }]}
+                                                rules={[{ required: true, max: maxLength, message: "Please enter Category Name" }]}
                                                 name="categoryName" label="Category Name"
                                                 initialValue={singleCategory.cat_name || ""}
                                             >
                                                 <Input placeholder='Enter Category Name' />
                                             </Form.Item>
                                             <Form.Item
+                                                rules={[{ required: true, max: maxLength, message: "Please enter Category Description" }]}
                                                 name="categoryDescription" label="Description"
                                                 initialValue={singleCategory.cat_description || ""}
                                             >
@@ -202,16 +320,18 @@ const AddCategory = () => {
                                             </Form.Item>
                                             <Form.Item
                                                 name="categoryMetaTagDescription" label="Meta Tag Description"
+                                                rules={[{ required: true, max: maxLength, message: "Please enter Meta Description" }]}
                                                 initialValue={singleCategory.cat_meta_tag_description || ""}
                                             >
                                                 <TextArea rows={3} placeholder="Enter Meta Tag Description" />
                                             </Form.Item>
                                             <Form.Item
                                                 className='wrap-label'
+                                                rules={[{ required: true, max: maxLength, message: "Please enter Meta Keywords" }]}
                                                 name="categoryMetaTagKeywords" label="Enter Meta Tag Keywords"
                                                 initialValue={singleCategory.cat_meta_tag_keywords || ""}
                                             >
-                                                <TextArea rows={3} placeholder="Enter Category Description" />
+                                                <TextArea rows={3} placeholder="Enter Meta Tag Keywords" />
                                             </Form.Item>
 
 
@@ -219,7 +339,7 @@ const AddCategory = () => {
 
                                         <Tabs.TabPane tab="Data" key="Data">
                                             <Form.Item
-                                                name="roleUUID"
+                                                name="categoryParentId"
                                                 initialValue=""
                                                 label="Parent"
                                             // tooltip={roles.isLoading ? 'Loading roles....' : null}
@@ -233,7 +353,7 @@ const AddCategory = () => {
                                                         <Select
                                                             allowClear
                                                             placeholder="Please select"
-                                                            // onChange={value => setSelectedRoles(value)}
+                                                            onChange={value => setParentUid(value)}
                                                             defaultValue={singleCategory.cat_parent_id}
                                                         >
                                                             {structuredCategories.data.map(item => (
@@ -254,7 +374,7 @@ const AddCategory = () => {
                                             </Form.Item>
 
                                             <Form.Item
-                                                name="categoryIsFeatured" label="Is Featured"
+                                                name="isFeatured" label="Is Featured"
                                             >
                                                 <Checkbox checked={isFeatured} onChange={e => setIsFeatured(e.target.checked)} />
                                             </Form.Item>
@@ -267,15 +387,41 @@ const AddCategory = () => {
                                                 />
                                             </Form.Item>
 
+
+                                            {/* <input
+                                                type="file"
+                                                name="myImage"
+                                                accept="image/*"
+                                                onChange={e => {
+                                                    console.log(e.target.files[0]);
+                                                    setImage(e.target.files[0])
+                                                }}
+                                            /> */}
+
+
                                             <Form.Item
                                                 name="img" label="Image"
                                             >
-                                                {/* <div className="add-product-block">
-                                            <Row gutter={15}>
-                                                <Col xs={24}>
-                                                    <div className="add-product-content">
-                                                        <Cards title="Product Image"> */}
-                                                <Dragger {...fileUploadProps} style={{ marginTop: '3em' }}>
+                                                <Dragger
+                                                    // {...fileUploadProps}
+
+                                                    multiple={false}
+                                                    // onChange={info => {
+                                                    //     console.log(info.file.originFileObj);
+
+                                                    // }}
+                                                    beforeUpload={file => {
+                                                        console.log(file);
+                                                        console.log(typeof file);
+
+
+                                                        setImage(file)
+                                                        return false;
+                                                    }}
+                                                    onRemove={file => setImage(null)}
+                                                    fileList={image ? [image] : []}
+                                                    style={{ marginTop: '3em' }}
+                                                >
                                                     <p className="ant-upload-drag-icon">
                                                         <FeatherIcon icon="upload" size={50} />
                                                     </p>
@@ -286,11 +432,6 @@ const AddCategory = () => {
                                                         or <span>Browse</span> to choose a file
                                                     </p>
                                                 </Dragger>
-                                                {/* </Cards>
-                                                    </div>
-                                                </Col>
-                                            </Row>
-                                        </div> */}
                                             </Form.Item>
 
 
