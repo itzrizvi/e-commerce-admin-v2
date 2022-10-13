@@ -144,7 +144,7 @@ const ListCategories = () => {
             key: 'cat_id',
             width: 70,
             // render: (text, record) => (<img src={require('../../static/img/avatar/NoPath (3).png')} alt="" />),
-            render: (text, record) => record.img ? <img height="46px" width="46px" src={`https://api.primeserverparts.com/images/category/${record.cat_id}/${record.cat_id}.jpg`} /> : ''
+            render: (text, record) => record.img ? <img height="46px" width="46px" src={`https://api.primeserverparts.com/images/category/${record.cat_id}/${record.cat_id}.jpg`} onerror={`this.onerror=null;this.src=null`} alt='logo' /> : ''
         },
         {
             title: 'Category Name',

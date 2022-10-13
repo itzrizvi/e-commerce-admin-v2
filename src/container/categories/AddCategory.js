@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Col, Form, Input, Checkbox, Switch, Tabs, Spin, Select, Upload } from 'antd';
+import { Row, Col, Form, Input, Checkbox, Switch, Tabs, Spin, Select, Upload, Badge, Avatar } from 'antd';
 import FeatherIcon from 'feather-icons-react';
 import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
@@ -390,45 +390,49 @@ const AddCategory = () => {
                                             <Form.Item
                                                 name="img" label="Image"
                                             >
-                                                <Dragger
-                                                    // {...fileUploadProps}
+                                                {!thumbUrl ?
+                                                    <Dragger
+                                                        multiple={false}
+                                                        beforeUpload={file => {
+                                                            const isJpg = file.type === 'image/jpeg';
+                                                            if (!isJpg) return toast.error('You can only upload JPG file!')
+                                                            const isLt2M = file.size / 1024 / 1024 < 2;
+                                                            if (!isLt2M) return toast.error('Image must smaller than 2MB!');
 
-                                                    multiple={false}
-                                                    // onChange={info => {
-                                                    //     console.log(info.file.originFileObj);
+                                                            setThumbUrl(URL.createObjectURL(file))
 
-                                                    // }}
-                                                    beforeUpload={file => {
-                                                        const isJpg = file.type === 'image/jpeg';
-                                                        if (!isJpg) return toast.error('You can only upload JPG file!')
-                                                        const isLt2M = file.size / 1024 / 1024 < 2;
-                                                        if (!isLt2M) return toast.error('Image must smaller than 2MB!');
+                                                            setImage(file)
+                                                            return false;
+                                                        }}
+                                                        onRemove={file => {
+                                                            setThumbUrl('')
+                                                            setImage(null)
+                                                        }
+                                                        }
+                                                        fileList={image ? [image] : []}
+                                                        style={{ marginTop: '3em' }}
+                                                    >
+                                                        <p className="ant-upload-drag-icon">
+                                                            <FeatherIcon icon="upload" size={50} />
+                                                        </p>
+                                                        <Heading as="h4" className="ant-upload-text">
+                                                            Drag and drop an image
+                                                        </Heading>
+                                                        <p className="ant-upload-hint">
+                                                            or <span>Browse</span> to choose a file
+                                                        </p>
+                                                    </Dragger>
 
-                                                        setThumbUrl(URL.createObjectURL(file))
-
-                                                        setImage(file)
-                                                        return false;
-                                                    }}
-                                                    onRemove={file => {
-                                                        setThumbUrl('')
-                                                        setImage(null)
-                                                    }
-                                                    }
-                                                    fileList={image ? [image] : []}
-                                                    style={{ marginTop: '3em' }}
-                                                >
-                                                    <p className="ant-upload-drag-icon">
-                                                        <FeatherIcon icon="upload" size={50} />
-                                                    </p>
-                                                    <Heading as="h4" className="ant-upload-text">
-                                                        Drag and drop an image
-                                                    </Heading>
-                                                    <p className="ant-upload-hint">
-                                                        or <span>Browse</span> to choose a file
-                                                    </p>
+                                                    : <Badge text='x' >
+                                                        <Avatar shape="square" size={80} src={thumbUrl}
+                                                            onClick={() => {
+                                                                setImage(null)
+                                                                setThumbUrl('')
+                                                            }}
+                                                        />
+                                                    </Badge>}
 
 
-                                                </Dragger>
                                             </Form.Item>
 
 
