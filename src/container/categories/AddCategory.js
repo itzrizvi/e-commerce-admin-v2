@@ -233,7 +233,7 @@ const AddCategory = () => {
                 data.cat_sort_order = parseInt(categorySortOrder)
             }
 
-            apolloClient.mutate({
+            apolloUploadClient.mutate({
                 mutation: productMutation.UPDATE_CATEGORY,
                 variables: { data },
                 context: {
