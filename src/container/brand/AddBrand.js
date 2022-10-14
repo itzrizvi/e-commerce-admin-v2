@@ -60,10 +60,16 @@ const AddBrand = () => {
             )
         })
 
+        if(modify_category.length == 0){
+            setIsLoading(false)
+            return toast.error("Please Select Category")
+        } 
+        
+
         const data = { ...values, brandStatus: brandStatus, brandSortOrder: order, categories: modify_category }
         apolloUploadClient.mutate({
-            mutation: brandQuery.BRAND_ADD,
-            variables: { data, file: image },
+            mutation: image ? brandQuery.BRAND_ADD : brandQuery.BRAND_ADD_WI,
+            variables: image ? { data, file: image } : { data },
             refetchQueries: [
                 {
                   query: brandQuery.GET_ALL_BRAND,
@@ -140,18 +146,18 @@ const AddBrand = () => {
                                         onFinishFailed={errorInfo => console.log('form error info:\n', errorInfo)}
                                         labelCol={{ span: 4 }} >
                                         <Form.Item
-                                            rules={[{ required: true, max: maxLength, message: "Please enter Manufacture Name" }]}
+                                            rules={[{ required: true, max: maxLength, message: "Please Enter Manufacture Name" }]}
                                             name="brandName" label="Name" >
                                             <Input placeholder='Enter Manufacture Name' />
                                         </Form.Item>
                                         <Form.Item
-                                            rules={[{ required: true, message: "Please enter Manufacture Description" }]}
+                                            rules={[{ required: true, message: "Please Enter Manufacture Description" }]}
                                             name="brandDescription" label="Description"
                                         >
                                             <TextArea rows={4} placeholder="Enter Manufacture Description" />
                                         </Form.Item>
 
-                                        <Form.Item label="Categories">
+                                        <Form.Item label="Categories" required >
                                             <Select
                                                 mode="multiple"
                                                 style={{ width: '100%' }}

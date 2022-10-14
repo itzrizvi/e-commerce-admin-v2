@@ -43,8 +43,8 @@ const AddBrand = () => {
         const data = { ...values, brand_status: brandStatus, brand_sort_order: order, categories: modify_category, brand_uuid: params?.id }
         // console.log(data);
         apolloUploadClient.mutate({
-            mutation: brandQuery.BRAND_UPDATE,
-            variables: { data, file: image },
+            mutation: image ? brandQuery.BRAND_UPDATE : brandQuery.BRAND_UPDATE_WI,
+            variables: image ? { data, file: image } : { data },
             refetchQueries: [
                 {
                   query: brandQuery.GET_ALL_BRAND,
@@ -170,12 +170,12 @@ const AddBrand = () => {
                                         onFinishFailed={errorInfo => console.log('form error info:\n', errorInfo)}
                                         labelCol={{ span: 4 }} >
                                         <Form.Item
-                                            rules={[{ required: true, max: maxLength, message: "Please enter Manufacture Name" }]}
+                                            rules={[{ required: true, max: maxLength, message: "Please Enter Manufacture Name" }]}
                                             name="brand_name" label="Name" >
                                             <Input placeholder='Enter Manufacture Name' defaultValue={singleBrand?.data?.brand_name} />
                                         </Form.Item>
                                         <Form.Item
-                                            rules={[{ required: true, message: "Please enter Manufacture Description" }]}
+                                            rules={[{ required: true, message: "Please Enter Manufacture Description" }]}
                                             name="brand_description" label="Description"
                                         >
                                             <TextArea rows={4} placeholder="Enter Manufacture Description" defaultValue={singleBrand?.data?.brand_description} />

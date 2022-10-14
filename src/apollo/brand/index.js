@@ -59,6 +59,13 @@ BRAND_UPDATE: gql`
       status
     }
   }`,
+  BRAND_UPDATE_WI: gql`
+  mutation updateBrand($data: UpdateBrandInput){
+    updateBrand(data:$data){
+      message
+      status
+    }
+  }`,
   BRAND_ADD: gql`
     mutation createBrand($data: BrandCreateInput, $file:Upload) {
       createBrand(data: $data, file:$file) {
@@ -66,5 +73,13 @@ BRAND_UPDATE: gql`
         tenant_id
         status
       }
-    }`
+    }`,
+    BRAND_ADD_WI: gql`
+      mutation createBrand($data: BrandCreateInput) {
+        createBrand(data: $data) {
+          message
+          tenant_id
+          status
+        }
+     }`
 }

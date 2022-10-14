@@ -1,5 +1,5 @@
 const renderImage = (id, image, type, size) => {
-    if(image == "") return;
+    if(!image) return require('../static/img/avatar/NoPath.png');
     const image_arry = image.split('.');
     const ext = image_arry[image_arry.length - 1]
     const filename = `${process.env.REACT_APP_IMAGE_URL}/${type}/${id}/${size}_${id}.${ext}` 

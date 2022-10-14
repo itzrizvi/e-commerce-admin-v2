@@ -195,7 +195,7 @@ const ListBrand = () => {
                                                 columns={columns}
                                                 pagination={{
                                                     defaultPageSize: 10,
-                                                    total: isFilter ? brand.data.length : brand.data.length,
+                                                    total: isFilter ? brand?.data?.length : brand?.data?.length,
                                                     showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`,
                                                 }}
                                                 rowKey={'brand_uuid'}
