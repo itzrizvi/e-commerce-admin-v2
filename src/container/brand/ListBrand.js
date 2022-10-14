@@ -13,6 +13,8 @@ import { brandQuery } from '../../apollo/brand';
 import { useSelector } from 'react-redux';
 import Moment from 'react-moment';
 import { toast } from 'react-toastify';
+import { errorImageSrc, renderImage } from '../../utility/images';
+import { LazyLoadImage } from 'react-lazy-load-image-component';
 
 
 
@@ -78,19 +80,24 @@ const ListBrand = () => {
             title: 'Name',
             dataIndex: 'brand_name',
             key: 'brand_name',
+            width: 120,
+            ellipsis: true,
             sorter: (a, b) => a.brand_name.toUpperCase() > b.brand_name.toUpperCase() ? 1 : -1,
         },
         {
             title: 'Image',
-            dataIndex: 'brand_uuid',
-            key: 'brand_uuid',
+            dataIndex: 'image',
+            key: 'image',
             width: 70,
-            render: (text, record) => (<img src={require('../../static/img/avatar/NoPath (3).png')} alt="" />),
+            align: 'right',
+            render: (text, record) => (<LazyLoadImage effect="blur" width="40" src={renderImage(record.brand_uuid, record.image, 'brand', '128x128')} onError={errorImageSrc} onL alt={record.brand_name} />),
         },
         {
             title: 'Alias',
             dataIndex: 'brand_slug',
             key: 'brand_slug',
+            width: 120,
+            ellipsis: true,
             sorter: (a, b) => a.brand_slug.toUpperCase() > b.brand_slug.toUpperCase() ? 1 : -1,
         },
         {

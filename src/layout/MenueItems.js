@@ -110,12 +110,7 @@ const MenuItems = ({ darkMode, toggleCollapsed, topMenu }) => {
       <SubMenu key="brand" icon={!topMenu && <FeatherIcon icon="aperture" />} title="Manufacture">
         <Menu.Item key="list_brand">
           <NavLink onClick={toggleCollapsed} to={`${path}/brand/list`}>
-            List Manufacture
-          </NavLink>
-        </Menu.Item>
-        <Menu.Item key="add_brand">
-          <NavLink onClick={toggleCollapsed} to={`${path}/brand/add`}>
-            Add Manufacture
+            Manufacture
           </NavLink>
         </Menu.Item>
       </SubMenu>

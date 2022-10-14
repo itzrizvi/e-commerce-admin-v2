@@ -10,6 +10,9 @@ import { toast } from 'react-toastify';
 import { PlusOutlined } from '@ant-design/icons';
 import { brandQuery } from '../../apollo/brand';
 import apolloClient from '../../apollo';
+import { apolloUploadClient } from '../../apollo';
+import { errorImageSrc } from '../../utility/images';
+import { LazyLoadImage } from 'react-lazy-load-image-component';
 
 const AddBrand = () => {
     const { TextArea } = Input;
@@ -17,7 +20,7 @@ const AddBrand = () => {
     const token = useSelector(state => state.auth.token);
     const [loading, setLoading] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
-    const [role_status, setRole_status] = useState(true)
+    const [brandStatus, setBrandStatus] = useState(true)
     const [image, setImage] = useState('');
     const [thumbnail, setThumbnail] = useState('');
     const [order, setOrder] = useState(0);
@@ -57,10 +60,22 @@ const AddBrand = () => {
             )
         })
 
-        const data = { ...values, brandStatus: role_status, brandSortOrder: order, categories: modify_category }
-        apolloClient.mutate({
+        const data = { ...values, brandStatus: brandStatus, brandSortOrder: order, categories: modify_category }
+        apolloUploadClient.mutate({
             mutation: brandQuery.BRAND_ADD,
             variables: { data, file: image },
+            refetchQueries: [
+                {
+                  query: brandQuery.GET_ALL_BRAND,
+                  context: {
+                    headers: {
+                      TENANTID: process.env.REACT_APP_TENANTID,
+                      Authorization: token
+                    }
+                  }
+                },
+                'getAllBrands'
+            ],
             context: {
                 headers: {
                     TENANTID: process.env.REACT_APP_TENANTID,
@@ -68,11 +83,11 @@ const AddBrand = () => {
                 }
             }
         }).then(res => {
-            console.log(res);
-            // const data = res?.data?.createRoleWithPermission
-            // if (!data?.status) return toast.error('Something Went wrong !!');
-            // toast.success(`${values.role} Role created successfully.`);
+            const data = res?.data?.createBrand
+            if (!data?.status) return toast.error('Something Went wrong !!');
+            toast.success(data?.message);
             history.push("/admin/brand/list");
+            window.location.reload();
         }).catch(err => {
             toast.error('Something Went wrong !!');
         }).finally(() => setIsLoading(false))
@@ -82,8 +97,8 @@ const AddBrand = () => {
     const beforeImageUpload = (file) => {
         const isJpg = file.type === 'image/jpeg';
         if (!isJpg) toast.error('You can only upload JPG file!')
-        const isLt2M = file.size / 1024 / 1024 < 2;
-        if (!isLt2M) toast.error('Image must smaller than 2MB!');
+        const isLt2M = file.size / 1024 / 1024 < 1;
+        if (!isLt2M) toast.error('Image must smaller than 1MB!');
 
         if (isJpg && isLt2M) {
             setThumbnail(URL.createObjectURL(file))
@@ -105,11 +120,6 @@ const AddBrand = () => {
         <>
             <PageHeader
                 title="Add Manufacture"
-                buttons={[
-                    <div key="1">
-                        <Switch checked={role_status} onChange={checked => setRole_status(checked)} checkedChildren="ON" unCheckedChildren="OFF" />
-                    </div>
-                ]}
             />
 
             <Main>
@@ -125,7 +135,7 @@ const AddBrand = () => {
                                     <Form
                                         style={{ width: '100%' }}
                                         form={form}
-                                        name="addRole"
+                                        name="addBrand"
                                         onFinish={handleSubmit}
                                         onFinishFailed={errorInfo => console.log('form error info:\n', errorInfo)}
                                         labelCol={{ span: 4 }} >
@@ -167,7 +177,10 @@ const AddBrand = () => {
                                         </Form.Item>
 
                                         <Form.Item label="Sort Order">
-                                            <InputNumber initialvalues={0} onChange={setOrder} style={{ width: '100%' }} />
+                                            <InputNumber defaultValue={0} onChange={setOrder} style={{ width: '100%' }} />
+                                        </Form.Item>
+                                        <Form.Item label="Status">
+                                            <Switch checked={brandStatus} onChange={checked => setBrandStatus(checked)} checkedChildren="ON" unCheckedChildren="OFF" />
                                         </Form.Item>
 
                                         <Form.Item label="Image">
@@ -180,8 +193,9 @@ const AddBrand = () => {
                                                 fileList={[]}
                                             >
                                                 {thumbnail ? (
-                                                    <img
+                                                    <LazyLoadImage
                                                         src={thumbnail}
+                                                        onError={errorImageSrc}
                                                         alt="image"
                                                         style={{
                                                             width: '100%',

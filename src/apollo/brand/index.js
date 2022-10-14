@@ -13,24 +13,9 @@ export const brandQuery = {
       brand_slug
       brand_description
       brand_status
+      image
       brand_sort_order
       createdAt
-      categories {
-        cat_id
-        cat_name
-        cat_status
-        subcategories {
-          cat_id
-          cat_name
-          cat_status
-          cat_sort_order
-          subsubcategories {
-            cat_id
-            cat_name
-            cat_status
-          }
-        }
-      }
     }
   }
 }`,
@@ -47,9 +32,29 @@ GET_CATEGORIES: gql`
     }
   }
 `,
+GET_SINGLE_BRAND: gql`
+  query getSingleBrand($brand_uuid : UUID!){
+    getSingleBrand(query: {brand_uuid: $brand_uuid}) {
+      message
+      tenant_id
+      status
+      data {
+        brand_name
+        brand_description
+        brand_status
+        brand_sort_order
+        image
+        categories {
+          cat_id
+          cat_name
+        }
+      }
+    }
+  }
+`,
 BRAND_UPDATE: gql`
-  mutation updateBrand($data: UpdateBrandInput){
-    updateBrand(data:$data){
+  mutation updateBrand($data: UpdateBrandInput, $file:Upload){
+    updateBrand(data:$data, file: $file){
       message
       status
     }
