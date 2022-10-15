@@ -60,8 +60,8 @@ const ListPermission = () => {
                 }
             }
         }).then(res => {
-            const status = res?.data?.updateRolesPermission?.status
-            if (!status) return toast.error(data.message)
+            const data = res?.data?.updateRolesPermission
+            if (!data?.status) return toast.error(data?.message)
             toast.success(`${record.roles_permission_name} Permission Status updated successfully.`)
         }).catch(err => {
             console.log("🚀 ~ file: AllAdmins.js ~ line 33 ~ handleStatusChange ~ err", err);
