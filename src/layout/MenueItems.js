@@ -92,9 +92,14 @@ const MenuItems = ({ darkMode, toggleCollapsed, topMenu }) => {
             Category
           </NavLink>
         </Menu.Item>
-        <Menu.Item key="addproducts">
+        {/* <Menu.Item key="addproducts">
           <NavLink onClick={toggleCollapsed} to={`${path}/products/add`}>
             Add Products
+          </NavLink>
+        </Menu.Item> */}
+        <Menu.Item key="products_list">
+          <NavLink onClick={toggleCollapsed} to={`${path}/products/list`}>
+            Products
           </NavLink>
         </Menu.Item>
       </SubMenu>
