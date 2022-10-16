@@ -20,11 +20,11 @@ const AuthorBox = () => {
           <figure>
             <img src={require('../../../../static/img/users/1.png')} alt="" />
 
-            <Upload>
+            {/* <Upload>
               <Link to="#">
                 <FeatherIcon icon="camera" size={16} />
               </Link>
-            </Upload>
+            </Upload> */}
           </figure>
           <figcaption>
             <div className="info">

@@ -74,11 +74,6 @@
 			"path": "src/container/categories/AddCategory.js",
 			"bookmarks": [
 				{
-					"line": 353,
-					"column": 98,
-					"label": "-----"
-				},
-				{
 					"line": 394,
 					"column": 1,
 					"label": ""
@@ -92,16 +87,6 @@
 					"line": 25,
 					"column": 23,
 					"label": "--log out--"
-				}
-			]
-		},
-		{
-			"path": "src/container/admin/AddAdmin.js",
-			"bookmarks": [
-				{
-					"line": 292,
-					"column": 64,
-					"label": "--"
 				}
 			]
 		}

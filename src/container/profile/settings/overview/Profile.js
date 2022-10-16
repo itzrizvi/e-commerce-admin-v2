@@ -121,7 +121,7 @@ const Profile = () => {
           </BasicFormWrapper>
         </Col>
       </Row>
-    </Cards>
+    </Cards >
   );
 };
 
