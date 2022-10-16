@@ -115,6 +115,14 @@ const MenuItems = ({ darkMode, toggleCollapsed, topMenu }) => {
         </Menu.Item>
       </SubMenu>
 
+      <SubMenu key="banner" icon={!topMenu && <FeatherIcon icon="image" />} title="Banner">
+        <Menu.Item key="list_banner">
+          <NavLink onClick={toggleCollapsed} to={`${path}/banner/list`}>
+            Banner
+          </NavLink>
+        </Menu.Item>
+      </SubMenu>
+
     </Menu>
   );
 };

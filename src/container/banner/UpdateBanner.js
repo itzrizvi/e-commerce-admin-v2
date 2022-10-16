@@ -1,80 +1,107 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Col, Form, Input, Switch, Select, Upload, InputNumber, Spin } from 'antd';
+import { Row, Col, Form, Input, Switch, Select, Upload, InputNumber, Spin, Table } from 'antd';
 import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
 import { Cards } from '../../components/cards/frame/cards-frame';
 import { Button } from '../../components/buttons/buttons';
-import { Link, useHistory, useLocation } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 import { PlusOutlined } from '@ant-design/icons';
 import { brandQuery } from '../../apollo/brand';
-import apolloClient, { apolloUploadClient } from '../../apollo';
-import queryString from 'query-string'
-import { errorImageSrc, renderImage } from '../../utility/images';
+import apolloClient from '../../apollo';
+import { apolloUploadClient } from '../../apollo';
+import { errorImageSrc } from '../../utility/images';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
+import FeatherIcon from 'feather-icons-react';
 
-const UpdateBanner = () => {
-    const { search } = useLocation();
-    const params = queryString.parse(search)
+const AddBanner = () => {
     const { TextArea } = Input;
     const history = useHistory();
     const token = useSelector(state => state.auth.token);
-    const [isLoading, setIsLoading] = useState(false)
     const [loading, setLoading] = useState(false)
+    const [isLoading, setIsLoading] = useState(false)
     const [brandStatus, setBrandStatus] = useState(true)
     const [image, setImage] = useState('');
     const [thumbnail, setThumbnail] = useState('');
-    const [order, setOrder] = useState(0);
     const [category, setCategory] = useState([]);
     const [categories, setCategories] = useState([]);
-    const [singleBrand, setSingleBrand] = useState({ data: {}, loading: true, error: '' })
-    const maxLength = 30
+    const maxLength = 50
     const [form] = Form.useForm();
 
+    const [bannerData, setBannerData] = useState([]);
+
+    useEffect(() => {
+        // setLoading(true);
+        // apolloClient.query({
+        //     query: brandQuery.GET_CATEGORIES,
+        //     context: {
+        //         headers: {
+        //             TENANTID: process.env.REACT_APP_TENANTID,
+        //             Authorization: token
+        //         }
+        //     }
+        // }).then(res => {
+        //     const data = res?.data?.getParentCategories?.categories
+        //     setCategories(data)
+        //     setLoading(false)
+        // }).catch(err => {
+        //     setCategories([])
+        //     console.log(err);
+        // })
+    }, [])
+
+    //Submit Form 
     const handleSubmit = values => {
-        setIsLoading(true)
-        const modify_category = [];
-        category.forEach(val => {
-            modify_category.push(
-                { "cat_id": val },
-            )
-        })
-        const data = { ...values, brand_status: brandStatus, brand_sort_order: order, categories: modify_category, brand_uuid: params?.id }
-        // console.log(data);
-        apolloUploadClient.mutate({
-            mutation: image ? brandQuery.BRAND_UPDATE : brandQuery.BRAND_UPDATE_WI,
-            variables: image ? { data, file: image } : { data },
-            refetchQueries: [
-                {
-                  query: brandQuery.GET_ALL_BRAND,
-                  context: {
-                    headers: {
-                      TENANTID: process.env.REACT_APP_TENANTID,
-                      Authorization: token
-                    }
-                  }
-                },
-                'getAllBrands'
-            ],
-            context: {
-                headers: {
-                    TENANTID: process.env.REACT_APP_TENANTID,
-                    Authorization: token
-                }
-            }
-        }).then(res => {
-            // console.log(res);
-            const data = res?.data?.updateBrand
-            if (!data?.status) return toast.error('Something Went wrong !!');
-            history.push("/admin/brand/list");
-            toast.success(data?.message);
-            window.location.reload(false); 
-        }).catch(err => {
-            toast.error('Something Went wrong !!');
-        }).finally(() => setIsLoading(false))
+        console.log(bannerData);
+        // setIsLoading(true)
+        // const modify_category = [];
+        // category.forEach(val => {
+        //     modify_category.push(
+        //         { "cat_id": val },
+        //     )
+        // })
+
+        // if (modify_category.length == 0) {
+        //     setIsLoading(false)
+        //     return toast.error("Please Select Category")
+        // }
+
+
+        // const data = { ...values, brandStatus: brandStatus, brandSortOrder: order, categories: modify_category }
+        // apolloUploadClient.mutate({
+        //     mutation: image ? brandQuery.BRAND_ADD : brandQuery.BRAND_ADD_WI,
+        //     variables: image ? { data, file: image } : { data },
+        //     refetchQueries: [
+        //         {
+        //             query: brandQuery.GET_ALL_BRAND,
+        //             context: {
+        //                 headers: {
+        //                     TENANTID: process.env.REACT_APP_TENANTID,
+        //                     Authorization: token
+        //                 }
+        //             }
+        //         },
+        //         'getAllBrands'
+        //     ],
+        //     context: {
+        //         headers: {
+        //             TENANTID: process.env.REACT_APP_TENANTID,
+        //             Authorization: token
+        //         }
+        //     }
+        // }).then(res => {
+        //     const data = res?.data?.createBrand
+        //     if (!data?.status) return toast.error('Something Went wrong !!');
+        //     history.push("/admin/brand/list");
+        //     toast.success(data?.message);
+        //     window.location.reload();
+        // }).catch(err => {
+        //     toast.error('Something Went wrong !!');
+        // }).finally(() => setIsLoading(false))
     };
 
+    // Assign Image
     const beforeImageUpload = (file) => {
         const isJpg = file.type === 'image/jpeg';
         if (!isJpg) toast.error('You can only upload JPG file!')
@@ -89,6 +116,7 @@ const UpdateBanner = () => {
         return false;
     };
 
+    // Upload Button Design
     const uploadButton = (
         <div>
             <PlusOutlined />
@@ -96,62 +124,79 @@ const UpdateBanner = () => {
         </div>
     );
 
-    useEffect(() => {
-        setLoading(true);
-        apolloClient.query({
-            query: brandQuery.GET_CATEGORIES,
-            context: {
-                headers: {
-                    TENANTID: process.env.REACT_APP_TENANTID,
-                    Authorization: token
-                }
+    // List For Table Column
+    const column = [
+        {
+            title: 'Title',
+            dataIndex: 'title',
+            key: 'title',
+            render: (text, record) => <Input placeholder="Title" />
+        },
+        {
+            title: 'Link',
+            dataIndex: 'link',
+            key: 'link',
+            render: (text, record) => <Input placeholder="Link" />
+        },
+        {
+            title: 'Image',
+            dataIndex: 'image',
+            key: 'image',
+            render: (text, record) =><Upload name="avatar" listType="picture-card" className="avatar-uploader" showUploadList={false} beforeUpload={beforeImageUpload} fileList={[]}>
+            {thumbnail ? (
+                <LazyLoadImage
+                    src={thumbnail}
+                    onError={errorImageSrc}
+                    alt="image"
+                    style={{
+                        width: '100%',
+                    }}
+                />
+            ) : (
+                uploadButton
+            )}
+        </Upload>
+        },
+        {
+            title: 'Sort Order',
+            dataIndex: 'sort_order',
+            key: 'sort_order',
+            width: 150,
+            render: (text, record) => <Input type="number" placeholder="Sort Order" onChange={(e) => record.sort_order = e.target.value} />
+        },
+        {
+            title: 'Action',
+            dataIndex: 'action',
+            key: 'action',
+            render: (text, record) => <Button size="" title="Remove" type="danger"><FeatherIcon icon="minus" onClick={() => removeRow(record.id)} /></Button>
+        },
+    ];
+
+    // Adding new row on table
+    const addNewRow = () => {
+        const newData = (
+            {
+                "id": new Date().getTime(),
+                "title": "",
+                "link": "",
+                "image": "",
+                "sort_order": "",
+                "action" : ""
             }
-        }).then(res => {
-            const data = res?.data?.getParentCategories?.categories
-            setCategories(data)
-        }).catch(err => {
-            setCategories([])
-            console.log(err);
+        )
+        setBannerData(prevState => [...prevState, newData])
+    }
+
+    const removeRow = (id) => {
+        setBannerData(prevState => {
+            return prevState.filter((value) => value.id !== id)
         })
-        apolloClient.query({
-            query: brandQuery.GET_SINGLE_BRAND,
-            variables: {
-                brand_uuid: params?.id
-            },
-            context: {
-                headers: {
-                    TENANTID: process.env.REACT_APP_TENANTID,
-                    Authorization: token
-                }
-            }
-        }).then(res => {
-            const data = res?.data?.getSingleBrand
-            if (!data.status) return;
-            setSingleBrand({ data: data?.data, loading: false, error: '' })
-            const inputSelectedCategories =  []
-            data?.data?.categories.map(item => {
-                inputSelectedCategories.push(item.cat_id)
-            })
-            setCategory(inputSelectedCategories)
-            setLoading(false);
-            setBrandStatus(data?.data?.brand_status)
-            setThumbnail(renderImage(params?.id, data?.data?.image, 'brand', '128x128'))
-            form.setFieldsValue({
-                "brand_name": data?.data?.brand_name,
-                "brand_description": data?.data?.brand_description
-            })
-            setOrder(data?.data?.brand_sort_order)
-        }).catch(err => {
-            console.log(err);
-            setSingleBrand({ data: {}, loading: false, error: 'Something went worng' })
-        })
-    }, [])
+    }
 
     return (
         <>
-            <PageHeader
-                title={ `Manage Manufacture | Edit Manufacture ${singleBrand?.data?.brand_name ? `(${singleBrand?.data?.brand_name})` : ""}` }
-            />
+            <PageHeader title="Edit Banner" />
+
             <Main>
                 <Row gutter={25}>
                     <Col sm={24} xs={24}>
@@ -165,85 +210,41 @@ const UpdateBanner = () => {
                                     <Form
                                         style={{ width: '100%' }}
                                         form={form}
-                                        name="editBrand"
+                                        name="addBanner"
                                         onFinish={handleSubmit}
                                         onFinishFailed={errorInfo => console.log('form error info:\n', errorInfo)}
                                         labelCol={{ span: 4 }} >
                                         <Form.Item
-                                            rules={[{ required: true, max: maxLength, message: "Please Enter Manufacture Name" }]}
-                                            name="brand_name" label="Name" >
-                                            <Input placeholder='Enter Manufacture Name' defaultValue={singleBrand?.data?.brand_name} />
-                                        </Form.Item>
-                                        <Form.Item
-                                            rules={[{ required: true, message: "Please Enter Manufacture Description" }]}
-                                            name="brand_description" label="Description"
-                                        >
-                                            <TextArea rows={4} placeholder="Enter Manufacture Description" defaultValue={singleBrand?.data?.brand_description} />
-                                        </Form.Item>
-
-                                        <Form.Item label="Categories">
-                                            <Select
-                                                mode="multiple"
-                                                style={{ width: '100%' }}
-                                                placeholder="Select Categories"
-                                                defaultValue={category}
-                                                onChange={(e) => setCategory(e)}
-                                                optionLabelProp="label"
-                                            >
-                                                {
-                                                    categories.map(val => {
-                                                        return (
-                                                            <Select.Option key={val.cat_id} value={val.cat_id} label={val.cat_name}>
-                                                                <div className="demo-option-label-item">
-                                                                    {
-                                                                        val.cat_name
-                                                                    }
-                                                                </div>
-                                                            </Select.Option>
-                                                        )
-                                                    })
-                                                }
-                                            </Select>
-                                        </Form.Item>
-
-                                        <Form.Item label="Sort Order">
-                                            <InputNumber defaultValue={singleBrand?.data?.brand_sort_order} onChange={setOrder} style={{ width: '100%' }} />
+                                            rules={[{ required: true, max: maxLength, message: "Please Enter Banner Name" }]}
+                                            name="bannerName" label="Banner Name" >
+                                            <Input placeholder='Enter Banner Name' />
                                         </Form.Item>
 
                                         <Form.Item label="Status">
                                             <Switch checked={brandStatus} onChange={checked => setBrandStatus(checked)} checkedChildren="ON" unCheckedChildren="OFF" />
                                         </Form.Item>
 
-                                        <Form.Item label="Image">
-                                            <Upload
-                                                name="avatar"
-                                                listType="picture-card"
-                                                className="avatar-uploader"
-                                                showUploadList={false}
-                                                beforeUpload={beforeImageUpload}
-                                                fileList={[]}
-                                            >
-                                                {thumbnail ? (
-                                                    <LazyLoadImage
-                                                        src={thumbnail}
-                                                        onError={errorImageSrc}
-                                                        alt="image"
-                                                        style={{
-                                                            width: '100%',
-                                                        }}
-                                                    />
-                                                ) : (
-                                                    uploadButton
-                                                )}
-                                            </Upload>
-                                        </Form.Item>
+                                        <Table
+                                            className="table-responsive"
+                                            columns={column}
+                                            pagination={false}
+                                            rowKey={'id'}
+                                            size="small"
+                                            dataSource={bannerData}
+                                        />
 
-                                        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                                        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '10px', marginBottom: '10px' }}>
+                                            <Button size="small" title="Add Banner" htmlType="button" type="primary">
+                                                <FeatherIcon icon="plus" onClick={addNewRow}/>
+                                            </Button>
+                                        </div>
+
+                                        <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
                                             <Form.Item>
                                                 <Button loading={isLoading} size="default" htmlType="submit" type="primary" raised>
                                                     {isLoading ? 'Processing' : 'Save'}
                                                 </Button>
-                                                <Link to="/admin/brand/list">
+                                                <Link to="/admin/banner/list">
                                                     <Button
                                                         style={{ marginLeft: 10 }}
                                                         type='light'
@@ -263,4 +264,4 @@ const UpdateBanner = () => {
     );
 };
 
-export default UpdateBanner;
+export default AddBanner;

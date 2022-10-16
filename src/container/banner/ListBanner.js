@@ -72,7 +72,7 @@ const ListBanner = () => {
             title: 'ID',
             dataIndex: 'brand_uuid',
             key: 'brand_uuid',
-            width: 120,
+            width: 80,
             ellipsis: true,
             sorter: (a, b) => a.brand_uuid.toUpperCase() > b.brand_uuid.toUpperCase() ? 1 : -1,
         },
@@ -80,38 +80,24 @@ const ListBanner = () => {
             title: 'Name',
             dataIndex: 'brand_name',
             key: 'brand_name',
-            width: 120,
+            width: 250,
             ellipsis: true,
             sorter: (a, b) => a.brand_name.toUpperCase() > b.brand_name.toUpperCase() ? 1 : -1,
         },
         {
-            title: 'Image',
-            dataIndex: 'image',
-            key: 'image',
-            width: 70,
-            align: 'right',
-            render: (text, record) => (<LazyLoadImage effect="blur" width="40" src={renderImage(record.brand_uuid, record.image, 'brand', '128x128')} onError={errorImageSrc} onL alt={record.brand_name} />),
-        },
-        {
-            title: 'Alias',
+            title: 'Link',
             dataIndex: 'brand_slug',
             key: 'brand_slug',
-            width: 120,
+            width: 250,
             ellipsis: true,
             sorter: (a, b) => a.brand_slug.toUpperCase() > b.brand_slug.toUpperCase() ? 1 : -1,
-        },
-        {
-            title: 'Description',
-            dataIndex: 'brand_description',
-            key: 'brand_description',
-            width: 200,
-            ellipsis: true
         },
         {
             title: 'Status',
             dataIndex: 'brand_status',
             key: 'brand_status',
             align: 'right',
+            width:120,
             render: (text, record) => (
                 <Switch defaultChecked={text} title='Status' onChange={checked => handleStatusChange(record, checked)} />
             ),
@@ -144,7 +130,7 @@ const ListBanner = () => {
             key: 'action',
             render: (text, record) => (
                 <>
-                    <Link to={`/admin/brand/edit?id=${record.brand_uuid}`}>
+                    <Link to={`/admin/banner/edit?id=${record.brand_uuid}`}>
                         <FontAwesome name="edit" />
                     </Link>
                 </>
@@ -162,11 +148,11 @@ const ListBanner = () => {
     return (
         <>
             <PageHeader
-                title="Manufacture"
+                title="Banner"
                 buttons={[
                     <div key="1" className="page-header-actions">
-                        <Link to="/admin/brand/add">
-                            <Button size="small" title="Add Manufacture" type="primary">
+                        <Link to="/admin/banner/add">
+                            <Button size="small" title="Add Banner" type="primary">
                                 <FeatherIcon icon="plus" />
                             </Button>
                         </Link>
@@ -186,7 +172,7 @@ const ListBanner = () => {
                                     <p>{brand.error}</p>
                                     :
                                     <>
-                                        <Input placeholder="Search in Manufacture..." prefix={<SearchOutlined />} onChange={onChangeSearch} />
+                                        <Input placeholder="Search in Banner..." prefix={<SearchOutlined />} onChange={onChangeSearch} />
                                         <br /><br />
 
                                         <span className={"psp_list"} >
