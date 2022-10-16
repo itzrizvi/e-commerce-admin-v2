@@ -29,7 +29,15 @@ const AddBanner = () => {
     const maxLength = 50
     const [form] = Form.useForm();
 
-    const [bannerData, setBannerData] = useState([]);
+    const initialData = {
+        "id": new Date().getTime(),
+        "title": "",
+        "link": "",
+        "image": "",
+        "sort_order": "",
+        "action": ""
+    }
+    const [bannerData, setBannerData] = useState([initialData]);
 
     useEffect(() => {
         // setLoading(true);
@@ -142,20 +150,20 @@ const AddBanner = () => {
             title: 'Image',
             dataIndex: 'image',
             key: 'image',
-            render: (text, record) =><Upload name="avatar" listType="picture-card" className="avatar-uploader" showUploadList={false} beforeUpload={beforeImageUpload} fileList={[]}>
-            {thumbnail ? (
-                <LazyLoadImage
-                    src={thumbnail}
-                    onError={errorImageSrc}
-                    alt="image"
-                    style={{
-                        width: '100%',
-                    }}
-                />
-            ) : (
-                uploadButton
-            )}
-        </Upload>
+            render: (text, record) => <Upload name="avatar" listType="picture-card" className="avatar-uploader" showUploadList={false} beforeUpload={beforeImageUpload} fileList={[]}>
+                {thumbnail ? (
+                    <LazyLoadImage
+                        src={thumbnail}
+                        onError={errorImageSrc}
+                        alt="image"
+                        style={{
+                            width: '100%',
+                        }}
+                    />
+                ) : (
+                    uploadButton
+                )}
+            </Upload>
         },
         {
             title: 'Sort Order',
@@ -168,7 +176,7 @@ const AddBanner = () => {
             title: 'Action',
             dataIndex: 'action',
             key: 'action',
-            render: (text, record) => <Button size="" title="Remove" type="danger"><FeatherIcon icon="minus" onClick={() => removeRow(record.id)} /></Button>
+            render: (text, record) => <Button size="" title="Remove" type="danger" onClick={() => removeRow(record.id)} ><FeatherIcon icon="minus" /></Button>
         },
     ];
 
@@ -181,7 +189,7 @@ const AddBanner = () => {
                 "link": "",
                 "image": "",
                 "sort_order": "",
-                "action" : ""
+                "action": ""
             }
         )
         setBannerData(prevState => [...prevState, newData])
@@ -234,8 +242,8 @@ const AddBanner = () => {
                                         />
 
                                         <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '10px', marginBottom: '10px' }}>
-                                            <Button size="small" title="Add Banner" htmlType="button" type="primary">
-                                                <FeatherIcon icon="plus" onClick={addNewRow}/>
+                                            <Button size="small" title="Add Banner" htmlType="button" type="primary" onClick={addNewRow}>
+                                                <FeatherIcon icon="plus" />
                                             </Button>
                                         </div>
 
