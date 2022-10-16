@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Row, Col, Form, Input, Switch } from 'antd';
+import { Row, Col, Form, Input, Switch, Checkbox } from 'antd';
 import FeatherIcon from 'feather-icons-react';
 import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';

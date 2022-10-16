@@ -15,10 +15,13 @@ import Cookies from 'js-cookie';
 import FontAwesome from 'react-fontawesome';
 import { toast } from 'react-toastify';
 import config from '../../config/config';
+import { logOut } from '../../redux/authentication/actionCreator';
+import { useDispatch } from 'react-redux';
 
 
 
 const ListPermission = () => {
+    const dispatch = useDispatch();
     const [permissions, setPermissions] = useState({ data: [], loading: true, error: '' })
     const [searchText, setSearchText] = useState('');
     const [filteredPermissions, setFilteredPermissions] = useState([]);
@@ -36,7 +39,7 @@ const ListPermission = () => {
 
             const data = res?.data?.getAllRolesPermission
 
-            if (!data?.isAuth) return setPermissions(s => ({ ...s, error: 'You Are not Authorized' }))
+            if (!data?.isAuth) return dispatch(logOut())
             setPermissions(s => ({ ...s, data: data?.data, error: '' }))
 
         }).catch(err => {
@@ -60,8 +63,9 @@ const ListPermission = () => {
                 }
             }
         }).then(res => {
-            const status = res?.data?.updateRolesPermission?.status
-            if (!status) return toast.error(data.message)
+            const data = res?.data?.updateRolesPermission
+            if (!data.isAuth) return
+            if (!data?.status) return toast.error(data?.message)
             toast.success(`${record.roles_permission_name} Permission Status updated successfully.`)
         }).catch(err => {
             console.log("🚀 ~ file: AllAdmins.js ~ line 33 ~ handleStatusChange ~ err", err);
@@ -83,6 +87,17 @@ const ListPermission = () => {
             key: 'roles_permission_status',
             align: 'right',
             sorter: (a, b) => (a.roles_permission_status === b.roles_permission_status) ? 0 : a.roles_permission_status ? -1 : 1,
+            filters: [
+                {
+                    text: 'Active',
+                    value: true,
+                },
+                {
+                    text: 'Inactive',
+                    value: false,
+                }
+            ],
+            onFilter: (value, record) => record.roles_permission_status === value,
             render: (text, record) => (
                 <Switch defaultChecked={text} title='Status' onChange={checked => handleStatusChange(record, checked)} />
             )

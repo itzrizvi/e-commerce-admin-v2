@@ -10,6 +10,8 @@ import { Link } from 'react-router-dom';
 import FontAwesome from 'react-fontawesome';
 import apolloClient, { productQuery } from '../../utility/apollo';
 import config from '../../config/config';
+import { LazyLoadImage } from 'react-lazy-load-image-component';
+import { errorImageSrc, renderImage } from '../../utility/images';
 
 const categories1 = [
     {
@@ -73,6 +75,7 @@ const ListCategories = () => {
     const [categoriesData, setCategoriesData] = useState({ data: [], loading: true })
     const [filteredCategoryData, setFilteredCategoryData] = useState([])
 
+
     const [isFilter, setIsFilter] = useState(false)
     const [searchText, setSearchText] = useState("")
     const [isFeatured, setIsFeatured] = useState(false)
@@ -80,6 +83,7 @@ const ListCategories = () => {
 
 
     useEffect(() => {
+
         apolloClient.query({
             query: productQuery.GET_ALL_CATEGORIES,
             context: {
@@ -92,6 +96,8 @@ const ListCategories = () => {
             const data = res?.data?.getAllCategories
             if (!data.status) return;
             setCategories(data.categories)
+            // console.log("list Category UseEffect:\n", data.categories);
+
         }).catch(err => {
 
         })
@@ -108,15 +114,15 @@ const ListCategories = () => {
             const parent = item.cat_name
             const cat_sort_order = item.cat_sort_order
 
-            arrData.push({ cat_name: parent, cat_id: item.cat_id, cat_sort_order, cat_des: item.cat_description, cat_isFeatured: item.is_featured, cat_status: item.cat_status })
+            arrData.push({ cat_name: parent, cat_id: item.cat_id, cat_sort_order, cat_des: item.cat_description, cat_isFeatured: item.is_featured, cat_status: item.cat_status, img: item.image })
             if (item.subcategories) {
                 item.subcategories.forEach(subCat => {
                     const sub = subCat.cat_name
-                    arrData.push({ cat_name: `${parent} > ${sub}`, cat_id: subCat.cat_id, cat_des: subCat.cat_description, cat_isFeatured: subCat.is_featured, cat_status: subCat.cat_status })
+                    arrData.push({ cat_name: `${parent} > ${sub}`, cat_id: subCat.cat_id, cat_des: subCat.cat_description, cat_isFeatured: subCat.is_featured, cat_status: subCat.cat_status, img: subCat.image })
                     if (subCat.subsubcategories) {
                         subCat.subsubcategories.forEach(subSubCat => {
                             const subSub = subSubCat.cat_name
-                            arrData.push({ cat_name: `${parent} > ${sub} > ${subSub}`, cat_id: subSubCat.cat_id, cat_des: subSubCat.cat_description, cat_isFeatured: subSubCat.is_featured, cat_status: subSubCat.cat_status })
+                            arrData.push({ cat_name: `${parent} > ${sub} > ${subSub}`, cat_id: subSubCat.cat_id, cat_des: subSubCat.cat_description, cat_isFeatured: subSubCat.is_featured, cat_status: subSubCat.cat_status, img: subSubCat.image })
                         })
                     }
                 })
@@ -125,6 +131,7 @@ const ListCategories = () => {
         })
 
         setCategoriesData({ data: arrData, loading: false })
+        // console.log("userEffect 2nd: \n", arrData)
 
     }, [categories])
 
@@ -136,14 +143,14 @@ const ListCategories = () => {
             width: 50,
             ellipsis: true,
             sorter: (a, b) => a.cat_id.toUpperCase() > b.cat_id.toUpperCase() ? 1 : -1,
-
         },
         {
             title: 'Logo',
             dataIndex: 'cat_id',
             key: 'cat_id',
             width: 70,
-            render: (text, record) => (<img src={require('../../static/img/avatar/NoPath (3).png')} alt="" />),
+            // render: (text, record) => (<img src={require('../../static/img/avatar/NoPath (3).png')} alt="" />),
+            render: (text, record) => (<LazyLoadImage effect="blur" width="40" src={renderImage(record.cat_id, record.img, 'category', '128x128')} onError={errorImageSrc} onL alt={record.cat_id} />)
         },
         {
             title: 'Category Name',
@@ -159,20 +166,24 @@ const ListCategories = () => {
             ellipsis: true,
             sorter: (a, b) => a.cat_des.toUpperCase() > b.cat_des.toUpperCase() ? 1 : -1,
         },
-        // {
-        //     title: 'Sort Order',
-        //     dataIndex: 'cat_sort_order',
-        //     key: 'cat_sort_order',
-        //     align: 'center',
-        //     width: 90,
-        // },
         {
             title: 'Featured',
             dataIndex: 'cat_isFeatured',
-            width: 90,
+            width: 110,
             align: 'center',
             key: 'cat_isFeatured',
             sorter: (a, b) => (a.cat_isFeatured === b.cat_isFeatured) ? 0 : a.cat_isFeatured ? -1 : 1,
+            filters: [
+                {
+                    text: 'Featured',
+                    value: true,
+                },
+                {
+                    text: 'Not Featured',
+                    value: false,
+                }
+            ],
+            onFilter: (value, record) => record.cat_isFeatured === value,
             render: (value, record) => (
                 <Checkbox
                     defaultChecked={value}
@@ -186,6 +197,17 @@ const ListCategories = () => {
             width: 90,
             key: 'cat_status',
             sorter: (a, b) => (a.status === b.status) ? 0 : a.status ? -1 : 1,
+            filters: [
+                {
+                    text: 'Active',
+                    value: true,
+                },
+                {
+                    text: 'Inactive',
+                    value: false,
+                }
+            ],
+            onFilter: (value, record) => record.cat_status === value,
             render: (value, record) => (
                 <Switch
                     defaultChecked={value}
@@ -252,6 +274,9 @@ const ListCategories = () => {
                     <Col sm={24} xs={24}>
                         <Cards headless>
 
+                            {/* TEST CODES */}
+                            {/* <p>{JSON.stringify(categoriesData.data.map(item => item.cat_name))}</p> */}
+
                             {categoriesData.loading ?
                                 <div className="spin">
                                     <Spin />
@@ -259,8 +284,6 @@ const ListCategories = () => {
                                 :
 
                                 <>
-
-
                                     <Input
                                         placeholder="Search Permission..."
                                         prefix={<SearchOutlined />}

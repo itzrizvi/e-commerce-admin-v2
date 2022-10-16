@@ -14,7 +14,7 @@
 			"path": "src/routes/admin/index.js",
 			"bookmarks": [
 				{
-					"line": 28,
+					"line": 29,
 					"column": 13,
 					"label": "-index routes"
 				}
@@ -44,7 +44,7 @@
 			"path": "src/redux/roles/actionCreator.js",
 			"bookmarks": [
 				{
-					"line": 45,
+					"line": 49,
 					"column": 28,
 					"label": "-refetch query"
 				}
@@ -67,6 +67,41 @@
 					"line": 31,
 					"column": 35,
 					"label": "--setting menue"
+				}
+			]
+		},
+		{
+			"path": "src/container/categories/AddCategory.js",
+			"bookmarks": [
+				{
+					"line": 353,
+					"column": 98,
+					"label": "-----"
+				},
+				{
+					"line": 394,
+					"column": 1,
+					"label": ""
+				}
+			]
+		},
+		{
+			"path": "src/components/utilities/auth-info/info.js",
+			"bookmarks": [
+				{
+					"line": 25,
+					"column": 23,
+					"label": "--log out--"
+				}
+			]
+		},
+		{
+			"path": "src/container/admin/AddAdmin.js",
+			"bookmarks": [
+				{
+					"line": 292,
+					"column": 64,
+					"label": "--"
 				}
 			]
 		}

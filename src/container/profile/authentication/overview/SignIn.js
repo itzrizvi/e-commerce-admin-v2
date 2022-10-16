@@ -11,7 +11,7 @@ import Heading from '../../../../components/heading/heading';
 
 const SignIn = () => {
   const [email, setEmail] = useState('shahriar.rizvi02@gmail.com');
-  const [password, setPassword] = useState('A1234567');
+  const [password, setPassword] = useState('A12345678');
 
   const history = useHistory();
   const dispatch = useDispatch();
