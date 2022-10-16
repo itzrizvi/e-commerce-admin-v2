@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Col, Form, Input, Select, Spin, Switch, Checkbox } from 'antd';
+import { Row, Col, Form, Input, Select, Spin, Switch, Checkbox, Typography } from 'antd';
 import FeatherIcon from 'feather-icons-react';
 import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
@@ -11,6 +11,7 @@ import apolloClient, { authMutation, authQuery } from '../../utility/apollo';
 import { toast } from 'react-toastify';
 import queryString from 'query-string'
 import Cookies from 'js-cookie';
+const { Paragraph, Text } = Typography;
 
 const { Option } = Select;
 
@@ -248,6 +249,13 @@ const AddAdmin = () => {
                                     <Switch checked={userStatus} onChange={checked => setUserStatus(checked)} />
                                 </Form.Item>
 
+                                <Form.Item
+                                    // name="userStatus"
+                                    label="Send Email"
+                                >
+                                    <Checkbox defaultChecked={true}></Checkbox>
+                                </Form.Item>
+
 
                                 <Form.Item
                                     name="roleUUID" initialValue="" label="Role"
@@ -271,6 +279,19 @@ const AddAdmin = () => {
                                                     {roles.roles.map(item => (
                                                         <Col span={12}>
                                                             <Checkbox value={item.role_uuid}>{item.role}</Checkbox>
+                                                            <br />
+                                                            <Paragraph
+                                                                style={{
+                                                                    marginLeft: '2em',
+                                                                    color: "gray",
+                                                                    width: "calc(100% - 4em)"
+                                                                }}
+                                                                // ellipsis={{ tooltip: item.role_description }}
+                                                                ellipsis={{ tooltip: item.role_description, rows: 1 }}
+
+                                                            >
+                                                                {item.role_description}
+                                                            </Paragraph>
                                                         </Col>
 
                                                     ))}

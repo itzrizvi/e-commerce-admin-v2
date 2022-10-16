@@ -94,6 +94,16 @@
 					"label": "--log out--"
 				}
 			]
+		},
+		{
+			"path": "src/container/admin/AddAdmin.js",
+			"bookmarks": [
+				{
+					"line": 292,
+					"column": 64,
+					"label": "--"
+				}
+			]
 		}
 	]
 }
