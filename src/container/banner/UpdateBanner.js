@@ -14,7 +14,7 @@ import queryString from 'query-string'
 import { errorImageSrc, renderImage } from '../../utility/images';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
 
-const UpdateBrand = () => {
+const UpdateBanner = () => {
     const { search } = useLocation();
     const params = queryString.parse(search)
     const { TextArea } = Input;
@@ -263,4 +263,4 @@ const UpdateBrand = () => {
     );
 };
 
-export default UpdateBrand;
+export default UpdateBanner;

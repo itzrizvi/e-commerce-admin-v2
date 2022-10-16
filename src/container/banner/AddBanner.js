@@ -4,34 +4,53 @@ import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
 import { Cards } from '../../components/cards/frame/cards-frame';
 import { Button } from '../../components/buttons/buttons';
-import { Link, useHistory, useLocation } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 import { PlusOutlined } from '@ant-design/icons';
 import { brandQuery } from '../../apollo/brand';
-import apolloClient, { apolloUploadClient } from '../../apollo';
-import queryString from 'query-string'
-import { errorImageSrc, renderImage } from '../../utility/images';
+import apolloClient from '../../apollo';
+import { apolloUploadClient } from '../../apollo';
+import { errorImageSrc } from '../../utility/images';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
 
-const UpdateBrand = () => {
-    const { search } = useLocation();
-    const params = queryString.parse(search)
+const AddBanner = () => {
     const { TextArea } = Input;
     const history = useHistory();
     const token = useSelector(state => state.auth.token);
-    const [isLoading, setIsLoading] = useState(false)
     const [loading, setLoading] = useState(false)
+    const [isLoading, setIsLoading] = useState(false)
     const [brandStatus, setBrandStatus] = useState(true)
     const [image, setImage] = useState('');
     const [thumbnail, setThumbnail] = useState('');
     const [order, setOrder] = useState(0);
     const [category, setCategory] = useState([]);
     const [categories, setCategories] = useState([]);
-    const [singleBrand, setSingleBrand] = useState({ data: {}, loading: true, error: '' })
     const maxLength = 30
     const [form] = Form.useForm();
 
+
+    useEffect(() => {
+        setLoading(true);
+        apolloClient.query({
+            query: brandQuery.GET_CATEGORIES,
+            context: {
+                headers: {
+                    TENANTID: process.env.REACT_APP_TENANTID,
+                    Authorization: token
+                }
+            }
+        }).then(res => {
+            const data = res?.data?.getParentCategories?.categories
+            setCategories(data)
+            setLoading(false)
+        }).catch(err => {
+            setCategories([])
+            console.log(err);
+        })
+    }, [])
+
+    //Submit Form 
     const handleSubmit = values => {
         setIsLoading(true)
         const modify_category = [];
@@ -40,10 +59,16 @@ const UpdateBrand = () => {
                 { "cat_id": val },
             )
         })
-        const data = { ...values, brand_status: brandStatus, brand_sort_order: order, categories: modify_category, brand_uuid: params?.id }
-        // console.log(data);
+
+        if(modify_category.length == 0){
+            setIsLoading(false)
+            return toast.error("Please Select Category")
+        } 
+        
+
+        const data = { ...values, brandStatus: brandStatus, brandSortOrder: order, categories: modify_category }
         apolloUploadClient.mutate({
-            mutation: image ? brandQuery.BRAND_UPDATE : brandQuery.BRAND_UPDATE_WI,
+            mutation: image ? brandQuery.BRAND_ADD : brandQuery.BRAND_ADD_WI,
             variables: image ? { data, file: image } : { data },
             refetchQueries: [
                 {
@@ -64,17 +89,17 @@ const UpdateBrand = () => {
                 }
             }
         }).then(res => {
-            // console.log(res);
-            const data = res?.data?.updateBrand
+            const data = res?.data?.createBrand
             if (!data?.status) return toast.error('Something Went wrong !!');
             history.push("/admin/brand/list");
             toast.success(data?.message);
-            window.location.reload(false); 
+            window.location.reload(); 
         }).catch(err => {
             toast.error('Something Went wrong !!');
         }).finally(() => setIsLoading(false))
     };
 
+    // Assign Image
     const beforeImageUpload = (file) => {
         const isJpg = file.type === 'image/jpeg';
         if (!isJpg) toast.error('You can only upload JPG file!')
@@ -89,6 +114,7 @@ const UpdateBrand = () => {
         return false;
     };
 
+    // Upload Button Design
     const uploadButton = (
         <div>
             <PlusOutlined />
@@ -96,97 +122,47 @@ const UpdateBrand = () => {
         </div>
     );
 
-    useEffect(() => {
-        setLoading(true);
-        apolloClient.query({
-            query: brandQuery.GET_CATEGORIES,
-            context: {
-                headers: {
-                    TENANTID: process.env.REACT_APP_TENANTID,
-                    Authorization: token
-                }
-            }
-        }).then(res => {
-            const data = res?.data?.getParentCategories?.categories
-            setCategories(data)
-        }).catch(err => {
-            setCategories([])
-            console.log(err);
-        })
-        apolloClient.query({
-            query: brandQuery.GET_SINGLE_BRAND,
-            variables: {
-                brand_uuid: params?.id
-            },
-            context: {
-                headers: {
-                    TENANTID: process.env.REACT_APP_TENANTID,
-                    Authorization: token
-                }
-            }
-        }).then(res => {
-            const data = res?.data?.getSingleBrand
-            if (!data.status) return;
-            setSingleBrand({ data: data?.data, loading: false, error: '' })
-            const inputSelectedCategories =  []
-            data?.data?.categories.map(item => {
-                inputSelectedCategories.push(item.cat_id)
-            })
-            setCategory(inputSelectedCategories)
-            setLoading(false);
-            setBrandStatus(data?.data?.brand_status)
-            setThumbnail(renderImage(params?.id, data?.data?.image, 'brand', '128x128'))
-            form.setFieldsValue({
-                "brand_name": data?.data?.brand_name,
-                "brand_description": data?.data?.brand_description
-            })
-            setOrder(data?.data?.brand_sort_order)
-        }).catch(err => {
-            console.log(err);
-            setSingleBrand({ data: {}, loading: false, error: 'Something went worng' })
-        })
-    }, [])
-
     return (
         <>
             <PageHeader
-                title={ `Manage Manufacture | Edit Manufacture ${singleBrand?.data?.brand_name ? `(${singleBrand?.data?.brand_name})` : ""}` }
+                title="Add Manufacture"
             />
+
             <Main>
                 <Row gutter={25}>
                     <Col sm={24} xs={24}>
                         <Cards headless>
                             {
                                 loading ? (
-                                    <div style={{ textAlign: "center" }}>
-                                        <Spin tip="processing..." />
-                                    </div>
+                                <div style={{ textAlign: "center" }}>
+                                    <Spin tip="processing..." />
+                                </div>
                                 ) :
                                     <Form
                                         style={{ width: '100%' }}
                                         form={form}
-                                        name="editBrand"
+                                        name="addBrand"
                                         onFinish={handleSubmit}
                                         onFinishFailed={errorInfo => console.log('form error info:\n', errorInfo)}
                                         labelCol={{ span: 4 }} >
                                         <Form.Item
                                             rules={[{ required: true, max: maxLength, message: "Please Enter Manufacture Name" }]}
-                                            name="brand_name" label="Name" >
-                                            <Input placeholder='Enter Manufacture Name' defaultValue={singleBrand?.data?.brand_name} />
+                                            name="brandName" label="Name" >
+                                            <Input placeholder='Enter Manufacture Name' />
                                         </Form.Item>
                                         <Form.Item
                                             rules={[{ required: true, message: "Please Enter Manufacture Description" }]}
-                                            name="brand_description" label="Description"
+                                            name="brandDescription" label="Description"
                                         >
-                                            <TextArea rows={4} placeholder="Enter Manufacture Description" defaultValue={singleBrand?.data?.brand_description} />
+                                            <TextArea rows={4} placeholder="Enter Manufacture Description" />
                                         </Form.Item>
 
-                                        <Form.Item label="Categories">
+                                        <Form.Item label="Categories" required >
                                             <Select
                                                 mode="multiple"
                                                 style={{ width: '100%' }}
                                                 placeholder="Select Categories"
-                                                defaultValue={category}
+                                                initialvalues=""
                                                 onChange={(e) => setCategory(e)}
                                                 optionLabelProp="label"
                                             >
@@ -207,9 +183,8 @@ const UpdateBrand = () => {
                                         </Form.Item>
 
                                         <Form.Item label="Sort Order">
-                                            <InputNumber defaultValue={singleBrand?.data?.brand_sort_order} onChange={setOrder} style={{ width: '100%' }} />
+                                            <InputNumber defaultValue={0} onChange={setOrder} style={{ width: '100%' }} />
                                         </Form.Item>
-
                                         <Form.Item label="Status">
                                             <Switch checked={brandStatus} onChange={checked => setBrandStatus(checked)} checkedChildren="ON" unCheckedChildren="OFF" />
                                         </Form.Item>
@@ -263,4 +238,4 @@ const UpdateBrand = () => {
     );
 };
 
-export default UpdateBrand;
+export default AddBanner;

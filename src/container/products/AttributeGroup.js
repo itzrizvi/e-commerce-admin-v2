@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Row, Col, Input, Table } from 'antd';
+import { Row, Col, Input, Table, Spin } from 'antd';
 import FeatherIcon from 'feather-icons-react';
 import { SearchOutlined } from '@ant-design/icons';
 import { PageHeader } from '../../components/page-headers/page-headers';
@@ -27,7 +27,7 @@ const AttributeGroup = () => {
             title: 'Sort Order',
             dataIndex: 'g_s',
             key: 'g_s',
-            sorter: (a, b) => a.g_s.toUpperCase() > b.g_s.toUpperCase() ? 1 : -1,
+            sorter: (a, b) => (a.g_s === b.g_s) ? 0 : a.g_s ? -1 : 1,
         },
         {
             title: 'Action',
