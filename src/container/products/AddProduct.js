@@ -58,7 +58,7 @@ const AddProduct = () => {
                                         </Form.Item>
                                         <Form.Item
                                             rules={[{ required: true, message: "Please enter n" }]}
-                                            name="n" label="Short Description"
+                                            name="n1" label="Short Description"
                                         >
                                             <TextArea rows={3} placeholder="Enter Short Description" />
                                         </Form.Item>
@@ -77,25 +77,25 @@ const AddProduct = () => {
                                         </Form.Item>
                                         <Form.Item
                                             rules={[{ required: true, message: "Please enter Meta Title" }]}
-                                            name="n" label="Meta Title"
+                                            name="n2" label="Meta Title"
                                         >
                                             <Input placeholder='Enter Meta Title' />
                                         </Form.Item>
                                         <Form.Item
                                             rules={[{ required: true, message: "Please enter Meta Description" }]}
-                                            name="n" label="Meta Description"
+                                            name="n3" label="Meta Description"
                                         >
                                             <Input placeholder='Enter Meta Description' />
                                         </Form.Item>
                                         <Form.Item
                                             rules={[{ required: true, message: "Please enter Meta Keywords" }]}
-                                            name="n" label="Meta Keywords"
+                                            name="n4" label="Meta Keywords"
                                         >
                                             <Input placeholder='Enter Meta Keywords' />
                                         </Form.Item>
                                         <Form.Item
                                             rules={[{ required: true, message: "Please enter Tags" }]}
-                                            name="n" label="Tags"
+                                            name="n5" label="Tags"
                                         >
                                             <Input placeholder='Enter Tags' />
                                         </Form.Item>
