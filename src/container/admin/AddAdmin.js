@@ -166,8 +166,9 @@ const AddAdmin = () => {
             }).then(res => {
                 const status = res?.data?.adminUpdate?.status
                 if (!status) return toast.error(data.message)
-                toast.success(`${params.email} user Status updated successfully.`)
                 history.push("/admin/admin/admins");
+                window.location.reload()
+                toast.success(`${params.email} user Status updated successfully.`)
             }).catch(err => {
                 console.log("🚀 ~ file: AllAdmins.js ~ line 33 ~ handleStatusChange ~ err", err);
                 toast.error(`Something went wrong!!`)
