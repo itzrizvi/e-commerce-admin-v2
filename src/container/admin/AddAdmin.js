@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Col, Form, Input, Select, Spin, Switch } from 'antd';
+import { Row, Col, Form, Input, Select, Spin, Switch, Checkbox, Typography } from 'antd';
 import FeatherIcon from 'feather-icons-react';
 import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
@@ -11,6 +11,7 @@ import apolloClient, { authMutation, authQuery } from '../../utility/apollo';
 import { toast } from 'react-toastify';
 import queryString from 'query-string'
 import Cookies from 'js-cookie';
+const { Paragraph, Text } = Typography;
 
 const { Option } = Select;
 
@@ -94,7 +95,7 @@ const AddAdmin = () => {
         if (!selectedRoles.length) return toast.warn("Select At List 1 Role..")
 
         setIsLoading(true);
-        if (!params.uid) {
+        if (!params.uid) { // ADD NEW ADMIN
             const variables = { data: { ...values, roleUUID: selectedRoles.map(item => ({ role_uuid: item })), userStatus } }
             apolloClient.mutate({
                 mutation: authMutation.ADMIN_SIGN_UP,
@@ -128,7 +129,7 @@ const AddAdmin = () => {
                 toast.error('Soemthing Went wrong !!');
             }).finally(() => setIsLoading(false))
 
-        } else {
+        } else { // UPDATE ADMIN
             const { first_name, last_name } = values
             const variables = {
                 data: {
@@ -145,6 +146,18 @@ const AddAdmin = () => {
             apolloClient.mutate({
                 mutation: authMutation.ADMIN_UPDATE,
                 variables,
+                refetchQueries: [
+                    {
+                        query: authQuery.GET_ALL_STAFF,
+                        context: {
+                            headers: {
+                                TENANTID: process.env.REACT_APP_TENANTID,
+                                Authorization: Cookies.get('psp_t')
+                            }
+                        }
+                    },
+                    'getAllStaff'
+                ],
                 context: {
                     headers: {
                         TENANTID: process.env.REACT_APP_TENANTID,
@@ -154,6 +167,8 @@ const AddAdmin = () => {
             }).then(res => {
                 const status = res?.data?.adminUpdate?.status
                 if (!status) return toast.error(data.message)
+                history.push("/admin/admin/admins");
+                window.location.reload()
                 toast.success(`${params.email} user Status updated successfully.`)
             }).catch(err => {
                 console.log("🚀 ~ file: AllAdmins.js ~ line 33 ~ handleStatusChange ~ err", err);
@@ -234,12 +249,66 @@ const AddAdmin = () => {
                                     <Switch checked={userStatus} onChange={checked => setUserStatus(checked)} />
                                 </Form.Item>
 
+                                <Form.Item
+                                    // name="userStatus"
+                                    label="Send Email"
+                                >
+                                    <Checkbox defaultChecked={true}></Checkbox>
+                                </Form.Item>
 
 
                                 <Form.Item
-                                    // rules={[{ required: true, message: "Please select a role" }]}
                                     name="roleUUID" initialValue="" label="Role"
-                                // tooltip={roles.isLoading ? 'Loading roles....' : null}
+                                >
+                                    {(params.uid && existingRoles.isLoading) || roles.isLoading
+                                        ?
+                                        <div className="spin">
+                                            <Spin />
+                                        </div>
+                                        : <>
+                                            <Checkbox.Group
+                                                style={{
+                                                    width: '100%',
+                                                    marginTop: "1em",
+                                                }}
+                                                defaultValue={existingRoles.data}
+                                                onChange={checkedValues => setSelectedRoles(checkedValues)}
+
+                                            >
+                                                <Row>
+                                                    {roles.roles.map(item => (
+                                                        <Col span={12}>
+                                                            <Checkbox value={item.role_uuid}>{item.role}</Checkbox>
+                                                            <br />
+                                                            <Paragraph
+                                                                style={{
+                                                                    marginLeft: '2em',
+                                                                    color: "gray",
+                                                                    width: "calc(100% - 4em)"
+                                                                }}
+                                                                // ellipsis={{ tooltip: item.role_description }}
+                                                                ellipsis={{ tooltip: item.role_description, rows: 1 }}
+
+                                                            >
+                                                                {item.role_description}
+                                                            </Paragraph>
+                                                        </Col>
+
+                                                    ))}
+
+                                                </Row>
+                                            </Checkbox.Group>
+
+                                        </>}
+
+
+                                </Form.Item>
+
+
+
+                                {/* OLD MULTISELECT ROLESS */}
+                                {/* <Form.Item
+                                    name="roleUUID" initialValue="" label="Role"
                                 >
                                     {(params.uid && existingRoles.isLoading) || roles.isLoading
                                         ?
@@ -257,12 +326,10 @@ const AddAdmin = () => {
                                                 {roles.roles.map(item => (
                                                     <Option key={item.role_uuid} value={item.role_uuid}>{item.role}</Option>
                                                 ))}
-
                                             </Select>
                                         </>
                                     }
-
-                                </Form.Item>
+                                </Form.Item> */}
 
 
                                 <div

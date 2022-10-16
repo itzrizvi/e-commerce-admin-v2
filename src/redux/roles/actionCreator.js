@@ -1,6 +1,7 @@
 import Cookies from 'js-cookie';
 import { toast } from 'react-toastify';
 import apolloClient, { authQuery, rolesMutation } from '../../utility/apollo';
+import { logOut } from '../authentication/actionCreator';
 import actions from './actions';
 
 const {
@@ -24,6 +25,9 @@ const rolesDataRead = () => {
         }
       }
     }).then(res => {
+      if (!res?.data?.getAllRoles?.status) {
+        dispatch(logOut())
+      }
       dispatch(rolesReadSuccess(res.data.getAllRoles.data));
     }).catch(err => {
       dispatch(rolesReadErr(err));

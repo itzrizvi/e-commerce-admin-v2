@@ -7,14 +7,17 @@ import { Cards } from '../../components/cards/frame/cards-frame';
 import { SearchOutlined } from '@ant-design/icons';
 import { Button } from '../../components/buttons/buttons';
 import apolloClient, { authMutation, authQuery } from '../../utility/apollo';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import FontAwesome from 'react-fontawesome';
 import Cookies from 'js-cookie';
 import { toast } from 'react-toastify';
 import config from '../../config/config';
+import { logOut } from '../../redux/authentication/actionCreator';
+
 
 const handleStatusChange = (record, checked) => {
+    const dispatch = useDispatch();
     const variables = { data: { uid: record.uid, user_status: checked } }
 
     apolloClient.mutate({
@@ -63,8 +66,12 @@ const AllAdmin = () => {
                 }
             }
         }).then(res => {
-            if (!res?.data?.getAllStaff?.isAuth) return setStaffs(s => ({ ...s, error: 'You Are not Authorized' }))
-            setStaffs(s => ({ ...s, data: res?.data?.getAllStaff?.data, error: '' }))
+            if (!res?.data?.getAllStaff?.isAuth) {
+                dispatch(logOut())
+            } else {
+
+                setStaffs(s => ({ ...s, data: res?.data?.getAllStaff?.data, error: '' }))
+            }
 
         }).catch(err => {
             setStaffs(s => ({ ...s, error: 'Something went Wrong.!! ' }))

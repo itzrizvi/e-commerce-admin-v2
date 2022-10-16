@@ -4,7 +4,7 @@ import FeatherIcon from 'feather-icons-react';
 import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
 import { Cards } from '../../components/cards/frame/cards-frame';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useHistory, useLocation } from 'react-router-dom';
 import { Button } from '../../components/buttons/buttons';
 import apolloClient, { apolloUploadClient, productMutation, productQuery } from '../../utility/apollo';
 import Heading from '../../components/heading/heading';
@@ -24,6 +24,7 @@ const AddCategory = () => {
     const maxLength = 30;
     const { search } = useLocation();
     const params = queryString.parse(search)
+    const history = useHistory();
 
     const [categories, setCategories] = useState([])
     const [structuredCategories, setStructuredCategories] = useState({ data: [], loading: true })
@@ -48,30 +49,6 @@ const AddCategory = () => {
             thumbUrl: require('../../static/img/products/1.png'),
         },
     ];
-
-    const fileUploadProps = {
-        name: 'file',
-        multiple: true,
-        action: 'https://www.mocky.io/v2/5cc8019d300000980a055e76',
-        onChange(info) {
-            const { status } = info.file;
-            if (status !== 'uploading') {
-                setState({ ...state, file: info.file, list: info.fileList });
-            }
-            if (status === 'done') {
-                message.success(`${info.file.name} file uploaded successfully.`);
-            } else if (status === 'error') {
-                message.error(`${info.file.name} file upload failed.`);
-            }
-        },
-        listType: 'picture',
-        defaultFileList: fileList,
-        showUploadList: {
-            showRemoveIcon: true,
-            removeIcon: <FeatherIcon icon="trash-2" onClick={e => console.log(e, 'custom removeIcon event')} />,
-        },
-    };
-
 
 
     useEffect(() => { // load category
@@ -169,7 +146,7 @@ const AddCategory = () => {
 
 
         if (!params.id) {
-
+            // for add new
             const data = {
                 categoryName,
                 categoryDescription,
@@ -197,6 +174,17 @@ const AddCategory = () => {
             apolloUploadClient.mutate({
                 mutation: productMutation.CREATE_CATEGORY,
                 variables,
+                refetchQueries: [
+                    {
+                        query: productQuery.GET_ALL_CATEGORIES,
+                        context: {
+                            headers: {
+                                TENANTID: process.env.REACT_APP_TENANTID,
+                            }
+                        }
+                    },
+                    'getAllCategories'
+                ],
                 context: {
                     headers: {
                         TENANTID: process.env.REACT_APP_TENANTID,
@@ -207,7 +195,7 @@ const AddCategory = () => {
                 const data = res?.data?.createCategory
                 if (!data?.status) return toast.error(data?.message)
                 toast.success(data?.message)
-
+                history.push("/admin/categories/list");
 
             }).catch(err => {
 
@@ -215,7 +203,7 @@ const AddCategory = () => {
                 setIsLoading(false)
             })
         } else {
-
+            //for update 
             const data = {
                 cat_id: params.id,
                 cat_name: categoryName,
@@ -237,6 +225,18 @@ const AddCategory = () => {
             apolloUploadClient.mutate({
                 mutation: productMutation.UPDATE_CATEGORY,
                 variables: { data },
+                refetchQueries: [
+                    {
+                        query: productQuery.GET_ALL_CATEGORIES,
+                        context: {
+                            headers: {
+                                TENANTID: process.env.REACT_APP_TENANTID,
+                                // Authorization: Cookies.get('psp_t')
+                            }
+                        }
+                    },
+                    'getAllBrands'
+                ],
                 context: {
                     headers: {
                         TENANTID: process.env.REACT_APP_TENANTID,
@@ -247,8 +247,7 @@ const AddCategory = () => {
                 const data = res?.data?.updateCategory
                 if (!data?.status) return toast.error(data?.message)
                 toast.success(data?.message)
-
-
+                history.push("/admin/categories/list");
             }).catch(err => {
 
             }).finally(() => {

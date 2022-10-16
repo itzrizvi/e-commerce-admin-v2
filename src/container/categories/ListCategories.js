@@ -10,6 +10,8 @@ import { Link } from 'react-router-dom';
 import FontAwesome from 'react-fontawesome';
 import apolloClient, { productQuery } from '../../utility/apollo';
 import config from '../../config/config';
+import { LazyLoadImage } from 'react-lazy-load-image-component';
+import { errorImageSrc, renderImage } from '../../utility/images';
 
 const categories1 = [
     {
@@ -73,6 +75,7 @@ const ListCategories = () => {
     const [categoriesData, setCategoriesData] = useState({ data: [], loading: true })
     const [filteredCategoryData, setFilteredCategoryData] = useState([])
 
+
     const [isFilter, setIsFilter] = useState(false)
     const [searchText, setSearchText] = useState("")
     const [isFeatured, setIsFeatured] = useState(false)
@@ -80,6 +83,7 @@ const ListCategories = () => {
 
 
     useEffect(() => {
+
         apolloClient.query({
             query: productQuery.GET_ALL_CATEGORIES,
             context: {
@@ -92,6 +96,8 @@ const ListCategories = () => {
             const data = res?.data?.getAllCategories
             if (!data.status) return;
             setCategories(data.categories)
+            // console.log("list Category UseEffect:\n", data.categories);
+
         }).catch(err => {
 
         })
@@ -125,6 +131,7 @@ const ListCategories = () => {
         })
 
         setCategoriesData({ data: arrData, loading: false })
+        // console.log("userEffect 2nd: \n", arrData)
 
     }, [categories])
 
@@ -136,7 +143,6 @@ const ListCategories = () => {
             width: 50,
             ellipsis: true,
             sorter: (a, b) => a.cat_id.toUpperCase() > b.cat_id.toUpperCase() ? 1 : -1,
-
         },
         {
             title: 'Logo',
@@ -144,7 +150,7 @@ const ListCategories = () => {
             key: 'cat_id',
             width: 70,
             // render: (text, record) => (<img src={require('../../static/img/avatar/NoPath (3).png')} alt="" />),
-            render: (text, record) => record.img ? <img height="46px" width="46px" src={`https://api.primeserverparts.com/images/category/${record.cat_id}/${record.cat_id}.jpg`} onerror={`this.onerror=null;this.src=null`} alt='logo' /> : ''
+            render: (text, record) => (<LazyLoadImage effect="blur" width="40" src={renderImage(record.cat_id, record.img, 'category', '128x128')} onError={errorImageSrc} onL alt={record.cat_id} />)
         },
         {
             title: 'Category Name',
@@ -160,13 +166,6 @@ const ListCategories = () => {
             ellipsis: true,
             sorter: (a, b) => a.cat_des.toUpperCase() > b.cat_des.toUpperCase() ? 1 : -1,
         },
-        // {
-        //     title: 'Sort Order',
-        //     dataIndex: 'cat_sort_order',
-        //     key: 'cat_sort_order',
-        //     align: 'center',
-        //     width: 90,
-        // },
         {
             title: 'Featured',
             dataIndex: 'cat_isFeatured',
@@ -275,6 +274,9 @@ const ListCategories = () => {
                     <Col sm={24} xs={24}>
                         <Cards headless>
 
+                            {/* TEST CODES */}
+                            {/* <p>{JSON.stringify(categoriesData.data.map(item => item.cat_name))}</p> */}
+
                             {categoriesData.loading ?
                                 <div className="spin">
                                     <Spin />
@@ -282,8 +284,6 @@ const ListCategories = () => {
                                 :
 
                                 <>
-
-
                                     <Input
                                         placeholder="Search Permission..."
                                         prefix={<SearchOutlined />}
