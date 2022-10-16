@@ -77,6 +77,11 @@ const MenuItems = ({ darkMode, toggleCollapsed, topMenu }) => {
       </SubMenu>
 
       <SubMenu key="products" icon={!topMenu && <FeatherIcon icon="shopping-cart" />} title="Products">
+        {/* <Menu.Item key="addproducts">
+          <NavLink onClick={toggleCollapsed} to={`${path}/products/list`}>
+            Products
+          </NavLink>
+        </Menu.Item> */}
         <Menu.Item key="listAttribute">
           <NavLink onClick={toggleCollapsed} to={`${path}/attributes/list`}>
             Attributes
@@ -92,11 +97,6 @@ const MenuItems = ({ darkMode, toggleCollapsed, topMenu }) => {
             Category
           </NavLink>
         </Menu.Item>
-        {/* <Menu.Item key="addproducts">
-          <NavLink onClick={toggleCollapsed} to={`${path}/products/add`}>
-            Add Products
-          </NavLink>
-        </Menu.Item> */}
         <Menu.Item key="products_list">
           <NavLink onClick={toggleCollapsed} to={`${path}/products/list`}>
             Products
@@ -124,6 +124,14 @@ const MenuItems = ({ darkMode, toggleCollapsed, topMenu }) => {
         <Menu.Item key="list_brand">
           <NavLink onClick={toggleCollapsed} to={`${path}/brand/list`}>
             Manufacture
+          </NavLink>
+        </Menu.Item>
+      </SubMenu>
+
+      <SubMenu key="banner" icon={!topMenu && <FeatherIcon icon="image" />} title="Banner">
+        <Menu.Item key="list_banner">
+          <NavLink onClick={toggleCollapsed} to={`${path}/banner/list`}>
+            Banner
           </NavLink>
         </Menu.Item>
       </SubMenu>

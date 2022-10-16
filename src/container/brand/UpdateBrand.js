@@ -14,7 +14,7 @@ import queryString from 'query-string'
 import { errorImageSrc, renderImage } from '../../utility/images';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
 
-const AddBrand = () => {
+const UpdateBrand = () => {
     const { search } = useLocation();
     const params = queryString.parse(search)
     const { TextArea } = Input;
@@ -67,9 +67,9 @@ const AddBrand = () => {
             // console.log(res);
             const data = res?.data?.updateBrand
             if (!data?.status) return toast.error('Something Went wrong !!');
-            toast.success(data?.message);
             history.push("/admin/brand/list");
-            window.location.reload();
+            toast.success(data?.message);
+            window.location.reload(false); 
         }).catch(err => {
             toast.error('Something Went wrong !!');
         }).finally(() => setIsLoading(false))
@@ -263,4 +263,4 @@ const AddBrand = () => {
     );
 };
 
-export default AddBrand;
+export default UpdateBrand;
