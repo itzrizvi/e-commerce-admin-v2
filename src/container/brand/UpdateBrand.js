@@ -67,9 +67,9 @@ const AddBrand = () => {
             // console.log(res);
             const data = res?.data?.updateBrand
             if (!data?.status) return toast.error('Something Went wrong !!');
-            toast.success(data?.message);
             history.push("/admin/brand/list");
-            window.location.reload();
+            toast.success(data?.message);
+            window.location.reload(false); 
         }).catch(err => {
             toast.error('Something Went wrong !!');
         }).finally(() => setIsLoading(false))
