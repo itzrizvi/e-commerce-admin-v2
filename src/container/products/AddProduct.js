@@ -118,7 +118,7 @@ const AddProduct = () => {
                                     </Tabs.TabPane>
 
                                     <Tabs.TabPane tab="Attribute" key="Attribute">
-                                        {/* <AttributeTab /> */}
+                                        <AttributeTab />
                                     </Tabs.TabPane>
 
                                     <Tabs.TabPane tab="Price" key="Price">
