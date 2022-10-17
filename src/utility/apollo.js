@@ -450,6 +450,35 @@ export const attributeQuery = {
   }
   
   `,
+  GET_ALL_ATTRIBUTES: gql`
+  query getAllAttributes {
+    getAllAttributes {
+      message
+      status
+      tenant_id
+      data {
+        attribute_uuid
+        attribute_name
+        attribute_slug
+        attr_group_uuid
+        attribute_status
+        tenant_id
+        createdAt
+        updatedAt
+        attribute_group {
+          attr_group_uuid
+          attr_group_name
+          attr_group_slug
+          attrgroup_status
+          attrgroup_sortorder
+          tenant_id
+          createdAt
+          updatedAt
+        }
+      }
+    }
+  }
+  `,
 }
 
 export const attributeMutation = {
@@ -465,6 +494,24 @@ export const attributeMutation = {
   UPDATE_ATTR_GROUP: gql`
   mutation updateAttrGroup($data:UpdateAttributeGroupInput){
     updateAttrGroup(data:$data){
+      message
+      status
+      tenant_id
+    }
+  }
+  `,
+  CREATE_ATTRIBUTE: gql`
+  mutation createAttribute($data: CreateAttributeInput){
+    createAttribute(data:$data){
+      message
+      status
+      tenant_id
+    }
+  }
+  `,
+  UPDATE_ATTRIBUTE: gql`
+  mutation updateAttribute($data: UpdateAttributeInput) {
+    updateAttribute(data: $data) {
       message
       status
       tenant_id
