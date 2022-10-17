@@ -8,8 +8,9 @@ import { Cards } from '../../components/cards/frame/cards-frame';
 import { Button } from '../../components/buttons/buttons';
 import { Link } from 'react-router-dom';
 import FontAwesome from 'react-fontawesome';
-import apolloClient, { attributeQuery } from '../../utility/apollo';
+import apolloClient, { attributeMutation, attributeQuery } from '../../utility/apollo';
 import Cookies from 'js-cookie';
+import { toast } from 'react-toastify';
 
 const ListAttributes = () => {
     const dummyData = [...Array(6).keys()].map(i => ({ a_n: `Attribute ${i + 1}`, a_g: `Group 2`, g_s: i + 1 }))
@@ -54,7 +55,7 @@ const ListAttributes = () => {
             render: (value, record) => (
                 <Switch
                     defaultChecked={value} title='Status'
-                // onChange={checked => handleStatusChange(record, checked)}
+                    onChange={checked => handleStatusChange(record, checked)}
                 />
             )
         },
@@ -105,6 +106,30 @@ const ListAttributes = () => {
         const value = e.target.value
         setSearchText(value)
         setFilteredAttributes(attributes.data.filter(attr => (attr?.attribute_name + attr?.attribute_group?.attr_group_name).toLowerCase().includes(value.toLowerCase())))
+    }
+
+    const handleStatusChange = (record, checked) => {
+        const variables = { data: { attribute_uuid: record.attribute_uuid, attribute_status: checked } }
+        console.log(variables)
+        // return;
+        apolloClient.mutate({
+            mutation: attributeMutation.UPDATE_ATTRIBUTE,
+            variables,
+            context: {
+                headers: {
+                    TENANTID: process.env.REACT_APP_TENANTID,
+                    Authorization: Cookies.get('psp_t')
+                },
+            },
+
+        }).then(res => {
+            const data = res?.data?.updateAttribute
+            if (!data.status) return toast.error(data.message);
+            toast.success(`${record.attribute_name} attribute status updated.`);
+        }).catch(err => {
+            console.log("got error on addPermission", err)
+            return toast.error('Something Went wrong !!')
+        })
     }
 
 

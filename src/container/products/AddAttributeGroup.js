@@ -61,7 +61,9 @@ const AddAttributeGroup = () => {
             }).finally(() => {
                 setIsLoading(false)
             })
-        } else { // Update  Attribute group
+        }
+
+        else { // Update  Attribute group
             const variables = { data: { attr_group_uuid: params.id, attr_group_name, attrgroup_sortorder: parseInt(attrgroup_sortorder), attrgroup_status: groupStatus } }
             console.log(variables)
             // return;
