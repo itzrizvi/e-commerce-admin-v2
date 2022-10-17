@@ -7,7 +7,7 @@ import { Cards } from '../../components/cards/frame/cards-frame';
 import { Button } from '../../components/buttons/buttons';
 import { Link, useHistory, useLocation } from 'react-router-dom';
 import queryString from 'query-string'
-import apolloClient, { attributeMutation } from '../../utility/apollo';
+import apolloClient, { attributeMutation, attributeQuery } from '../../utility/apollo';
 import Cookies from 'js-cookie';
 import { toast } from 'react-toastify';
 
@@ -35,26 +35,26 @@ const AddAttributeGroup = () => {
                         TENANTID: process.env.REACT_APP_TENANTID,
                         Authorization: Cookies.get('psp_t')
                     },
-                    // refetchQueries: [
-                    //     {
-                    //         query: authQuery.GET_ALL_ROLES_PERMISSION,
-                    //         context: {
-                    //             headers: {
-                    //                 TENANTID: process.env.REACT_APP_TENANTID,
-                    //                 Authorization: Cookies.get('psp_t')
-                    //             }
-                    //         }
-                    //     },
-                    //     'getAllRolesPermission'
-                    // ],
+                    refetchQueries: [
+                        {
+                            query: attributeQuery.GET_ALL_ATTR_GROUPS,
+                            context: {
+                                headers: {
+                                    TENANTID: process.env.REACT_APP_TENANTID,
+                                    Authorization: Cookies.get('psp_t')
+                                }
+                            }
+                        },
+                        'getAllAttrGroups'
+                    ],
                 },
 
             }).then(res => {
                 const data = res?.data?.createAttrGroup
                 if (!data.status) return toast.error(data.message);
-                toast.success(`${values.attr_group_name} updated successfully`);
                 history.push("/admin/attributes/list-group");
-
+                window.location.reload()
+                toast.success(`${values.attr_group_name} updated successfully`);
             }).catch(err => {
                 console.log("got error on addPermission", err)
                 return toast.error('Something Went wrong !!')
@@ -75,26 +75,26 @@ const AddAttributeGroup = () => {
                         TENANTID: process.env.REACT_APP_TENANTID,
                         Authorization: Cookies.get('psp_t')
                     },
-                    // refetchQueries: [
-                    //     {
-                    //         query: authQuery.GET_ALL_ROLES_PERMISSION,
-                    //         context: {
-                    //             headers: {
-                    //                 TENANTID: process.env.REACT_APP_TENANTID,
-                    //                 Authorization: Cookies.get('psp_t')
-                    //             }
-                    //         }
-                    //     },
-                    //     'getAllRolesPermission'
-                    // ],
+                    refetchQueries: [
+                        {
+                            query: attributeQuery.GET_ALL_ATTR_GROUPS,
+                            context: {
+                                headers: {
+                                    TENANTID: process.env.REACT_APP_TENANTID,
+                                    Authorization: Cookies.get('psp_t')
+                                }
+                            }
+                        },
+                        'getAllAttrGroups'
+                    ],
                 },
 
             }).then(res => {
                 const data = res?.data?.updateAttrGroup
                 if (!data.status) return toast.error(data.message);
-                toast.success(`${values.attr_group_name} updated successfully`);
                 history.push("/admin/attributes/list-group");
-
+                toast.success(`${values.attr_group_name} updated successfully`);
+                window.location.reload()
             }).catch(err => {
                 console.log("got error on addPermission", err)
                 return toast.error('Something Went wrong !!')

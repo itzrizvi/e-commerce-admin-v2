@@ -66,26 +66,26 @@ const AddAttribute = () => {
                         TENANTID: process.env.REACT_APP_TENANTID,
                         Authorization: Cookies.get('psp_t')
                     },
-                    // refetchQueries: [
-                    //     {
-                    //         query: authQuery.GET_ALL_ROLES_PERMISSION,
-                    //         context: {
-                    //             headers: {
-                    //                 TENANTID: process.env.REACT_APP_TENANTID,
-                    //                 Authorization: Cookies.get('psp_t')
-                    //             }
-                    //         }
-                    //     },
-                    //     'getAllRolesPermission'
-                    // ],
+                    refetchQueries: [
+                        {
+                            query: attributeQuery.GET_ALL_ATTRIBUTES,
+                            context: {
+                                headers: {
+                                    TENANTID: process.env.REACT_APP_TENANTID,
+                                    Authorization: Cookies.get('psp_t')
+                                }
+                            }
+                        },
+                        'getAllAttributes'
+                    ],
                 },
 
             }).then(res => {
                 const data = res?.data?.createAttribute
                 if (!data.status) return toast.error(data.message);
-                toast.success(`${values.attribute_name} Added successfully`);
                 history.push("/admin/attributes/list");
-
+                window.location.reload()
+                toast.success(`${values.attribute_name} Added successfully`);
             }).catch(err => {
                 console.log("got error on addPermission", err)
                 return toast.error('Something Went wrong !!')
@@ -104,25 +104,26 @@ const AddAttribute = () => {
                         TENANTID: process.env.REACT_APP_TENANTID,
                         Authorization: Cookies.get('psp_t')
                     },
-                    // refetchQueries: [
-                    //     {
-                    //         query: authQuery.GET_ALL_ROLES_PERMISSION,
-                    //         context: {
-                    //             headers: {
-                    //                 TENANTID: process.env.REACT_APP_TENANTID,
-                    //                 Authorization: Cookies.get('psp_t')
-                    //             }
-                    //         }
-                    //     },
-                    //     'getAllRolesPermission'
-                    // ],
+                    refetchQueries: [
+                        {
+                            query: attributeQuery.GET_ALL_ATTRIBUTES,
+                            context: {
+                                headers: {
+                                    TENANTID: process.env.REACT_APP_TENANTID,
+                                    Authorization: Cookies.get('psp_t')
+                                }
+                            }
+                        },
+                        'getAllAttributes'
+                    ],
                 },
 
             }).then(res => {
                 const data = res?.data?.updateAttribute
                 if (!data.status) return toast.error(data.message);
-                toast.success(`${values.attr_group_name} updated successfully`);
                 history.push("/admin/attributes/list");
+                window.location.reload()
+                toast.success(`${values.attr_group_name} updated successfully`);
             }).catch(err => {
                 console.log("got error on addPermission", err)
                 return toast.error('Something Went wrong !!')
