@@ -123,6 +123,11 @@ const AddProduct = () => {
 
                                     <Tabs.TabPane tab="Price" key="Price">
                                     </Tabs.TabPane>
+
+                                    <Tabs.TabPane tab="Discount" key="Discount">
+
+                                    </Tabs.TabPane>
+
                                     <Tabs.TabPane tab="Stock" key="Stock">
                                     </Tabs.TabPane>
                                     <Tabs.TabPane tab="Images" key="Images">
