@@ -1,7 +1,9 @@
-import { Button, Input, Select, Table, Upload } from 'antd';
-import React, { useState } from 'react';
+import { AutoComplete, Button, Input, Select, Spin, Table, Upload } from 'antd';
+import React, { useEffect, useState } from 'react';
 import { UploadOutlined } from '@ant-design/icons';
 import FeatherIcon from 'feather-icons-react';
+import apolloClient, { attributeQuery } from '../../../utility/apollo';
+import Cookies from 'js-cookie';
 const { Option } = Select;
 
 
@@ -69,7 +71,6 @@ const AttributeTab = () => {
         })
     }
 
-
     // List For Table Column
     const column = [
         {
@@ -77,7 +78,23 @@ const AttributeTab = () => {
             dataIndex: 'Attribute',
             key: 'Attribute',
             width: 300,
-            render: (text, record) => <Input placeholder="Title" />
+            render: (text, record) => {
+                const options = attributesData.data.map(item => ({ value: item.attribute_name }))
+
+                return (
+                    <AutoComplete
+                        style={{
+                            width: "100%",
+                        }}
+                        options={options}
+                        placeholder="Attribute name"
+                    // filterOption={(inputValue, option) =>
+                    //     option.value.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1
+                    // }
+                    />
+
+                )
+            }
         },
         {
             title: 'Values',
@@ -104,7 +121,40 @@ const AttributeTab = () => {
         },
     ];
 
+    const [attributesData, setAttributesData] = useState({ data: [], isLoading: true })
+    useEffect(() => {
+        // return
+        apolloClient.query({
+            query: attributeQuery.GET_ALL_ATTRIBUTES,
+            context: {
+                headers: {
+                    TENANTID: process.env.REACT_APP_TENANTID,
+                    Authorization: Cookies.get('psp_t')
+                }
+            }
+        }).then(res => {
+
+            const data = res?.data?.getAllAttributes
+
+            if (!data?.status) return
+            setAttributesData(s => ({ ...s, data: data?.data, error: '' }))
+
+        }).catch(err => {
+            setAttributesData(s => ({ ...s, error: 'Something went Wrong.!! ' }))
+        }).finally(() => {
+            setAttributesData(s => ({ ...s, isLoading: false }))
+        })
+
+    }, [])
+
+    if (attributesData.isLoading) return (
+        <div className="spin">
+            <Spin />
+        </div>
+    )
+
     return (
+
         <>
             <Table
                 columns={column}

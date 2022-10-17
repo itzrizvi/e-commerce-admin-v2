@@ -10,6 +10,7 @@ import queryString from 'query-string'
 import apolloClient, { apolloUploadClient, attributeMutation, attributeQuery } from '../../utility/apollo';
 import Cookies from 'js-cookie';
 import { toast } from 'react-toastify';
+const { Option } = Select;
 
 const AddAttribute = () => {
     const { search } = useLocation();
