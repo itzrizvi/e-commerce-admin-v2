@@ -89,6 +89,16 @@
 					"label": "--log out--"
 				}
 			]
+		},
+		{
+			"path": "src/container/products/AddAttributeGroup.js",
+			"bookmarks": [
+				{
+					"line": 140,
+					"column": 60,
+					"label": "---"
+				}
+			]
 		}
 	]
 }

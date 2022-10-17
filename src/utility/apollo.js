@@ -14,7 +14,6 @@ export const apolloUploadClient = new ApolloClient({
 })
 
 
-
 export const authQuery = {
   GET_ALL_ROLES: gql`
       query getAllRoles {
@@ -376,8 +375,6 @@ export const productMutation = {
     `,
 }
 
-
-
 export const rolesMutation = {
   ADD_ROLE_MUTATION: gql`
         mutation createRole($data: CreateRoleInput){
@@ -391,6 +388,89 @@ export const rolesMutation = {
             status
           }
         }`
+}
+
+export const attributeQuery = {
+  GET_ALL_ATTR_GROUPS: gql`
+  query getAllAttrGroups {
+    getAllAttrGroups{
+      status
+      message
+      tenant_id
+      data{
+        attr_group_uuid
+        attr_group_name
+        attr_group_slug
+        attrgroup_status
+        attrgroup_sortorder
+        tenant_id
+        createdAt
+        updatedAt
+        attributes {
+          attribute_uuid
+          attribute_name
+          attribute_slug
+          attr_group_uuid
+          attribute_status
+          tenant_id
+          createdAt
+          updatedAt
+        }
+      }
+    }
+  }
+  `,
+  GET_SINGLE_ATTR_GROUP: gql`
+  query getSingleAttrGroup($query: GetSingleAttrGroupInput) {
+    getSingleAttrGroup(query: $query) {
+      message
+      status
+      tenant_id
+      data {
+        attr_group_uuid
+        attr_group_name
+        attr_group_slug
+        attrgroup_status
+        attrgroup_sortorder
+        tenant_id
+        createdAt
+        updatedAt
+        attributes {
+          attribute_uuid
+          attribute_name
+          attribute_slug
+          attr_group_uuid
+          attribute_status
+          tenant_id
+          createdAt
+          updatedAt
+        }
+      }
+    }
+  }
+  
+  `,
+}
+
+export const attributeMutation = {
+  CREATE_ATTR_GROUP: gql`
+  mutation createAttrGroup($data:CreateAttributeGroupInput){
+    createAttrGroup(data:$data){
+      message
+      status
+      tenant_id
+    }
+  }
+  `,
+  UPDATE_ATTR_GROUP: gql`
+  mutation updateAttrGroup($data:UpdateAttributeGroupInput){
+    updateAttrGroup(data:$data){
+      message
+      status
+      tenant_id
+    }
+  }
+  `,
 }
 
 
