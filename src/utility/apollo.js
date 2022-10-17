@@ -520,6 +520,73 @@ export const attributeMutation = {
   `,
 }
 
+export const customerQuery = {
+  GET_ALL_CUSTOMER_GROUPS: gql`
+  query getAllCustomerGroups {
+    getAllCustomerGroups {
+      message
+      status
+      tenant_id
+      data {
+        customer_group_uuid
+        customer_group_name
+        customer_group_slug
+        customergroup_description
+        customergroup_sortorder
+        customergroup_status
+        tenant_id
+        createdAt
+        updatedAt
+      }
+    }
+  }
+  `,
+  GET_SINGLE_CUSTOMER_GROUP: gql`
+  query getSingleCustomerGroup($query: GetSingleCustomerGroupInput) {
+    getSingleCustomerGroup(query: $query) {
+      message
+      status
+      tenant_id
+      data {
+        customer_group_uuid
+        customer_group_name
+        customer_group_slug
+        customergroup_description
+        customergroup_sortorder
+        customergroup_status
+        tenant_id
+        createdAt
+        updatedAt
+      }
+    }
+  }
+  `,
+
+
+}
+
+
+export const customerMutation = {
+  CREATE_CUSTOMER_GROUP: gql`
+  mutation createCustomerGroup($data:CreateCustomerGroupInput){
+    createCustomerGroup(data:$data){
+      message
+      status
+      tenant_id
+    }
+  }
+  `,
+  UPDATE_CUSTOMER_GROUP: gql`
+  mutation updateCustomerGroup($data: UpdateCustomerGroupInput) {
+    updateCustomerGroup(data: $data) {
+      message
+      status
+      tenant_id
+    }
+  }  
+  `,
+
+}
 
 
 

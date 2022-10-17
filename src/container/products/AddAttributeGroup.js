@@ -30,23 +30,23 @@ const AddAttributeGroup = () => {
             apolloClient.mutate({
                 mutation: attributeMutation.CREATE_ATTR_GROUP,
                 variables,
+                refetchQueries: [
+                    {
+                        query: attributeQuery.GET_ALL_ATTR_GROUPS,
+                        context: {
+                            headers: {
+                                TENANTID: process.env.REACT_APP_TENANTID,
+                                Authorization: Cookies.get('psp_t')
+                            }
+                        }
+                    },
+                    'getAllAttrGroups'
+                ],
                 context: {
                     headers: {
                         TENANTID: process.env.REACT_APP_TENANTID,
                         Authorization: Cookies.get('psp_t')
                     },
-                    refetchQueries: [
-                        {
-                            query: attributeQuery.GET_ALL_ATTR_GROUPS,
-                            context: {
-                                headers: {
-                                    TENANTID: process.env.REACT_APP_TENANTID,
-                                    Authorization: Cookies.get('psp_t')
-                                }
-                            }
-                        },
-                        'getAllAttrGroups'
-                    ],
                 },
 
             }).then(res => {
@@ -70,23 +70,23 @@ const AddAttributeGroup = () => {
             apolloClient.mutate({
                 mutation: attributeMutation.UPDATE_ATTR_GROUP,
                 variables,
+                refetchQueries: [
+                    {
+                        query: attributeQuery.GET_ALL_ATTR_GROUPS,
+                        context: {
+                            headers: {
+                                TENANTID: process.env.REACT_APP_TENANTID,
+                                Authorization: Cookies.get('psp_t')
+                            }
+                        }
+                    },
+                    'getAllAttrGroups'
+                ],
                 context: {
                     headers: {
                         TENANTID: process.env.REACT_APP_TENANTID,
                         Authorization: Cookies.get('psp_t')
                     },
-                    refetchQueries: [
-                        {
-                            query: attributeQuery.GET_ALL_ATTR_GROUPS,
-                            context: {
-                                headers: {
-                                    TENANTID: process.env.REACT_APP_TENANTID,
-                                    Authorization: Cookies.get('psp_t')
-                                }
-                            }
-                        },
-                        'getAllAttrGroups'
-                    ],
                 },
 
             }).then(res => {

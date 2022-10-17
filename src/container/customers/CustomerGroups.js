@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Row, Col, Spin, Input, Table, Switch } from 'antd';
 import FeatherIcon from 'feather-icons-react';
 import { PageHeader } from '../../components/page-headers/page-headers';
@@ -9,58 +9,78 @@ import { Link } from 'react-router-dom';
 import FontAwesome from 'react-fontawesome';
 import { SearchOutlined } from '@ant-design/icons';
 import config from '../../config/config';
+import apolloClient, { customerMutation, customerQuery } from '../../utility/apollo';
+import Cookies from 'js-cookie';
+import { toast } from 'react-toastify';
 
 
 const CustomerGroups = () => {
-    const dummyData = [...Array(10).keys()].map(i => ({ g_n: `Customer Group ${i + 1}`, g_s: i + 1, g_status: true }))
+    // const dummyData = [...Array(10).keys()].map(i => ({ g_n: `Customer Group ${i + 1}`, g_s: i + 1, g_status: true }))
 
-    const [customerGroups, setCustomerGroups] = useState({ data: dummyData, isLoading: false })
+    const [customerGroups, setCustomerGroups] = useState({ data: [], isLoading: true })
+
     const [filteredCustomerGroups, setFilteredCustomerGroups] = useState([])
     const [searchText, setSearchText] = useState('')
 
     const handleStatusChange = (record, checked) => {
-        // const variables = { data: { roles_permission_uuid: record.roles_permission_uuid, roles_permission_status: checked } }
+        const variables = {
+            data: {
+                customer_group_uuid: record.customer_group_uuid,
+                customergroup_status: checked,
+            }
+        }
+        console.log(variables)
+        apolloClient.mutate({
+            mutation: customerMutation.UPDATE_CUSTOMER_GROUP,
+            variables,
+            context: {
+                headers: {
+                    TENANTID: process.env.REACT_APP_TENANTID,
+                    Authorization: Cookies.get('psp_t')
+                },
+            },
 
-        // apolloClient.mutate({
-        //     mutation: authMutation.UPDATE_ROLES_PERMISSION,
-        //     variables,
-        //     context: {
-        //         headers: {
-        //             TENANTID: process.env.REACT_APP_TENANTID,
-        //             Authorization: Cookies.get('psp_t')
-        //         }
-        //     }
-        // }).then(res => {
-        //     const data = res?.data?.updateRolesPermission
-        //     if (!data.isAuth) return
-        //     if (!data?.status) return toast.error(data?.message)
-        //     toast.success(`${record.roles_permission_name} Permission Status updated successfully.`)
-        // }).catch(err => {
-        //     console.log("🚀 ~ file: AllAdmins.js ~ line 33 ~ handleStatusChange ~ err", err);
-        //     toast.error(`Something went wrong!!`)
-        // })
+        }).then(res => {
+            const data = res?.data?.updateCustomerGroup
+            if (!data.status) return toast.error(data.message);
+            toast.success(`${record.customer_group_name} Group Status Updated successfully`);
+        }).catch(err => {
+            console.log("got error on updateStatus", err)
+            return toast.error('Something Went wrong !!')
+        })
 
     }
 
     const columns = [
         {
             title: 'Group Name',
-            dataIndex: 'g_n',
-            key: 'g_n',
-            sorter: (a, b) => a.g_n.toUpperCase() > b.g_n.toUpperCase() ? 1 : -1,
+            dataIndex: 'customer_group_name',
+            key: 'customer_group_name',
+            sorter: (a, b) => a.customer_group_name.toUpperCase() > b.customer_group_name.toUpperCase() ? 1 : -1,
+        },
+        {
+            title: 'Group Description',
+            dataIndex: 'customergroup_description',
+            key: 'customergroup_description',
+            // width: 200,
+            ellipsis: true,
+            sorter: (a, b) => a.customergroup_description.toUpperCase() > b.customergroup_description.toUpperCase() ? 1 : -1,
         },
         {
             title: 'Sort Order',
-            dataIndex: 'g_s',
-            key: 'g_s',
-            sorter: (a, b) => (a.g_s === b.g_s) ? 0 : a.g_s ? -1 : 1,
+            dataIndex: 'customergroup_sortorder',
+            key: 'customergroup_sortorder',
+            width: 100,
+            align: 'center',
+            sorter: (a, b) => (a.customergroup_sortorder === b.customergroup_sortorder) ? 0 : a.customergroup_sortorder ? -1 : 1,
         },
         {
             title: 'Status',
-            dataIndex: 'g_status',
-            key: 'g_status',
-            align: 'right',
-            sorter: (a, b) => (a.g_status === b.g_status) ? 0 : a.g_status ? -1 : 1,
+            dataIndex: 'customergroup_status',
+            key: 'customergroup_status',
+            align: 'center',
+            width: 100,
+            sorter: (a, b) => (a.customergroup_status === b.customergroup_status) ? 0 : a.customergroup_status ? -1 : 1,
             filters: [
                 {
                     text: 'Active',
@@ -71,7 +91,7 @@ const CustomerGroups = () => {
                     value: false,
                 }
             ],
-            onFilter: (value, record) => record.g_status === value,
+            onFilter: (value, record) => record.customergroup_status === value,
             render: (value, record) => (
                 <Switch defaultChecked={value} title='Status' onChange={checked => handleStatusChange(record, checked)} />
             )
@@ -84,7 +104,7 @@ const CustomerGroups = () => {
             align: 'right',
             render: (text, record) => (
                 <>
-                    <Link to={`/admin/customers/add-group?id=${1}&name=${record.g_n}`}>
+                    <Link to={`/admin/customers/add-group?id=${record.customer_group_uuid}&name=${record.customer_group_name}`}>
                         {/* <Button size="default" type="white" title='Edit'> */}
                         <FontAwesome name="edit" style={{ margin: ".5em 1em" }} />
                         {/* </Button> */}
@@ -95,10 +115,37 @@ const CustomerGroups = () => {
         },
     ]
 
+
+    // LOAD CUSTOMER GROUPS
+    useEffect(() => {
+        apolloClient.query({
+            query: customerQuery.GET_ALL_CUSTOMER_GROUPS,
+            context: {
+                headers: {
+                    TENANTID: process.env.REACT_APP_TENANTID,
+                    Authorization: Cookies.get('psp_t')
+                }
+            }
+        }).then(res => {
+            const data = res?.data?.getAllCustomerGroups
+
+            if (!data?.status) return
+            setCustomerGroups(s => ({ ...s, data: data?.data, error: '' }))
+        }).catch(err => {
+            setCustomerGroups(s => ({ ...s, error: 'Something went Wrong.!! ' }))
+        }).finally(() => {
+            setCustomerGroups(s => ({ ...s, isLoading: false }))
+        })
+
+    }, [])
+
+
+
+
     const onChangeSearch = e => {
         const value = e.target.value
         setSearchText(value)
-        setFilteredCustomerGroups(customerGroups.data.filter(attr => attr?.g_n.toLowerCase().includes(value.toLowerCase())))
+        setFilteredCustomerGroups(customerGroups.data.filter(group => (group?.customer_group_name + group?.customergroup_description + group.customergroup_sortorder).toLowerCase().includes(value.toLowerCase())))
     }
 
 

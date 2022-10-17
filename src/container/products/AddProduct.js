@@ -9,6 +9,7 @@ import RichTextEditor from 'react-rte';
 const { TextArea } = Input;
 import style from "./products.module.css"
 import AttributeTab from './addProducts/AttributeTab';
+import DiscountTab from './addProducts/DiscountTab';
 
 
 
@@ -49,7 +50,6 @@ const AddProduct = () => {
                                 labelCol={{ span: 4 }}
                             >
                                 <Tabs>
-
 
                                     <Tabs.TabPane tab="General" key="general">
                                         <Form.Item
@@ -116,6 +116,9 @@ const AddProduct = () => {
                                         </Form.Item> */}
 
                                     </Tabs.TabPane>
+                                    <Tabs.TabPane tab="Stock" key="Data">
+
+                                    </Tabs.TabPane>
 
                                     <Tabs.TabPane tab="Attribute" key="Attribute">
                                         <AttributeTab />
@@ -125,10 +128,17 @@ const AddProduct = () => {
                                     </Tabs.TabPane>
 
                                     <Tabs.TabPane tab="Discount" key="Discount">
-
+                                        <DiscountTab />
                                     </Tabs.TabPane>
 
                                     <Tabs.TabPane tab="Stock" key="Stock">
+                                        {/* <Form.Item
+                                            rules={[{ required: true, message: "Please enter Product Quantity" }]}
+                                            name="q"
+                                            label="Quantity"
+                                        >
+                                            <Input placeholder='Enter Quantity' />
+                                        </Form.Item> */}
                                     </Tabs.TabPane>
                                     <Tabs.TabPane tab="Images" key="Images">
                                     </Tabs.TabPane>
