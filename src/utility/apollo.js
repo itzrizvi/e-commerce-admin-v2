@@ -222,10 +222,11 @@ export const authMutation = {
         }
         `,
   ADMIN_UPDATE: gql`
-        mutation adminUpdate($data: UpdateAdminInput){
-          adminUpdate(data:$data){
+        mutation adminUpdate($data: UpdateAdminInput, $file:Upload){
+          adminUpdate(data:$data, file:$file){
             message
             status
+            tenant_id
           }
         }
         `,

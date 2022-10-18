@@ -51,16 +51,6 @@
 			]
 		},
 		{
-			"path": "src/container/profile/settings/overview/Profile.js",
-			"bookmarks": [
-				{
-					"line": 22,
-					"column": 17,
-					"label": "-edit profile form"
-				}
-			]
-		},
-		{
 			"path": "src/container/profile/settings/overview/ProfileAuthorBox.js",
 			"bookmarks": [
 				{

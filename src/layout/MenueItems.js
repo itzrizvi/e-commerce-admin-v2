@@ -43,7 +43,7 @@ const MenuItems = ({ darkMode, toggleCollapsed, topMenu }) => {
       overflowedIndicator={<FeatherIcon icon="more-vertical" />}
       openKeys={openKeys}
     >
-      <Menu.Item key="home">
+      <Menu.Item key="home" icon={!topMenu && <FeatherIcon icon="pie-chart" />} >
         <NavLink onClick={toggleCollapsed} to={`${path}`}>
           Dashboard
         </NavLink>
