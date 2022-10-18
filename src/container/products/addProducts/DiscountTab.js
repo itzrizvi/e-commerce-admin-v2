@@ -1,6 +1,8 @@
-import { Button, DatePicker, Input, Table } from 'antd';
-import React, { useState } from 'react';
+import { Button, DatePicker, Input, Select, Table } from 'antd';
+import React, { useEffect, useState } from 'react';
 import FeatherIcon from 'feather-icons-react';
+import apolloClient, { customerQuery } from '../../../utility/apollo';
+import Cookies from 'js-cookie';
 
 const DiscountTab = () => {
     const initialData = {
@@ -13,12 +15,41 @@ const DiscountTab = () => {
         Date_End: ""
     }
     const [discount, setDiscount] = useState([initialData])
+    const [customerGroups, setCustomerGroups] = useState({ data: [], isLoading: true })
+
+    // LOAD CUSTOMER GROUPS
+    useEffect(() => {
+        apolloClient.query({
+            query: customerQuery.GET_ALL_CUSTOMER_GROUPS,
+            context: {
+                headers: {
+                    TENANTID: process.env.REACT_APP_TENANTID,
+                    Authorization: Cookies.get('psp_t')
+                }
+            }
+        }).then(res => {
+            const data = res?.data?.getAllCustomerGroups
+
+            if (!data?.status) return
+            setCustomerGroups(s => ({ ...s, data: data?.data, error: '' }))
+        }).catch(err => {
+            setCustomerGroups(s => ({ ...s, error: 'Something went Wrong.!! ' }))
+        }).finally(() => {
+            setCustomerGroups(s => ({ ...s, isLoading: false }))
+        })
+
+    }, [])
+
     const column = [
         {
             title: 'Customer Group',
             dataIndex: 'title',
             key: 'title',
-            render: (text, record) => <Input placeholder="Title" />
+            render: (text, record) => <Select style={{ width: "150px" }} placeholder={customerGroups.isLoading ? "Loading.." : "customer group"} >
+                {customerGroups?.data?.map(item => (
+                    <Select.Option key={item.customer_group_uuid} value={item.customer_group_uuid} >{item.customer_group_name}</Select.Option>
+                ))}
+            </Select>
         },
         {
             title: 'Quantity',
