@@ -52,10 +52,6 @@ const AddProduct = () => {
                             >
                                 <Tabs>
 
-                                    <Tabs.TabPane tab="Images" key="Images">
-                                        <ImageTab />
-                                    </Tabs.TabPane>
-
                                     <Tabs.TabPane tab="General" key="general">
                                         <Form.Item
                                             rules={[{ required: true, message: "Please enter Product Name" }]}
@@ -201,7 +197,9 @@ const AddProduct = () => {
                                         <DiscountTab />
                                     </Tabs.TabPane>
 
-
+                                    <Tabs.TabPane tab="Images" key="Images">
+                                        <ImageTab />
+                                    </Tabs.TabPane>
 
                                 </Tabs>
                             </Form>
