@@ -100,7 +100,7 @@ const AddProduct = () => {
                                             rules={[{ required: true, message: "Please enter Tags" }]}
                                             name="n5" label="Tags"
                                         >
-                                            <Input placeholder='Enter Tags' />
+                                            <Input placeholder='Enter comma separated Tags' />
                                         </Form.Item>
                                     </Tabs.TabPane>
 
