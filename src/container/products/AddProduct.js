@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Row, Col, Tabs, Form, Input, Switch, Select, DatePicker } from 'antd';
+import { Row, Col, Tabs, Form, Input, Switch, Select, DatePicker, Checkbox } from 'antd';
 import FeatherIcon from 'feather-icons-react';
 import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
@@ -10,6 +10,7 @@ const { TextArea } = Input;
 import style from "./products.module.css"
 import AttributeTab from './addProducts/AttributeTab';
 import DiscountTab from './addProducts/DiscountTab';
+import ImageTab from './addProducts/ImageTab';
 
 
 
@@ -50,6 +51,10 @@ const AddProduct = () => {
                                 labelCol={{ span: 4 }}
                             >
                                 <Tabs>
+
+                                    <Tabs.TabPane tab="Images" key="Images">
+                                        <ImageTab />
+                                    </Tabs.TabPane>
 
                                     <Tabs.TabPane tab="General" key="general">
                                         <Form.Item
@@ -100,7 +105,7 @@ const AddProduct = () => {
                                             rules={[{ required: true, message: "Please enter Tags" }]}
                                             name="n5" label="Tags"
                                         >
-                                            <Input placeholder='Enter Tags' />
+                                            <Input placeholder='Enter comma separated Tags' />
                                         </Form.Item>
                                     </Tabs.TabPane>
 
@@ -163,6 +168,33 @@ const AddProduct = () => {
                                     </Tabs.TabPane>
 
                                     <Tabs.TabPane tab="Price" key="Price">
+                                        <Form.Item
+                                            // rules={[{ required: true, message: "Please enter " }]}
+                                            name="Price"
+                                            label="Regular Price"
+
+                                        >
+                                            <Input placeholder='Enter price' prefix="US$  " type='number' />
+                                        </Form.Item>
+                                        <Form.Item
+                                            // rules={[{ required: true, message: "Please enter " }]}
+                                            name="cPrice"
+                                            label="Sales Price"
+                                        >
+                                            <Input prefix="US$  " type='number' placeholder='Enter Sales price' />
+                                        </Form.Item>
+                                        <Form.Item
+                                            // rules={[{ required: true, message: "Please enter " }]}
+                                            name="cPrice"
+                                            label="Cost Per Item"
+                                        >
+                                            <Input prefix="US$  " type='number' placeholder='Enter cost per item' />
+                                            <p style={{ color: "gray" }}>Customers won't see this</p>
+
+                                            <Checkbox >Charge Tax on this product</Checkbox>
+
+                                        </Form.Item>
+
                                     </Tabs.TabPane>
 
                                     <Tabs.TabPane tab="Discount" key="Discount">
@@ -170,8 +202,7 @@ const AddProduct = () => {
                                     </Tabs.TabPane>
 
 
-                                    <Tabs.TabPane tab="Images" key="Images">
-                                    </Tabs.TabPane>
+
                                 </Tabs>
                             </Form>
 
