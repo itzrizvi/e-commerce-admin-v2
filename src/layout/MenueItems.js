@@ -82,6 +82,11 @@ const MenuItems = ({ darkMode, toggleCollapsed, topMenu }) => {
             Products
           </NavLink>
         </Menu.Item> */}
+        <Menu.Item key="listCoupon">
+          <NavLink onClick={toggleCollapsed} to={`${path}/products/coupon`}>
+            Coupons
+          </NavLink>
+        </Menu.Item>
         <Menu.Item key="listAttribute">
           <NavLink onClick={toggleCollapsed} to={`${path}/attributes/list`}>
             Attributes

@@ -33,7 +33,7 @@ const ListAttributes = () => {
             dataIndex: 'attribute_group.attr_group_name',
             key: 'attribute_group.attr_group_name',
             sorter: (a, b) => a.attribute_group.attr_group_name.toUpperCase() > b.attribute_group.attr_group_name.toUpperCase() ? 1 : -1,
-            render: (value, record) => record.attribute_group.attr_group_name
+            render: (value, record) => record?.attribute_group?.attr_group_name
         },
         {
             title: 'Status',
