@@ -29,7 +29,7 @@ const AddBanner = () => {
     //Submit Form 
     const handleSubmit = values => {
         setIsLoading(true)
-        const data = { ...values, banner_status: bannerStatus}
+        const data = { ...values, banner_status: bannerStatus }
         apolloUploadClient.mutate({
             mutation: bannerQuery.BANNER_ADD,
             variables: { data },
@@ -46,29 +46,24 @@ const AddBanner = () => {
             const banner_uuid = data?.data?.banner_uuid;
 
             bannerData.forEach((val) => {
-                // apolloUploadClient.mutate({
-                //     mutation: bannerQuery.BANNER_IMAGE_ADD,
-                //     variables: {data: { banner_id: banner_uuid, title: val.title, sort_order: val.sort_order, link: val.link}, file: val.image},
-                //     context: {
-                //         headers: {
-                //             TENANTID: process.env.REACT_APP_TENANTID,
-                //             Authorization: token
-                //         }
-                //     }
-                // }).then(res => {
-                //     console.log(res);
-                // }).catch(err => {
-                //     toast.error('Something Went wrong !!');
-                // })
+                console.log(val)
+                console.log(val.image)
 
                 apolloUploadClient.mutate({
-                    mutation: bannerQuery.SINGLE_UPLOAD,
-                    variables: {file: image},
+                    mutation: bannerQuery.BANNER_IMAGE_ADD,
+                    variables: { data: { banner_id: banner_uuid, title: val.title, sort_order: val.sort_order, link: val.link, image: val.image } },
+                    context: {
+                        headers: {
+                            TENANTID: process.env.REACT_APP_TENANTID,
+                            Authorization: token
+                        }
+                    }
                 }).then(res => {
                     console.log(res);
                 }).catch(err => {
                     toast.error('Something Went wrong !!');
                 })
+
             })
         }).catch(err => {
             toast.error('Something Went wrong !!!');
@@ -83,18 +78,6 @@ const AddBanner = () => {
         if (!isLt2M) toast.error('Image must smaller than 1MB!');
 
         if (isJpg && isLt2M) {
-
-            console.log(file);
-
-            apolloUploadClient.mutate({
-                mutation: bannerQuery.SINGLE_UPLOAD,
-                variables: {file: file},
-            }).then(res => {
-                console.log(res);
-            }).catch(err => {
-                toast.error('Something Went wrong !!');
-            })
-
             setImage(file)
         }
 
@@ -110,12 +93,12 @@ const AddBanner = () => {
     );
 
     const setImageInObject = (e) => {
-        if(e && "target" in e && 'getAttribute' in e.target){
+        if (e && "target" in e && 'getAttribute' in e.target) {
             const data_id = e.target.getAttribute("data-id");
-            if(data_id){
+            if (data_id) {
                 let shawlow_copy = bannerData;
-                shawlow_copy.map(ele =>{
-                    if(ele.id == data_id){
+                shawlow_copy.map(ele => {
+                    if (ele.id == data_id) {
                         ele.image = image
                     }
                     return ele;
@@ -130,32 +113,40 @@ const AddBanner = () => {
             title: 'Title',
             dataIndex: 'title',
             key: 'title',
-            render: (text, record) => <Input type='text' placeholder="Title" onChange={(e) => record.title = e.target.value}/>
+            render: (text, record) => <Input type='text' placeholder="Title" onChange={(e) => record.title = e.target.value} />
         },
         {
             title: 'Link',
             dataIndex: 'link',
             key: 'link',
-            render: (text, record) => <Input type='text' placeholder="Link" onChange={(e) => record.link = e.target.value}/>
+            render: (text, record) => <Input type='text' placeholder="Link" onChange={(e) => record.link = e.target.value} />
         },
         {
             title: 'Image',
             dataIndex: 'image',
             key: 'image',
-            render: (text, record) => <Upload name="avatar" listType="picture-card" data-id={record.id} className="avatar-uploader" showUploadList={false} beforeUpload={beforeImageUpload} onChange={setImageInObject(event)} fileList={[]}>
+            render: (text, record) => <Upload
+                name="avatar"
+                listType="picture-card"
+                data-id={record.id}
+                className="avatar-uploader"
+                showUploadList={false}
+                beforeUpload={beforeImageUpload}
+                onChange={setImageInObject(event)} fileList={[]}
+            >
                 {
-                record.image ? (
-                    <LazyLoadImage
-                        src={URL.createObjectURL(record.image)}
-                        onError={errorImageSrc}
-                        alt="image"
-                        style={{
-                            width: '100%',
-                        }}
-                    />
-                ) : (
-                    uploadButton
-                )}
+                    record.image ? (
+                        <LazyLoadImage
+                            src={URL.createObjectURL(record.image)}
+                            onError={errorImageSrc}
+                            alt="image"
+                            style={{
+                                width: '100%',
+                            }}
+                        />
+                    ) : (
+                        uploadButton
+                    )}
             </Upload>
         },
         {

@@ -1,7 +1,7 @@
 import { gql } from "@apollo/client";
 
 export const bannerQuery = {
-  
+
   BANNER_ADD: gql`
     mutation addBanner($data: BannerInput) {
         addBanner(data: $data) {
@@ -13,13 +13,12 @@ export const bannerQuery = {
       }
     }`,
   BANNER_IMAGE_ADD: gql`
-    mutation addBannerImage($data: BannerImageInput!, $file: Upload!) {
-      addBannerImage(data: $data, file: $file) {
+    mutation addBannerImage($data: BannerImageInput!) {
+      addBannerImage(data: $data) {
         message
         status
         data {
           banner_uuid
-          banner_id
           title
           link
           sort_order
@@ -27,7 +26,7 @@ export const bannerQuery = {
       }
     }`,
   SINGLE_UPLOAD: gql`
-    mutation singleUpload($file: Upload) {
+    mutation singleUpload($file: Upload!) {
       singleUpload(file: $file) {
           message
         }
