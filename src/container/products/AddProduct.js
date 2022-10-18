@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Row, Col, Tabs, Form, Input } from 'antd';
+import { Row, Col, Tabs, Form, Input, Switch, Select, DatePicker } from 'antd';
 import FeatherIcon from 'feather-icons-react';
 import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
@@ -102,8 +102,6 @@ const AddProduct = () => {
                                         >
                                             <Input placeholder='Enter Tags' />
                                         </Form.Item>
-
-
                                     </Tabs.TabPane>
 
                                     <Tabs.TabPane tab="Data" key="Data">
@@ -116,8 +114,48 @@ const AddProduct = () => {
                                         </Form.Item> */}
 
                                     </Tabs.TabPane>
-                                    <Tabs.TabPane tab="Stock" key="Data">
 
+                                    <Tabs.TabPane tab="Stock" key="Stock">
+                                        <Form.Item
+                                            rules={[{ required: true, message: "Please enter Product Quantity" }]}
+                                            name="q"
+                                            label="Quantity"
+                                        >
+                                            <Input placeholder='Enter Quantity' />
+                                        </Form.Item>
+                                        <Form.Item
+                                            rules={[{ required: true, message: "Please enter Minimum Quantity" }]}
+                                            name="mq"
+                                            label="Minimum Quantity"
+                                        >
+                                            <Input placeholder='Enter Minimum Quantity' />
+                                        </Form.Item>
+                                        <Form.Item
+                                            label="Subtract Stock"
+                                        >
+                                            <Switch defaultChecked={true} />
+
+                                        </Form.Item>
+                                        <Form.Item
+                                            rules={[{ required: true, message: "Please enter Out Of Stock Status" }]}
+                                            // name="q"
+                                            label="Out Of Stock Status"
+
+                                        >
+                                            <Select defaultValue={2}>
+                                                <Select.Option key={1} value={1}>2-3 Days</Select.Option>
+                                                <Select.Option key={2} value={2}>In Stock</Select.Option>
+                                                <Select.Option key={3} value={3}>Out Of Stock</Select.Option>
+                                                <Select.Option key={4} value={4}>Pre-Order</Select.Option>
+                                            </Select>
+                                        </Form.Item>
+                                        <Form.Item
+                                            rules={[{ required: true, message: "Please enter Date Available" }]}
+                                            // name="q"
+                                            label="Date Available"
+                                        >
+                                            <DatePicker size='middle' style={{ height: '2.6em' }} />
+                                        </Form.Item>
                                     </Tabs.TabPane>
 
                                     <Tabs.TabPane tab="Attribute" key="Attribute">
@@ -131,15 +169,7 @@ const AddProduct = () => {
                                         <DiscountTab />
                                     </Tabs.TabPane>
 
-                                    <Tabs.TabPane tab="Stock" key="Stock">
-                                        {/* <Form.Item
-                                            rules={[{ required: true, message: "Please enter Product Quantity" }]}
-                                            name="q"
-                                            label="Quantity"
-                                        >
-                                            <Input placeholder='Enter Quantity' />
-                                        </Form.Item> */}
-                                    </Tabs.TabPane>
+
                                     <Tabs.TabPane tab="Images" key="Images">
                                     </Tabs.TabPane>
                                 </Tabs>
