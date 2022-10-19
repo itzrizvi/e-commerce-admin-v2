@@ -11,6 +11,8 @@ import style from "./products.module.css"
 import AttributeTab from './addProducts/AttributeTab';
 import DiscountTab from './addProducts/DiscountTab';
 import ImageTab from './addProducts/ImageTab';
+import Heading from '../../components/heading/heading';
+const { Option } = Select;
 
 
 
@@ -51,7 +53,6 @@ const AddProduct = () => {
                                 labelCol={{ span: 4 }}
                             >
                                 <Tabs>
-
                                     <Tabs.TabPane tab="General" key="general">
                                         <Form.Item
                                             rules={[{ required: true, message: "Please enter Product Name" }]}
@@ -104,18 +105,68 @@ const AddProduct = () => {
                                             <Input placeholder='Enter comma separated Tags' />
                                         </Form.Item>
                                     </Tabs.TabPane>
-
                                     <Tabs.TabPane tab="Data" key="Data">
-                                        {/* <Form.Item
-                                            rules={[{ required: true, message: "Please enter " }]}
-                                            name="N"
-                                            label=""
+                                        <Form.Item
+                                            rules={[{ required: true, message: "Please enter Model" }]}
+                                            name="model"
+                                            label="Model"
                                         >
                                             <Input placeholder='Enter ' />
-                                        </Form.Item> */}
+                                        </Form.Item>
+                                        <Form.Item
+                                            // rules={[{ required: true, message: "Please enter " }]}
+                                            name="SKU"
+                                            label="SKU"
+                                        >
+                                            <Input placeholder='Enter Product SKU' />
+                                        </Form.Item>
+                                        {/* <Heading as="h6"> Specification:</Heading> */}
+                                    </Tabs.TabPane>
+                                    <Tabs.TabPane tab="Specifications" key="Specifications">
+                                        <Form.Item
+                                            // rules={[{ required: true, message: "Please enter Model" }]}
+                                            name="d1"
+                                            label={<p>Dimensions <br /> (L x W x H)</p>}
+                                        >
+                                            <Input.Group compact >
+                                                <Input type='number' style={{ width: "33.3%" }} placeholder='Length' />
+                                                <Input type='number' style={{ width: "33.3%" }} placeholder='Width' />
+                                                <Input type='number' style={{ width: "33.3%" }} placeholder='Height' />
+                                            </Input.Group>
+                                        </Form.Item>
+                                        <Form.Item
+                                            // rules={[{ required: true, message: "Please enter Model" }]}
+                                            name="model"
+                                            label={<p>Dimensions <br />Class </p>}
+                                        >
+                                            <Select style={{ height: '3.5em' }} placeholder="Enter Dimension class" >
+                                                <Option key={1} value={1} >Centimeter</Option>
+                                                <Option key={2} value={2} >Millimeter</Option>
+                                                <Option key={3} value={3} >Inch</Option>
+                                            </Select>
+                                        </Form.Item>
+
+                                        <Form.Item
+                                            // rules={[{ required: true, message: "Please enter Model" }]}
+                                            name="w"
+                                            label="Weight"
+                                        >
+                                            <Input type='number' />
+                                        </Form.Item>
+                                        <Form.Item
+                                            // rules={[{ required: true, message: "Please enter Model" }]}
+                                            name="model"
+                                            label="Weight Class"
+                                        >
+                                            <Select placeholder="Enter Dimension class" >
+                                                <Option key={1} value={1} >Kilogram</Option>
+                                                <Option key={1} value={1} >Gram</Option>
+                                                <Option key={2} value={2} >Pound</Option>
+                                                <Option key={3} value={3} >Ounce</Option>
+                                            </Select>
+                                        </Form.Item>
 
                                     </Tabs.TabPane>
-
                                     <Tabs.TabPane tab="Stock" key="Stock">
                                         <Form.Item
                                             rules={[{ required: true, message: "Please enter Product Quantity" }]}
@@ -158,11 +209,9 @@ const AddProduct = () => {
                                             <DatePicker size='middle' style={{ height: '2.6em' }} />
                                         </Form.Item>
                                     </Tabs.TabPane>
-
                                     <Tabs.TabPane tab="Attribute" key="Attribute">
                                         <AttributeTab />
                                     </Tabs.TabPane>
-
                                     <Tabs.TabPane tab="Price" key="Price">
                                         <Form.Item
                                             // rules={[{ required: true, message: "Please enter " }]}
