@@ -58,7 +58,7 @@ const ListBrand = () => {
             }
         }).then(res => {
             const status = res?.data?.updateBrand?.status
-            if (!status) return toast.error(data.message)
+            if (!status) return toast.error(res?.data?.updateBrand?.message)
             toast.success(`${record.brand_name} Status updated.`)
         }).catch(err => {
             console.log(err);
