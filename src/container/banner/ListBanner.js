@@ -9,24 +9,22 @@ import { Button } from '../../components/buttons/buttons';
 import { Link } from 'react-router-dom';
 import FontAwesome from 'react-fontawesome';
 import apolloClient from '../../apollo';
-import { brandQuery } from '../../apollo/brand';
+import { bannerQuery } from '../../apollo/banner';
 import { useSelector } from 'react-redux';
 import Moment from 'react-moment';
 import { toast } from 'react-toastify';
-import { errorImageSrc, renderImage } from '../../utility/images';
-import { LazyLoadImage } from 'react-lazy-load-image-component';
 
 
 
 const ListBanner = () => {
-    const [brand, setBrand] = useState({ data: [], loading: true, error: '' })
-    const [filteredBrand, setFilteredBrand] = useState([]);
+    const [banner, setBanner] = useState({ data: [], loading: true, error: '' })
+    const [filteredBanner, setFilteredBanner] = useState([]);
     const [isFilter, setIsFilter] = useState(false)
     const token = useSelector(state => state.auth.token);
 
     useEffect(() => {
         apolloClient.query({
-            query: brandQuery.GET_ALL_BRAND,
+            query: bannerQuery.GET_ALL_BANNER,
             context: {
                 headers: {
                     TENANTID: process.env.REACT_APP_TENANTID,
@@ -34,21 +32,22 @@ const ListBanner = () => {
                 }
             }
         }).then(res => {
-            const data = res?.data?.getAllBrands
-            setBrand(s => ({ ...s, data: data?.data, error: '' }))
+            const data = res?.data?.getAllBanners
+            // console.log(data);
+            setBanner(s => ({ ...s, data: data?.data, error: '' }))
         }).catch(err => {
-            setBrand(s => ({ ...s, error: 'Something went Wrong.!! ' }))
+            setBanner(s => ({ ...s, error: 'Something went Wrong.!! ' }))
         }).finally(() => {
-            setBrand(s => ({ ...s, loading: false }))
+            setBanner(s => ({ ...s, loading: false }))
         })
 
-    }, [brand.data])
+    }, [])
 
     const handleStatusChange = (record, checked) => {
-        const variables = { data: { brand_uuid: record.brand_uuid, brand_status: checked } }
+        const variables = { data: { banner_uuid: record.banner_uuid, banner_status: checked } }
     
         apolloClient.mutate({
-            mutation: brandQuery.BRAND_UPDATE,
+            mutation: bannerQuery.BANNER_UPDATE,
             variables,
             context: {
                 headers: {
@@ -57,9 +56,10 @@ const ListBanner = () => {
                 }
             }
         }).then(res => {
-            const status = res?.data?.updateBrand?.status
+            const status = res?.data?.updateBanner?.status
+            console.log(record);
             if (!status) return toast.error(data.message)
-            toast.success(`${record.brand_name} Status updated.`)
+            toast.success(`${record.banner_name} Status updated.`)
         }).catch(err => {
             console.log(err);
             toast.error(`Something went wrong!!`)
@@ -70,32 +70,32 @@ const ListBanner = () => {
     const columns = [
         {
             title: 'ID',
-            dataIndex: 'brand_uuid',
-            key: 'brand_uuid',
+            dataIndex: 'banner_uuid',
+            key: 'banner_uuid',
             width: 80,
             ellipsis: true,
-            sorter: (a, b) => a.brand_uuid.toUpperCase() > b.brand_uuid.toUpperCase() ? 1 : -1,
+            sorter: (a, b) => a.banner_uuid.toUpperCase() > b.banner_uuid.toUpperCase() ? 1 : -1,
         },
         {
             title: 'Name',
-            dataIndex: 'brand_name',
-            key: 'brand_name',
+            dataIndex: 'banner_name',
+            key: 'banner_name',
             width: 250,
             ellipsis: true,
-            sorter: (a, b) => a.brand_name.toUpperCase() > b.brand_name.toUpperCase() ? 1 : -1,
+            sorter: (a, b) => a.banner_name.toUpperCase() > b.banner_name.toUpperCase() ? 1 : -1,
         },
         {
-            title: 'Link',
-            dataIndex: 'brand_slug',
-            key: 'brand_slug',
+            title: 'Alias',
+            dataIndex: 'banner_slug',
+            key: 'banner_slug',
             width: 250,
             ellipsis: true,
-            sorter: (a, b) => a.brand_slug.toUpperCase() > b.brand_slug.toUpperCase() ? 1 : -1,
+            sorter: (a, b) => a.banner_slug.toUpperCase() > b.banner_slug.toUpperCase() ? 1 : -1,
         },
         {
             title: 'Status',
-            dataIndex: 'brand_status',
-            key: 'brand_status',
+            dataIndex: 'banner_status',
+            key: 'banner_status',
             align: 'right',
             width:120,
             render: (text, record) => (
@@ -111,8 +111,8 @@ const ListBanner = () => {
                   value: false,
                 }
             ],
-            onFilter: (value, record) => record.brand_status === value,
-            sorter: (a, b) => a.brand_status - b.brand_status,
+            onFilter: (value, record) => record.banner_status === value,
+            sorter: (a, b) => a.banner_status - b.banner_status,
         },
         {
             title: 'Date',
@@ -130,7 +130,7 @@ const ListBanner = () => {
             key: 'action',
             render: (text, record) => (
                 <>
-                    <Link to={`/admin/banner/edit?id=${record.brand_uuid}`}>
+                    <Link to={`/admin/banner/edit?id=${record.banner_uuid}`}>
                         <FontAwesome name="edit" />
                     </Link>
                 </>
@@ -141,14 +141,14 @@ const ListBanner = () => {
     const onChangeSearch = e => {
         const value = e.target.value
         setIsFilter(value)
-        setFilteredBrand(brand.data.filter(brand => (brand?.brand_name + brand?.brand_slug + brand?.brand_uuid).toLowerCase().includes(value.toLowerCase())))
+        setFilteredBanner(banner.data.filter(banner => (banner?.banner_name + banner?.banner_slug + banner?.banner_uuid).toLowerCase().includes(value.toLowerCase())))
     }
 
 
     return (
         <>
             <PageHeader
-                title="Banner"
+                title="Banner List"
                 buttons={[
                     <div key="1" className="page-header-actions">
                         <Link to="/admin/banner/add">
@@ -163,13 +163,13 @@ const ListBanner = () => {
                 <Row gutter={25}>
                     <Col sm={24} xs={24}>
                         <Cards headless>
-                            {brand.loading ?
+                            {banner.loading ?
                                 <div className="spin">
                                     <Spin />
                                 </div>
                                 :
-                                brand.error ?
-                                    <p>{brand.error}</p>
+                                banner.error ?
+                                    <p>{banner.error}</p>
                                     :
                                     <>
                                         <Input placeholder="Search in Banner..." prefix={<SearchOutlined />} onChange={onChangeSearch} />
@@ -181,12 +181,12 @@ const ListBanner = () => {
                                                 columns={columns}
                                                 pagination={{
                                                     defaultPageSize: 10,
-                                                    total: isFilter ? brand?.data?.length : brand?.data?.length,
+                                                    total: isFilter ? banner?.data?.length : banner?.data?.length,
                                                     showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`,
                                                 }}
-                                                rowKey={'brand_uuid'}
+                                                rowKey={'banner_uuid'}
                                                 size="small"
-                                                dataSource={isFilter ? filteredBrand : brand.data}
+                                                dataSource={isFilter ? filteredBanner : banner.data}
                                                 rowClassName={(record, index) => (index % 2 == 0 ? "" : "altTableClass")}
                                             />
                                         </span>

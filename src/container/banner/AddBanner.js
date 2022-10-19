@@ -28,46 +28,71 @@ const AddBanner = () => {
 
     //Submit Form 
     const handleSubmit = values => {
-        setIsLoading(true)
-        const data = { ...values, banner_status: bannerStatus }
-        apolloUploadClient.mutate({
-            mutation: bannerQuery.BANNER_ADD,
-            variables: { data },
-            context: {
-                headers: {
-                    TENANTID: process.env.REACT_APP_TENANTID,
-                    Authorization: token
-                }
+        let check_point = true;
+        bannerData.forEach(val => {
+            if(check_point && (val.image == "" || val.title == "")){
+                toast.info("Please Provide All Banner Image First!");
+                check_point = false;
+                return;
             }
-        }).then(res => {
-            const data = res?.data?.addBanner
-            if (!data?.status) return toast.error('Something Went wrong !');
-            // console.log(data?.data?.banner_uuid);
-            const banner_uuid = data?.data?.banner_uuid;
+        });
 
-            bannerData.forEach((val) => {
-                console.log(val)
-                console.log(val.image)
-
-                apolloUploadClient.mutate({
-                    mutation: bannerQuery.BANNER_IMAGE_ADD,
-                    variables: { data: { banner_id: banner_uuid, title: val.title, sort_order: val.sort_order, link: val.link, image: val.image } },
-                    context: {
-                        headers: {
-                            TENANTID: process.env.REACT_APP_TENANTID,
-                            Authorization: token
-                        }
+        if(check_point){
+            setIsLoading(true)
+            const data = { ...values, banner_status: bannerStatus }
+            apolloClient.mutate({
+                mutation: bannerQuery.BANNER_ADD,
+                variables: { data },
+                context: {
+                    headers: {
+                        TENANTID: process.env.REACT_APP_TENANTID,
+                        Authorization: token
                     }
-                }).then(res => {
-                    console.log(res);
-                }).catch(err => {
-                    toast.error('Something Went wrong !!');
-                })
+                },
+                refetchQueries: [
+                    {
+                      query: bannerQuery.GET_ALL_BANNER,
+                      context: {
+                        headers: {
+                          TENANTID: process.env.REACT_APP_TENANTID,
+                          Authorization: token
+                        }
+                      }
+                    },
+                    'getAllBanners'
+                ],
+            }).then(res => {
+                const data = res?.data?.addBanner
+                if (!data?.status) return toast.error('Something Went wrong !');
+                const banner_uuid = data?.data?.banner_uuid;
+                bannerData.forEach((val) => {
+                    apolloUploadClient.mutate({
+                        mutation: bannerQuery.BANNER_IMAGE_ADD,
+                        variables: { data: { banner_id: banner_uuid, title: val.title, sort_order: val.sort_order, link: val.link, image: val.image } },
+                        context: {
+                            headers: {
+                                TENANTID: process.env.REACT_APP_TENANTID,
+                                Authorization: token
+                            }
+                        }
+                    }).then(res => {
+                        console.log(res);
+                    }).catch(err => {
+                        toast.error('Something Went wrong !!');
+                    })
 
+                })
+            }).catch(err => {
+                toast.error('Something Went wrong !!!');
+            }).finally(() =>{
+                setIsLoading(false)
+                history.push("/admin/banner/list");
+                toast.success("Banner Added Successfully!");
+                setTimeout(() => {
+                    window.location.reload(); 
+                }, 2000);
             })
-        }).catch(err => {
-            toast.error('Something Went wrong !!!');
-        }).finally(() => setIsLoading(false))
+        }
     };
 
     // Assign Image
