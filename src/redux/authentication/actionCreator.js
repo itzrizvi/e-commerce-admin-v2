@@ -2,7 +2,7 @@ import Cookies from 'js-cookie';
 import apolloClient, { authMutation } from '../../utility/apollo';
 import actions from './actions';
 
-const { loginBegin, loginSuccess, loginErr, logoutBegin, logoutSuccess, logoutErr } = actions;
+const { loginBegin, loginSuccess, loginErr, logoutBegin, logoutSuccess, logoutErr, updateUser } = actions;
 
 const login = (email, password, history) => {
   return async dispatch => {
@@ -16,14 +16,9 @@ const login = (email, password, history) => {
         }
       }
     }).then(res => {
-      console.log("🚀 ~ file: actionCreator.js ~ line 19 ~ login ~ res", res);
       const adminSignIn = res?.data?.adminSignIn
-      console.log("🚀 ~ file: actionCreator.js ~ line 21 ~ login ~ adminSignIn", adminSignIn);
-      console.log("🚀 ~ file: actionCreator.js ~ line 21 ~ login ~ adminSignIn.status", adminSignIn.status);
 
       if (adminSignIn?.status) {
-        console.log("🚀 ~ file: actionCreator.js ~ line 21 ~ login ~ adminSignIn.status1", adminSignIn.status);
-
         Cookies.set('logedIn', true);
         Cookies.set('psp_t', adminSignIn?.authToken);
         Cookies.set('r_i', adminSignIn?.roleNo);
@@ -74,4 +69,11 @@ const logOut = () => {
   };
 };
 
-export { login, logOut };
+const changeUser = user => {
+  return async dispatch => {
+    dispatch(updateUser({ user }))
+    Cookies.set('user', JSON.stringify(user));
+  }
+}
+
+export { login, logOut, changeUser };

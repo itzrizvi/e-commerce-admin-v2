@@ -19,7 +19,7 @@ export const brandQuery = {
     }
   }
 }`,
-GET_CATEGORIES: gql`
+  GET_CATEGORIES: gql`
   query getParentCategories {
     getParentCategories {
       message
@@ -32,7 +32,7 @@ GET_CATEGORIES: gql`
     }
   }
 `,
-GET_SINGLE_BRAND: gql`
+  GET_SINGLE_BRAND: gql`
   query getSingleBrand($brand_uuid : UUID!){
     getSingleBrand(query: {brand_uuid: $brand_uuid}) {
       message
@@ -52,7 +52,7 @@ GET_SINGLE_BRAND: gql`
     }
   }
 `,
-BRAND_UPDATE: gql`
+  BRAND_UPDATE: gql`
   mutation updateBrand($data: UpdateBrandInput, $file:Upload){
     updateBrand(data:$data, file: $file){
       message
@@ -74,7 +74,7 @@ BRAND_UPDATE: gql`
         status
       }
     }`,
-    BRAND_ADD_WI: gql`
+  BRAND_ADD_WI: gql`
       mutation createBrand($data: BrandCreateInput) {
         createBrand(data: $data) {
           message
