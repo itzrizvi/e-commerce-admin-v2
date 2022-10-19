@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Row, Col, Input, Table, Spin } from 'antd';
+import React, { useEffect, useState } from 'react';
+import { Row, Col, Input, Table, Spin, Switch } from 'antd';
 import FeatherIcon from 'feather-icons-react';
 import { SearchOutlined } from '@ant-design/icons';
 import { PageHeader } from '../../components/page-headers/page-headers';
@@ -8,42 +8,94 @@ import { Cards } from '../../components/cards/frame/cards-frame';
 import { Button } from '../../components/buttons/buttons';
 import { Link } from 'react-router-dom';
 import FontAwesome from 'react-fontawesome';
+import apolloClient, { attributeMutation, attributeQuery } from '../../utility/apollo';
+import Cookies from 'js-cookie';
+import { toast } from 'react-toastify';
 
 const AttributeGroup = () => {
-    const dummyData = [...Array(10).keys()].map(i => ({ g_n: `Group ${i + 1}`, g_s: i + 1 }))
-
-    const [attributeGroups, setAttributeGroups] = useState({ data: dummyData, isLoading: false })
+    // const dummyData = [...Array(10).keys()].map(i => ({ g_n: `Group ${i + 1}`, g_s: i + 1 }))
+    const [attributeGroups, setAttributeGroups] = useState({ data: [], isLoading: true })
     const [filteredAttributeGroups, setFilteredAttributeGroups] = useState([])
     const [searchText, setSearchText] = useState('')
+
+    useEffect(() => {
+        apolloClient.query({
+            query: attributeQuery.GET_ALL_ATTR_GROUPS,
+            context: {
+                headers: {
+                    TENANTID: process.env.REACT_APP_TENANTID,
+                    Authorization: Cookies.get('psp_t')
+                }
+            }
+        }).then(res => {
+
+            const data = res?.data?.getAllAttrGroups
+
+            if (!data?.status) return
+            setAttributeGroups(s => ({ ...s, data: data?.data, error: '' }))
+
+        }).catch(err => {
+            setAttributeGroups(s => ({ ...s, error: 'Something went Wrong.!! ' }))
+        }).finally(() => {
+            setAttributeGroups(s => ({ ...s, isLoading: false }))
+        })
+
+    }, [])
+
 
     const columns = [
         {
             title: 'Group Name',
-            dataIndex: 'g_n',
-            key: 'g_n',
-            sorter: (a, b) => a.g_n.toUpperCase() > b.g_n.toUpperCase() ? 1 : -1,
+            dataIndex: 'attr_group_name',
+            key: 'attr_group_name',
+            sorter: (a, b) => a.attr_group_name.toUpperCase() > b.attr_group_name.toUpperCase() ? 1 : -1,
         },
         {
             title: 'Sort Order',
-            dataIndex: 'g_s',
-            key: 'g_s',
-            sorter: (a, b) => (a.g_s === b.g_s) ? 0 : a.g_s ? -1 : 1,
+            dataIndex: 'attrgroup_sortorder',
+            key: 'attrgroup_sortorder',
+            sorter: (a, b) => (a.attrgroup_sortorder === b.attrgroup_sortorder) ? 0 : a.attrgroup_sortorder ? -1 : 1,
         },
         {
+            title: 'Status',
+            dataIndex: 'attrgroup_status',
+            key: 'attrgroup_status',
+            align: 'right',
+            sorter: (a, b) => (a.attrgroup_status === b.attrgroup_status) ? 0 : a.attrgroup_status ? -1 : 1,
+            filters: [
+                {
+                    text: 'Active',
+                    value: true,
+                },
+                {
+                    text: 'Inactive',
+                    value: false,
+                }
+            ],
+            onFilter: (value, record) => record.attrgroup_status === value,
+            render: (value, record) => (
+                <Switch
+                    defaultChecked={value} title='Status'
+                    onChange={checked => handleStatusChange(record, checked)}
+                />
+            )
+        },
+
+        {
             title: 'Action',
-            dataIndex: 'action',
+            dataIndex: 'attr_group_uuid',
+            key: 'attr_group_uuid',
             width: 70,
             align: 'right',
-            render: (text, record) => (
+            render: (value, record) => (
                 <>
-                    <Link to={`/admin/attributes/add-group?id=${1}&name=${record.g_n}`}>
+                    <Link to={`/admin/attributes/add-group?id=${value}&name=${record.attr_group_name}&s=${record.attrgroup_sortorder}&status=${record.attrgroup_status}`}>
                         {/* <Button size="default" type="white" title='Edit'> */}
                         <FontAwesome name="edit" style={{ margin: ".5em 1em" }} />
                         {/* </Button> */}
                     </Link>
                 </>
             ),
-            key: 'last_name',
         },
     ]
 
@@ -51,6 +103,32 @@ const AttributeGroup = () => {
         const value = e.target.value
         setSearchText(value)
         setFilteredAttributeGroups(attributeGroups.data.filter(attr => attr?.g_n.toLowerCase().includes(value.toLowerCase())))
+    }
+
+    const handleStatusChange = (record, checked) => {
+        const variables = { data: { attr_group_uuid: record.attr_group_uuid, attrgroup_status: checked } }
+        console.log(variables)
+        // return;
+        apolloClient.mutate({
+            mutation: attributeMutation.UPDATE_ATTR_GROUP,
+            variables,
+            context: {
+                headers: {
+                    TENANTID: process.env.REACT_APP_TENANTID,
+                    Authorization: Cookies.get('psp_t')
+                },
+            },
+
+        }).then(res => {
+            const data = res?.data?.updateAttrGroup
+            if (!data.status) return toast.error(data.message);
+            toast.success(`${record.attr_group_name} status updated successfully`);
+
+        }).catch(err => {
+            console.log("got error on status update", err)
+            return toast.error('Something Went wrong !!')
+        })
+
     }
 
 

@@ -14,7 +14,6 @@ export const apolloUploadClient = new ApolloClient({
 })
 
 
-
 export const authQuery = {
   GET_ALL_ROLES: gql`
       query getAllRoles {
@@ -45,25 +44,26 @@ export const authQuery = {
       }
     `,
   GET_ALL_STAFF: gql`
-  query getAllStaff {
-    getAllStaff {
-      isAuth
-      message
-      status
-      data {
-        uid
-        first_name
-        last_name
-        email
-        email_verified
-        user_status
-        roles {
-          role
-          role_slug
+      query getAllStaff {
+        getAllStaff {
+          isAuth
+          message
+          status
+          data {
+            uid
+            first_name
+            last_name
+            email
+            email_verified
+            user_status
+            image
+            roles {
+              role
+              role_slug
+            }
+          }
         }
       }
-    }
-  }
     `,
   GET_ALL_FEATURE_PERMISSION: gql`
       query getAllFeaturePermission{
@@ -223,10 +223,11 @@ export const authMutation = {
         }
         `,
   ADMIN_UPDATE: gql`
-        mutation adminUpdate($data: UpdateAdminInput){
-          adminUpdate(data:$data){
+        mutation adminUpdate($data: UpdateAdminInput, $file:Upload){
+          adminUpdate(data:$data, file:$file){
             message
             status
+            tenant_id
           }
         }
         `,
@@ -376,8 +377,6 @@ export const productMutation = {
     `,
 }
 
-
-
 export const rolesMutation = {
   ADD_ROLE_MUTATION: gql`
         mutation createRole($data: CreateRoleInput){
@@ -393,6 +392,203 @@ export const rolesMutation = {
         }`
 }
 
+export const attributeQuery = {
+  GET_ALL_ATTR_GROUPS: gql`
+  query getAllAttrGroups {
+    getAllAttrGroups{
+      status
+      message
+      tenant_id
+      data{
+        attr_group_uuid
+        attr_group_name
+        attr_group_slug
+        attrgroup_status
+        attrgroup_sortorder
+        tenant_id
+        createdAt
+        updatedAt
+        attributes {
+          attribute_uuid
+          attribute_name
+          attribute_slug
+          attr_group_uuid
+          attribute_status
+          tenant_id
+          createdAt
+          updatedAt
+        }
+      }
+    }
+  }
+  `,
+  GET_SINGLE_ATTR_GROUP: gql`
+  query getSingleAttrGroup($query: GetSingleAttrGroupInput) {
+    getSingleAttrGroup(query: $query) {
+      message
+      status
+      tenant_id
+      data {
+        attr_group_uuid
+        attr_group_name
+        attr_group_slug
+        attrgroup_status
+        attrgroup_sortorder
+        tenant_id
+        createdAt
+        updatedAt
+        attributes {
+          attribute_uuid
+          attribute_name
+          attribute_slug
+          attr_group_uuid
+          attribute_status
+          tenant_id
+          createdAt
+          updatedAt
+        }
+      }
+    }
+  }
+  
+  `,
+  GET_ALL_ATTRIBUTES: gql`
+  query getAllAttributes {
+    getAllAttributes {
+      message
+      status
+      tenant_id
+      data {
+        attribute_uuid
+        attribute_name
+        attribute_slug
+        attr_group_uuid
+        attribute_status
+        tenant_id
+        createdAt
+        updatedAt
+        attribute_group {
+          attr_group_uuid
+          attr_group_name
+          attr_group_slug
+          attrgroup_status
+          attrgroup_sortorder
+          tenant_id
+          createdAt
+          updatedAt
+        }
+      }
+    }
+  }
+  `,
+}
+
+export const attributeMutation = {
+  CREATE_ATTR_GROUP: gql`
+  mutation createAttrGroup($data:CreateAttributeGroupInput){
+    createAttrGroup(data:$data){
+      message
+      status
+      tenant_id
+    }
+  }
+  `,
+  UPDATE_ATTR_GROUP: gql`
+  mutation updateAttrGroup($data:UpdateAttributeGroupInput){
+    updateAttrGroup(data:$data){
+      message
+      status
+      tenant_id
+    }
+  }
+  `,
+  CREATE_ATTRIBUTE: gql`
+  mutation createAttribute($data: CreateAttributeInput){
+    createAttribute(data:$data){
+      message
+      status
+      tenant_id
+    }
+  }
+  `,
+  UPDATE_ATTRIBUTE: gql`
+  mutation updateAttribute($data: UpdateAttributeInput) {
+    updateAttribute(data: $data) {
+      message
+      status
+      tenant_id
+    }
+  }
+  `,
+}
+
+export const customerQuery = {
+  GET_ALL_CUSTOMER_GROUPS: gql`
+  query getAllCustomerGroups {
+    getAllCustomerGroups {
+      message
+      status
+      tenant_id
+      data {
+        customer_group_uuid
+        customer_group_name
+        customer_group_slug
+        customergroup_description
+        customergroup_sortorder
+        customergroup_status
+        tenant_id
+        createdAt
+        updatedAt
+      }
+    }
+  }
+  `,
+  GET_SINGLE_CUSTOMER_GROUP: gql`
+  query getSingleCustomerGroup($query: GetSingleCustomerGroupInput) {
+    getSingleCustomerGroup(query: $query) {
+      message
+      status
+      tenant_id
+      data {
+        customer_group_uuid
+        customer_group_name
+        customer_group_slug
+        customergroup_description
+        customergroup_sortorder
+        customergroup_status
+        tenant_id
+        createdAt
+        updatedAt
+      }
+    }
+  }
+  `,
+
+
+}
+
+
+export const customerMutation = {
+  CREATE_CUSTOMER_GROUP: gql`
+  mutation createCustomerGroup($data:CreateCustomerGroupInput){
+    createCustomerGroup(data:$data){
+      message
+      status
+      tenant_id
+    }
+  }
+  `,
+  UPDATE_CUSTOMER_GROUP: gql`
+  mutation updateCustomerGroup($data: UpdateCustomerGroupInput) {
+    updateCustomerGroup(data: $data) {
+      message
+      status
+      tenant_id
+    }
+  }  
+  `,
+
+}
 
 
 

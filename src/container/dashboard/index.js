@@ -35,7 +35,7 @@ const Dashboard = () => {
           <Col lg={24} xs={24}>
             <Cards headless>
               <div style={{ minHeight: 'calc(100vh - 320px)' }}>
-                <h2>Welcome {user.first_name} {user.last_name}</h2>
+                <h2>Welcome {user?.first_name} {user?.last_name}</h2>
               </div>
             </Cards>
           </Col>

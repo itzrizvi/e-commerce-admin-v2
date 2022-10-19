@@ -1,0 +1,17 @@
+.rte {
+    border: 1px solid black;
+}
+
+.rteEditor {
+    border: 1px solid #d9d9d9;
+    border-radius: 3px;
+    padding: .2em .3em;
+    padding-bottom: 3em;
+    font-family: 'Inter', sans-serif;
+}
+
+.rteToolbar {
+    border: 1px solid #d9d9d9;
+    border-radius: 3px;
+    /* padding-bottom: 3em; */
+}

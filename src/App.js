@@ -14,6 +14,8 @@ import ProtectedRoute from './components/utilities/protectedRoute';
 import { ApolloProvider } from '@apollo/client';
 import apolloClient from './utility/apollo';
 import 'react-toastify/dist/ReactToastify.css';
+import 'antd/es/modal/style';
+// import 'antd/es/slider/style';
 import './config/customTable.css'
 import AuthVerify from './utility/auth_verify';
 
@@ -45,7 +47,7 @@ const ProviderConfig = () => {
       <ThemeProvider theme={{ ...theme, rtl, topMenu, darkMode }}>
         <ApolloProvider client={apolloClient} >
           <Router basename={process.env.PUBLIC_URL}>
-          <AuthVerify />
+            <AuthVerify />
             {!isLoggedIn ? <Route path="/" component={Auth} /> : <ProtectedRoute path="/admin" component={Admin} />}
             {isLoggedIn && (path === process.env.PUBLIC_URL || path === `${process.env.PUBLIC_URL}/`) && (
               <Redirect to="/admin" />

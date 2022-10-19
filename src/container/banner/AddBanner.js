@@ -24,7 +24,15 @@ const AddBanner = () => {
     const maxLength = 50
     const [form] = Form.useForm();
 
-    const [bannerData, setBannerData] = useState([]);
+    const initialData = {
+        "id": new Date().getTime(),
+        "title": "",
+        "link": "",
+        "image": "",
+        "sort_order": "",
+        "action": ""
+    }
+    const [bannerData, setBannerData] = useState([initialData]);
 
     //Submit Form 
     const handleSubmit = values => {
@@ -185,7 +193,7 @@ const AddBanner = () => {
             title: 'Action',
             dataIndex: 'action',
             key: 'action',
-            render: (text, record) => <Button size="" title="Remove" type="danger"><FeatherIcon icon="minus" onClick={() => removeRow(record.id)} /></Button>
+            render: (text, record) => <Button size="" title="Remove" type="danger" onClick={() => removeRow(record.id)} ><FeatherIcon icon="minus" /></Button>
         },
     ];
 

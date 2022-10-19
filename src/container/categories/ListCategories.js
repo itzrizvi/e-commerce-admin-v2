@@ -8,10 +8,12 @@ import { Button } from '../../components/buttons/buttons';
 import { SearchOutlined } from '@ant-design/icons';
 import { Link } from 'react-router-dom';
 import FontAwesome from 'react-fontawesome';
-import apolloClient, { productQuery } from '../../utility/apollo';
+import apolloClient, { productMutation, productQuery } from '../../utility/apollo';
 import config from '../../config/config';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
 import { errorImageSrc, renderImage } from '../../utility/images';
+import Cookies from 'js-cookie';
+import { toast } from 'react-toastify';
 
 const categories1 = [
     {
@@ -135,6 +137,49 @@ const ListCategories = () => {
 
     }, [categories])
 
+    const handleStatusChange = (record, checked) => {
+        const variables = { data: { cat_id: record.cat_id, cat_status: checked } }
+
+        apolloClient.mutate({
+            mutation: productMutation.UPDATE_CATEGORY,
+            variables,
+            context: {
+                headers: {
+                    TENANTID: process.env.REACT_APP_TENANTID,
+                    Authorization: Cookies.get('psp_t')
+                }
+            }
+        }).then(res => {
+            const data = res?.data?.updateCategory
+            if (!data?.status) return toast.error(data?.message)
+            toast.success(`${record.cat_name} Category Status updated successfully.`)
+        }).catch(err => {
+            console.log("🚀 ~ file: AllAdmins.js ~ line 33 ~ handleStatusChange ~ err", err);
+            toast.error(`Something went wrong!!`)
+        })
+    }
+    const handleIsFeaturesChange = (record, checked) => {
+        const variables = { data: { cat_id: record.cat_id, is_featured: checked } }
+
+        apolloClient.mutate({
+            mutation: productMutation.UPDATE_CATEGORY,
+            variables,
+            context: {
+                headers: {
+                    TENANTID: process.env.REACT_APP_TENANTID,
+                    Authorization: Cookies.get('psp_t')
+                }
+            }
+        }).then(res => {
+            const data = res?.data?.updateCategory
+            if (!data?.status) return toast.error(data?.message)
+            toast.success(`${record.cat_name} Category isFeatured Status updated.`)
+        }).catch(err => {
+            console.log("🚀 ~ file: AllAdmins.js ~ line 33 ~ handleStatusChange ~ err", err);
+            toast.error(`Something went wrong!!`)
+        })
+    }
+
     const columns = [
         {
             title: 'ID',
@@ -187,13 +232,13 @@ const ListCategories = () => {
             render: (value, record) => (
                 <Checkbox
                     defaultChecked={value}
-                // onChange={onChange}
+                    onChange={e => handleIsFeaturesChange(record, e.target.checked)}
                 />
             )
         },
         {
             title: 'Status',
-            dataIndex: 'status',
+            dataIndex: 'cat_status',
             width: 90,
             key: 'cat_status',
             sorter: (a, b) => (a.status === b.status) ? 0 : a.status ? -1 : 1,
@@ -212,7 +257,7 @@ const ListCategories = () => {
                 <Switch
                     defaultChecked={value}
                     title='Status'
-                // onChange={checked => handleStatusChange(record, checked)}
+                    onChange={checked => handleStatusChange(record, checked)}
                 />
             )
         },

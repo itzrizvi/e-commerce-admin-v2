@@ -43,7 +43,7 @@ const MenuItems = ({ darkMode, toggleCollapsed, topMenu }) => {
       overflowedIndicator={<FeatherIcon icon="more-vertical" />}
       openKeys={openKeys}
     >
-      <Menu.Item key="home">
+      <Menu.Item key="home" icon={!topMenu && <FeatherIcon icon="pie-chart" />} >
         <NavLink onClick={toggleCollapsed} to={`${path}`}>
           Dashboard
         </NavLink>
@@ -77,9 +77,14 @@ const MenuItems = ({ darkMode, toggleCollapsed, topMenu }) => {
       </SubMenu>
 
       <SubMenu key="products" icon={!topMenu && <FeatherIcon icon="shopping-cart" />} title="Products">
-        <Menu.Item key="addproducts">
+        {/* <Menu.Item key="addproducts">
           <NavLink onClick={toggleCollapsed} to={`${path}/products/list`}>
             Products
+          </NavLink>
+        </Menu.Item> */}
+        <Menu.Item key="listCoupon">
+          <NavLink onClick={toggleCollapsed} to={`${path}/products/coupon`}>
+            Coupons
           </NavLink>
         </Menu.Item>
         <Menu.Item key="listAttribute">
@@ -97,6 +102,11 @@ const MenuItems = ({ darkMode, toggleCollapsed, topMenu }) => {
             Category
           </NavLink>
         </Menu.Item>
+        <Menu.Item key="products_list">
+          <NavLink onClick={toggleCollapsed} to={`${path}/products/list`}>
+            Products
+          </NavLink>
+        </Menu.Item>
       </SubMenu>
 
       {/* <SubMenu key="roles" icon={!topMenu && <FeatherIcon icon="shopping-cart" />} title="Roles">
@@ -106,6 +116,14 @@ const MenuItems = ({ darkMode, toggleCollapsed, topMenu }) => {
           </NavLink>
         </Menu.Item>
       </SubMenu> */}
+
+      <SubMenu key="customers" icon={!topMenu && <FeatherIcon icon="user" />} title="Customers">
+        <Menu.Item key="customers_group">
+          <NavLink onClick={toggleCollapsed} to={`${path}/customers/group`}>
+            Customers Group
+          </NavLink>
+        </Menu.Item>
+      </SubMenu>
 
       <SubMenu key="brand" icon={!topMenu && <FeatherIcon icon="aperture" />} title="Manufacture">
         <Menu.Item key="list_brand">

@@ -1,15 +1,16 @@
 import React, { useState } from 'react';
-import { Row, Col, Form, Input, Select } from 'antd';
+import { Row, Col, Form, Input, Select, Upload } from 'antd';
 import { Cards } from '../../../../components/cards/frame/cards-frame';
 import { Button } from '../../../../components/buttons/buttons';
 import { BasicFormWrapper, TagInput } from '../../../styled';
 import Heading from '../../../../components/heading/heading';
 import { Tag } from '../../../../components/tags/tags';
 import { useSelector } from 'react-redux';
-import apolloClient, { authMutation } from '../../../../utility/apollo';
+import apolloClient, { apolloUploadClient, authMutation } from '../../../../utility/apollo';
 import Cookies from 'js-cookie';
 import { toast } from 'react-toastify';
 import { Link } from 'react-router-dom';
+import ImgCrop from 'antd-img-crop';
 
 const { Option } = Select;
 const Profile = () => {
@@ -17,19 +18,18 @@ const Profile = () => {
   const user = useSelector(state => state.auth.user);
   const [isLoading, setIsLoading] = useState(false)
   const maxLength = 30;
-
-  const [state, setState] = useState({
-    tags: ['UI/UX', 'Branding', 'Product Design', 'Web Design'],
-    values: null,
-  });
+  const [profile, setProfile] = useState({})
 
   const handleSubmit = values => {
 
     setIsLoading(true)
-    const variables = { data: { ...values, uid: user.uid } }
+    const variables = { data: { ...values, uid: user.uid, sendEmail: true } }
     console.log(variables);
+    if (profile.file) {
+      variables.file = profile.file
+    }
 
-    apolloClient.mutate({
+    apolloUploadClient.mutate({
       mutation: authMutation.ADMIN_UPDATE,
       variables,
       context: {
@@ -57,6 +57,21 @@ const Profile = () => {
     form.resetFields();
   };
 
+  const handleBeforeUpload = file => {
+    console.log(file)
+
+    const isJpg = file.type === 'image/jpeg';
+    if (!isJpg) return toast.error('You can only upload JPG file!')
+    const isLt2M = file.size / 1024 / 1024 < 2;
+    if (!isLt2M) return toast.error('Image must smaller than 2MB!');
+
+    if (isJpg && isLt2M) {
+      setProfile({ file, thumbnail: URL.createObjectURL(file) })
+    }
+
+
+    return false;
+  }
 
 
 
@@ -72,13 +87,28 @@ const Profile = () => {
       <Row justify="center">
         <Col xl={12} lg={16} xs={24}>
           <BasicFormWrapper>
-            <Form name="editProfile" onFinish={handleSubmit}>
+            <Form labelCol={{ span: 6 }} name="editProfile" onFinish={handleSubmit}>
               <Form.Item
-                // name="first_name"
-                // initialValue={user.first_name}
+                label="Photo"
+              >
+                <p>
+                  <ImgCrop rotate >
+                    <Upload
+                      listType="picture-card"
+                      beforeUpload={handleBeforeUpload}
+                      onPreview={() => console.log()}
+                      onRemove={() => setProfile({})}
+                      fileList={!profile.file ? [] : [{ file: profile.file, url: profile.thumbnail }]}
+                    >
+                      {!profile.file && "+ Upload"}
+                    </Upload>
+                  </ImgCrop>
+                </p>
+              </Form.Item>
+
+              <Form.Item
                 label="Email"
               >
-                {/* <Input /> */}
                 <p> {user.email}</p>
               </Form.Item>
               <Form.Item
@@ -121,7 +151,7 @@ const Profile = () => {
           </BasicFormWrapper>
         </Col>
       </Row>
-    </Cards>
+    </Cards >
   );
 };
 

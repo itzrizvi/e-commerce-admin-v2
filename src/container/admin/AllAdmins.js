@@ -14,6 +14,8 @@ import Cookies from 'js-cookie';
 import { toast } from 'react-toastify';
 import config from '../../config/config';
 import { logOut } from '../../redux/authentication/actionCreator';
+import { LazyLoadImage } from 'react-lazy-load-image-component';
+import { errorImageSrc, renderImage } from '../../utility/images';
 
 
 const handleStatusChange = (record, checked) => {
@@ -69,10 +71,8 @@ const AllAdmin = () => {
             if (!res?.data?.getAllStaff?.isAuth) {
                 dispatch(logOut())
             } else {
-
                 setStaffs(s => ({ ...s, data: res?.data?.getAllStaff?.data, error: '' }))
             }
-
         }).catch(err => {
             setStaffs(s => ({ ...s, error: 'Something went Wrong.!! ' }))
         }).finally(() => {
@@ -107,10 +107,18 @@ const AllAdmin = () => {
             title: 'UID',
             dataIndex: 'uid',
             key: 'uid',
-            width: 120,
+            width: 100,
             ellipsis: true,
             sorter: (a, b) => a.uid.toUpperCase() > b.uid.toUpperCase() ? 1 : -1,
 
+        },
+        {
+            title: 'Image',
+            dataIndex: 'uid',
+            key: 'uid',
+            width: 70,
+            // render: (text, record) => (<img src={require('../../static/img/avatar/NoPath (3).png')} alt="" />),
+            render: (text, record) => (<LazyLoadImage effect="blur" width="40" src={renderImage(record.uid, record.image, 'user', '128x128')} onError={errorImageSrc} alt={record.uid} />)
         },
         {
             title: 'Email',

@@ -12,7 +12,7 @@ const login = (email, password, history) => {
       variables: { email, password },
       context: {
         headers: {
-          TENANTID: 100001
+          TENANTID: process.env.REACT_APP_TENANTID
         }
       }
     }).then(res => {

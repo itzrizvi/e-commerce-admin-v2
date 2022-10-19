@@ -23,6 +23,7 @@ const AddAdmin = () => {
     const maxLength = 30;
     const [userStatus, setUserStatus] = useState(true);
     const [selectedRoles, setSelectedRoles] = useState([])
+    const [sendEmail, setSendEmail] = useState(true);
 
 
     const [roles, setRoles] = useState({
@@ -96,7 +97,7 @@ const AddAdmin = () => {
 
         setIsLoading(true);
         if (!params.uid) { // ADD NEW ADMIN
-            const variables = { data: { ...values, roleUUID: selectedRoles.map(item => ({ role_uuid: item })), userStatus } }
+            const variables = { data: { ...values, roleUUID: selectedRoles.map(item => ({ role_uuid: item })), userStatus, sendEmail } }
             apolloClient.mutate({
                 mutation: authMutation.ADMIN_SIGN_UP,
                 variables,
@@ -137,7 +138,8 @@ const AddAdmin = () => {
                     first_name,
                     last_name,
                     roleUUID: selectedRoles.map(item => ({ role_uuid: item })),
-                    user_status: userStatus
+                    user_status: userStatus,
+                    sendEmail,
                 }
             }
 
@@ -250,10 +252,12 @@ const AddAdmin = () => {
                                 </Form.Item>
 
                                 <Form.Item
-                                    // name="userStatus"
                                     label="Send Email"
                                 >
-                                    <Checkbox defaultChecked={true}></Checkbox>
+                                    <Checkbox
+                                        value={sendEmail}
+                                        onChange={e => setSendEmail(e.target.checked)}
+                                    ></Checkbox>
                                 </Form.Item>
 
 

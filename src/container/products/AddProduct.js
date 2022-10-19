@@ -1,21 +1,23 @@
 import React, { useState } from 'react';
-import { Row, Col } from 'antd';
+import { Row, Col, Tabs, Form, Input, Switch, Select, DatePicker, Checkbox } from 'antd';
 import FeatherIcon from 'feather-icons-react';
 import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
 import { Cards } from '../../components/cards/frame/cards-frame';
-import style from './product.module.css'
-import RichTextEditor from 'react-rte';
 import { Button } from '../../components/buttons/buttons';
-import { ShareButtonPageHeader } from '../../components/buttons/share-button/share-button';
-import { ExportButtonPageHeader } from '../../components/buttons/export-button/export-button';
-import { CalendarButtonPageHeader } from '../../components/buttons/calendar-button/calendar-button';
+import RichTextEditor from 'react-rte';
+const { TextArea } = Input;
+import style from "./products.module.css"
+import AttributeTab from './addProducts/AttributeTab';
+import DiscountTab from './addProducts/DiscountTab';
+import ImageTab from './addProducts/ImageTab';
+import Heading from '../../components/heading/heading';
+const { Option } = Select;
 
-const BlankPage = () => {
-    const [activeTab, setActiveTab] = useState('General')
-    const tabs = ["General", "Data", "Price", "Stock", "Images"]
 
-    // const [description, setDescription] = useState(RichTextEditor.createEmptyValue());
+
+const AddProduct = () => {
+    const [form] = Form.useForm();
     const [description, setDescription] = useState(RichTextEditor.createEmptyValue());
     const onChangeRte = value => {
         console.log(value.toString('html'))
@@ -34,162 +36,222 @@ const BlankPage = () => {
                             <FeatherIcon icon="save" />
                             Add Product
                         </Button>
-
-                        {/* <CalendarButtonPageHeader />
-                    <ExportButtonPageHeader />
-                    <ShareButtonPageHeader />
-                    <Button size="small" type="primary">
-                        <FeatherIcon icon="plus" size={14} />
-                        Add New
-                    </Button> */}
-                    </div>,
+                    </div>
                 ]}
             />
             <Main>
                 <Row gutter={25}>
                     <Col sm={24} xs={24}>
                         <Cards headless>
-                            <ul className={style.tabs}>
-                                {tabs.map(item => (
-                                    <li
-                                        key={item}
-                                        className={activeTab == item ? style.activeTab : ''}
-                                        onClick={() => setActiveTab(item)}
-                                    >{item}</li>
 
-                                ))}
-                            </ul>
+                            <Form
+                                style={{ width: '100%' }}
+                                form={form}
+                                name="addRole"
+                                // onFinish={handleSubmit}
+                                onFinishFailed={errorInfo => console.log('form error info:\n', errorInfo)}
+                                labelCol={{ span: 4 }}
+                            >
+                                <Tabs>
+                                    <Tabs.TabPane tab="General" key="general">
+                                        <Form.Item
+                                            rules={[{ required: true, message: "Please enter Product Name" }]}
+                                            name="N"
+                                            label="Name"
+                                        >
+                                            <Input placeholder='Enter Product Name' />
+                                        </Form.Item>
+                                        <Form.Item
+                                            rules={[{ required: true, message: "Please enter n" }]}
+                                            name="n1" label="Short Description"
+                                        >
+                                            <TextArea rows={3} placeholder="Enter Short Description" />
+                                        </Form.Item>
+                                        <Form.Item
+                                            label="Long Description"
+                                        >
+                                            <RichTextEditor
+                                                value={description}
+                                                onChange={onChangeRte}
+                                                placeholder='Long Description'
+                                                className={style.rte}
+                                                editorClassName={style.rteEditor}
+                                                toolbarClassName={style.rteToolbar}
+                                            />
 
-                            <form >
+                                        </Form.Item>
+                                        <Form.Item
+                                            rules={[{ required: true, message: "Please enter Meta Title" }]}
+                                            name="n2" label="Meta Title"
+                                        >
+                                            <Input placeholder='Enter Meta Title' />
+                                        </Form.Item>
+                                        <Form.Item
+                                            rules={[{ required: true, message: "Please enter Meta Description" }]}
+                                            name="n3" label="Meta Description"
+                                        >
+                                            <Input placeholder='Enter Meta Description' />
+                                        </Form.Item>
+                                        <Form.Item
+                                            rules={[{ required: true, message: "Please enter Meta Keywords" }]}
+                                            name="n4" label="Meta Keywords"
+                                        >
+                                            <Input placeholder='Enter Meta Keywords' />
+                                        </Form.Item>
+                                        <Form.Item
+                                            rules={[{ required: true, message: "Please enter Tags" }]}
+                                            name="n5" label="Tags"
+                                        >
+                                            <Input placeholder='Enter comma separated Tags' />
+                                        </Form.Item>
+                                    </Tabs.TabPane>
+                                    <Tabs.TabPane tab="Data" key="Data">
+                                        <Form.Item
+                                            rules={[{ required: true, message: "Please enter Model" }]}
+                                            name="model"
+                                            label="Model"
+                                        >
+                                            <Input placeholder='Enter ' />
+                                        </Form.Item>
+                                        <Form.Item
+                                            // rules={[{ required: true, message: "Please enter " }]}
+                                            name="SKU"
+                                            label="SKU"
+                                        >
+                                            <Input placeholder='Enter Product SKU' />
+                                        </Form.Item>
+                                        {/* <Heading as="h6"> Specification:</Heading> */}
+                                    </Tabs.TabPane>
+                                    <Tabs.TabPane tab="Specifications" key="Specifications">
+                                        <Form.Item
+                                            // rules={[{ required: true, message: "Please enter Model" }]}
+                                            name="d1"
+                                            label={<p>Dimensions <br /> (L x W x H)</p>}
+                                        >
+                                            <Input.Group compact >
+                                                <Input type='number' style={{ width: "33.3%" }} placeholder='Length' />
+                                                <Input type='number' style={{ width: "33.3%" }} placeholder='Width' />
+                                                <Input type='number' style={{ width: "33.3%" }} placeholder='Height' />
+                                            </Input.Group>
+                                        </Form.Item>
+                                        <Form.Item
+                                            // rules={[{ required: true, message: "Please enter Model" }]}
+                                            name="model"
+                                            label={<p>Dimensions <br />Class </p>}
+                                        >
+                                            <Select style={{ height: '3.5em' }} placeholder="Enter Dimension class" >
+                                                <Option key={1} value={1} >Centimeter</Option>
+                                                <Option key={2} value={2} >Millimeter</Option>
+                                                <Option key={3} value={3} >Inch</Option>
+                                            </Select>
+                                        </Form.Item>
 
-                                <div className={activeTab == 'General' ? style.activeContent : style.inactiveContent}>
+                                        <Form.Item
+                                            // rules={[{ required: true, message: "Please enter Model" }]}
+                                            name="w"
+                                            label="Weight"
+                                        >
+                                            <Input type='number' />
+                                        </Form.Item>
+                                        <Form.Item
+                                            // rules={[{ required: true, message: "Please enter Model" }]}
+                                            name="model"
+                                            label="Weight Class"
+                                        >
+                                            <Select placeholder="Enter Dimension class" >
+                                                <Option key={1} value={1} >Kilogram</Option>
+                                                <Option key={1} value={1} >Gram</Option>
+                                                <Option key={2} value={2} >Pound</Option>
+                                                <Option key={3} value={3} >Ounce</Option>
+                                            </Select>
+                                        </Form.Item>
 
-                                    <div className={style.inputGrpup}>
-                                        <label htmlFor="">Name</label>
-                                        <input
-                                            type="text"
-                                            placeholder='Product Name'
-                                        />
-                                    </div>
-                                    <div className={style.inputGrpup}>
-                                        <label htmlFor="">Short Description</label>
-                                        <input
-                                            type="text"
-                                            placeholder='Short Description'
-                                        />
-                                    </div>
-                                    <div className={style.inputGrpup}>
-                                        <label htmlFor="">Long Description</label>
-                                        <RichTextEditor
-                                            value={description}
-                                            onChange={onChangeRte}
-                                            placeholder='Long Description'
-                                            className={style.rte}
+                                    </Tabs.TabPane>
+                                    <Tabs.TabPane tab="Stock" key="Stock">
+                                        <Form.Item
+                                            rules={[{ required: true, message: "Please enter Product Quantity" }]}
+                                            name="q"
+                                            label="Quantity"
+                                        >
+                                            <Input placeholder='Enter Quantity' />
+                                        </Form.Item>
+                                        <Form.Item
+                                            rules={[{ required: true, message: "Please enter Minimum Quantity" }]}
+                                            name="mq"
+                                            label="Minimum Quantity"
+                                        >
+                                            <Input placeholder='Enter Minimum Quantity' />
+                                        </Form.Item>
+                                        <Form.Item
+                                            label="Subtract Stock"
+                                        >
+                                            <Switch defaultChecked={true} />
 
-                                            editorClassName={style.rteEditor}
-                                            toolbarClassName={style.rteToolbar}
-                                        />
-                                    </div>
-                                    <div className={style.inputGrpup}>
-                                        <label htmlFor="">"Meta Title</label>
-                                        <input type="text" placeholder='Product Meta title' />
-                                    </div>
-                                    <div className={style.inputGrpup}>
-                                        <label htmlFor="">Meta Description</label>
-                                        <input type="text" placeholder='Product Meta Description' />
-                                    </div>
-                                    <div className={style.inputGrpup}>
-                                        <label htmlFor="">Meta Keywords</label>
-                                        <input type="text" placeholder='Product Meta Keywords' />
-                                    </div>
-                                    <div className={style.inputGrpup}>
-                                        <label htmlFor="">Tags</label>
-                                        <input type="text" placeholder='Product Tags' />
-                                    </div>
-                                </div>
+                                        </Form.Item>
+                                        <Form.Item
+                                            rules={[{ required: true, message: "Please enter Out Of Stock Status" }]}
+                                            // name="q"
+                                            label="Out Of Stock Status"
 
-                                <div className={activeTab == 'Data' ? style.activeContent : style.inactiveContent}>
+                                        >
+                                            <Select defaultValue={2}>
+                                                <Select.Option key={1} value={1}>2-3 Days</Select.Option>
+                                                <Select.Option key={2} value={2}>In Stock</Select.Option>
+                                                <Select.Option key={3} value={3}>Out Of Stock</Select.Option>
+                                                <Select.Option key={4} value={4}>Pre-Order</Select.Option>
+                                            </Select>
+                                        </Form.Item>
+                                        <Form.Item
+                                            rules={[{ required: true, message: "Please enter Date Available" }]}
+                                            // name="q"
+                                            label="Date Available"
+                                        >
+                                            <DatePicker size='middle' style={{ height: '2.6em' }} />
+                                        </Form.Item>
+                                    </Tabs.TabPane>
+                                    <Tabs.TabPane tab="Attribute" key="Attribute">
+                                        <AttributeTab />
+                                    </Tabs.TabPane>
+                                    <Tabs.TabPane tab="Price" key="Price">
+                                        <Form.Item
+                                            // rules={[{ required: true, message: "Please enter " }]}
+                                            name="Price"
+                                            label="Regular Price"
 
-                                    <div className={style.inputGrpup}>
-                                        <label htmlFor="">Stock Quantity</label>
-                                        <input type="text" placeholder='Product SKU'
-                                        />
-                                    </div>
-                                    <div className={style.inputGrpup}>
-                                        <label htmlFor="">Category</label>
-                                        <input type="text" placeholder='Product Category'
-                                        />
-                                    </div>
-                                    <div className={style.inputGrpup}>
-                                        <label htmlFor="">Barcode</label>
-                                        <input type="text" placeholder='Product Barcode'
-                                        />
-                                    </div>
-                                </div>
+                                        >
+                                            <Input placeholder='Enter price' prefix="US$  " type='number' />
+                                        </Form.Item>
+                                        <Form.Item
+                                            // rules={[{ required: true, message: "Please enter " }]}
+                                            name="cPrice"
+                                            label="Sales Price"
+                                        >
+                                            <Input prefix="US$  " type='number' placeholder='Enter Sales price' />
+                                        </Form.Item>
+                                        <Form.Item
+                                            // rules={[{ required: true, message: "Please enter " }]}
+                                            name="cPrice"
+                                            label="Cost Per Item"
+                                        >
+                                            <Input prefix="US$  " type='number' placeholder='Enter cost per item' />
+                                            <p style={{ color: "gray" }}>Customers won't see this</p>
 
-                                <div className={activeTab == 'Price' ? style.activeContent : style.inactiveContent}>
+                                            <Checkbox >Charge Tax on this product</Checkbox>
 
-                                    <div className={style.inputGrpup}>
-                                        <label htmlFor="">Regular Price</label>
-                                        <input type="text" placeholder='Product Regular Price'
-                                        />
-                                    </div>
-                                    <div className={style.inputGrpup}>
-                                        <label htmlFor="">Sale Price</label>
-                                        <input type="text" placeholder='Product Sale Price'
-                                        />
-                                    </div>
+                                        </Form.Item>
 
-                                    <div className={style.checkbox}>
-                                        <label htmlFor="">Tax Include</label>
+                                    </Tabs.TabPane>
 
-                                        <input type="checkbox" defaultChecked />
-                                    </div>
+                                    <Tabs.TabPane tab="Discount" key="Discount">
+                                        <DiscountTab />
+                                    </Tabs.TabPane>
 
-                                    {/* todo */}
+                                    <Tabs.TabPane tab="Images" key="Images">
+                                        <ImageTab />
+                                    </Tabs.TabPane>
 
-                                </div>
-
-                                <div className={activeTab == 'Stock' ? style.activeContent : style.inactiveContent}>
-
-                                    <div className={style.inputGrpup}>
-                                        <label htmlFor="">Product Stock Quantity</label>
-                                        <input type="text" placeholder='Product Stock Quantity'
-                                        />
-                                    </div>
-                                    <div className={style.inputGrpup}>
-                                        <label htmlFor="">Product Minimum Stock Quantity</label>
-                                        <input type="text" placeholder='Product Minimum Stock Quantity'
-                                        />
-                                    </div>
-                                    <div className={style.inputGrpup}>
-                                        <label htmlFor="">Product Maximum Orders</label>
-                                        <input type="text" placeholder='Product Maximum Orders'
-                                        />
-                                    </div>
-                                    <div className={style.inputGrpup}>
-                                        <label htmlFor="">Product Stock Status</label>
-                                        <input type="text" placeholder='Product Stock Status'
-                                        />
-                                    </div>
-                                    <div className={style.inputGrpup}>
-                                        <label htmlFor="">Product Available From</label>
-                                        <input type="text" placeholder='Product Available From'
-                                        />
-                                    </div>
-                                    <div className={style.inputGrpup}>
-                                        <label htmlFor="">Product Status</label>
-                                        <div className={style.radioInput}>
-                                            <input type="radio" name="product_stock_status" value="male" />
-                                            <label for="">In-Stock</label>
-                                            <span style={{ width: '5px' }} />
-                                            <input type="radio" name="product_stock_status" value="female" id="" />
-                                            <label for="">Not-In-Stock</label>
-                                        </div>
-                                    </div>
-                                </div>
-
-                            </form>
+                                </Tabs>
+                            </Form>
 
 
                         </Cards>
@@ -200,4 +262,4 @@ const BlankPage = () => {
     );
 };
 
-export default BlankPage;
+export default AddProduct;

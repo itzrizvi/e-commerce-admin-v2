@@ -333,7 +333,7 @@ const AddCategory = () => {
                                             </Form.Item>
 
 
-                                        </Tabs.TabPane>
+                                        </Tabs.TabPane >
 
                                         <Tabs.TabPane tab="Data" key="Data">
                                             <Form.Item
