@@ -5,12 +5,13 @@ import { Button } from '../../../../components/buttons/buttons';
 import { BasicFormWrapper, TagInput } from '../../../styled';
 import Heading from '../../../../components/heading/heading';
 import { Tag } from '../../../../components/tags/tags';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import apolloClient, { apolloUploadClient, authMutation } from '../../../../utility/apollo';
 import Cookies from 'js-cookie';
 import { toast } from 'react-toastify';
 import { Link } from 'react-router-dom';
 import ImgCrop from 'antd-img-crop';
+import { changeUser } from '../../../../redux/authentication/actionCreator';
 
 const { Option } = Select;
 const Profile = () => {
@@ -19,6 +20,7 @@ const Profile = () => {
   const [isLoading, setIsLoading] = useState(false)
   const maxLength = 30;
   const [profile, setProfile] = useState({})
+  const dispatch = useDispatch();
 
   const handleSubmit = values => {
 
@@ -42,6 +44,8 @@ const Profile = () => {
       const status = res?.data?.adminUpdate?.status
       if (!status) return toast.error(data.message)
       toast.success(`Profile updated successfully.`)
+      const { first_name, last_name } = values;
+      dispatch(changeUser({ ...user, first_name, last_name }));
     }).catch(err => {
       console.log("🚀 ~ file: AllAdmins.js ~ line 33 ~ handleStatusChange ~ err", err);
       toast.error(`Something went wrong!!`)

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Row, Col, Tabs, Form, Input, Switch, Select, DatePicker, Checkbox } from 'antd';
 import FeatherIcon from 'feather-icons-react';
 import { PageHeader } from '../../components/page-headers/page-headers';
@@ -12,6 +12,10 @@ import AttributeTab from './addProducts/AttributeTab';
 import DiscountTab from './addProducts/DiscountTab';
 import ImageTab from './addProducts/ImageTab';
 import Heading from '../../components/heading/heading';
+import apolloClient from '../../apollo';
+import { brandQuery } from '../../apollo/brand';
+import Cookies from 'js-cookie';
+import { productQuery } from '../../utility/apollo';
 const { Option } = Select;
 
 
@@ -19,11 +23,73 @@ const { Option } = Select;
 const AddProduct = () => {
     const [form] = Form.useForm();
     const [description, setDescription] = useState(RichTextEditor.createEmptyValue());
+    const [brand, setBrand] = useState({ data: [], loading: true, error: '' })
+    const [categoriesData, setCategoriesData] = useState({ data: [], loading: true })
     const onChangeRte = value => {
         console.log(value.toString('html'))
-
         setDescription(value);
     }
+
+    useEffect(() => {
+        // Load Manufacture/brand
+        apolloClient.query({
+            query: brandQuery.GET_ALL_BRAND,
+            context: {
+                headers: {
+                    TENANTID: process.env.REACT_APP_TENANTID,
+                    Authorization: Cookies.get('psp_t')
+                }
+            }
+        }).then(res => {
+            const data = res?.data?.getAllBrands
+            setBrand(s => ({ ...s, data: data?.data, error: '' }))
+        }).catch(err => {
+            setBrand(s => ({ ...s, error: 'Something went Wrong.!! ' }))
+        }).finally(() => {
+            setBrand(s => ({ ...s, loading: false }))
+        })
+
+        // Load Categories
+        apolloClient.query({
+            query: productQuery.GET_ALL_CATEGORIES,
+            context: {
+                headers: {
+                    TENANTID: process.env.REACT_APP_TENANTID,
+                }
+            }
+        }).then(res => {
+            const data = res?.data?.getAllCategories
+            if (!data.status) return;
+            const categories = data.categories
+            if (!categories.length) return
+            let arrData = []
+            // Loop & organize categories
+            categories.forEach(item => {
+
+                const parent = item.cat_name
+                const cat_sort_order = item.cat_sort_order
+
+                arrData.push({ cat_name: parent, cat_id: item.cat_id, cat_sort_order, cat_status: item.cat_status })
+                if (item.subcategories) {
+                    item.subcategories.forEach(subCat => {
+                        const sub = subCat.cat_name
+                        arrData.push({ cat_name: `${parent} > ${sub}`, cat_id: subCat.cat_id, cat_status: subCat.cat_status })
+                        if (subCat.subsubcategories) {
+                            subCat.subsubcategories.forEach(subSubCat => {
+                                const subSub = subSubCat.cat_name
+                                arrData.push({ cat_name: `${parent} > ${sub} > ${subSub}`, cat_id: subSubCat.cat_id, cat_status: subSubCat.cat_status })
+                            })
+                        }
+                    })
+                }
+            })
+            setCategoriesData({ data: arrData, loading: false })
+
+        }).catch(err => {
+
+        })
+
+    }, [])
 
 
     return (
@@ -53,6 +119,47 @@ const AddProduct = () => {
                                 labelCol={{ span: 4 }}
                             >
                                 <Tabs>
+                                    <Tabs.TabPane tab="Links" key="Links">
+                                        <Form.Item
+                                            rules={[{ required: true, message: "Please enter Product Name" }]}
+                                            // name=""
+                                            label="Manufacturer"
+                                        >
+                                            <Select placeholder={brand.loading ? "Loading..." : "select Manufacture"} >
+                                                {brand.data.map(item => (
+                                                    <Option key={item.brand_uuid} value={item.brand_uuid} >{item.brand_name}</Option>
+                                                ))}
+                                            </Select>
+                                        </Form.Item>
+                                        <Form.Item
+                                            rules={[{ required: true, message: "Please enter Product Name" }]}
+                                            // name=""
+                                            label="Categories"
+                                        >
+                                            <Select placeholder={categoriesData.loading ? "Loading..." : "select Category"} mode="multiple" >
+                                                {categoriesData.data.map(item => (
+                                                    <Option key={item.cat_id} value={item.cat_id} >{item.cat_name}</Option>
+                                                ))}
+                                            </Select>
+                                        </Form.Item>
+                                        <Form.Item
+                                            rules={[{ required: true, message: "Please enter Product Name" }]}
+                                            // name=""
+                                            label="Related Product"
+                                        >
+                                            <Select
+                                                // placeholder={brand.loading ? "Loading..." : "select Manufacture"}
+                                                placeholder={"select Related Products"}
+                                            >
+                                                {/* {brand.data.map(item => (
+                                                    <Option key={item.brand_uuid} value={item.brand_uuid} >{item.brand_name}</Option>
+                                                ))} */}
+                                            </Select>
+                                        </Form.Item>
+
+                                    </Tabs.TabPane>
+
+
                                     <Tabs.TabPane tab="General" key="general">
                                         <Form.Item
                                             rules={[{ required: true, message: "Please enter Product Name" }]}
@@ -111,7 +218,7 @@ const AddProduct = () => {
                                             name="model"
                                             label="Model"
                                         >
-                                            <Input placeholder='Enter ' />
+                                            <Input placeholder='Enter Product Model' />
                                         </Form.Item>
                                         <Form.Item
                                             // rules={[{ required: true, message: "Please enter " }]}

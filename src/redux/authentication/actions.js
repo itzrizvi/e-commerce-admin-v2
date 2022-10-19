@@ -7,6 +7,8 @@ const actions = {
   LOGOUT_SUCCESS: 'LOGOUT_SUCCESS',
   LOGOUT_ERR: 'LOGOUT_ERR',
 
+  UPDATE_USER: "UPDATE_USER",
+
   loginBegin: () => {
     return {
       type: actions.LOGIN_BEGIN,
@@ -46,6 +48,13 @@ const actions = {
       err,
     };
   },
+
+  updateUser: data => {
+    return {
+      type: actions.UPDATE_USER,
+      data,
+    };
+  }
 };
 
 export default actions;

@@ -1,7 +1,7 @@
 import Cookies from 'js-cookie';
 import actions from './actions';
 
-const { LOGIN_BEGIN, LOGIN_SUCCESS, LOGIN_ERR, LOGOUT_BEGIN, LOGOUT_SUCCESS, LOGOUT_ERR } = actions;
+const { LOGIN_BEGIN, LOGIN_SUCCESS, LOGIN_ERR, LOGOUT_BEGIN, LOGOUT_SUCCESS, LOGOUT_ERR, UPDATE_USER } = actions;
 
 const initState = {
   login: Cookies.get('logedIn'),
@@ -62,6 +62,11 @@ const AuthReducer = (state = initState, action) => {
         error: err,
         loading: false,
       };
+    case UPDATE_USER:
+      return {
+        ...state,
+        user: data.user,
+      }
     default:
       return state;
   }
