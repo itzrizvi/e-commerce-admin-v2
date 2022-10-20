@@ -96,7 +96,6 @@ export const authQuery = {
         }
       }
     `,
-
   GET_SINGLE_ROLE: gql`
         query getSingleRole($query: GetSingleRoleInput){
           getSingleRole(query: $query){
@@ -149,8 +148,6 @@ export const authQuery = {
     }
     `,
 }
-
-
 
 export const authMutation = {
   ADMIN_SIGN_UP: gql`
@@ -563,10 +560,7 @@ export const customerQuery = {
     }
   }
   `,
-
-
 }
-
 
 export const customerMutation = {
   CREATE_CUSTOMER_GROUP: gql`
@@ -590,6 +584,80 @@ export const customerMutation = {
 
 }
 
+export const couponQuery = {
+  GET_ALL_COUPONS: gql`
+  query getAllCoupons {
+    getAllCoupons {
+      message
+      status
+      tenant_id
+      data {
+        coupon_uuid
+        coupon_name
+        coupon_code
+        coupon_type
+        coupon_amount
+        coupon_status
+        coupon_enddate
+        coupon_maxamount
+        coupon_minamount
+        coupon_startdate
+        coupon_sortorder
+        coupon_description
+        createdAt
+        updatedAt
+        tenant_id
+      }
+    }
+  }
+  `,
+  GET_SINGLE_COUPON: gql`
+  query getSingleCoupon($query:GetSingleCouponInput){
+    getSingleCoupon(query:$query){
+      status
+      message
+      tenant_id
+      data {
+        coupon_uuid
+        coupon_name
+        coupon_code
+        coupon_type
+        coupon_amount
+        coupon_status
+        coupon_enddate
+        coupon_maxamount
+        coupon_minamount
+        coupon_startdate
+        coupon_sortorder
+        coupon_description
+        createdAt
+        updatedAt
+        tenant_id
+      }
+    }
+  }
+  `,
+}
+export const couponMutation = {
+  CREATE_COUPON: gql`
+  mutation createCoupon($data:CreateCouponInput){
+    createCoupon(data:$data){
+      status
+      message
+      tenant_id
+    }
+  }
+  `,
+  UPDATE_COUPON: gql`
+  mutation updateCoupon($data: UpdateCouponInput) {
+    updateCoupon(data: $data) {
+      message
+      status
+      tenant_id
+    }
+  }  
+  `,
+}
 
 
 

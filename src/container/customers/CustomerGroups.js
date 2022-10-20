@@ -174,7 +174,7 @@ const CustomerGroups = () => {
                                 </div>
                                 :
                                 <>
-                                    <Input placeholder="Search Permission..." prefix={<SearchOutlined />} onChange={onChangeSearch} />
+                                    <Input placeholder="Search Group..." prefix={<SearchOutlined />} onChange={onChangeSearch} />
                                     <br /><br />
 
                                     <span className={"psp_list"} >
