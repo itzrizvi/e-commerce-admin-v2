@@ -15,7 +15,6 @@ import { LazyLoadImage } from 'react-lazy-load-image-component';
 import FeatherIcon from 'feather-icons-react';
 
 const AddBanner = () => {
-    const { TextArea } = Input;
     const history = useHistory();
     const token = useSelector(state => state.auth.token);
     const [isLoading, setIsLoading] = useState(false)
