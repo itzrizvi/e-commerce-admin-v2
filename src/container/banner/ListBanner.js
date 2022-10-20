@@ -118,6 +118,7 @@ const ListBanner = () => {
             title: 'Date',
             dataIndex: 'createdAt',
             key: 'createdAt',
+            width: 120,
             align: 'center',
             render: (text, record) => (
                 <span className={"status-text"}>{<Moment format="DD MMMM YYYY">{parseInt(text)}</Moment>}</span>
@@ -128,6 +129,7 @@ const ListBanner = () => {
             dataIndex: 'action',
             align: 'right',
             key: 'action',
+            width: 100,
             render: (text, record) => (
                 <>
                     <Link to={`/admin/banner/edit?id=${record.banner_uuid}`}>

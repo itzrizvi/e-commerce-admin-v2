@@ -118,6 +118,11 @@ const MenuItems = ({ darkMode, toggleCollapsed, topMenu }) => {
       </SubMenu> */}
 
       <SubMenu key="customers" icon={!topMenu && <FeatherIcon icon="user" />} title="Customers">
+        <Menu.Item key="customer_list">
+          <NavLink onClick={toggleCollapsed} to={`${path}/customers/list`}>
+            Customers
+          </NavLink>
+        </Menu.Item>
         <Menu.Item key="customers_group">
           <NavLink onClick={toggleCollapsed} to={`${path}/customers/group`}>
             Customers Group
