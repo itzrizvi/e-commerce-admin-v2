@@ -8,9 +8,10 @@ import { Cards } from '../../components/cards/frame/cards-frame';
 import { Button } from '../../components/buttons/buttons';
 import { Link } from 'react-router-dom';
 import FontAwesome from 'react-fontawesome';
-import apolloClient, { attributeMutation, attributeQuery } from '../../utility/apollo';
+import apolloClient, { couponMutation, couponQuery } from '../../utility/apollo';
 import Cookies from 'js-cookie';
 import { toast } from 'react-toastify';
+import config from '../../config/config';
 
 const ListCoupon = () => {
     const dummyData = [...Array(10).keys()].map(i => ({
@@ -26,54 +27,54 @@ const ListCoupon = () => {
         d: "Lorem ipsum, dolor sit amet consectetur adipisicing elit. Atque, architecto quod quidem fuga assumenda temporibus quam quae sapiente cupiditate voluptatum.",
         so: i + 1
     }))
-    const [attributeGroups, setAttributeGroups] = useState({ data: dummyData, isLoading: false })
-    // const [attributeGroups, setAttributeGroups] = useState({ data: [], isLoading: true })
-    const [filteredAttributeGroups, setFilteredAttributeGroups] = useState([])
+    // const [attributeGroups, setAttributeGroups] = useState({ data: dummyData, isLoading: false })
+    const [coupons, setCoupons] = useState({ data: [], isLoading: true })
+    const [filteredCoupons, setFilteredCoupons] = useState([])
     const [searchText, setSearchText] = useState('')
 
-    // useEffect(() => {
-    //     apolloClient.query({
-    //         query: attributeQuery.GET_ALL_ATTR_GROUPS,
-    //         context: {
-    //             headers: {
-    //                 TENANTID: process.env.REACT_APP_TENANTID,
-    //                 Authorization: Cookies.get('psp_t')
-    //             }
-    //         }
-    //     }).then(res => {
+    useEffect(() => {
+        apolloClient.query({
+            query: couponQuery.GET_ALL_COUPONS,
+            context: {
+                headers: {
+                    TENANTID: process.env.REACT_APP_TENANTID,
+                    Authorization: Cookies.get('psp_t')
+                }
+            }
+        }).then(res => {
 
-    //         const data = res?.data?.getAllAttrGroups
+            const data = res?.data?.getAllCoupons
 
-    //         if (!data?.status) return
-    //         setAttributeGroups(s => ({ ...s, data: data?.data, error: '' }))
+            if (!data?.status) return
+            setCoupons(s => ({ ...s, data: data?.data, error: '' }))
 
-    //     }).catch(err => {
-    //         setAttributeGroups(s => ({ ...s, error: 'Something went Wrong.!! ' }))
-    //     }).finally(() => {
-    //         setAttributeGroups(s => ({ ...s, isLoading: false }))
-    //     })
+        }).catch(err => {
+            setCoupons(s => ({ ...s, error: 'Something went Wrong.!! ' }))
+        }).finally(() => {
+            setCoupons(s => ({ ...s, isLoading: false }))
+        })
 
-    // }, [])
+    }, [])
 
 
     const columns = [
         {
             title: 'Name',
-            dataIndex: 'n',
-            key: 'n',
-            sorter: (a, b) => a.n.toUpperCase() > b.n.toUpperCase() ? 1 : -1,
+            dataIndex: 'coupon_name',
+            key: 'coupon_name',
+            sorter: (a, b) => a.coupon_name.toUpperCase() > b.coupon_name.toUpperCase() ? 1 : -1,
         },
         {
             title: 'CODE',
-            dataIndex: 'c',
-            key: 'c',
-            sorter: (a, b) => a.c.toUpperCase() > b.c.toUpperCase() ? 1 : -1,
+            dataIndex: 'coupon_code',
+            key: 'coupon_code',
+            sorter: (a, b) => a.coupon_code.toUpperCase() > b.coupon_code.toUpperCase() ? 1 : -1,
         },
         {
             title: 'Type',
-            dataIndex: 't',
-            key: 't',
-            sorter: (a, b) => a.t.toUpperCase() > b.t.toUpperCase() ? 1 : -1,
+            dataIndex: 'coupon_type',
+            key: 'coupon_type',
+            sorter: (a, b) => a.coupon_type.toUpperCase() > b.coupon_type.toUpperCase() ? 1 : -1,
         },
         // {
         //     title: 'Description',
@@ -86,33 +87,35 @@ const ListCoupon = () => {
         // },
         {
             title: 'Amount',
-            dataIndex: 'aa',
-            key: 'aa',
-            sorter: (a, b) => (a.aa === b.aa) ? 0 : a.aa ? -1 : 1,
+            dataIndex: 'coupon_amount',
+            key: 'coupon_amount',
+            sorter: (a, b) => (a.coupon_amount === b.coupon_amount) ? 0 : a.coupon_amount ? -1 : 1,
         },
         {
             title: <p>Minimum<br />Amount</p>,
-            dataIndex: 'mia',
-            key: 'mia',
-            sorter: (a, b) => (a.mia === b.mia) ? 0 : a.mia ? -1 : 1,
+            dataIndex: 'coupon_minamount',
+            key: 'coupon_minamount',
+            sorter: (a, b) => (a.coupon_minamount === b.coupon_minamount) ? 0 : a.coupon_minamount ? -1 : 1,
         },
         {
             title: <p>Maximum<br />Amount</p>,
-            dataIndex: 'maa',
-            key: 'maa',
-            sorter: (a, b) => (a.maa === b.maa) ? 0 : a.maa ? -1 : 1,
+            dataIndex: 'coupon_maxamount',
+            key: 'coupon_maxamount',
+            sorter: (a, b) => (a.coupon_maxamount === b.coupon_maxamount) ? 0 : a.coupon_maxamount ? -1 : 1,
         },
         {
             title: 'Start Date',
-            dataIndex: 'sd',
-            key: 'sd',
-            sorter: (a, b) => (a.sd === b.sd) ? 0 : a.sd ? -1 : 1,
+            dataIndex: 'coupon_startdate',
+            key: 'coupon_startdate',
+            sorter: (a, b) => (a.coupon_startdate === b.coupon_startdate) ? 0 : a.coupon_startdate ? -1 : 1,
+            render: (value, record) => new Date(parseInt(value)).toLocaleDateString()
         },
         {
             title: 'End Date',
-            dataIndex: 'ed',
-            key: 'ed',
-            sorter: (a, b) => (a.ed === b.ed) ? 0 : a.ed ? -1 : 1,
+            dataIndex: 'coupon_enddate',
+            key: 'coupon_enddate',
+            sorter: (a, b) => (a.coupon_enddate === b.coupon_enddate) ? 0 : a.coupon_enddate ? -1 : 1,
+            render: (value, record) => new Date(parseInt(value)).toLocaleDateString()
         },
 
         // {
@@ -123,17 +126,17 @@ const ListCoupon = () => {
         // },
         {
             title: 'Sort Order',
-            dataIndex: 'so',
-            key: 'so',
+            dataIndex: 'coupon_sortorder',
+            key: 'coupon_sortorder',
             align: 'center',
-            sorter: (a, b) => (a.so === b.so) ? 0 : a.so ? -1 : 1,
+            sorter: (a, b) => (a.coupon_sortorder === b.coupon_sortorder) ? 0 : a.coupon_sortorder ? -1 : 1,
         },
         {
             title: 'Status',
-            dataIndex: 'status',
-            key: 'status',
+            dataIndex: 'coupon_status',
+            key: 'coupon_status',
             align: 'center',
-            sorter: (a, b) => (a.status === b.status) ? 0 : a.status ? -1 : 1,
+            sorter: (a, b) => (a.coupon_status === b.coupon_status) ? 0 : a.coupon_status ? -1 : 1,
             filters: [
                 {
                     text: 'Active',
@@ -155,13 +158,13 @@ const ListCoupon = () => {
 
         {
             title: 'Action',
-            dataIndex: 'attr_group_uuid',
-            key: 'attr_group_uuid',
+            dataIndex: 'coupon_uuid',
+            key: 'coupon_uuid',
             width: 70,
             align: 'right',
             render: (value, record) => (
                 <>
-                    <Link to={`/admin/products/add-coupon?id=${value}&name=${record.n}`}>
+                    <Link to={`/admin/products/add-coupon?id=${value}&name=${record.coupon_name}`}>
                         {/* <Button size="default" type="white" title='Edit'> */}
                         <FontAwesome name="edit" style={{ margin: ".5em 1em" }} />
                         {/* </Button> */}
@@ -174,15 +177,15 @@ const ListCoupon = () => {
     const onChangeSearch = e => {
         const value = e.target.value
         setSearchText(value)
-        setFilteredAttributeGroups(attributeGroups.data.filter(attr => attr?.g_n.toLowerCase().includes(value.toLowerCase())))
+        setFilteredCoupons(coupons.data.filter(coupon => (coupon?.coupon_name + coupon.coupon_description + coupon.coupon_code).toLowerCase().includes(value.toLowerCase())))
     }
 
     const handleStatusChange = (record, checked) => {
-        const variables = { data: { attr_group_uuid: record.attr_group_uuid, attrgroup_status: checked } }
+        const variables = { data: { coupon_uuid: record.coupon_uuid, coupon_status: checked } }
         console.log(variables)
         // return;
         apolloClient.mutate({
-            mutation: attributeMutation.UPDATE_ATTR_GROUP,
+            mutation: couponMutation.UPDATE_COUPON,
             variables,
             context: {
                 headers: {
@@ -192,9 +195,9 @@ const ListCoupon = () => {
             },
 
         }).then(res => {
-            const data = res?.data?.updateAttrGroup
+            const data = res?.data?.updateCoupon
             if (!data.status) return toast.error(data.message);
-            toast.success(`${record.attr_group_name} status updated successfully`);
+            toast.success(`${record.coupon_name} status updated successfully`);
 
         }).catch(err => {
             console.log("got error on status update", err)
@@ -222,13 +225,13 @@ const ListCoupon = () => {
                 <Row gutter={25}>
                     <Col sm={24} xs={24}>
                         <Cards headless>
-                            {attributeGroups.isLoading ?
+                            {coupons.isLoading ?
                                 <div className="spin">
                                     <Spin />
                                 </div>
                                 :
                                 <>
-                                    <Input placeholder="Search Permission..." prefix={<SearchOutlined />} onChange={onChangeSearch} />
+                                    <Input placeholder="Search Coupons..." prefix={<SearchOutlined />} onChange={onChangeSearch} />
                                     <br /><br />
 
                                     <span className={"psp_list"} >
@@ -236,16 +239,16 @@ const ListCoupon = () => {
                                             scroll={{ x: "max-content" }}
                                             className="table-responsive"
                                             columns={columns}
-                                            rowKey={'g_s'}
+                                            rowKey={'coupon_uuid'}
                                             size="small"
-                                            dataSource={searchText ? filteredAttributeGroups : attributeGroups.data}
+                                            dataSource={searchText ? filteredCoupons : coupons.data}
                                             rowClassName={(record, index) => (index % 2 == 0 ? "" : "altTableClass")}
-                                        // pagination={false}
-                                        // pagination={{
-                                        //     defaultPageSize: config.PERMISSIONS_PER_PAGE,
-                                        //     total: searchText ? filteredPermissions.length : permissions.length,
-                                        //     showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`,
-                                        // }}
+                                            // pagination={false}
+                                            pagination={{
+                                                defaultPageSize: config.COUPON_GROUPS_PER_PAGE,
+                                                total: searchText ? filteredCoupons.length : coupons.data.length,
+                                                showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`,
+                                            }}
                                         />
                                     </span>
 

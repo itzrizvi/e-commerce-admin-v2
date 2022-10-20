@@ -11,6 +11,7 @@ const config = {
   USERS_PER_PAGE: 10,
   CATEGORY_PER_PAGE: 10,
   CUSTOMER_GROUPS_PER_PAGE: 10,
+  COUPON_GROUPS_PER_PAGE: 10,
 };
 
 export default config;
