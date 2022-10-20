@@ -71,12 +71,12 @@
 			]
 		},
 		{
-			"path": "src/container/products/AddAttributeGroup.js",
+			"path": "src/container/products/ListCoupon.js",
 			"bookmarks": [
 				{
-					"line": 142,
-					"column": 60,
-					"label": "---"
+					"line": 244,
+					"column": 56,
+					"label": "--"
 				}
 			]
 		}
