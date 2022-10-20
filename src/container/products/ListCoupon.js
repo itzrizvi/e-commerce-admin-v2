@@ -214,7 +214,7 @@ const ListCoupon = () => {
                 buttons={[
                     <div key="1" className="page-header-actions">
                         <Link to="/admin/products/add-coupon">
-                            <Button size="small" title="Add Attribute Group" type="primary">
+                            <Button size="small" title="Add Coupons" type="primary">
                                 <FeatherIcon icon="file-plus" />
                             </Button>
                         </Link>
