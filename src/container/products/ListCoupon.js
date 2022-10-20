@@ -89,18 +89,21 @@ const ListCoupon = () => {
             title: 'Amount',
             dataIndex: 'coupon_amount',
             key: 'coupon_amount',
+            align: "center",
             sorter: (a, b) => (a.coupon_amount === b.coupon_amount) ? 0 : a.coupon_amount ? -1 : 1,
         },
         {
-            title: <p>Minimum<br />Amount</p>,
+            title: "Min Amount",
             dataIndex: 'coupon_minamount',
             key: 'coupon_minamount',
+            align: "center",
             sorter: (a, b) => (a.coupon_minamount === b.coupon_minamount) ? 0 : a.coupon_minamount ? -1 : 1,
         },
         {
-            title: <p>Maximum<br />Amount</p>,
+            title: "Max Amount",
             dataIndex: 'coupon_maxamount',
             key: 'coupon_maxamount',
+            align: "center",
             sorter: (a, b) => (a.coupon_maxamount === b.coupon_maxamount) ? 0 : a.coupon_maxamount ? -1 : 1,
         },
         {

@@ -13,6 +13,7 @@ import Pages from './pages';
 import Attributes from './Attributes';
 import Customers from './customers';
 import Banner from './banner';
+import Order from './order';
 
 const Admin = () => {
   const { path } = useRouteMatch();
@@ -38,6 +39,7 @@ const Admin = () => {
         <Route path={`${path}/attributes`} component={Attributes} />
         <Route path={`${path}/customers`} component={Customers} />
         <Route path={`${path}/banner`} component={Banner} />
+        <Route path={`${path}/order`} component={Order} />
       </Suspense>
     </Switch>
   );

@@ -242,7 +242,9 @@ const AddCoupon = () => {
                                         rules={[{ required: true, message: "Please enter Start Date" }]}
                                         name="coupon_startdate"
                                         label="Start Date"
-                                        initialValue={moment(parseInt(singleCoupon.data.coupon_startdate)) || ""}
+                                    // initialValue={moment(parseInt(singleCoupon.data.coupon_startdate)) || this.initialValue}
+                                    // init
+
                                     >
                                         <DatePicker />
                                     </Form.Item>
@@ -250,7 +252,7 @@ const AddCoupon = () => {
                                         rules={[{ required: true, message: "Please enter End Date" }]}
                                         name="coupon_enddate"
                                         label="End Date"
-                                        initialValue={moment(parseInt(singleCoupon.data.coupon_enddate)) || ""}
+                                    // initialValue={moment(parseInt(singleCoupon.data.coupon_enddate)) || ""}
                                     // initialValue={""}
                                     >
                                         <DatePicker />

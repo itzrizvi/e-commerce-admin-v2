@@ -146,6 +146,14 @@ const MenuItems = ({ darkMode, toggleCollapsed, topMenu }) => {
         </Menu.Item>
       </SubMenu>
 
+      <SubMenu key="orders" icon={!topMenu && <FeatherIcon icon="shopping-bag" />} title="Orders">
+        <Menu.Item key="list_orders">
+          <NavLink onClick={toggleCollapsed} to={`${path}/order/list`}>
+            Orders
+          </NavLink>
+        </Menu.Item>
+      </SubMenu>
+
     </Menu>
   );
 };
