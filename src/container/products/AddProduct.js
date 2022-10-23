@@ -332,14 +332,13 @@ const AddProduct = () => {
 
                                     <Tabs.TabPane tab="Price" key="Price">
                                         <Form.Item
-                                            // rules={[{ required: true, message: "Please Enter Regular Price" }]}
                                             rules={[{ required: true, message: "Please Enter Regular Price" }]}
-                                            // name="Price"
+                                            name="Rp"
                                             label="Regular Price"
-
                                         >
-                                            <Input placeholder='Enter Price' prefix="US$  " type='number' />
+                                            <Input placeholder='Enter Regular Price' prefix="US$  " type='number' />
                                         </Form.Item>
+
                                         <Form.Item
                                             // rules={[{ required: true, message: "Please enter " }]}
                                             name="cPrice"
