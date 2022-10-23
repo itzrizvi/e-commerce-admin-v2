@@ -14,19 +14,23 @@ import Cookies from 'js-cookie';
 import { toast } from 'react-toastify';
 
 
-const ListOrder = () => {
+const ListVendor = () => {
     const dummyData = [...Array(10).keys()].map(i => ({
-        o_u: 'asdasd5asd5asd676d67asd6as',
-        o_a: 2000,
-        o_da: 410,
-        o_ga: 320,
-        o_ci: "dasda57da7sd66das6d6ad66766da6a797",
-        o_s: "pending",
-        o_d: "166627543598"
+        v_n: `Vendor ${i + 1}`,
+        v_e: `Vendor${i + 1}@gmail.com`,
+        v_a: `Address, aaaa${i + 1},bbb${i + 1}`,
+        v_c: `Test Vendor City${i + 1}`,
+        v_c1: `Vendor Country${i + 1}`,
+        v_c_n: `Vendor Company${i + 1}`,
+        v_d: `Lorem ipsum dolor sit amet consectetur adipisicing elit. Ex unde obcaecati sed alias repellendus adipisci ullam ea eveniet quaerat voluptate dolore veniam soluta aliquam labore ratione, quidem iusto, sit aspernatur!`,
+        // v_s: i + 1,
+        v_s: true,
+
+
     }))
 
-    const [customerGroups, setCustomerGroups] = useState({ data: dummyData, isLoading: false })
     // const [customerGroups, setCustomerGroups] = useState({ data: [], isLoading: true })
+    const [customerGroups, setCustomerGroups] = useState({ data: dummyData, isLoading: false })
 
     const [filteredCustomerGroups, setFilteredCustomerGroups] = useState([])
     const [searchText, setSearchText] = useState('')
@@ -62,35 +66,71 @@ const ListOrder = () => {
 
     const columns = [
         {
-            title: 'UID',
-            dataIndex: 'o_u',
-            key: 'o_u',
-            width: 70,
+            title: 'Name',
+            dataIndex: 'v_n',
+            key: 'v_n',
+            sorter: (a, b) => a.v_n.toUpperCase() > b.v_n.toUpperCase() ? 1 : -1,
+        },
+        {
+            title: 'Email',
+            dataIndex: 'v_e',
+            key: 'v_e',
             ellipsis: true,
-            sorter: (a, b) => a.o_u.toUpperCase() > b.o_u.toUpperCase() ? 1 : -1,
+            sorter: (a, b) => a.v_e.toUpperCase() > b.v_e.toUpperCase() ? 1 : -1,
         },
         {
-            title: 'Amount',
-            dataIndex: 'o_a',
-            key: 'o_a',
-            sorter: (a, b) => a.o_a.toUpperCase() > b.o_a.toUpperCase() ? 1 : -1,
+            title: 'Address',
+            dataIndex: 'v_a',
+            key: 'v_a',
+            // width: 200,
+            ellipsis: true,
+            sorter: (a, b) => a.v_a.toUpperCase() > b.v_a.toUpperCase() ? 1 : -1,
         },
-
         {
-            title: 'Sort Order',
-            dataIndex: 'customergroup_sortorder',
-            key: 'customergroup_sortorder',
-            width: 100,
-            align: 'center',
-            sorter: (a, b) => (a.customergroup_sortorder === b.customergroup_sortorder) ? 0 : a.customergroup_sortorder ? -1 : 1,
+            title: 'City',
+            dataIndex: 'v_c',
+            key: 'v_c',
+            ellipsis: true,
+            sorter: (a, b) => a.v_c.toUpperCase() > b.v_c.toUpperCase() ? 1 : -1,
         },
+        {
+            title: 'Country',
+            dataIndex: 'v_c1',
+            key: 'v_c1',
+            ellipsis: true,
+            sorter: (a, b) => a.v_c1.toUpperCase() > b.v_c1.toUpperCase() ? 1 : -1,
+        },
+        // {
+        //     title: 'Description',
+        //     dataIndex: 'v_d',
+        //     key: 'v_d',
+        //     // width: 200,
+        //     ellipsis: true,
+        //     sorter: (a, b) => a.v_d.toUpperCase() > b.v_d.toUpperCase() ? 1 : -1,
+        // },
+        {
+            title: 'company Name',
+            dataIndex: 'v_c_n',
+            key: 'v_c_n',
+            // width: 200,
+            ellipsis: true,
+            sorter: (a, b) => a.v_c_n.toUpperCase() > b.v_c_n.toUpperCase() ? 1 : -1,
+        },
+        // {
+        //     title: 'Sort Order',
+        //     dataIndex: 'customergroup_sortorder',
+        //     key: 'customergroup_sortorder',
+        //     width: 100,
+        //     align: 'center',
+        //     sorter: (a, b) => (a.customergroup_sortorder === b.customergroup_sortorder) ? 0 : a.customergroup_sortorder ? -1 : 1,
+        // },
         {
             title: 'Status',
-            dataIndex: 'customergroup_status',
-            key: 'customergroup_status',
+            dataIndex: 'v_s',
+            key: 'v_s',
             align: 'center',
             width: 100,
-            sorter: (a, b) => (a.customergroup_status === b.customergroup_status) ? 0 : a.customergroup_status ? -1 : 1,
+            sorter: (a, b) => (a.v_s === b.v_s) ? 0 : a.v_s ? -1 : 1,
             filters: [
                 {
                     text: 'Active',
@@ -101,7 +141,7 @@ const ListOrder = () => {
                     value: false,
                 }
             ],
-            onFilter: (value, record) => record.customergroup_status === value,
+            onFilter: (value, record) => record.v_s === value,
             render: (value, record) => (
                 <Switch defaultChecked={value} title='Status' onChange={checked => handleStatusChange(record, checked)} />
             )
@@ -114,7 +154,7 @@ const ListOrder = () => {
             align: 'right',
             render: (text, record) => (
                 <>
-                    <Link to={`/admin/customers/add-group?id=${record.customer_group_uuid}&name=${record.customer_group_name}`}>
+                    <Link to={`/admin/vendor/add?id=${record.customer_group_uuid}&name=${record.v_n}`}>
                         {/* <Button size="default" type="white" title='Edit'> */}
                         <FontAwesome name="edit" style={{ margin: ".5em 1em" }} />
                         {/* </Button> */}
@@ -128,7 +168,7 @@ const ListOrder = () => {
 
     // LOAD CUSTOMER GROUPS
     useEffect(() => {
-        return
+        return;
         apolloClient.query({
             query: customerQuery.GET_ALL_CUSTOMER_GROUPS,
             context: {
@@ -163,14 +203,14 @@ const ListOrder = () => {
     return (
         <>
             <PageHeader
-                title="Orders"
+                title="Vendors"
                 buttons={[
                     <div key="1" className="page-header-actions">
-                        {/* <Link to="/admin/customers/add-group"> */}
-                        <Button size="small" title="Add Customer Groups" type="primary">
-                            <FeatherIcon icon="user-plus" />
-                        </Button>
-                        {/* </Link> */}
+                        <Link to="/admin/vendor/add">
+                            <Button size="small" title="Add Vendors" type="primary">
+                                <FeatherIcon icon="plus" />
+                            </Button>
+                        </Link>
                     </div>
                 ]}
             />
@@ -185,7 +225,7 @@ const ListOrder = () => {
                                 </div>
                                 :
                                 <>
-                                    <Input placeholder="Search Orders.." prefix={<SearchOutlined />} onChange={onChangeSearch} />
+                                    <Input placeholder="Search Vendor..." prefix={<SearchOutlined />} onChange={onChangeSearch} />
                                     <br /><br />
 
                                     <span className={"psp_list"} >
@@ -221,4 +261,4 @@ const ListOrder = () => {
     );
 };
 
-export default ListOrder;
+export default ListVendor;
