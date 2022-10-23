@@ -69,6 +69,16 @@
 					"label": "--log out--"
 				}
 			]
+		},
+		{
+			"path": "src/container/products/AddProduct.js",
+			"bookmarks": [
+				{
+					"line": 36,
+					"column": 30,
+					"label": "-1"
+				}
+			]
 		}
 	]
 }

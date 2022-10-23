@@ -19,6 +19,45 @@ export const brandQuery = {
     }
   }
 }`,
+  GET_ALL_BRAND_WITH_CATEGORY: gql`
+query getAllBrands {
+  getAllBrands {
+    message
+    tenant_id
+    status
+    data {
+      brand_uuid
+      brand_name
+      brand_slug
+      brand_status
+      brand_description
+      image
+      createdAt
+      updatedAt
+      tenant_id
+      categories {
+        cat_id
+        cat_name
+        cat_slug
+        cat_status
+        subcategories {
+          cat_id
+          cat_name
+          cat_slug
+          cat_status
+          subsubcategories {
+            cat_id
+            cat_name
+            cat_slug
+            cat_status
+          }
+        }
+      }
+    }
+  }
+}
+
+`,
   GET_CATEGORIES: gql`
   query getParentCategories {
     getParentCategories {

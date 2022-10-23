@@ -31,10 +31,38 @@ const AddProduct = () => {
         setDescription(value);
     }
 
+    // for links tab--------------
+    const [selectedManifacture, setSelectedManifacture] = useState({})
+    const [categories, setCategories] = useState([])
+    const onManufactureSelect = (val, item) => {
+        if (!item?.categories?.length) return
+        let arrData = []
+        // Loop & organize categories
+        !item?.categories?.forEach(item => {
+            const parent = item.cat_name
+
+            arrData.push({ cat_name: parent, cat_id: item.cat_id, cat_status: item.cat_status })
+            if (item.subcategories) {
+                item.subcategories.forEach(subCat => {
+                    const sub = subCat.cat_name
+                    arrData.push({ cat_name: `${parent} > ${sub}`, cat_id: subCat.cat_id, cat_status: subCat.cat_status })
+                    if (subCat.subsubcategories) {
+                        subCat.subsubcategories.forEach(subSubCat => {
+                            const subSub = subSubCat.cat_name
+                            arrData.push({ cat_name: `${parent} > ${sub} > ${subSub}`, cat_id: subSubCat.cat_id, cat_status: subSubCat.cat_status })
+                        })
+                    }
+                })
+            }
+        })
+        setCategories(arrData)
+
+    }
+
     useEffect(() => {
         // Load Manufacture/brand
         apolloClient.query({
-            query: brandQuery.GET_ALL_BRAND,
+            query: brandQuery.GET_ALL_BRAND_WITH_CATEGORY,
             context: {
                 headers: {
                     TENANTID: process.env.REACT_APP_TENANTID,
@@ -50,45 +78,6 @@ const AddProduct = () => {
             setBrand(s => ({ ...s, loading: false }))
         })
 
-        // Load Categories
-        apolloClient.query({
-            query: productQuery.GET_ALL_CATEGORIES,
-            context: {
-                headers: {
-                    TENANTID: process.env.REACT_APP_TENANTID,
-                }
-            }
-        }).then(res => {
-            const data = res?.data?.getAllCategories
-            if (!data.status) return;
-            const categories = data.categories
-            if (!categories.length) return
-            let arrData = []
-            // Loop & organize categories
-            categories.forEach(item => {
-
-                const parent = item.cat_name
-                const cat_sort_order = item.cat_sort_order
-
-                arrData.push({ cat_name: parent, cat_id: item.cat_id, cat_sort_order, cat_status: item.cat_status })
-                if (item.subcategories) {
-                    item.subcategories.forEach(subCat => {
-                        const sub = subCat.cat_name
-                        arrData.push({ cat_name: `${parent} > ${sub}`, cat_id: subCat.cat_id, cat_status: subCat.cat_status })
-                        if (subCat.subsubcategories) {
-                            subCat.subsubcategories.forEach(subSubCat => {
-                                const subSub = subSubCat.cat_name
-                                arrData.push({ cat_name: `${parent} > ${sub} > ${subSub}`, cat_id: subSubCat.cat_id, cat_status: subSubCat.cat_status })
-                            })
-                        }
-                    })
-                }
-            })
-            setCategoriesData({ data: arrData, loading: false })
-
-        }).catch(err => {
-
-        })
 
     }, [])
 
@@ -179,14 +168,14 @@ const AddProduct = () => {
 
                                     <Tabs.TabPane tab="Data" key="Data">
                                         <Form.Item
-                                            rules={[{ required: true, message: "Please enter Model" }]}
+                                            // rules={[{ required: true, message: "Please enter Model" }]}
                                             name="model"
                                             label="Model"
                                         >
                                             <Input placeholder='Enter Product Model' />
                                         </Form.Item>
                                         <Form.Item
-                                            // rules={[{ required: true, message: "Please enter " }]}
+                                            rules={[{ required: true, message: "Please enter " }]}
                                             name="SKU"
                                             label="SKU"
                                         >
@@ -201,22 +190,37 @@ const AddProduct = () => {
                                             // name=""
                                             label="Manufacturer"
                                         >
-                                            <Select placeholder={brand.loading ? "Loading..." : "select Manufacture"} >
-                                                {brand.data.map(item => (
-                                                    <Option key={item.brand_uuid} value={item.brand_uuid} >{item.brand_name}</Option>
-                                                ))}
-                                            </Select>
+                                            <Select placeholder={brand.loading ? "Loading..." : "select Manufacture"}
+                                                options={brand.data.map(item => ({
+                                                    label: item.brand_name,
+                                                    value: item.brand_name,
+                                                    categories: item.categories,
+                                                }))}
+                                                onSelect={onManufactureSelect}
+                                            />
+
                                         </Form.Item>
                                         <Form.Item
                                             rules={[{ required: true, message: "Please enter Product Name" }]}
                                             // name=""
                                             label="Categories"
                                         >
-                                            <Select placeholder={categoriesData.loading ? "Loading..." : "select Category"} mode="multiple" >
-                                                {categoriesData.data.map(item => (
+                                            <Select placeholder={brand.loading ? "Loading..." :
+                                                categories.length ?
+                                                    "Select Category"
+                                                    :
+                                                    "Select manifacture first"
+                                            }
+                                                options={categories.map(item => ({
+                                                    label: item.cat_name,
+                                                    value: item.cat_name,
+                                                }))}
+                                            // mode="multiple"
+                                            />
+                                            {/* {categoriesData.data.map(item => (
                                                     <Option key={item.cat_id} value={item.cat_id} >{item.cat_name}</Option>
                                                 ))}
-                                            </Select>
+                                            </Select> */}
                                         </Form.Item>
                                         <Form.Item
                                             rules={[{ required: true, message: "Please enter Product Name" }]}
