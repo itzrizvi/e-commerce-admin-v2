@@ -25,6 +25,7 @@
     "js-cookie": "^3.0.1",
     "leaflet": "^1.7.1",
     "leaflet.markercluster": "^1.5.3",
+    "lodash": "^4.17.21",
     "moment": "^2.29.4",
     "peity-react": "0.0.7",
     "prop-types": "^15.7.2",

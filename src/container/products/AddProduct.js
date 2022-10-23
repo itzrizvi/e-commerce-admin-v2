@@ -16,6 +16,7 @@ import apolloClient from '../../apollo';
 import { brandQuery } from '../../apollo/brand';
 import Cookies from 'js-cookie';
 import { productQuery } from '../../utility/apollo';
+import PartsOfProductTab from './addProducts/PartsOfProductTab';
 const { Option } = Select;
 
 
@@ -119,45 +120,8 @@ const AddProduct = () => {
                                 labelCol={{ span: 4 }}
                             >
                                 <Tabs>
-                                    <Tabs.TabPane tab="Links" key="Links">
-                                        <Form.Item
-                                            rules={[{ required: true, message: "Please enter Product Name" }]}
-                                            // name=""
-                                            label="Manufacturer"
-                                        >
-                                            <Select placeholder={brand.loading ? "Loading..." : "select Manufacture"} >
-                                                {brand.data.map(item => (
-                                                    <Option key={item.brand_uuid} value={item.brand_uuid} >{item.brand_name}</Option>
-                                                ))}
-                                            </Select>
-                                        </Form.Item>
-                                        <Form.Item
-                                            rules={[{ required: true, message: "Please enter Product Name" }]}
-                                            // name=""
-                                            label="Categories"
-                                        >
-                                            <Select placeholder={categoriesData.loading ? "Loading..." : "select Category"} mode="multiple" >
-                                                {categoriesData.data.map(item => (
-                                                    <Option key={item.cat_id} value={item.cat_id} >{item.cat_name}</Option>
-                                                ))}
-                                            </Select>
-                                        </Form.Item>
-                                        <Form.Item
-                                            rules={[{ required: true, message: "Please enter Product Name" }]}
-                                            // name=""
-                                            label="Related Product"
-                                        >
-                                            <Select
-                                                // placeholder={brand.loading ? "Loading..." : "select Manufacture"}
-                                                placeholder={"select Related Products"}
-                                            >
-                                                {/* {brand.data.map(item => (
-                                                    <Option key={item.brand_uuid} value={item.brand_uuid} >{item.brand_name}</Option>
-                                                ))} */}
-                                            </Select>
-                                        </Form.Item>
 
-                                    </Tabs.TabPane>
+
 
 
                                     <Tabs.TabPane tab="General" key="general">
@@ -212,6 +176,7 @@ const AddProduct = () => {
                                             <Input placeholder='Enter comma separated Tags' />
                                         </Form.Item>
                                     </Tabs.TabPane>
+
                                     <Tabs.TabPane tab="Data" key="Data">
                                         <Form.Item
                                             rules={[{ required: true, message: "Please enter Model" }]}
@@ -229,6 +194,47 @@ const AddProduct = () => {
                                         </Form.Item>
                                         {/* <Heading as="h6"> Specification:</Heading> */}
                                     </Tabs.TabPane>
+
+                                    <Tabs.TabPane tab="Links" key="Links">
+                                        <Form.Item
+                                            rules={[{ required: true, message: "Please enter Product Name" }]}
+                                            // name=""
+                                            label="Manufacturer"
+                                        >
+                                            <Select placeholder={brand.loading ? "Loading..." : "select Manufacture"} >
+                                                {brand.data.map(item => (
+                                                    <Option key={item.brand_uuid} value={item.brand_uuid} >{item.brand_name}</Option>
+                                                ))}
+                                            </Select>
+                                        </Form.Item>
+                                        <Form.Item
+                                            rules={[{ required: true, message: "Please enter Product Name" }]}
+                                            // name=""
+                                            label="Categories"
+                                        >
+                                            <Select placeholder={categoriesData.loading ? "Loading..." : "select Category"} mode="multiple" >
+                                                {categoriesData.data.map(item => (
+                                                    <Option key={item.cat_id} value={item.cat_id} >{item.cat_name}</Option>
+                                                ))}
+                                            </Select>
+                                        </Form.Item>
+                                        <Form.Item
+                                            rules={[{ required: true, message: "Please enter Product Name" }]}
+                                            // name=""
+                                            label="Related Product"
+                                        >
+                                            <Select
+                                                // placeholder={brand.loading ? "Loading..." : "select Manufacture"}
+                                                placeholder={"select Related Products"}
+                                            >
+                                                {/* {brand.data.map(item => (
+                                                    <Option key={item.brand_uuid} value={item.brand_uuid} >{item.brand_name}</Option>
+                                                ))} */}
+                                            </Select>
+                                        </Form.Item>
+
+                                    </Tabs.TabPane>
+
                                     <Tabs.TabPane tab="Specifications" key="Specifications">
                                         <Form.Item
                                             // rules={[{ required: true, message: "Please enter Model" }]}
@@ -352,6 +358,11 @@ const AddProduct = () => {
                                     <Tabs.TabPane tab="Discount" key="Discount">
                                         <DiscountTab />
                                     </Tabs.TabPane>
+
+                                    <Tabs.TabPane tab="Parts Of Product" key="PartsOf">
+                                        <PartsOfProductTab />
+                                    </Tabs.TabPane>
+
 
                                     <Tabs.TabPane tab="Images" key="Images">
                                         <ImageTab />
