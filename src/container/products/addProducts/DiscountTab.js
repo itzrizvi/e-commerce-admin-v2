@@ -53,21 +53,24 @@ const DiscountTab = () => {
         },
         {
             title: 'Quantity',
-            dataIndex: 'title',
-            key: 'title',
-            render: (text, record) => <Input type="number" placeholder="Title" />
+            dataIndex: 'q',
+            key: 'q',
+            width: 100,
+            render: (text, record) => <Input type="number" placeholder="Quantity" style={{ width: "100px" }} />
         },
         {
             title: 'Priority',
             dataIndex: 'title',
             key: 'title',
-            render: (text, record) => <Input type="number" placeholder="Title" />
+            width: 100,
+            render: (text, record) => <Input type="number" placeholder="Priority" style={{ width: "100px" }} />
         },
         {
             title: 'Price',
             dataIndex: 'title',
             key: 'title',
-            render: (text, record) => <Input placeholder="Title" />
+            width: 100,
+            render: (text, record) => <Input placeholder="Price" style={{ width: "100px" }} />
         },
         {
             title: 'Date Start',

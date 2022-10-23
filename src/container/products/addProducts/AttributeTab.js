@@ -14,17 +14,18 @@ const Inputs = () => {
     return (
         <>
             <Select
-                style={{ width: '100%' }}
+                style={{ width: '10em', marginRight: "1em" }}
                 placeholder="Select type"
                 onChange={value => setType(value)}
             >
                 <Option value="text" >Text</Option>
                 <Option value="link" >Link</Option>
                 <Option value="file" >File</Option>
+                <Option value="none" >None</Option>
             </Select>
 
-            {type === "text" && < Input placeholder="Enter text" style={{ marginTop: '1em' }} />}
-            {type === "link" && < Input placeholder="Enter Link" style={{ marginTop: '1em' }} />}
+            {type === "text" && < Input placeholder="Enter text" style={{ width: 'calc(100% - 12em)' }} size="middle" />}
+            {type === "link" && < Input placeholder="Enter Link" style={{ width: 'calc(100% - 12em)' }} size="middle" />}
             {type === "file"
                 && <Upload
                     // style={{ marginTop: "2em" }}

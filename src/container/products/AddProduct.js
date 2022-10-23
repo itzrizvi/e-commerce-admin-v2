@@ -256,7 +256,7 @@ const AddProduct = () => {
                                             name="model"
                                             label={<p>Dimensions <br />Class </p>}
                                         >
-                                            <Select style={{ height: '3.5em' }} placeholder="Enter Dimension class" >
+                                            <Select style={{ height: '3.5em' }} placeholder="Enter Dimension Class" >
                                                 <Option key={1} value={1} >Centimeter</Option>
                                                 <Option key={2} value={2} >Millimeter</Option>
                                                 <Option key={3} value={3} >Inch</Option>
@@ -268,14 +268,14 @@ const AddProduct = () => {
                                             name="w"
                                             label="Weight"
                                         >
-                                            <Input type='number' />
+                                            <Input type='number' placeholder='Enter Weight' />
                                         </Form.Item>
                                         <Form.Item
                                             // rules={[{ required: true, message: "Please enter Model" }]}
                                             name="model"
                                             label="Weight Class"
                                         >
-                                            <Select placeholder="Enter Dimension class" >
+                                            <Select placeholder="Enter Weight Class" >
                                                 <Option key={1} value={1} >Kilogram</Option>
                                                 <Option key={1} value={1} >Gram</Option>
                                                 <Option key={2} value={2} >Pound</Option>
@@ -285,15 +285,15 @@ const AddProduct = () => {
 
                                     </Tabs.TabPane>
                                     <Tabs.TabPane tab="Stock" key="Stock">
-                                        <Form.Item
+                                        {/* <Form.Item
                                             rules={[{ required: true, message: "Please enter Product Quantity" }]}
                                             name="q"
                                             label="Quantity"
                                         >
                                             <Input placeholder='Enter Quantity' />
-                                        </Form.Item>
+                                        </Form.Item> */}
                                         <Form.Item
-                                            rules={[{ required: true, message: "Please enter Minimum Quantity" }]}
+                                            // rules={[{ required: true, message: "Please enter Minimum Quantity" }]}
                                             name="mq"
                                             label="Minimum Quantity"
                                         >
@@ -323,34 +323,36 @@ const AddProduct = () => {
                                             // name="q"
                                             label="Date Available"
                                         >
-                                            <DatePicker size='middle' style={{ height: '2.6em' }} />
+                                            <DatePicker size='middle' style={{ height: '2.6em', }} />
                                         </Form.Item>
                                     </Tabs.TabPane>
                                     <Tabs.TabPane tab="Attribute" key="Attribute">
                                         <AttributeTab />
                                     </Tabs.TabPane>
+
                                     <Tabs.TabPane tab="Price" key="Price">
                                         <Form.Item
-                                            // rules={[{ required: true, message: "Please enter " }]}
-                                            name="Price"
+                                            // rules={[{ required: true, message: "Please Enter Regular Price" }]}
+                                            rules={[{ required: true, message: "Please Enter Regular Price" }]}
+                                            // name="Price"
                                             label="Regular Price"
 
                                         >
-                                            <Input placeholder='Enter price' prefix="US$  " type='number' />
+                                            <Input placeholder='Enter Price' prefix="US$  " type='number' />
                                         </Form.Item>
                                         <Form.Item
                                             // rules={[{ required: true, message: "Please enter " }]}
                                             name="cPrice"
                                             label="Sales Price"
                                         >
-                                            <Input prefix="US$  " type='number' placeholder='Enter Sales price' />
+                                            <Input prefix="US$  " type='number' placeholder='Enter Sales Price' />
                                         </Form.Item>
                                         <Form.Item
                                             // rules={[{ required: true, message: "Please enter " }]}
                                             name="cPrice"
                                             label="Cost Per Item"
                                         >
-                                            <Input prefix="US$  " type='number' placeholder='Enter cost per item' />
+                                            <Input prefix="US$  " type='number' placeholder='Enter Cost Per Item' />
                                             <p style={{ color: "gray" }}>Customers won't see this</p>
 
                                             <Checkbox >Charge Tax on this product</Checkbox>
