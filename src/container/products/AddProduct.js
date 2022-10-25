@@ -146,6 +146,8 @@ const AddProduct = () => {
         setIsLoading(true)
         const {
             dimension_class,
+            prod_regular_price,
+            prod_sale_price,
             ...rest
         } = values
         const product_attributes = attributesTableData.map(item => {
@@ -178,6 +180,8 @@ const AddProduct = () => {
             partof_product,
             prod_thumbnail,
             prod_gallery,
+            prod_regular_price: parseFloat(prod_regular_price),
+            prod_sale_price: parseFloat(prod_sale_price),
         }
 
         console.log("values:\n", values);
