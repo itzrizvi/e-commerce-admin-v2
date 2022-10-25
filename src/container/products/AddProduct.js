@@ -15,25 +15,32 @@ import Heading from '../../components/heading/heading';
 import apolloClient from '../../apollo';
 import { brandQuery } from '../../apollo/brand';
 import Cookies from 'js-cookie';
-import { productQuery } from '../../utility/apollo';
+import { apolloUploadClient, productMutation, productQuery } from '../../utility/apollo';
 import PartsOfProductTab from './addProducts/PartsOfProductTab';
+import { Link } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import RelatedProducts from './addProducts/RelatedProducts';
 const { Option } = Select;
 
 
 
 const AddProduct = () => {
     const [form] = Form.useForm();
-    const [description, setDescription] = useState(RichTextEditor.createEmptyValue());
-    const [brand, setBrand] = useState({ data: [], loading: true, error: '' })
-    const [categoriesData, setCategoriesData] = useState({ data: [], loading: true })
+    const [isLoading, setIsLoading] = useState(false)
+    // ================= 1.for General tab START =================
+    const [longDescription, setLongDescription] = useState(RichTextEditor.createEmptyValue());
+    const [prod_long_desc, setProd_long_desc] = useState("")
     const onChangeRte = value => {
-        console.log(value.toString('html'))
-        setDescription(value);
+        setProd_long_desc(value.toString('html'))
+        setLongDescription(value);
     }
+    // ================= 1.for General tab END =================
 
-    // for links tab--------------
-    const [selectedManifacture, setSelectedManifacture] = useState({})
+
+    // ================= 3.for links tab START =================
+    const [brand, setBrand] = useState({ data: [], loading: true, error: '' })
     const [categories, setCategories] = useState([])
+    const [relatedProducts, setRelatedProducts] = useState([])
     const onManufactureSelect = (val, item) => {
         if (!item?.categories?.length) return
         let arrData = []
@@ -58,7 +65,7 @@ const AddProduct = () => {
         setCategories(arrData)
 
     }
-
+    // get all brands with category
     useEffect(() => {
         // Load Manufacture/brand
         apolloClient.query({
@@ -80,20 +87,133 @@ const AddProduct = () => {
 
 
     }, [])
+    // ================= 3.for links tab END =================
 
+
+    // ================= 4.for Specification tab START =================
+    const [dimensions, setDimensions] = useState({})
+    // ================= 4.for Specification tab END =================
+
+
+    // ================= 6.for Attribute tab START =================
+    const initalData = [{
+        id: new Date().getTime(),
+        attr_group_uuid: "",
+        attribute_uuid: '',
+        attribute_type: '',
+        attribute_value: ''
+    }]
+    const [attributesTableData, setAttributesTableData] = useState(initalData)
+    // ================= 6.for Attribute tab END =================
+
+    // ================= 9.for Parts Of Product tab START =================
+    const [products, setProducts] = useState({ data: [], isLoading: true })
+    const [selectedPartsOfProducts, setSelectedPartsOfProducts] = useState([])
+    const [partOfProductQuantities, setPartOfProductQuantities] = useState({})
+    // load ATTRIBUTE GROUPS
+    useEffect(() => {
+        // return
+        apolloClient.query({
+            query: productQuery.GET_PRODUCT_LIST_FOR_ADD_MINIMAL,
+            context: {
+                headers: {
+                    TENANTID: process.env.REACT_APP_TENANTID,
+                    Authorization: Cookies.get('psp_t')
+                }
+            }
+        }).then(res => {
+
+            const data = res?.data?.getProductList
+
+            if (!data?.status) return
+            setProducts(s => ({ ...s, data: data?.data, error: '' }))
+        }).catch(err => {
+            setProducts(s => ({ ...s, error: 'Something went Wrong.!! ' }))
+        }).finally(() => {
+            setProducts(s => ({ ...s, isLoading: false }))
+        })
+
+    }, [])
+    // ================= 9.for Parts Of Product tab END =================
+
+
+    // ================= 10.for Image tab START =================
+    const [featuresImage, setFeaturesImage] = useState({})
+    const [gallaryImages, setGallaryImages] = useState([])
+    // ================= 10.for Image tab END =================
+
+    const handleSubmit = values => {
+        setIsLoading(true)
+        const {
+            dimension_class,
+            ...rest
+        } = values
+        const product_attributes = attributesTableData.map(item => {
+            // TODO: show warning for missing value
+            const { id, ...attributes } = item
+            return ({ ...attributes })
+        })
+        const related_product = relatedProducts.map(item => item.uid)
+        const partof_product = selectedPartsOfProducts.map(item => {
+            const data = {
+                prod_uuid: item.uid,
+                prod_quantity: partOfProductQuantities[item.uid] ? parseInt(partOfProductQuantities[item.uid]) : 1
+            }
+            return data
+        })
+        const prod_thumbnail = featuresImage.file
+        const prod_gallery = gallaryImages.map(item => item.file)
+
+        // All Validation Start
+        // if (!prod_thumbnail) { return toast.warning("Please select a Feature image") }
+        // All Validation End
+
+        const data = {
+            ...rest,
+            prod_long_desc,
+            related_product,
+            dimensions: { ...dimensions, dimension_class },
+            product_attributes,
+            prod_status: true, // TEMPORARY
+            partof_product,
+            prod_thumbnail,
+            prod_gallery,
+        }
+
+        console.log("values:\n", values);
+        console.log("data:\n", data);
+
+        apolloUploadClient.mutate({
+            mutation: productMutation.ADD_PRODUCT,
+            variables: { data },
+            context: {
+                headers: {
+                    TENANTID: process.env.REACT_APP_TENANTID,
+                    Authorization: Cookies.get('psp_t')
+                }
+            }
+        }).then(res => {
+            console.log("product res:\n", res);
+        }).catch(err => {
+            console.log("add Prod err:\n", err)
+        }).finally(() => {
+            setIsLoading(false)
+        })
+
+    }
 
     return (
         <>
             <PageHeader
                 title="Add Product"
-                buttons={[
-                    <div key="1" className="page-header-actions">
-                        <Button size="default" type="primary">
-                            <FeatherIcon icon="save" />
-                            Add Product
-                        </Button>
-                    </div>
-                ]}
+            // buttons={[
+            //     <div key="1" className="page-header-actions">
+            //         <Button size="default" type="primary">
+            //             <FeatherIcon icon="save" />
+            //             Add Product
+            //         </Button>
+            //     </div>
+            // ]}
             />
             <Main>
                 <Row gutter={25}>
@@ -104,63 +224,66 @@ const AddProduct = () => {
                                 style={{ width: '100%' }}
                                 form={form}
                                 name="addRole"
-                                // onFinish={handleSubmit}
+                                onFinish={handleSubmit}
                                 onFinishFailed={errorInfo => console.log('form error info:\n', errorInfo)}
                                 labelCol={{ span: 4 }}
                             >
                                 <Tabs>
 
-
-
-
                                     <Tabs.TabPane tab="General" key="general">
                                         <Form.Item
                                             rules={[{ required: true, message: "Please enter Product Name" }]}
-                                            name="N"
+                                            name="prod_name"
                                             label="Name"
                                         >
                                             <Input placeholder='Enter Product Name' />
                                         </Form.Item>
                                         <Form.Item
                                             rules={[{ required: true, message: "Please enter n" }]}
-                                            name="n1" label="Short Description"
+                                            name="prod_short_desc"
+                                            label="Short Description"
                                         >
                                             <TextArea rows={3} placeholder="Enter Short Description" />
                                         </Form.Item>
                                         <Form.Item
+                                            // name="prod_long_desc"
                                             label="Long Description"
                                         >
                                             <RichTextEditor
-                                                value={description}
+
+                                                value={longDescription}
                                                 onChange={onChangeRte}
                                                 placeholder='Long Description'
                                                 className={style.rte}
                                                 editorClassName={style.rteEditor}
                                                 toolbarClassName={style.rteToolbar}
                                             />
-
                                         </Form.Item>
                                         <Form.Item
                                             rules={[{ required: true, message: "Please enter Meta Title" }]}
-                                            name="n2" label="Meta Title"
+                                            name="prod_meta_title"
+                                            label="Meta Title"
                                         >
                                             <Input placeholder='Enter Meta Title' />
                                         </Form.Item>
                                         <Form.Item
                                             rules={[{ required: true, message: "Please enter Meta Description" }]}
-                                            name="n3" label="Meta Description"
+                                            name="prod_meta_desc"
+                                            label="Meta Description"
                                         >
                                             <Input placeholder='Enter Meta Description' />
                                         </Form.Item>
                                         <Form.Item
                                             rules={[{ required: true, message: "Please enter Meta Keywords" }]}
-                                            name="n4" label="Meta Keywords"
+                                            name="prod_meta_keywords"
+                                            label="Meta Keywords"
                                         >
-                                            <Input placeholder='Enter Meta Keywords' />
+                                            <Input placeholder='Enter comma separated Meta Keywords' />
                                         </Form.Item>
                                         <Form.Item
                                             rules={[{ required: true, message: "Please enter Tags" }]}
-                                            name="n5" label="Tags"
+                                            name="prod_tags"
+                                            label="Tags"
                                         >
                                             <Input placeholder='Enter comma separated Tags' />
                                         </Form.Item>
@@ -169,14 +292,14 @@ const AddProduct = () => {
                                     <Tabs.TabPane tab="Data" key="Data">
                                         <Form.Item
                                             // rules={[{ required: true, message: "Please enter Model" }]}
-                                            name="model"
+                                            name="prod_model"
                                             label="Model"
                                         >
                                             <Input placeholder='Enter Product Model' />
                                         </Form.Item>
                                         <Form.Item
                                             rules={[{ required: true, message: "Please enter " }]}
-                                            name="SKU"
+                                            name="prod_sku"
                                             label="SKU"
                                         >
                                             <Input placeholder='Enter Product SKU' />
@@ -187,13 +310,13 @@ const AddProduct = () => {
                                     <Tabs.TabPane tab="Links" key="Links">
                                         <Form.Item
                                             rules={[{ required: true, message: "Please enter Product Name" }]}
-                                            // name=""
+                                            name="brand_uuid"
                                             label="Manufacturer"
                                         >
                                             <Select placeholder={brand.loading ? "Loading..." : "select Manufacture"}
                                                 options={brand.data.map(item => ({
                                                     label: item.brand_name,
-                                                    value: item.brand_name,
+                                                    value: item.brand_uuid,
                                                     categories: item.categories,
                                                 }))}
                                                 onSelect={onManufactureSelect}
@@ -202,7 +325,7 @@ const AddProduct = () => {
                                         </Form.Item>
                                         <Form.Item
                                             rules={[{ required: true, message: "Please enter Product Name" }]}
-                                            // name=""
+                                            name="prod_category"
                                             label="Categories"
                                         >
                                             <Select placeholder={brand.loading ? "Loading..." :
@@ -213,27 +336,34 @@ const AddProduct = () => {
                                             }
                                                 options={categories.map(item => ({
                                                     label: item.cat_name,
-                                                    value: item.cat_name,
+                                                    value: item.cat_id,
                                                 }))}
                                             // mode="multiple"
                                             />
-                                            {/* {categoriesData.data.map(item => (
-                                                    <Option key={item.cat_id} value={item.cat_id} >{item.cat_name}</Option>
-                                                ))}
-                                            </Select> */}
                                         </Form.Item>
+
                                         <Form.Item
                                             rules={[{ required: true, message: "Please enter Product Name" }]}
                                             // name=""
                                             label="Related Product"
                                         >
                                             <Select
-                                                // placeholder={brand.loading ? "Loading..." : "select Manufacture"}
-                                                placeholder={"select Related Products"}
+                                                placeholder={products.isLoading ? "Loading..." : "select Related Products"}
+                                                // placeholder={"select Related Products"}
+                                                mode="multiple"
+                                                options={products?.data?.map(item => (
+                                                    {
+                                                        label: item.prod_name,
+                                                        value: item.prod_name,
+                                                        uid: item.prod_uuid,
+                                                    }
+                                                ))}
+
+                                                onChange={(newVal, items) => {
+                                                    setRelatedProducts(items)
+                                                }}
                                             >
-                                                {/* {brand.data.map(item => (
-                                                    <Option key={item.brand_uuid} value={item.brand_uuid} >{item.brand_name}</Option>
-                                                ))} */}
+
                                             </Select>
                                         </Form.Item>
 
@@ -242,57 +372,66 @@ const AddProduct = () => {
                                     <Tabs.TabPane tab="Specifications" key="Specifications">
                                         <Form.Item
                                             // rules={[{ required: true, message: "Please enter Model" }]}
-                                            name="d1"
+                                            // name="d1"
                                             label={<p>Dimensions <br /> (L x W x H)</p>}
                                         >
-                                            <Input.Group compact >
-                                                <Input type='number' style={{ width: "33.3%" }} placeholder='Length' />
-                                                <Input type='number' style={{ width: "33.3%" }} placeholder='Width' />
-                                                <Input type='number' style={{ width: "33.3%" }} placeholder='Height' />
+                                            <Input.Group compact
+                                            >
+                                                <Input
+                                                    type='number'
+                                                    style={{ width: "33.3%" }} placeholder='Length'
+                                                    onBlur={e => setDimensions(state => ({ ...state, length: parseFloat(e.target.value) }))}
+                                                />
+                                                <Input
+                                                    type='number'
+                                                    style={{ width: "33.3%" }} placeholder='Width'
+                                                    onBlur={e => setDimensions(state => ({ ...state, width: parseFloat(e.target.value) }))}
+                                                />
+                                                <Input
+                                                    type='number'
+                                                    style={{ width: "33.3%" }} placeholder='Height'
+                                                    onBlur={e => setDimensions(state => ({ ...state, height: parseFloat(e.target.value) }))}
+                                                />
                                             </Input.Group>
                                         </Form.Item>
                                         <Form.Item
                                             // rules={[{ required: true, message: "Please enter Model" }]}
-                                            name="model"
+                                            name="dimension_class"
                                             label={<p>Dimensions <br />Class </p>}
+                                            initialValue="Inch"
                                         >
                                             <Select style={{ height: '3.5em' }} placeholder="Enter Dimension Class" >
-                                                <Option key={1} value={1} >Centimeter</Option>
-                                                <Option key={2} value={2} >Millimeter</Option>
-                                                <Option key={3} value={3} >Inch</Option>
+                                                <Option key={1} value="Centimeter" >Centimeter</Option>
+                                                <Option key={2} value="Millimeter" >Millimeter</Option>
+                                                <Option key={3} value="Inch" >Inch</Option>
                                             </Select>
                                         </Form.Item>
 
                                         <Form.Item
                                             // rules={[{ required: true, message: "Please enter Model" }]}
-                                            name="w"
+                                            name="prod_weight"
                                             label="Weight"
                                         >
                                             <Input type='number' placeholder='Enter Weight' />
                                         </Form.Item>
                                         <Form.Item
                                             // rules={[{ required: true, message: "Please enter Model" }]}
-                                            name="model"
+                                            name="prod_weight_class"
                                             label="Weight Class"
+                                            initialValue="Pound"
                                         >
                                             <Select placeholder="Enter Weight Class" >
-                                                <Option key={1} value={1} >Kilogram</Option>
-                                                <Option key={1} value={1} >Gram</Option>
-                                                <Option key={2} value={2} >Pound</Option>
-                                                <Option key={3} value={3} >Ounce</Option>
+                                                <Option key={1} value="Kilogram" >Kilogram</Option>
+                                                <Option key={1} value="Gram" >Gram</Option>
+                                                <Option key={2} value="Pound" >Pound</Option>
+                                                <Option key={3} value="Ounce" >Ounce</Option>
                                             </Select>
                                         </Form.Item>
 
                                     </Tabs.TabPane>
+
                                     <Tabs.TabPane tab="Stock" key="Stock">
                                         {/* <Form.Item
-                                            rules={[{ required: true, message: "Please enter Product Quantity" }]}
-                                            name="q"
-                                            label="Quantity"
-                                        >
-                                            <Input placeholder='Enter Quantity' />
-                                        </Form.Item> */}
-                                        <Form.Item
                                             // rules={[{ required: true, message: "Please enter Minimum Quantity" }]}
                                             name="mq"
                                             label="Minimum Quantity"
@@ -304,49 +443,48 @@ const AddProduct = () => {
                                         >
                                             <Switch defaultChecked={true} />
 
-                                        </Form.Item>
+                                        </Form.Item> */}
                                         <Form.Item
                                             rules={[{ required: true, message: "Please enter Out Of Stock Status" }]}
-                                            // name="q"
+                                            name="prod_outofstock_status"
                                             label="Out Of Stock Status"
-
                                         >
-                                            <Select defaultValue={2}>
-                                                <Select.Option key={1} value={1}>2-3 Days</Select.Option>
-                                                <Select.Option key={2} value={2}>In Stock</Select.Option>
-                                                <Select.Option key={3} value={3}>Out Of Stock</Select.Option>
-                                                <Select.Option key={4} value={4}>Pre-Order</Select.Option>
+                                            <Select placeholder="Please select a Status">
+                                                <Select.Option key={1} value="2-3 Days" >2-3 Days</Select.Option>
+                                                <Select.Option key={2} value="In Stock">In Stock</Select.Option>
+                                                <Select.Option key={3} value="Out Of Stock" >Out Of Stock</Select.Option>
+                                                <Select.Option key={4} value="Pre-Orde" >Pre-Order</Select.Option>
                                             </Select>
                                         </Form.Item>
-                                        <Form.Item
+                                        {/* <Form.Item
                                             rules={[{ required: true, message: "Please enter Date Available" }]}
                                             // name="q"
                                             label="Date Available"
                                         >
                                             <DatePicker size='middle' style={{ height: '2.6em', }} />
-                                        </Form.Item>
+                                        </Form.Item> */}
                                     </Tabs.TabPane>
+
                                     <Tabs.TabPane tab="Attribute" key="Attribute">
-                                        <AttributeTab />
+                                        <AttributeTab {...{ attributesTableData, setAttributesTableData }} />
                                     </Tabs.TabPane>
 
                                     <Tabs.TabPane tab="Price" key="Price">
                                         <Form.Item
                                             rules={[{ required: true, message: "Please Enter Regular Price" }]}
-                                            name="Rp"
+                                            name="prod_regular_price"
                                             label="Regular Price"
                                         >
                                             <Input placeholder='Enter Regular Price' prefix="US$  " type='number' />
                                         </Form.Item>
 
                                         <Form.Item
-                                            // rules={[{ required: true, message: "Please enter " }]}
-                                            name="cPrice"
+                                            name="prod_sale_price"
                                             label="Sales Price"
                                         >
                                             <Input prefix="US$  " type='number' placeholder='Enter Sales Price' />
                                         </Form.Item>
-                                        <Form.Item
+                                        {/* <Form.Item
                                             // rules={[{ required: true, message: "Please enter " }]}
                                             name="cPrice"
                                             label="Cost Per Item"
@@ -356,7 +494,7 @@ const AddProduct = () => {
 
                                             <Checkbox >Charge Tax on this product</Checkbox>
 
-                                        </Form.Item>
+                                        </Form.Item> */}
 
                                     </Tabs.TabPane>
 
@@ -365,15 +503,41 @@ const AddProduct = () => {
                                     </Tabs.TabPane>
 
                                     <Tabs.TabPane tab="Parts Of Product" key="PartsOf">
-                                        <PartsOfProductTab />
+                                        <PartsOfProductTab {...{ products, setProducts, selectedPartsOfProducts, setSelectedPartsOfProducts, partOfProductQuantities, setPartOfProductQuantities }} />
                                     </Tabs.TabPane>
 
 
                                     <Tabs.TabPane tab="Images" key="Images">
-                                        <ImageTab />
+                                        <ImageTab {...{ featuresImage, setFeaturesImage, gallaryImages, setGallaryImages }} />
                                     </Tabs.TabPane>
 
                                 </Tabs>
+
+                                <div
+                                    style={{
+                                        display: 'flex',
+                                        justifyContent: 'flex-end',
+                                        marginTop: '3em'
+                                    }}
+                                >
+                                    <Form.Item>
+
+                                        <Button loading={isLoading} size="default" htmlType="submit" type="primary" raised>
+                                            {isLoading ? 'Processing' : 'Save'}
+                                        </Button>
+                                        <Link to="/admin/roles/list">
+                                            <Button
+                                                // className="btn-cancel"
+                                                type='white'
+                                                size="large"
+                                            >
+                                                Cancel
+                                            </Button>
+                                        </Link>
+                                    </Form.Item>
+                                </div>
+
+
                             </Form>
 
 

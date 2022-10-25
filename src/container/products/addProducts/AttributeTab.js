@@ -6,17 +6,34 @@ import apolloClient, { attributeQuery } from '../../../utility/apollo';
 import Cookies from 'js-cookie';
 const { Option } = Select;
 
-
-const Inputs = () => {
+// Component for Value column
+const Inputs = ({ index, setAttributesTableData }) => {
     const [type, setType] = useState('')
     const [file, setFile] = useState([])
+
+    const handleOnBlur = e => {
+        setAttributesTableData(arr => {
+            let data = arr[index];
+            const copy = [...arr];
+            copy[index] = { ...data, attribute_value: e.target.value }
+            return copy;
+        })
+    }
 
     return (
         <>
             <Select
                 style={{ width: '10em', marginRight: "1em" }}
                 placeholder="Select type"
-                onChange={value => setType(value)}
+                onChange={value => {
+                    setType(value)
+                    setAttributesTableData(arr => {
+                        let data = arr[index];
+                        const copy = [...arr];
+                        copy[index] = { ...data, attribute_type: value }
+                        return copy;
+                    })
+                }}
             >
                 <Option value="text" >Text</Option>
                 <Option value="link" >Link</Option>
@@ -24,8 +41,12 @@ const Inputs = () => {
                 <Option value="none" >None</Option>
             </Select>
 
-            {type === "text" && < Input placeholder="Enter text" style={{ width: 'calc(100% - 12em)' }} size="middle" />}
-            {type === "link" && < Input placeholder="Enter Link" style={{ width: 'calc(100% - 12em)' }} size="middle" />}
+            {type === "text"
+                && < Input placeholder="Enter text" style={{ width: 'calc(100% - 12em)' }} size="middle" onBlur={handleOnBlur} />
+            }
+            {type === "link"
+                && < Input placeholder="Enter Link" style={{ width: 'calc(100% - 12em)' }} size="middle" onBlur={handleOnBlur} />
+            }
             {type === "file"
                 && <Upload
                     // style={{ marginTop: "2em" }}
@@ -45,71 +66,119 @@ const Inputs = () => {
     )
 }
 
+const AttributeTab = ({ attributesTableData, setAttributesTableData }) => {
 
-const AttributeTab = () => {
-    const initalData = [{
-        id: new Date().getTime(),
-        attribute: '',
-        type: '',
-        value: ''
-    }]
-    const [attributes, setAttributes] = useState(initalData)
 
     const addNewRow = () => {
-        const newData = (
-            {
-                id: new Date().getTime(),
-                attribute: '',
-                type: '',
-                value: ''
-            }
-        )
-        setAttributes(prevState => [...prevState, newData])
+        const newData = {
+            id: new Date().getTime(),
+            attr_group_uuid: "",
+            attribute_uuid: '',
+            attribute_type: '',
+            attribute_value: ''
+        }
+        setAttributesTableData(prevState => [...prevState, newData])
+        console.log(attributesTableData)
     }
     const removeRow = (id) => {
-        setAttributes(prevState => {
+        setAttributesTableData(prevState => {
             return prevState.filter((value) => value.id !== id)
         })
     }
 
+
+    const [attributeGroups, setAttributeGroups] = useState({ data: [], isLoading: true })
+    const [selectedGroup, setSelectedGroup] = useState({})
+    const handleAttrGroupSelect = (val, item, index) => {
+        setSelectedGroup(item)
+
+        setAttributesTableData(arr => {
+            let data = arr[index];
+            const copy = [...arr];
+            copy[index] = { ...data, attr_group_uuid: val }
+            return copy;
+        })
+    }
+    const handleAttributeSelect = (val, item, index) => {
+        setAttributesTableData(arr => {
+            let data = arr[index];
+            const copy = [...arr];
+            copy[index] = { ...data, attribute_uuid: val }
+            return copy;
+        })
+    }
+
+    // load ATTRIBUTE GROUPS
+    useEffect(() => {
+        // return
+        apolloClient.query({
+            query: attributeQuery.GET_ALL_ATTR_GROUPS_FOR_ADD_PROD,
+            context: {
+                headers: {
+                    TENANTID: process.env.REACT_APP_TENANTID,
+                    Authorization: Cookies.get('psp_t')
+                }
+            }
+        }).then(res => {
+
+            const data = res?.data?.getAllAttrGroups
+
+            if (!data?.status) return
+            setAttributeGroups(s => ({ ...s, data: data?.data, error: '' }))
+        }).catch(err => {
+            setAttributeGroups(s => ({ ...s, error: 'Something went Wrong.!! ' }))
+        }).finally(() => {
+            setAttributeGroups(s => ({ ...s, isLoading: false }))
+        })
+
+    }, [])
+
     // List For Table Column
     const column = [
         {
+            title: 'Attribute Group',
+            dataIndex: 'group',
+            key: 'group',
+            width: 200,
+            render: (text, record, index) => <Select
+                style={{ width: "100%" }}
+                placeholder={attributeGroups.isLoading ? 'Loading...' : "Select Group..."}
+                options={attributeGroups.data.map(item => ({
+                    label: item.attr_group_name,
+                    value: item.attr_group_uuid,
+                    attributes: item.attributes
+                }))}
+                onSelect={(val, item) => handleAttrGroupSelect(val, item, index)}
+            />
+        },
+        {
             title: 'Attribute',
-            dataIndex: 'Attribute',
-            key: 'Attribute',
-            width: 300,
-            render: (text, record) => {
-                const options = attributesData.data.map(item => ({ value: item.attribute_name }))
-
-                return (
-                    <AutoComplete
-                        style={{
-                            width: "100%",
-                        }}
-                        options={options}
-                        placeholder="Attribute name"
-                    // filterOption={(inputValue, option) =>
-                    //     option.value.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1
-                    // }
-                    />
-
-                )
-            }
+            dataIndex: 'attribute',
+            key: 'attribute',
+            width: 200,
+            render: (text, record, index) => <Select
+                style={{ width: "100%" }}
+                disabled={!selectedGroup.value}
+                placeholder={attributeGroups.isLoading ? 'Loading...'
+                    : "Select Group..."
+                }
+                options={selectedGroup?.attributes?.map(item => ({
+                    label: item.attribute_name,
+                    value: item.attribute_uuid,
+                }))}
+                onSelect={(val, item) => handleAttributeSelect(val, item, index)}
+            // onSelect={val => {
+            //     console.log(val)
+            //     setSelectedAttribute(val)
+            // }}
+            />
         },
         {
             title: 'Values',
             dataIndex: 'value',
             key: 'value',
-            render: (text, record) => <Inputs />
+            render: (text, record, index) => <Inputs {...{ index, setAttributesTableData }} />
         },
-        // {
-        //     title: 'Sort Order',
-        //     dataIndex: 'sort_order',
-        //     key: 'sort_order',
-        //     width: 150,
-        //     render: (text, record) => <Input type="number" placeholder="Sort Order" onChange={(e) => record.sort_order = e.target.value} />
-        // },
         {
             title: 'Action',
             dataIndex: 'action',
@@ -122,45 +191,16 @@ const AttributeTab = () => {
         },
     ];
 
-    const [attributesData, setAttributesData] = useState({ data: [], isLoading: true })
-    useEffect(() => {
-        // return
-        apolloClient.query({
-            query: attributeQuery.GET_ALL_ATTRIBUTES,
-            context: {
-                headers: {
-                    TENANTID: process.env.REACT_APP_TENANTID,
-                    Authorization: Cookies.get('psp_t')
-                }
-            }
-        }).then(res => {
 
-            const data = res?.data?.getAllAttributes
-
-            if (!data?.status) return
-            setAttributesData(s => ({ ...s, data: data?.data, error: '' }))
-
-        }).catch(err => {
-            setAttributesData(s => ({ ...s, error: 'Something went Wrong.!! ' }))
-        }).finally(() => {
-            setAttributesData(s => ({ ...s, isLoading: false }))
-        })
-
-    }, [])
-
-    if (attributesData.isLoading) return (
-        <div className="spin">
-            <Spin />
-        </div>
-    )
 
     return (
 
         <>
             <Table
                 columns={column}
-                dataSource={attributes}
+                dataSource={attributesTableData}
                 pagination={false}
+                rowKey="id"
             />
 
             <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '10px', marginBottom: '10px', marginRight: '1em' }}>

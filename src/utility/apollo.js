@@ -290,6 +290,20 @@ export const productQuery = {
     }
   }
   `,
+  GET_PRODUCT_LIST_FOR_ADD_MINIMAL: gql`
+  query getProductList{
+    getProductList{
+      message
+      status
+      data{
+        prod_uuid
+        prod_name
+        prod_status
+        prod_sku
+      }
+    }
+  }
+  `,
 
 }
 
@@ -347,6 +361,15 @@ export const productMutation = {
       }
     }
     
+    `,
+  ADD_PRODUCT: gql`
+  mutation addProduct($data:AddProductInput) {
+    addProduct(data:$data ) {
+      message
+      status
+      tenant_id
+    }
+  }
     `,
 }
 
@@ -449,6 +472,26 @@ export const attributeQuery = {
           tenant_id
           createdAt
           updatedAt
+        }
+      }
+    }
+  }
+  `,
+  GET_ALL_ATTR_GROUPS_FOR_ADD_PROD: gql`
+  query getAllAttrGroups {
+    getAllAttrGroups{
+      status
+      message
+      tenant_id
+      data{
+        attr_group_uuid
+        attr_group_name
+        attrgroup_status
+        attrgroup_sortorder
+        attributes {
+          attribute_uuid
+          attribute_name
+          attribute_status
         }
       }
     }
@@ -634,6 +677,7 @@ export const couponMutation = {
   }  
   `,
 }
+
 
 
 

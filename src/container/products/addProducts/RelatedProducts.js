@@ -2,8 +2,8 @@ import { Button, Form, Input, Select, Table } from 'antd';
 import React, { useEffect, useState } from 'react';
 import FeatherIcon from 'feather-icons-react';
 
+const RelatedProducts = ({ products, selectedRelatedProducts, setSelectedRelatedProducts, relatedProductQuantities, setRelatedProductQuantities }) => {
 
-const PartsOfProductTab = ({ products, setProducts, selectedPartsOfProducts, setSelectedPartsOfProducts, partOfProductQuantities, setPartOfProductQuantities }) => {
 
     const columns = [
         {
@@ -26,7 +26,9 @@ const PartsOfProductTab = ({ products, setProducts, selectedPartsOfProducts, set
                 type="number"
                 placeholder="Quantity"
                 onBlur={e => {
-                    setPartOfProductQuantities(state => {
+                    console.log(e.target.value);
+
+                    setRelatedProductQuantities(state => {
                         const copy = { ...state }
                         copy[record.uid] = e.target.value
                         console.log(copy)
@@ -44,9 +46,10 @@ const PartsOfProductTab = ({ products, setProducts, selectedPartsOfProducts, set
             render: (text, record, index) => <Button size="" title="Remove" type="danger"
                 // onClick={() => removeRow(record.id)}
                 onClick={() => {
-                    const copy = [...selectedPartsOfProducts]
+                    console.log(text, record, index)
+                    const copy = [...selectedRelatedProducts]
                     copy.splice(index, 1)
-                    setSelectedPartsOfProducts(copy)
+                    setSelectedRelatedProducts(copy)
                 }}
 
             ><FeatherIcon icon="minus" /></Button>
@@ -64,7 +67,7 @@ const PartsOfProductTab = ({ products, setProducts, selectedPartsOfProducts, set
                 <Select
                     style={{ marginBottom: "2em" }}
                     mode="multiple"
-                    value={selectedPartsOfProducts}
+                    value={selectedRelatedProducts}
                     placeholder={products.isLoading ? "Loading.." : "Select Product.."}
                     options={products?.data?.map(item => (
                         {
@@ -74,15 +77,17 @@ const PartsOfProductTab = ({ products, setProducts, selectedPartsOfProducts, set
                             name: item.prod_name,
                             sku: item.prod_sku,
                         }
-                    ))}
+
+                    ))
+                    }
                     // value={[]}
                     onChange={(newVal, items) => {
-                        setSelectedPartsOfProducts(items)
+                        setSelectedRelatedProducts(items)
                     }}
                 />
 
                 <Table
-                    dataSource={selectedPartsOfProducts}
+                    dataSource={selectedRelatedProducts}
                     columns={columns}
                     pagination={false}
                     rowKey="uid"
@@ -93,4 +98,4 @@ const PartsOfProductTab = ({ products, setProducts, selectedPartsOfProducts, set
     );
 };
 
-export default PartsOfProductTab;
+export default RelatedProducts;
