@@ -3,6 +3,7 @@ import { Menu } from 'antd';
 import { NavLink, useRouteMatch } from 'react-router-dom';
 import FeatherIcon from 'feather-icons-react';
 import propTypes from 'prop-types';
+import { menuPermission } from '../utility/utility';
 
 const { SubMenu } = Menu;
 
@@ -43,124 +44,168 @@ const MenuItems = ({ darkMode, toggleCollapsed, topMenu }) => {
       overflowedIndicator={<FeatherIcon icon="more-vertical" />}
       openKeys={openKeys}
     >
-      <Menu.Item key="home" icon={!topMenu && <FeatherIcon icon="pie-chart" />} >
-        <NavLink onClick={toggleCollapsed} to={`${path}`}>
-          Dashboard
-        </NavLink>
-      </Menu.Item>
+      {
+        menuPermission('dashboard') && (
+          <Menu.Item key="home" icon={!topMenu && <FeatherIcon icon="pie-chart" />} >
+            <NavLink onClick={toggleCollapsed} to={`${path}`}>
+              Dashboard
+            </NavLink>
+          </Menu.Item>
+        )
+      }
 
-      <SubMenu key="admin" icon={!topMenu && <FeatherIcon icon="users" />} title="Admin">
+      {
+        ( menuPermission('permission') || menuPermission('role') || menuPermission('users')) && (
+          <SubMenu key="admin" icon={!topMenu && <FeatherIcon icon="users" />} title="Admin">
+            {
+              menuPermission('permission') && (
+                <Menu.Item key="permission">
+                  <NavLink onClick={toggleCollapsed} to={`${path}/permission/list`}>
+                    Permissions
+                  </NavLink>
+                </Menu.Item>
+              )
+            }
 
-        <Menu.Item key="permission">
-          <NavLink onClick={toggleCollapsed} to={`${path}/permission/list`}>
-            Permissions
-          </NavLink>
-        </Menu.Item>
-        <Menu.Item key="roles">
-          <NavLink onClick={toggleCollapsed} to={`${path}/roles/list`}>
-            Roles
-          </NavLink>
-        </Menu.Item>
+            {
+              menuPermission('role') && (
+                <Menu.Item key="roles">
+                  <NavLink onClick={toggleCollapsed} to={`${path}/roles/list`}>
+                    Roles
+                  </NavLink>
+                </Menu.Item>
+              )
+            }
 
-        <Menu.Item key="users">
-          <NavLink onClick={toggleCollapsed} to={`${path}/admin/admins`}>
-            Users
-          </NavLink>
-        </Menu.Item>
+            {
+              menuPermission('user') && (
+              <Menu.Item key="users">
+                <NavLink onClick={toggleCollapsed} to={`${path}/admin/admins`}>
+                  Users
+                </NavLink>
+              </Menu.Item>
+              )
+            }  
+          </SubMenu>
+        )
+      }
+      {
+        ( menuPermission('product') || 
+        menuPermission('coupon') || 
+        menuPermission('attribute') || 
+        menuPermission('attribute-group') ||
+        menuPermission('category') ||
+        menuPermission('product')) && (
+          <SubMenu key="products" icon={!topMenu && <FeatherIcon icon="shopping-cart" />} title="Products">
+            {
+              menuPermission('coupon') && 
+              <Menu.Item key="listCoupon">
+                <NavLink onClick={toggleCollapsed} to={`${path}/products/coupon`}>
+                  Coupons
+                </NavLink>
+              </Menu.Item>
+            }
+            {
+              menuPermission('attribute') &&
+              <Menu.Item key="listAttribute">
+                <NavLink onClick={toggleCollapsed} to={`${path}/attributes/list`}>
+                  Attributes
+                </NavLink>
+              </Menu.Item>
+            }
+            {
+              menuPermission('attribute-group') &&
+              <Menu.Item key="listAttributegroup">
+                <NavLink onClick={toggleCollapsed} to={`${path}/attributes/list-group`}>
+                  Attribute Groups
+                </NavLink>
+              </Menu.Item>
+            }
+            {
+              menuPermission('category') &&
+              <Menu.Item key="listCategory">
+                <NavLink onClick={toggleCollapsed} to={`${path}/categories/list`}>
+                  Category
+                </NavLink>
+              </Menu.Item>
+            }
+            {
+              menuPermission('product') &&
+              <Menu.Item key="products_list">
+                <NavLink onClick={toggleCollapsed} to={`${path}/products/list`}>
+                  Products
+                </NavLink>
+              </Menu.Item>
+            }
+          </SubMenu>
+        )
+      }
 
+      {
+        (menuPermission('customer') || menuPermission('customer-group')) &&       
+        <SubMenu key="customers" icon={!topMenu && <FeatherIcon icon="user" />} title="Customers">
+          {
+            menuPermission('customer') &&
+              <Menu.Item key="customer_list">
+                <NavLink onClick={toggleCollapsed} to={`${path}/customers/list`}>
+                  Customers
+                </NavLink>
+              </Menu.Item>
+          }
+          {
+            menuPermission('customer-group') &&
+              <Menu.Item key="customers_group">
+                <NavLink onClick={toggleCollapsed} to={`${path}/customers/group`}>
+                  Customer Groups
+                </NavLink>
+              </Menu.Item>
+          }
+        </SubMenu>
+      }
 
-        {/* <Menu.Item key="single">
-          <NavLink onClick={toggleCollapsed} to={`${path}/email/single/1585118055048`}>
-            Read Email
-          </NavLink>
-        </Menu.Item> */}
-      </SubMenu>
+      {
+        menuPermission('manufacture') && 
+          <SubMenu key="brand" icon={!topMenu && <FeatherIcon icon="aperture" />} title="Manufacture">
+            <Menu.Item key="list_brand">
+              <NavLink onClick={toggleCollapsed} to={`${path}/brand/list`}>
+                Manufacture
+              </NavLink>
+            </Menu.Item>
+          </SubMenu>
+      }
 
-      <SubMenu key="products" icon={!topMenu && <FeatherIcon icon="shopping-cart" />} title="Products">
-        {/* <Menu.Item key="addproducts">
-          <NavLink onClick={toggleCollapsed} to={`${path}/products/list`}>
-            Products
-          </NavLink>
-        </Menu.Item> */}
-        <Menu.Item key="listCoupon">
-          <NavLink onClick={toggleCollapsed} to={`${path}/products/coupon`}>
-            Coupons
-          </NavLink>
-        </Menu.Item>
-        <Menu.Item key="listAttribute">
-          <NavLink onClick={toggleCollapsed} to={`${path}/attributes/list`}>
-            Attributes
-          </NavLink>
-        </Menu.Item>
-        <Menu.Item key="listAttributegroup">
-          <NavLink onClick={toggleCollapsed} to={`${path}/attributes/list-group`}>
-            Attribute Group
-          </NavLink>
-        </Menu.Item>
-        <Menu.Item key="listCategory">
-          <NavLink onClick={toggleCollapsed} to={`${path}/categories/list`}>
-            Category
-          </NavLink>
-        </Menu.Item>
-        <Menu.Item key="products_list">
-          <NavLink onClick={toggleCollapsed} to={`${path}/products/list`}>
-            Products
-          </NavLink>
-        </Menu.Item>
-      </SubMenu>
+      {
+        menuPermission('banner') && 
+        <SubMenu key="banner" icon={!topMenu && <FeatherIcon icon="image" />} title="Banner">
+          <Menu.Item key="list_banner">
+            <NavLink onClick={toggleCollapsed} to={`${path}/banner/list`}>
+              Banner
+            </NavLink>
+          </Menu.Item>
+        </SubMenu>
+      }
 
-      {/* <SubMenu key="roles" icon={!topMenu && <FeatherIcon icon="shopping-cart" />} title="Roles">
-        <Menu.Item key="roleList">
-          <NavLink onClick={toggleCollapsed} to={`${path}/roles/list`}>
-            Manage Roles
-          </NavLink>
-        </Menu.Item>
-      </SubMenu> */}
+      {
+        menuPermission('order') && 
+        <SubMenu key="orders" icon={!topMenu && <FeatherIcon icon="shopping-bag" />} title="Orders">
+          <Menu.Item key="list_orders">
+            <NavLink onClick={toggleCollapsed} to={`${path}/order/list`}>
+              Orders
+            </NavLink>
+          </Menu.Item>
+        </SubMenu>
+      }
 
-      <SubMenu key="customers" icon={!topMenu && <FeatherIcon icon="user" />} title="Customers">
-        <Menu.Item key="customer_list">
-          <NavLink onClick={toggleCollapsed} to={`${path}/customers/list`}>
-            Customers
-          </NavLink>
-        </Menu.Item>
-        <Menu.Item key="customers_group">
-          <NavLink onClick={toggleCollapsed} to={`${path}/customers/group`}>
-            Customers Group
-          </NavLink>
-        </Menu.Item>
-      </SubMenu>
-
-      <SubMenu key="brand" icon={!topMenu && <FeatherIcon icon="aperture" />} title="Manufacture">
-        <Menu.Item key="list_brand">
-          <NavLink onClick={toggleCollapsed} to={`${path}/brand/list`}>
-            Manufacture
-          </NavLink>
-        </Menu.Item>
-      </SubMenu>
-
-      <SubMenu key="banner" icon={!topMenu && <FeatherIcon icon="image" />} title="Banner">
-        <Menu.Item key="list_banner">
-          <NavLink onClick={toggleCollapsed} to={`${path}/banner/list`}>
-            Banner
-          </NavLink>
-        </Menu.Item>
-      </SubMenu>
-
-      <SubMenu key="orders" icon={!topMenu && <FeatherIcon icon="shopping-bag" />} title="Orders">
-        <Menu.Item key="list_orders">
-          <NavLink onClick={toggleCollapsed} to={`${path}/order/list`}>
-            Orders
-          </NavLink>
-        </Menu.Item>
-      </SubMenu>
-
-      <SubMenu key="vendor" icon={!topMenu && <FeatherIcon icon="archive" />} title="Vendors">
-        <Menu.Item key="list_vendor">
-          <NavLink onClick={toggleCollapsed} to={`${path}/vendor/list`}>
-            Vendors
-          </NavLink>
-        </Menu.Item>
-      </SubMenu>
+      {
+        menuPermission('vendor') && 
+        <SubMenu key="vendor" icon={!topMenu && <FeatherIcon icon="archive" />} title="Vendors">
+          <Menu.Item key="list_vendor">
+            <NavLink onClick={toggleCollapsed} to={`${path}/vendor/list`}>
+              Vendors
+            </NavLink>
+          </Menu.Item>
+        </SubMenu>
+      }
 
     </Menu>
   );

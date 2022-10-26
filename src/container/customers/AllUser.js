@@ -16,35 +16,31 @@ import config from '../../config/config';
 import { logOut } from '../../redux/authentication/actionCreator';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
 import { errorImageSrc, renderImage } from '../../utility/images';
-
-
-const handleStatusChange = (record, checked) => {
-    const variables = { data: { uid: record.uid, user_status: checked } }
-    apolloClient.mutate({
-        mutation: authMutation.ADMIN_UPDATE,
-        variables,
-        context: {
-            headers: {
-                TENANTID: process.env.REACT_APP_TENANTID,
-                Authorization: Cookies.get('psp_t')
-            }
-        }
-    }).then(res => {
-        const status = res?.data?.adminUpdate?.status
-        if (!status) return toast.error(data.message)
-        toast.success(`${record.email} user Status updated successfully.`)
-    }).catch(err => {
-        console.log("🚀 ~ file: AllAdmins.js ~ line 33 ~ handleStatusChange ~ err", err);
-        toast.error(`Something went wrong!!`)
-    })
-
-}
-
-
-
-
+import { viewPermission } from '../../utility/utility';
 
 const ListUser = () => {
+    viewPermission('customer');
+    const handleStatusChange = (record, checked) => {
+        const variables = { data: { uid: record.uid, user_status: checked } }
+        apolloClient.mutate({
+            mutation: authMutation.ADMIN_UPDATE,
+            variables,
+            context: {
+                headers: {
+                    TENANTID: process.env.REACT_APP_TENANTID,
+                    Authorization: Cookies.get('psp_t')
+                }
+            }
+        }).then(res => {
+            const status = res?.data?.adminUpdate?.status
+            if (!status) return toast.error(data.message)
+            toast.success(`${record.email} user Status updated successfully.`)
+        }).catch(err => {
+            console.log("🚀 ~ file: AllAdmins.js ~ line 33 ~ handleStatusChange ~ err", err);
+            toast.error(`Something went wrong!!`)
+        })
+
+    }
     const token = useSelector(state => state.auth.token);
     const [searchText, setSearchText] = useState('');
     const [filteredUser, setFilteredUser] = useState([]);

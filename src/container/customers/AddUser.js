@@ -9,9 +9,11 @@ import { useSelector } from 'react-redux';
 import apolloClient, { authMutation, authQuery } from '../../utility/apollo';
 import { toast } from 'react-toastify';
 import queryString from 'query-string'
+import { viewPermission } from '../../utility/utility';
 const { Paragraph, Text } = Typography;
 
 const AddUser = () => {
+    viewPermission('customer');
     const history = useHistory();
     const { search } = useLocation();
     const params = queryString.parse(search)

@@ -1,4 +1,5 @@
 import Cookies from 'js-cookie';
+import { authQuery } from '../../apollo/auth';
 import apolloClient, { authMutation } from '../../utility/apollo';
 import actions from './actions';
 
@@ -23,21 +24,55 @@ const login = (email, password, history) => {
         Cookies.set('psp_t', adminSignIn?.authToken);
         Cookies.set('r_i', adminSignIn?.roleNo);
         Cookies.set('user', JSON.stringify(adminSignIn));
+        const permissions = [];
 
+        apolloClient.mutate({
+          mutation: authQuery.GET_AUTH_PERMISSION,
+          variables: { 
+            query: {
+              "uid": adminSignIn?.uid
+            } 
+          },
+          context: {
+            headers: {
+              TENANTID: process.env.REACT_APP_TENANTID,
+              Authorization: adminSignIn?.authToken
+            }
+          }
+        }).then( res => {
+            const roles = res?.data?.getSingleAdmin?.data?.roles;
+            roles.forEach(per => {
+              per.permissions.forEach( permission => {
+                permissions.push(
+                  {
+                    edit_access: permission.edit_access,
+                    read_access: permission.read_access,
+                    permission_name: permission?.rolesPermission?.roles_permission_slug
+                  }
+                )
+              });
+            });
+
+            Cookies.set('permissions', JSON.stringify(permissions));
+        })
+ 
 
         dispatch(loginSuccess({
           login: true,
           token: adminSignIn?.authToken,
           roleId: adminSignIn?.roleNo,
           user: adminSignIn,
+          permissions
         }));
         history.push('/admin');
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000);
       } else {
         dispatch(loginErr('wrong email or password'));
       }
     }).catch(err => {
       dispatch(loginErr('Something went wrong'));
-
     })
 
 
@@ -62,6 +97,7 @@ const logOut = () => {
       Cookies.remove('psp_t');
       Cookies.remove('r_i');
       Cookies.remove('user');
+      Cookies.remove('permissions');
       dispatch(logoutSuccess(null));
     } catch (err) {
       dispatch(logoutErr(err));

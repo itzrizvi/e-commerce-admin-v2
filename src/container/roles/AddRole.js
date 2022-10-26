@@ -11,8 +11,10 @@ import { useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 const { TextArea } = Input;
 import queryString from 'query-string'
+import { viewPermission } from '../../utility/utility';
 
 const AddRole = () => {
+    viewPermission('role');
     const history = useHistory();
     const { search } = useLocation();
     const params = queryString.parse(search)

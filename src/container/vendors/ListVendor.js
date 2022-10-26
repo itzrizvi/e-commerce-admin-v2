@@ -12,9 +12,11 @@ import config from '../../config/config';
 import apolloClient, { customerMutation, customerQuery } from '../../utility/apollo';
 import Cookies from 'js-cookie';
 import { toast } from 'react-toastify';
+import { viewPermission } from '../../utility/utility';
 
 
 const ListVendor = () => {
+    viewPermission('vendor');
     const dummyData = [...Array(10).keys()].map(i => ({
         v_n: `Vendor ${i + 1}`,
         v_e: `Vendor${i + 1}@gmail.com`,

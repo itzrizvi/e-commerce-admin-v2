@@ -8,11 +8,16 @@ import { Main } from '../styled';
 import { ShareButtonPageHeader } from '../../components/buttons/share-button/share-button';
 import { ExportButtonPageHeader } from '../../components/buttons/export-button/export-button';
 import { CalendarButtonPageHeader } from '../../components/buttons/calendar-button/calendar-button';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { menuPermission } from '../../utility/utility';
+import { logOut } from '../../redux/authentication/actionCreator';
 
 const Dashboard = () => {
   const user = useSelector(state => state.auth.user);
-
+  const dispatch = useDispatch();
+  setTimeout(() => {
+    if(!menuPermission('dashboard')) dispatch(logOut());
+  }, 2000);
   return (
     <>
       <PageHeader

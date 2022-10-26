@@ -10,10 +10,12 @@ import queryString from 'query-string'
 import apolloClient, { customerMutation, customerQuery } from '../../utility/apollo';
 import Cookies from 'js-cookie';
 import { toast } from 'react-toastify';
+import { viewPermission } from '../../utility/utility';
 const { TextArea } = Input;
 
 
 const AddVendor = () => {
+    viewPermission('vendor');
     const { search } = useLocation();
     const params = queryString.parse(search)
     const history = useHistory();

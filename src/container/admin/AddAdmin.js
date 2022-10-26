@@ -11,11 +11,13 @@ import apolloClient, { authMutation, authQuery } from '../../utility/apollo';
 import { toast } from 'react-toastify';
 import queryString from 'query-string'
 import Cookies from 'js-cookie';
+import { viewPermission } from '../../utility/utility';
 const { Paragraph, Text } = Typography;
 
 const { Option } = Select;
 
 const AddAdmin = () => {
+    viewPermission('user');
     const history = useHistory();
     const { search } = useLocation();
     const params = queryString.parse(search)

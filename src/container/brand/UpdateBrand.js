@@ -13,8 +13,10 @@ import apolloClient, { apolloUploadClient } from '../../apollo';
 import queryString from 'query-string'
 import { errorImageSrc, renderImage } from '../../utility/images';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
+import { viewPermission } from '../../utility/utility';
 
 const UpdateBrand = () => {
+    viewPermission('manufacture');
     const { search } = useLocation();
     const params = queryString.parse(search)
     const { TextArea } = Input;

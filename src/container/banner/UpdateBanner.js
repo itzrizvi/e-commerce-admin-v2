@@ -14,8 +14,10 @@ import { errorImageSrc, renderImage } from '../../utility/images';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
 import FeatherIcon from 'feather-icons-react';
 import queryString from 'query-string'
+import { viewPermission } from '../../utility/utility';
 
 const AddBanner = () => {
+    viewPermission('banner');
     const { search } = useLocation();
     const params = queryString.parse(search)
     const history = useHistory();

@@ -12,8 +12,10 @@ import apolloClient, { couponMutation, couponQuery } from '../../utility/apollo'
 import Cookies from 'js-cookie';
 import { toast } from 'react-toastify';
 import config from '../../config/config';
+import { viewPermission } from '../../utility/utility';
 
 const ListCoupon = () => {
+    viewPermission('coupon');
     const dummyData = [...Array(10).keys()].map(i => ({
         n: `Coupon${i + 1}`,
         c: i + 1,

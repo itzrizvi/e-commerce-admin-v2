@@ -10,9 +10,11 @@ import queryString from 'query-string'
 import apolloClient, { apolloUploadClient, attributeMutation, attributeQuery } from '../../utility/apollo';
 import Cookies from 'js-cookie';
 import { toast } from 'react-toastify';
+import { viewPermission } from '../../utility/utility';
 const { Option } = Select;
 
 const AddAttribute = () => {
+    viewPermission('attribute');
     const { search } = useLocation();
     const params = queryString.parse(search)
     const history = useHistory();

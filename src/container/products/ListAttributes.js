@@ -11,8 +11,10 @@ import FontAwesome from 'react-fontawesome';
 import apolloClient, { attributeMutation, attributeQuery } from '../../utility/apollo';
 import Cookies from 'js-cookie';
 import { toast } from 'react-toastify';
+import { viewPermission } from '../../utility/utility';
 
 const ListAttributes = () => {
+    viewPermission('attribute');
     const dummyData = [...Array(6).keys()].map(i => ({ a_n: `Attribute ${i + 1}`, a_g: `Group 2`, g_s: i + 1 }))
 
     const [attributes, setAttributes] = useState({ data: dummyData, isLoading: true })

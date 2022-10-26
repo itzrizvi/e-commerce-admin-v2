@@ -12,9 +12,11 @@ import config from '../../config/config';
 import apolloClient, { customerMutation, customerQuery } from '../../utility/apollo';
 import Cookies from 'js-cookie';
 import { toast } from 'react-toastify';
+import { viewPermission } from '../../utility/utility';
 
 
 const CustomerGroups = () => {
+    viewPermission('customer-group');
     // const dummyData = [...Array(10).keys()].map(i => ({ g_n: `Customer Group ${i + 1}`, g_s: i + 1, g_status: true }))
 
     const [customerGroups, setCustomerGroups] = useState({ data: [], isLoading: true })

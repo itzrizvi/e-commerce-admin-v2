@@ -6,7 +6,7 @@ import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
 import { Cards } from '../../components/cards/frame/cards-frame';
 import { Button } from '../../components/buttons/buttons';
-import { Link } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 import FontAwesome from 'react-fontawesome';
 import apolloClient from '../../apollo';
 import { brandQuery } from '../../apollo/brand';
@@ -15,10 +15,12 @@ import Moment from 'react-moment';
 import { toast } from 'react-toastify';
 import { errorImageSrc, renderImage } from '../../utility/images';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
+import { viewPermission } from '../../utility/utility';
 
 
 
 const ListBrand = () => {
+    viewPermission('manufacture');
     const [brand, setBrand] = useState({ data: [], loading: true, error: '' })
     const [filteredBrand, setFilteredBrand] = useState([]);
     const [isFilter, setIsFilter] = useState(false)
@@ -112,6 +114,7 @@ const ListBrand = () => {
             dataIndex: 'brand_status',
             key: 'brand_status',
             align: 'right',
+            width: 120,
             render: (text, record) => (
                 <Switch defaultChecked={text} title='Status' onChange={checked => handleStatusChange(record, checked)} />
             ),
@@ -133,6 +136,7 @@ const ListBrand = () => {
             dataIndex: 'createdAt',
             key: 'createdAt',
             align: 'center',
+            width: 120,
             render: (text, record) => (
                 <span className={"status-text"}>{<Moment format="DD MMMM YYYY">{parseInt(text)}</Moment>}</span>
             )
@@ -142,6 +146,7 @@ const ListBrand = () => {
             dataIndex: 'action',
             align: 'right',
             key: 'action',
+            width: 80,
             render: (text, record) => (
                 <>
                     <Link to={`/admin/brand/edit?id=${record.brand_uuid}`}>

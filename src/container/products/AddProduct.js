@@ -17,11 +17,13 @@ import { brandQuery } from '../../apollo/brand';
 import Cookies from 'js-cookie';
 import { productQuery } from '../../utility/apollo';
 import PartsOfProductTab from './addProducts/PartsOfProductTab';
+import { viewPermission } from '../../utility/utility';
 const { Option } = Select;
 
 
 
 const AddProduct = () => {
+    viewPermission('product');
     const [form] = Form.useForm();
     const [description, setDescription] = useState(RichTextEditor.createEmptyValue());
     const [brand, setBrand] = useState({ data: [], loading: true, error: '' })
