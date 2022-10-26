@@ -16,62 +16,6 @@ import Cookies from 'js-cookie';
 import { toast } from 'react-toastify';
 import { viewPermission } from '../../utility/utility';
 
-const categories1 = [
-    {
-        cat_id: "824a68e1-f826-4d3c-bf60-0e90c67f8d7c",
-        cat_name: "Motherboard",
-        cat_sort_order: 11,
-        subcategories: [
-            {
-                cat_id: "d3fd1ea0-ba74-4f96-a9e6-4310b660d089",
-                cat_name: "Desktop Board",
-                subsubcategories: [
-                    {
-                        cat_id: "df688b28-4314-4334-a553-51ff752381fa",
-                        cat_name: "Inspiron Board"
-                    },
-                    {
-                        cat_id: "ed7b4a33-8954-49a5-91a0-7e1767d98b94",
-                        cat_name: "Eaglelake"
-                    }
-                ]
-            },
-            {
-                cat_id: "a8d2c712-3e14-47d3-9f90-938c9d1a2565",
-                cat_name: "Laptop Board",
-                subsubcategories: []
-            },
-            {
-                cat_id: "8d0cd401-d00f-4ed5-829d-545e11173c46",
-                cat_name: "Server Board",
-                subsubcategories: []
-            }
-        ]
-    },
-    {
-        cat_id: "e3a7a796-8506-4e87-a430-300b057453f0",
-        cat_name: "Cables",
-        cat_sort_order: 18,
-        subcategories: [
-            {
-                cat_id: "0fc4ac2f-e3d3-41e9-b4a1-f505c865ac96",
-                cat_name: "Fiber Cable",
-                subsubcategories: []
-            },
-            {
-                cat_id: "84b1e480-90e6-4753-bddf-8719b2e1f482",
-                cat_name: "Backplane Cable",
-                subsubcategories: []
-            },
-            {
-                cat_id: "28975bc5-90ae-4fb0-8d91-d3c7e31f5b47",
-                cat_name: "Antenna Cable",
-                subsubcategories: []
-            }
-        ]
-    },
-
-]
 
 const ListCategories = () => {
     viewPermission('category');
