@@ -290,6 +290,30 @@ export const productQuery = {
     }
   }
   `,
+  GET_PRODUCT_LIST: gql`
+  query getProductList{
+    getProductList{
+      message
+      status
+      tenant_id
+      data{
+        prod_uuid
+        prod_name
+        prod_slug
+        prod_sku
+        prod_model
+        prod_status
+        prod_thumbnail
+        prod_sale_price
+        prod_regular_price
+        prod_outofstock_status
+        createdAt
+        updatedAt
+        tenant_id
+      }
+    }
+  }
+  `,
   GET_PRODUCT_LIST_FOR_ADD_MINIMAL: gql`
   query getProductList{
     getProductList{
