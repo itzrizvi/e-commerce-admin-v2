@@ -39,6 +39,7 @@ const AddAdmin = () => {
 
     const [form] = Form.useForm();
 
+    // get all roles
     useEffect(() => {
         setRoles(state => ({ ...state, isLoading: true }))
 
@@ -63,6 +64,7 @@ const AddAdmin = () => {
 
     }, [])
 
+    // get Single admin - update admin
     useEffect(() => {
         if (!params.uid) return
 

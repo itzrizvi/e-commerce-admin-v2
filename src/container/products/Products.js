@@ -106,11 +106,11 @@ const Products = () => {
             sorter: (a, b) => a.prod_sku.toUpperCase() > b.prod_sku.toUpperCase() ? 1 : -1,
         },
         {
-            title: 'Model',
-            dataIndex: 'prod_model',
-            key: 'prod_model',
+            title: 'Part NO',
+            dataIndex: 'prod_partnum',
+            key: 'prod_partnum',
             ellipsis: true,
-            sorter: (a, b) => a.prod_model.toUpperCase() > b.prod_model.toUpperCase() ? 1 : -1,
+            sorter: (a, b) => a.prod_partnum.toUpperCase() > b.prod_partnum.toUpperCase() ? 1 : -1,
         },
         {
             title: 'Regular Price',
@@ -161,11 +161,11 @@ const Products = () => {
             align: 'right',
             render: (text, record) => (
                 <>
-                    {/* <Link to={`/admin/attributes/add?id=${record.attribute_uuid}&name=${record.attribute_name}&g_id=${record.attribute_group.attr_group_uuid}`}> */}
-                    {/* <Button size="default" type="white" title='Edit'> */}
-                    <FontAwesome name="edit" style={{ margin: ".5em 1em" }} />
-                    {/* </Button> */}
-                    {/* </Link> */}
+                    <Link to={`/admin/products/add?id=${record.prod_uuid}&name=${record.prod_name}`}>
+                        {/* <Button size="default" type="white" title='Edit'> */}
+                        <FontAwesome name="edit" style={{ margin: ".5em 1em" }} />
+                        {/* </Button> */}
+                    </Link>
                 </>
             ),
             key: 'last_name',
@@ -176,7 +176,7 @@ const Products = () => {
     const onChangeSearch = e => {
         const value = e.target.value
         setSearchText(value)
-        setFilteredProducts(products.data.filter(attr => (attr?.attribute_name + attr?.attribute_group?.attr_group_name).toLowerCase().includes(value.toLowerCase())))
+        setFilteredProducts(products.data.filter(prod => (prod?.prod_name + prod?.prod_sku).toLowerCase().includes(value.toLowerCase())))
     }
 
 
@@ -223,11 +223,7 @@ const Products = () => {
                                             }}
                                         />
                                     </span>
-
-
-
                                 </>
-
                             }
 
                         </Cards>

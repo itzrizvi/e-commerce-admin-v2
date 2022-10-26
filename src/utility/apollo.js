@@ -301,7 +301,7 @@ export const productQuery = {
         prod_name
         prod_slug
         prod_sku
-        prod_model
+        prod_partnum
         prod_status
         prod_thumbnail
         prod_sale_price
@@ -328,7 +328,167 @@ export const productQuery = {
     }
   }
   `,
-
+  GET_SINGLE_PRODUCT: gql`
+  query getSingleProduct($query: GetSingleProductInput) {
+    getSingleProduct(query: $query) {
+      message
+      tenant_id
+      status
+      data {
+        prod_uuid
+        prod_name
+        prod_slug
+        prod_long_desc
+        prod_short_desc
+        prod_meta_title
+        prod_meta_desc
+        prod_meta_keywords
+        prod_tags
+        prod_regular_price
+        prod_sale_price
+        prod_partnum
+        prod_sku
+        prod_weight
+        prod_weight_class
+        prod_outofstock_status
+        prod_thumbnail
+        tenant_id
+        createdAt
+        updatedAt
+        brand {
+          brand_uuid
+          brand_name
+          brand_slug
+          brand_description
+          brand_status
+          brand_sort_order
+          image
+        }
+        category {
+          cat_id
+          cat_name
+          cat_slug
+          cat_description
+          cat_meta_tag_title
+          cat_meta_tag_description
+          cat_meta_tag_keywords
+          image
+          cat_sort_order
+          cat_status
+          is_featured
+          tenant_id
+          cat_parent_id
+        }
+        discount_type {
+          discount_type_uuid
+          customer_group {
+            customer_group_uuid
+            customer_group_name
+            customer_group_slug
+            customergroup_description
+            customergroup_sortorder
+            customergroup_status
+          }
+          discount_quantity
+          discount_priority
+          discount_price
+          discount_startdate
+          discount_enddate
+        }
+        dimensions {
+          prod_dimension_uuid
+          length
+          width
+          height
+          dimension_class
+        }
+        gallery {
+          prod_gallery_uuid
+          prod_uuid
+          prod_image
+        }
+        part_of_products {
+          partof_product_uuid
+          prod_quantity
+          part_product {
+            prod_uuid
+            prod_name
+            prod_slug
+            prod_long_desc
+            prod_short_desc
+            prod_meta_title
+            prod_meta_desc
+            prod_meta_keywords
+            prod_tags
+            prod_regular_price
+            prod_sale_price
+            prod_model
+            prod_sku
+            prod_weight
+            prod_weight_class
+            prod_outofstock_status
+            prod_thumbnail
+          }
+        }
+        prod_attributes {
+          prod_attr_uuid
+          attribute_type
+          attribute_value
+          attribute_data {
+            attribute_uuid
+            attribute_name
+            attribute_slug
+            attribute_status
+            attribute_group {
+              attr_group_uuid
+              attr_group_name
+              attr_group_slug
+              attrgroup_sortorder
+              attrgroup_status
+            }
+          }
+        },
+        related_products {
+          related_prod_uuid
+          related_prod {
+            prod_uuid
+            prod_name
+            prod_slug
+            prod_long_desc
+            prod_short_desc
+            prod_meta_title
+            prod_meta_desc
+            prod_meta_keywords
+            prod_tags
+            prod_regular_price
+            prod_sale_price
+            prod_model
+            prod_sku
+            prod_weight
+            prod_weight_class
+            prod_outofstock_status
+            prod_thumbnail
+          }
+        }
+        created_by {
+          uid
+          first_name
+          last_name
+          email
+          image
+          roles {
+            role_uuid
+            role_no
+            role
+            role_slug
+            role_status
+            role_description
+          }
+        }
+      }
+    }
+  }
+  `,
 }
 
 export const productMutation = {

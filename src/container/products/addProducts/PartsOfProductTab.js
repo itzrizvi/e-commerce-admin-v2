@@ -66,10 +66,12 @@ const PartsOfProductTab = ({ products, setProducts, selectedPartsOfProducts, set
                     mode="multiple"
                     value={selectedPartsOfProducts}
                     placeholder={products.isLoading ? "Loading.." : "Select Product.."}
+                    optionFilterProp="label"
+
                     options={products?.data?.map(item => (
                         {
                             label: item.prod_name,
-                            value: item.prod_name,
+                            value: item.prod_uuid,
                             uid: item.prod_uuid,
                             key: item.prod_uuid,
                             name: item.prod_name,
