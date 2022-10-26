@@ -143,7 +143,6 @@ const AddProduct = () => {
     // ================= 10.for Image tab END =================
 
     const handleSubmit = values => {
-        setIsLoading(true)
         const {
             dimension_class,
             prod_regular_price,
@@ -166,15 +165,13 @@ const AddProduct = () => {
         const prod_thumbnail = featuresImage.file
         const prod_gallery = gallaryImages.map(item => item.file)
 
-        // All Validation Start
-        // if (!prod_thumbnail) { return toast.warning("Please select a Feature image") }
-        // All Validation End
+
 
         const data = {
             ...rest,
             prod_long_desc,
             related_product,
-            dimensions: { ...dimensions, dimension_class },
+            // dimensions: { ...dimensions, dimension_class },
             product_attributes,
             prod_status: true, // TEMPORARY
             partof_product,
@@ -183,10 +180,23 @@ const AddProduct = () => {
             prod_regular_price: parseFloat(prod_regular_price),
             prod_sale_price: parseFloat(prod_sale_price),
         }
-
         console.log("values:\n", values);
         console.log("data:\n", data);
 
+        // All Validation Start
+        if (!data.prod_long_desc) return toast.warning("Please enter a long description")
+        if (!data.prod_short_desc) return toast.warning("Please enter a long description")
+        if (!data.prod_sku) return toast.warning("Please enter Product SKU")
+        if (!data.brand_uuid) return toast.warning("Please select a Manufacture")
+        if (!data.prod_category) return toast.warning("Please select a Category")
+        if (!data.prod_outofstock_status) return toast.warning("Please select an Availability Status")
+        if (!data.prod_regular_price) return toast.warning("Please enter Regular Price")
+        if (!prod_thumbnail) { return toast.warning("Please select a Feature image") }
+        // All Validation End
+
+
+        // return;
+        setIsLoading(true)
         apolloUploadClient.mutate({
             mutation: productMutation.ADD_PRODUCT,
             variables: { data },
@@ -449,9 +459,9 @@ const AddProduct = () => {
 
                                         </Form.Item> */}
                                         <Form.Item
-                                            rules={[{ required: true, message: "Please enter Out Of Stock Status" }]}
+                                            rules={[{ required: true, message: "Please enter Availability Status" }]}
                                             name="prod_outofstock_status"
-                                            label="Out Of Stock Status"
+                                            label="Availability"
                                         >
                                             <Select placeholder="Please select a Status">
                                                 <Select.Option key={1} value="2-3 Days" >2-3 Days</Select.Option>

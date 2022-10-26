@@ -74,19 +74,14 @@
 			"path": "src/container/products/AddProduct.js",
 			"bookmarks": [
 				{
-					"line": 155,
+					"line": 154,
 					"column": 17,
 					"label": "--submit"
 				},
 				{
-					"line": 183,
+					"line": 180,
 					"column": 62,
 					"label": "-+"
-				},
-				{
-					"line": 478,
-					"column": 42,
-					"label": "---"
 				}
 			]
 		}
