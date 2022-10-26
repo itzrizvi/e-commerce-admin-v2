@@ -71,6 +71,7 @@ const PartsOfProductTab = ({ products, setProducts, selectedPartsOfProducts, set
                             label: item.prod_name,
                             value: item.prod_name,
                             uid: item.prod_uuid,
+                            key: item.prod_uuid,
                             name: item.prod_name,
                             sku: item.prod_sku,
                         }

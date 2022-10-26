@@ -18,9 +18,10 @@ import Cookies from 'js-cookie';
 import { apolloUploadClient, productMutation, productQuery } from '../../utility/apollo';
 import PartsOfProductTab from './addProducts/PartsOfProductTab';
 import { viewPermission } from '../../utility/utility';
-import { Link } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import RelatedProducts from './addProducts/RelatedProducts';
+import { getDefaultCompilerOptions } from 'typescript';
 const { Option } = Select;
 
 
@@ -29,6 +30,8 @@ const AddProduct = () => {
     viewPermission('product');
     const [form] = Form.useForm();
     const [isLoading, setIsLoading] = useState(false)
+    const history = useHistory();
+
     // ================= 1.for General tab START =================
     const [longDescription, setLongDescription] = useState(RichTextEditor.createEmptyValue());
     const [prod_long_desc, setProd_long_desc] = useState("")
@@ -36,6 +39,7 @@ const AddProduct = () => {
         setProd_long_desc(value.toString('html'))
         setLongDescription(value);
     }
+    const [prod_status, setProd_status] = useState(true)
     // ================= 1.for General tab END =================
 
 
@@ -149,13 +153,33 @@ const AddProduct = () => {
             dimension_class,
             prod_regular_price,
             prod_sale_price,
+            prod_weight,
+            prod_weight_class,
             ...rest
         } = values
+
+        let isAttribute = true;
+        let isAttrCorrect = true;
         const product_attributes = attributesTableData.map(item => {
             // TODO: show warning for missing value
             const { id, ...attributes } = item
+            if (attributes.attribute_type === "none") {
+                attributes.attribute_value = "none"
+            }
+            // for empty attribute
+            if (!attributes.attr_group_uuid && !attributes.attribute_type && !attributes.attribute_value) {
+                isAttribute = false
+            }
+            // for incorrect inputs
+            if (!attributes.attr_group_uuid || !attributes.attribute_type || !attributes.attribute_value) {
+                isAttrCorrect = false
+            }
             return ({ ...attributes })
         })
+        if (!isAttrCorrect && isAttribute) return toast.warning("Please fill all Attribute field correctly")
+
+
+
         const related_product = relatedProducts.map(item => item.uid)
         const partof_product = selectedPartsOfProducts.map(item => {
             const data = {
@@ -173,15 +197,41 @@ const AddProduct = () => {
             ...rest,
             prod_long_desc,
             related_product,
-            // dimensions: { ...dimensions, dimension_class },
-            product_attributes,
-            prod_status: true, // TEMPORARY
+            prod_status,
             partof_product,
             prod_thumbnail,
             prod_gallery,
-            prod_regular_price: parseFloat(prod_regular_price),
-            prod_sale_price: parseFloat(prod_sale_price),
         }
+
+        if (prod_regular_price) {
+            data.prod_regular_price = parseFloat(prod_regular_price)
+        }
+        if (prod_sale_price) {
+            data.prod_sale_price = parseFloat(prod_sale_price)
+        }
+        if (isAttribute) {
+            data.product_attributes = product_attributes
+        }
+        if (prod_weight) {
+            data.prod_weight = prod_weight
+            data.prod_weight_class = prod_weight_class
+        }
+        const { height, length, width } = dimensions
+        if (height || length || width) {
+            let dimensions = { dimension_class }
+            if (height) {
+                dimensions.height = height
+            }
+            if (length) {
+                dimensions.length = length
+            }
+            if (width) {
+                dimensions.width = width
+            }
+            data.dimensions = dimensions
+        }
+
+
         console.log("values:\n", values);
         console.log("data:\n", data);
 
@@ -209,9 +259,14 @@ const AddProduct = () => {
                 }
             }
         }).then(res => {
-            console.log("product res:\n", res);
+            const data = res?.data?.addProduct
+            if (!data.status) return toast.error(data.message);
+            history.push("/admin/products/list");
+            window.location.reload()
+            toast.success(data.message);
         }).catch(err => {
             console.log("add Prod err:\n", err)
+            return toast.error('Something Went wrong !!')
         }).finally(() => {
             setIsLoading(false)
         })
@@ -222,14 +277,6 @@ const AddProduct = () => {
         <>
             <PageHeader
                 title="Add Product"
-            // buttons={[
-            //     <div key="1" className="page-header-actions">
-            //         <Button size="default" type="primary">
-            //             <FeatherIcon icon="save" />
-            //             Add Product
-            //         </Button>
-            //     </div>
-            // ]}
             />
             <Main>
                 <Row gutter={25}>
@@ -303,6 +350,13 @@ const AddProduct = () => {
                                         >
                                             <Input placeholder='Enter comma separated Tags' />
                                         </Form.Item>
+                                        <Form.Item
+                                            label="Status"
+                                        >
+                                            <Switch checked={prod_status} onChange={checked => prod_status(checked)} />
+                                        </Form.Item>
+
+
                                     </Tabs.TabPane>
 
                                     <Tabs.TabPane tab="Data" key="Data">
@@ -353,6 +407,7 @@ const AddProduct = () => {
                                                 options={categories.map(item => ({
                                                     label: item.cat_name,
                                                     value: item.cat_id,
+                                                    key: item.cat_id,
                                                 }))}
                                             // mode="multiple"
                                             />
@@ -372,6 +427,7 @@ const AddProduct = () => {
                                                         label: item.prod_name,
                                                         value: item.prod_name,
                                                         uid: item.prod_uuid,
+                                                        key: item.prod_uuid,
                                                     }
                                                 ))}
 
@@ -464,6 +520,7 @@ const AddProduct = () => {
                                             rules={[{ required: true, message: "Please enter Availability Status" }]}
                                             name="prod_outofstock_status"
                                             label="Availability"
+                                            initialValue={"In Stock"}
                                         >
                                             <Select placeholder="Please select a Status">
                                                 <Select.Option key={1} value="2-3 Days" >2-3 Days</Select.Option>
