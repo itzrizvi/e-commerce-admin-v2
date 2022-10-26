@@ -11,12 +11,14 @@ import Heading from '../../components/heading/heading';
 import queryString from 'query-string'
 import { toast } from 'react-toastify';
 import Cookies from 'js-cookie';
+import { viewPermission } from '../../utility/utility';
 
 const { TextArea } = Input;
 const { Option } = Select;
 const { Dragger } = Upload;
 
 const AddCategory = () => {
+    viewPermission('category');
     const [form] = Form.useForm();
     const [categoryStatus, setCategoryStatus] = useState(true);
     const [isFeatured, setIsFeatured] = useState(false)

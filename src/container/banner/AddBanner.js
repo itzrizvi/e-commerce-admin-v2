@@ -13,8 +13,10 @@ import apolloClient, { apolloUploadClient } from '../../apollo';
 import { errorImageSrc } from '../../utility/images';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
 import FeatherIcon from 'feather-icons-react';
+import { viewPermission } from '../../utility/utility';
 
 const AddBanner = () => {
+    viewPermission('banner');
     const history = useHistory();
     const token = useSelector(state => state.auth.token);
     const [isLoading, setIsLoading] = useState(false)

@@ -10,9 +10,11 @@ import queryString from 'query-string'
 import apolloClient, { authMutation, authQuery } from '../../utility/apollo';
 import Cookies from 'js-cookie';
 import { toast } from 'react-toastify';
+import { viewPermission } from '../../utility/utility';
 const { TextArea } = Input;
 
 const UpdateRole = () => {
+    viewPermission('role');
     const history = useHistory();
     const { search } = useLocation();
     const params = queryString.parse(search)

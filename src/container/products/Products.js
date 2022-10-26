@@ -9,8 +9,10 @@ import { ShareButtonPageHeader } from '../../components/buttons/share-button/sha
 import { ExportButtonPageHeader } from '../../components/buttons/export-button/export-button';
 import { CalendarButtonPageHeader } from '../../components/buttons/calendar-button/calendar-button';
 import { Link } from 'react-router-dom';
+import { viewPermission } from '../../utility/utility';
 
 const Products = () => {
+    viewPermission('product');
     return (
         <>
             <PageHeader

@@ -17,10 +17,12 @@ import { toast } from 'react-toastify';
 import config from '../../config/config';
 import { logOut } from '../../redux/authentication/actionCreator';
 import { useDispatch } from 'react-redux';
+import { viewPermission } from '../../utility/utility';
 
 
 
 const ListPermission = () => {
+    viewPermission('permission');
     const dispatch = useDispatch();
     const [permissions, setPermissions] = useState({ data: [], loading: true, error: '' })
     const [searchText, setSearchText] = useState('');
@@ -80,6 +82,12 @@ const ListPermission = () => {
             dataIndex: 'roles_permission_name',
             key: 'roles_permission_name',
             sorter: (a, b) => a.roles_permission_name.toUpperCase() > b.roles_permission_name.toUpperCase() ? 1 : -1,
+        },
+        {
+            title: 'Permission Alias',
+            dataIndex: 'roles_permission_slug',
+            key: 'roles_permission_slug',
+            sorter: (a, b) => a.roles_permission_slug.toUpperCase() > b.roles_permission_slug.toUpperCase() ? 1 : -1,
         },
         {
             title: 'Status',

@@ -13,10 +13,12 @@ import { bannerQuery } from '../../apollo/banner';
 import { useSelector } from 'react-redux';
 import Moment from 'react-moment';
 import { toast } from 'react-toastify';
+import { viewPermission } from '../../utility/utility';
 
 
 
 const ListBanner = () => {
+    viewPermission('banner');
     const [banner, setBanner] = useState({ data: [], loading: true, error: '' })
     const [filteredBanner, setFilteredBanner] = useState([]);
     const [isFilter, setIsFilter] = useState(false)

@@ -12,9 +12,11 @@ import config from '../../config/config';
 import apolloClient, { customerMutation, customerQuery } from '../../utility/apollo';
 import Cookies from 'js-cookie';
 import { toast } from 'react-toastify';
+import { viewPermission } from '../../utility/utility';
 
 
 const ListOrder = () => {
+    viewPermission('order');
     const dummyData = [...Array(10).keys()].map(i => ({
         o_u: 'asdasd5asd5asd676d67asd6as',
         o_a: 2000,

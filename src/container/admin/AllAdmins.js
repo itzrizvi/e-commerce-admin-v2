@@ -16,6 +16,7 @@ import config from '../../config/config';
 import { logOut } from '../../redux/authentication/actionCreator';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
 import { errorImageSrc, renderImage } from '../../utility/images';
+import { viewPermission } from '../../utility/utility';
 
 
 const handleStatusChange = (record, checked) => {
@@ -47,6 +48,7 @@ const handleStatusChange = (record, checked) => {
 
 
 const AllAdmin = () => {
+    viewPermission('user');
     const token = useSelector(state => state.auth.token);
     const [searchText, setSearchText] = useState('');
     const [filteredUser, setFilteredUser] = useState([]);

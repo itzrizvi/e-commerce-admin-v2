@@ -17,6 +17,7 @@ import { brandQuery } from '../../apollo/brand';
 import Cookies from 'js-cookie';
 import { apolloUploadClient, productMutation, productQuery } from '../../utility/apollo';
 import PartsOfProductTab from './addProducts/PartsOfProductTab';
+import { viewPermission } from '../../utility/utility';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import RelatedProducts from './addProducts/RelatedProducts';
@@ -25,6 +26,7 @@ const { Option } = Select;
 
 
 const AddProduct = () => {
+    viewPermission('product');
     const [form] = Form.useForm();
     const [isLoading, setIsLoading] = useState(false)
     // ================= 1.for General tab START =================

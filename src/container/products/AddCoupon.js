@@ -11,10 +11,12 @@ import apolloClient, { couponMutation, couponQuery, customerMutation, customerQu
 import Cookies from 'js-cookie';
 import { toast } from 'react-toastify';
 import moment from 'moment';
+import { viewPermission } from '../../utility/utility';
 const { TextArea } = Input;
 
 
 const AddCoupon = () => {
+    viewPermission('coupon');
     const { search } = useLocation();
     const params = queryString.parse(search)
     const history = useHistory();

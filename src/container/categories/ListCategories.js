@@ -14,6 +14,7 @@ import { LazyLoadImage } from 'react-lazy-load-image-component';
 import { errorImageSrc, renderImage } from '../../utility/images';
 import Cookies from 'js-cookie';
 import { toast } from 'react-toastify';
+import { viewPermission } from '../../utility/utility';
 
 const categories1 = [
     {
@@ -73,6 +74,7 @@ const categories1 = [
 ]
 
 const ListCategories = () => {
+    viewPermission('category');
     const [categories, setCategories] = useState([])
     const [categoriesData, setCategoriesData] = useState({ data: [], loading: true })
     const [filteredCategoryData, setFilteredCategoryData] = useState([])

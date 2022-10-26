@@ -8,9 +8,11 @@ import FeatherIcon from 'feather-icons-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { roleDataAdd, rolesDataRead } from '../../redux/roles/actionCreator';
 import { Link } from 'react-router-dom';
+import { viewPermission } from '../../utility/utility';
 const RoleListTable = lazy(() => import('../../container/pages/overview/RoleListTable'))
 
 export default function ListRoles() {
+    viewPermission('role');
 
     return (
         <>

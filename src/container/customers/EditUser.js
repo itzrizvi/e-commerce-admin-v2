@@ -11,11 +11,13 @@ import { toast } from 'react-toastify';
 import queryString from 'query-string'
 import Cookies from 'js-cookie';
 import Moment from 'react-moment';
+import { viewPermission } from '../../utility/utility';
 const { Paragraph, Text } = Typography;
 
 const { Option } = Select;
 
 const EditUser = () => {
+    viewPermission('customer');
     const history = useHistory();
     const { search } = useLocation();
     const params = queryString.parse(search)

@@ -8,6 +8,7 @@ const initState = {
   token: Cookies.get('psp_t'),
   roleId: Cookies.get('r_i'),
   user: JSON.parse(Cookies.get('user') || null),
+  permissions: JSON.parse(Cookies.get('permissions') || "[]"),
   loading: false,
   error: null,
 };
@@ -34,6 +35,7 @@ const AuthReducer = (state = initState, action) => {
         user: data.user,
         token: data.token,
         roleId: data.roleId,
+        permissions: data.permissions
       };
     case LOGIN_ERR:
       return {
@@ -54,6 +56,7 @@ const AuthReducer = (state = initState, action) => {
         user: undefined,
         token: undefined,
         roleId: undefined,
+        permissions: [],
         error: null,
       };
     case LOGOUT_ERR:

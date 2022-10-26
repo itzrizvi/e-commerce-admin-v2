@@ -13,8 +13,10 @@ import apolloClient from '../../apollo';
 import { apolloUploadClient } from '../../apollo';
 import { errorImageSrc } from '../../utility/images';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
+import { viewPermission } from '../../utility/utility';
 
 const AddBrand = () => {
+    viewPermission('manufacture');
     const { TextArea } = Input;
     const history = useHistory();
     const token = useSelector(state => state.auth.token);
