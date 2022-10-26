@@ -12,6 +12,8 @@ import apolloClient, { productQuery } from '../../utility/apollo';
 import FontAwesome from 'react-fontawesome';
 import Cookies from 'js-cookie';
 import config from '../../config/config';
+import { errorImageSrc, renderImage } from '../../utility/images';
+import { LazyLoadImage } from 'react-lazy-load-image-component';
 
 const Products = () => {
     viewPermission('product');
@@ -82,6 +84,14 @@ const Products = () => {
             sorter: (a, b) => a.prod_uuid.toUpperCase() > b.prod_uuid.toUpperCase() ? 1 : -1,
         },
         {
+            title: 'Logo',
+            dataIndex: 'prod_uuid',
+            key: 'prod_uuid',
+            width: 70,
+            render: (text, record) => (<LazyLoadImage effect="blur" width="40" src={renderImage(record.prod_uuid, record.prod_thumbnail, 'product/image/thumbnail', '128x128')} onError={errorImageSrc} alt={record.prod_uuid} />)
+        },
+
+        {
             title: 'Product Name',
             dataIndex: 'prod_name',
             key: 'prod_name',
@@ -107,6 +117,7 @@ const Products = () => {
             dataIndex: 'prod_regular_price',
             key: 'prod_regular_price',
             ellipsis: true,
+            align: "center",
             sorter: (a, b) => a.prod_regular_price > b.prod_regular_price ? 1 : -1,
         },
         {
@@ -114,6 +125,7 @@ const Products = () => {
             dataIndex: 'prod_sale_price',
             key: 'prod_sale_price',
             ellipsis: true,
+            align: "center",
             sorter: (a, b) => a.prod_sale_price > b.prod_sale_price ? 1 : -1,
         },
 

@@ -361,7 +361,6 @@ const AddProduct = () => {
 
                                     <Tabs.TabPane tab="Data" key="Data">
                                         <Form.Item
-                                            // rules={[{ required: true, message: "Please enter Model" }]}
                                             name="prod_model"
                                             label="Model"
                                         >
@@ -374,7 +373,6 @@ const AddProduct = () => {
                                         >
                                             <Input placeholder='Enter Product SKU' />
                                         </Form.Item>
-                                        {/* <Heading as="h6"> Specification:</Heading> */}
                                     </Tabs.TabPane>
 
                                     <Tabs.TabPane tab="Links" key="Links">
@@ -420,7 +418,6 @@ const AddProduct = () => {
                                         >
                                             <Select
                                                 placeholder={products.isLoading ? "Loading..." : "select Related Products"}
-                                                // placeholder={"select Related Products"}
                                                 mode="multiple"
                                                 options={products?.data?.map(item => (
                                                     {
@@ -443,8 +440,6 @@ const AddProduct = () => {
 
                                     <Tabs.TabPane tab="Specifications" key="Specifications">
                                         <Form.Item
-                                            // rules={[{ required: true, message: "Please enter Model" }]}
-                                            // name="d1"
                                             label={<p>Dimensions <br /> (L x W x H)</p>}
                                         >
                                             <Input.Group compact
@@ -503,19 +498,6 @@ const AddProduct = () => {
                                     </Tabs.TabPane>
 
                                     <Tabs.TabPane tab="Stock" key="Stock">
-                                        {/* <Form.Item
-                                            // rules={[{ required: true, message: "Please enter Minimum Quantity" }]}
-                                            name="mq"
-                                            label="Minimum Quantity"
-                                        >
-                                            <Input placeholder='Enter Minimum Quantity' />
-                                        </Form.Item>
-                                        <Form.Item
-                                            label="Subtract Stock"
-                                        >
-                                            <Switch defaultChecked={true} />
-
-                                        </Form.Item> */}
                                         <Form.Item
                                             rules={[{ required: true, message: "Please enter Availability Status" }]}
                                             name="prod_outofstock_status"
@@ -529,13 +511,6 @@ const AddProduct = () => {
                                                 <Select.Option key={4} value="Pre-Orde" >Pre-Order</Select.Option>
                                             </Select>
                                         </Form.Item>
-                                        {/* <Form.Item
-                                            rules={[{ required: true, message: "Please enter Date Available" }]}
-                                            // name="q"
-                                            label="Date Available"
-                                        >
-                                            <DatePicker size='middle' style={{ height: '2.6em', }} />
-                                        </Form.Item> */}
                                     </Tabs.TabPane>
 
                                     <Tabs.TabPane tab="Attribute" key="Attribute">
@@ -557,17 +532,6 @@ const AddProduct = () => {
                                         >
                                             <Input prefix="US$  " type='number' placeholder='Enter Sales Price' />
                                         </Form.Item>
-                                        {/* <Form.Item
-                                            // rules={[{ required: true, message: "Please enter " }]}
-                                            name="cPrice"
-                                            label="Cost Per Item"
-                                        >
-                                            <Input prefix="US$  " type='number' placeholder='Enter Cost Per Item' />
-                                            <p style={{ color: "gray" }}>Customers won't see this</p>
-
-                                            <Checkbox >Charge Tax on this product</Checkbox>
-
-                                        </Form.Item> */}
 
                                     </Tabs.TabPane>
 
