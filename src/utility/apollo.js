@@ -303,6 +303,9 @@ export const productQuery = {
         prod_sku
         prod_partnum
         prod_status
+        taxable
+        is_featured
+        prod_condition
         prod_thumbnail
         prod_sale_price
         prod_regular_price
@@ -868,6 +871,30 @@ export const couponMutation = {
   `,
 }
 
+export const utilityQuery = {
+  GET_ALL_AVAILABILITY: gql`
+  query getAllProductAvailabilityStatus{
+    getAllProductAvailabilityStatus {
+      message
+      status
+      data {
+        name
+      }
+    }
+  }
+  `,
+  GET_ALL_CONDITIONS: gql`
+  query getAllProductCondition {
+    getAllProductCondition {
+      message
+      status
+      data {
+        name
+      }
+    }
+  }
+  `,
+}
 
 
 

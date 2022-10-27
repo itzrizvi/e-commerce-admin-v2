@@ -7,7 +7,7 @@ import Cookies from 'js-cookie';
 const { Option } = Select;
 
 // Component for Value column
-const Inputs = ({ index, setAttributesTableData }) => {
+const Inputs = ({ index, setAttributesTableData, attribute_type, attribute_value }) => {
     const [type, setType] = useState('')
     const [file, setFile] = useState([])
 
@@ -25,6 +25,7 @@ const Inputs = ({ index, setAttributesTableData }) => {
             <Select
                 style={{ width: '10em', marginRight: "1em" }}
                 placeholder="Select type"
+                defaultValue={attribute_type || null}
                 onChange={value => {
                     setType(value)
                     setAttributesTableData(arr => {
@@ -42,10 +43,18 @@ const Inputs = ({ index, setAttributesTableData }) => {
             </Select>
 
             {type === "text"
-                && < Input placeholder="Enter text" style={{ width: 'calc(100% - 12em)' }} size="middle" onBlur={handleOnBlur} />
+                && < Input
+                    placeholder="Enter text"
+                    style={{ width: 'calc(100% - 12em)' }}
+                    size="middle"
+                    onBlur={handleOnBlur}
+                    defaultValue={attribute_value}
+                />
             }
             {type === "link"
-                && < Input placeholder="Enter Link" style={{ width: 'calc(100% - 12em)' }} size="middle" onBlur={handleOnBlur} />
+                && < Input placeholder="Enter Link" style={{ width: 'calc(100% - 12em)' }} size="middle" onBlur={handleOnBlur}
+                    defaultValue={attribute_value}
+                />
             }
             {type === "file"
                 && <Upload
@@ -137,12 +146,13 @@ const AttributeTab = ({ attributesTableData, setAttributesTableData }) => {
     const column = [
         {
             title: 'Attribute Group',
-            dataIndex: 'group',
-            key: 'group',
+            dataIndex: 'attr_group_uuid',
+            key: 'attr_group_uuid',
             width: 200,
-            render: (text, record, index) => <Select
+            render: (val, record, index) => <Select
                 style={{ width: "100%" }}
                 placeholder={attributeGroups.isLoading ? 'Loading...' : "Select Group..."}
+                defaultValue={val || null}
                 options={attributeGroups.data.map(item => ({
                     label: item.attr_group_name,
                     value: item.attr_group_uuid,
@@ -153,12 +163,13 @@ const AttributeTab = ({ attributesTableData, setAttributesTableData }) => {
         },
         {
             title: 'Attribute',
-            dataIndex: 'attribute',
-            key: 'attribute',
+            dataIndex: 'attribute_uuid',
+            key: 'attribute_uuid',
             width: 200,
-            render: (text, record, index) => <Select
+            render: (val, record, index) => <Select
                 style={{ width: "100%" }}
                 disabled={!selectedGroup.value}
+                defaultValue={val || null}
                 placeholder={attributeGroups.isLoading ? 'Loading...'
                     : "Select Group..."
                 }
@@ -177,7 +188,7 @@ const AttributeTab = ({ attributesTableData, setAttributesTableData }) => {
             title: 'Values',
             dataIndex: 'value',
             key: 'value',
-            render: (text, record, index) => <Inputs {...{ index, setAttributesTableData }} />
+            render: (text, record, index) => <Inputs {...{ index, setAttributesTableData, attribute_type: record.attribute_type, attribute_value: record.attribute_value }} />
         },
         {
             title: 'Action',

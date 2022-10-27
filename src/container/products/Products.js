@@ -8,12 +8,13 @@ import { Button } from '../../components/buttons/buttons';
 import { SearchOutlined } from '@ant-design/icons';
 import { Link } from 'react-router-dom';
 import { viewPermission } from '../../utility/utility';
-import apolloClient, { productQuery } from '../../utility/apollo';
+import apolloClient, { productQuery, utilityQuery } from '../../utility/apollo';
 import FontAwesome from 'react-fontawesome';
 import Cookies from 'js-cookie';
 import config from '../../config/config';
 import { errorImageSrc, renderImage } from '../../utility/images';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
+import { gql } from '@apollo/client';
 const { RangePicker } = DatePicker;
 
 const Products = () => {
@@ -22,10 +23,25 @@ const Products = () => {
     const [filteredProducts, setFilteredProducts] = useState([])
     const [searchText, setSearchText] = useState('')
     const [isFilter, setIsFilter] = useState(true)
+    const [categories, setCategories] = useState({ data: [], isLoading: true })
+    const [attributes, setAttributes] = useState({ data: [], isLoading: true })
+    const [availability, setAvailability] = useState({ data: [], isLoading: true })
+    const [conditions, setConditions] = useState({ data: [], isLoading: true })
+    const [filterDate, setFilterDate] = useState({
+        availability: [],
+        categories: [],
+        condition: [],
+        attributes: [],
+        startDate: '',
+        endDate: '',
+        minPrice: '',
+        maxPrice: ''
+    })
 
 
     useEffect(() => {
         // return
+        // Load Product List 
         apolloClient.query({
             query: productQuery.GET_PRODUCT_LIST,
             context: {
@@ -45,6 +61,109 @@ const Products = () => {
             setProducts(s => ({ ...s, error: 'Something went Wrong.!! ' }))
         }).finally(() => {
             setProducts(s => ({ ...s, isLoading: false }))
+        })
+
+        // Load filter data
+        // 1.load category
+        apolloClient.query({
+            query: productQuery.GET_ALL_CATEGORIES,
+            context: {
+                headers: {
+                    TENANTID: process.env.REACT_APP_TENANTID,
+                }
+            }
+        }).then(res => {
+            const data = res?.data?.getAllCategories
+            if (!data.status) return;
+            // setCategories(data.categories)
+
+
+            if (!data.categories.length) return
+            let arrData = []
+
+            data.categories.forEach(item => {
+
+                const parent = item.cat_name
+
+                arrData.push({ cat_name: parent, cat_id: item.cat_id })
+                if (item.subcategories) {
+                    item.subcategories.forEach(subCat => {
+                        const sub = subCat.cat_name
+                        arrData.push({ cat_name: `${parent} > ${sub}`, cat_id: subCat.cat_id })
+                        if (subCat.subsubcategories) {
+                            subCat.subsubcategories.forEach(subSubCat => {
+                                const subSub = subSubCat.cat_name
+                                arrData.push({ cat_name: `${parent} > ${sub} > ${subSub}`, cat_id: subSubCat.cat_id })
+                            })
+                        }
+                    })
+
+                }
+            })
+            // console.log(arrData);
+            setCategories({ data: arrData, isLoading: false })
+
+        }).catch(err => {
+
+        })
+
+
+
+        // 2.load Arrributes
+        apolloClient.query({
+            query: gql`
+            query getAllAttributes {
+                getAllAttributes {
+                  message
+                  status
+                  tenant_id
+                  data {
+                    attribute_uuid
+                    attribute_name
+                  }
+                }
+              }
+            `,
+            context: {
+                headers: {
+                    TENANTID: process.env.REACT_APP_TENANTID,
+                    Authorization: Cookies.get('psp_t')
+                }
+            }
+        }).then(res => {
+            const data = res?.data?.getAllAttributes
+            if (!data.status) return;
+            setAttributes({ data: data.data, isLoading: false })
+        })
+
+        // 3.load Availability
+        apolloClient.query({
+            query: utilityQuery.GET_ALL_AVAILABILITY,
+            context: {
+                headers: {
+                    TENANTID: process.env.REACT_APP_TENANTID,
+                    Authorization: Cookies.get('psp_t')
+                }
+            }
+        }).then(res => {
+            const data = res?.data?.getAllProductAvailabilityStatus
+            if (!data.status) return;
+            setAvailability({ data: data.data, isLoading: false })
+        })
+
+        // 4.load Conditions
+        apolloClient.query({
+            query: utilityQuery.GET_ALL_CONDITIONS,
+            context: {
+                headers: {
+                    TENANTID: process.env.REACT_APP_TENANTID,
+                    Authorization: Cookies.get('psp_t')
+                }
+            }
+        }).then(res => {
+            const data = res?.data?.getAllProductCondition
+            if (!data.status) return;
+            setConditions({ data: data.data, isLoading: false })
         })
 
     }, [])
@@ -174,6 +293,7 @@ const Products = () => {
         },
     ]
 
+    // All filter
     useEffect(() => {
         if (searchText) {
             setFilteredProducts(products.data.filter(prod => (prod?.prod_name + prod?.prod_sku).toLowerCase().includes(searchText.toLowerCase())))
@@ -235,24 +355,16 @@ const Products = () => {
                                                     placeholder="Select status"
                                                     size="middle"
                                                     mode="multiple"
-                                                    options={[
+
+                                                    onChange={val => {
+                                                        setFilterDate(s => ({ ...s, availability: val }))
+                                                    }}
+                                                    options={availability.data.map(item => (
                                                         {
-                                                            label: "2-3 Days",
-                                                            value: "2-3 Days"
-                                                        },
-                                                        {
-                                                            label: "In Stock",
-                                                            value: "In Stock"
-                                                        },
-                                                        {
-                                                            label: "Out Of Stock",
-                                                            value: "Out Of Stock"
-                                                        },
-                                                        {
-                                                            label: "Pre-Order",
-                                                            value: "Pre-Order"
-                                                        },
-                                                    ]}
+                                                            label: item.name,
+                                                            value: item.name
+                                                        }
+                                                    ))}
                                                 />
 
                                             </Col>
@@ -260,27 +372,19 @@ const Products = () => {
                                                 Category: <br />
                                                 <Select
                                                     style={{ width: "100%" }}
-                                                    placeholder="select category"
+                                                    placeholder={categories.isLoading ? "Loading.." : "select category"}
                                                     size="middle"
                                                     mode="multiple"
-                                                    options={[
+                                                    optionFilterProp='label'
+                                                    onChange={val => {
+                                                        setFilterDate(s => ({ ...s, categories: val }))
+                                                    }}
+                                                    options={categories.data.map(item => (
                                                         {
-                                                            label: "Test1",
-                                                            value: "test1"
-                                                        },
-                                                        {
-                                                            label: "Test2",
-                                                            value: "test2"
-                                                        },
-                                                        {
-                                                            label: "Test3",
-                                                            value: "test3"
-                                                        },
-                                                        {
-                                                            label: "Test4",
-                                                            value: "test4"
-                                                        },
-                                                    ]}
+                                                            label: item.cat_name,
+                                                            value: item.cat_id
+                                                        }
+                                                    ))}
                                                 />
                                             </Col>
 
@@ -289,6 +393,16 @@ const Products = () => {
                                                 <RangePicker
                                                     style={{ height: '40px', width: '100%' }}
                                                     size="small"
+                                                    onChange={val => {
+                                                        console.log(val);
+                                                        setFilterDate(s => (
+                                                            {
+                                                                ...s,
+                                                                startDate: val[0]._d,
+                                                                endDate: val[1]._d,
+                                                            }
+                                                        ))
+                                                    }}
                                                 />
                                             </Col>
                                         </Row>
@@ -300,24 +414,13 @@ const Products = () => {
                                                     placeholder="Select Condition"
                                                     size="middle"
                                                     mode="multiple"
-                                                    options={[
+                                                    onChange={value => setFilterDate(s => ({ ...s, condition: value }))}
+                                                    options={conditions.data.map(item => (
                                                         {
-                                                            label: "Test1",
-                                                            value: "test1"
-                                                        },
-                                                        {
-                                                            label: "Test2",
-                                                            value: "test2"
-                                                        },
-                                                        {
-                                                            label: "Test3",
-                                                            value: "test3"
-                                                        },
-                                                        {
-                                                            label: "Test4",
-                                                            value: "test4"
-                                                        },
-                                                    ]}
+                                                            label: item.name,
+                                                            value: item.name
+                                                        }
+                                                    ))}
                                                 />
                                             </Col>
                                             <Col span={8} >
@@ -325,27 +428,16 @@ const Products = () => {
 
                                                 <Select
                                                     style={{ width: "100%" }}
-                                                    placeholder="select Attribute"
+                                                    placeholder={attributes.isLoading ? "Loading.." : "select Attribute"}
                                                     size="middle"
                                                     mode="multiple"
-                                                    options={[
+                                                    onChange={value => setFilterDate(s => ({ ...s, attributes: value }))}
+                                                    options={attributes.data.map(item => (
                                                         {
-                                                            label: "Test1",
-                                                            value: "test1"
-                                                        },
-                                                        {
-                                                            label: "Test2",
-                                                            value: "test2"
-                                                        },
-                                                        {
-                                                            label: "Test3",
-                                                            value: "test3"
-                                                        },
-                                                        {
-                                                            label: "Test4",
-                                                            value: "test4"
-                                                        },
-                                                    ]}
+                                                            label: item.attribute_name,
+                                                            value: item.attribute_uuid
+                                                        }
+                                                    ))}
                                                 />
                                             </Col>
 
@@ -355,7 +447,11 @@ const Products = () => {
                                                     compact
                                                     size="default"
                                                 >
-                                                    <Input type='number' placeholder='Min' style={{ width: "50%" }} />
+                                                    <Input type='number' placeholder='Min' style={{ width: "50%" }}
+                                                        onChange={e => {
+                                                            console.log(filterDate);
+                                                        }}
+                                                    />
                                                     <Input type='number' placeholder='Max' style={{ width: "50%" }} />
 
                                                 </Input.Group>

@@ -34,11 +34,12 @@ const DiscountTab = ({ discount, setDiscount }) => {
     const column = [
         {
             title: 'Customer Group',
-            dataIndex: 'title',
-            key: 'title',
+            dataIndex: 'customer_group_uuid',
+            key: 'customer_group_uuid',
             render: (text, record, index) => <Select
                 style={{ width: "150px" }}
                 placeholder={customerGroups.isLoading ? "Loading.." : "customer group"}
+                defaultValue={text}
                 onSelect={value => {
                     setDiscount(state => {
                         let data = state[index];
@@ -57,10 +58,10 @@ const DiscountTab = ({ discount, setDiscount }) => {
         },
         {
             title: 'Quantity',
-            dataIndex: 'q',
-            key: 'q',
+            dataIndex: 'discount_quantity',
+            key: 'discount_quantity',
             width: 100,
-            render: (text, record, index) => <Input type="number" placeholder="Quantity" style={{ width: "100px" }}
+            render: (val, record, index) => <Input defaultValue={val} type="number" placeholder="Quantity" style={{ width: "100px" }}
                 onBlur={e => {
                     console.log(e.target.value)
                     setDiscount(state => {
@@ -75,10 +76,11 @@ const DiscountTab = ({ discount, setDiscount }) => {
         },
         {
             title: 'Priority',
-            dataIndex: 'title',
-            key: 'title',
+            dataIndex: 'discount_priority',
+            key: 'discount_priority',
             width: 100,
-            render: (text, record, index) => <Input type="number" placeholder="Priority" style={{ width: "100px" }}
+            render: (val, record, index) => <Input type="number" placeholder="Priority" style={{ width: "100px" }}
+                defaultValue={val}
                 onBlur={e => {
                     console.log(e.target.value)
                     setDiscount(state => {
@@ -93,10 +95,11 @@ const DiscountTab = ({ discount, setDiscount }) => {
         },
         {
             title: 'Price',
-            dataIndex: 'title',
-            key: 'title',
+            dataIndex: 'discount_price',
+            key: 'discount_price',
             width: 100,
-            render: (text, record, index) => <Input type="number" placeholder="Price" style={{ width: "100px" }}
+            render: (val, record, index) => <Input type="number" placeholder="Price" style={{ width: "100px" }}
+                defaultValue={val}
                 onBlur={e => {
                     console.log(e.target.value)
                     setDiscount(state => {

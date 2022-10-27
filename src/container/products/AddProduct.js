@@ -51,6 +51,51 @@ const AddProduct = () => {
             const data = res?.data?.getSingleProduct
             if (!data.status) return toast.error("Try reload..!")
             setSingleProduct({ data: data?.data, isLoading: false })
+            setDiscount(s => {
+                const n = data?.data?.discount_type?.map(item => (
+                    {
+                        id: new Date().getTime(),
+                        customer_group_uuid: item.discount_type_uuid,
+                        discount_quantity: item.discount_quantity,
+                        discount_priority: item.discount_priority,
+                        discount_price: item.discount_price,
+                        discount_startdate: item.discount_startdate,
+                        discount_enddate: item.discount_enddate
+                    }
+                ))
+                // console.log(n)
+                return n
+            })
+
+            setAttributesTableData(s => {
+                // console.log(data?.data?.prod_attributes);
+                const n = data?.data?.prod_attributes?.map(item => (
+                    {
+                        id: new Date().getTime(),
+                        attr_group_uuid: item.attribute_data?.attribute_group?.attr_group_uuid,
+                        attribute_uuid: item?.attribute_data?.attribute_uuid,
+                        attribute_type: item.attribute_type,
+                        attribute_value: item.attribute_value,
+                    }
+                ))
+                // console.log(n)
+                return n
+            })
+            setSelectedPartsOfProducts(s => {
+                console.log(data?.data?.part_of_products);
+                const n = data?.data?.part_of_products?.map(item => (
+                    {
+                        label: item.prod_name,
+                        value: item.prod_uuid,
+                        uid: item.prod_uuid,
+                        key: item.prod_uuid,
+                        name: item.prod_name,
+                        sku: item.prod_sku,
+                    }
+                ))
+                console.log(n)
+                return n
+            })
         }).catch(err => {
             console.log("error on loading porduct,\n", err)
         })
@@ -141,7 +186,7 @@ const AddProduct = () => {
     // ================= 6.for Attribute tab END =================
 
     // ================= 8.for Discount tab START =================
-    const disInitialValue = {
+    const disInitialValue = [{
         id: new Date().getTime(),
         customer_group_uuid: "",
         discount_quantity: "",
@@ -149,8 +194,8 @@ const AddProduct = () => {
         discount_price: "",
         discount_startdate: "",
         discount_enddate: ""
-    }
-    const [discount, setDiscount] = useState([disInitialValue])
+    }]
+    const [discount, setDiscount] = useState(disInitialValue)
     // ================= 8.for Discount tab END =================
 
 
@@ -322,6 +367,8 @@ const AddProduct = () => {
 
 
         // return;
+        if (params.id) return
+
         setIsLoading(true)
         apolloUploadClient.mutate({
             mutation: productMutation.ADD_PRODUCT,
@@ -373,8 +420,8 @@ const AddProduct = () => {
                                 >
                                     <Tabs>
 
-                                        <Tabs.TabPane tab="Discount" key="Discount">
-                                            <DiscountTab {...{ discount, setDiscount }} />
+                                        <Tabs.TabPane tab="Attribute" key="Attribute">
+                                            <AttributeTab {...{ attributesTableData, setAttributesTableData }} />
                                         </Tabs.TabPane>
 
                                         <Tabs.TabPane tab="General" key="general">
@@ -615,9 +662,7 @@ const AddProduct = () => {
                                             </Form.Item>
                                         </Tabs.TabPane>
 
-                                        <Tabs.TabPane tab="Attribute" key="Attribute">
-                                            <AttributeTab {...{ attributesTableData, setAttributesTableData }} />
-                                        </Tabs.TabPane>
+
 
                                         <Tabs.TabPane tab="Price" key="Price">
                                             <Form.Item
@@ -646,7 +691,9 @@ const AddProduct = () => {
 
                                         </Tabs.TabPane>
 
-
+                                        <Tabs.TabPane tab="Discount" key="Discount">
+                                            <DiscountTab {...{ discount, setDiscount }} />
+                                        </Tabs.TabPane>
 
                                         <Tabs.TabPane tab="Parts Of Product" key="PartsOf">
                                             <PartsOfProductTab {...{ products, setProducts, selectedPartsOfProducts, setSelectedPartsOfProducts, partOfProductQuantities, setPartOfProductQuantities }} />
