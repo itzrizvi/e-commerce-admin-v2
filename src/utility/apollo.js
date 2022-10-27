@@ -348,6 +348,8 @@ export const productQuery = {
         prod_sale_price
         prod_partnum
         prod_sku
+        prod_status
+        taxable
         prod_weight
         prod_weight_class
         prod_outofstock_status
@@ -422,8 +424,10 @@ export const productQuery = {
             prod_tags
             prod_regular_price
             prod_sale_price
-            prod_model
+            prod_partnum
             prod_sku
+            prod_status
+            taxable
             prod_weight
             prod_weight_class
             prod_outofstock_status
@@ -447,7 +451,7 @@ export const productQuery = {
               attrgroup_status
             }
           }
-        },
+        }
         related_products {
           related_prod_uuid
           related_prod {
@@ -462,8 +466,10 @@ export const productQuery = {
             prod_tags
             prod_regular_price
             prod_sale_price
-            prod_model
+            prod_partnum
             prod_sku
+            prod_status
+            taxable
             prod_weight
             prod_weight_class
             prod_outofstock_status

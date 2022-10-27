@@ -4,17 +4,8 @@ import FeatherIcon from 'feather-icons-react';
 import apolloClient, { customerQuery } from '../../../utility/apollo';
 import Cookies from 'js-cookie';
 
-const DiscountTab = () => {
-    const initialData = {
-        id: new Date().getTime(),
-        CustomerGroup: "",
-        Quantity: "",
-        Priority: "",
-        Price: "",
-        Date_Start: "",
-        Date_End: ""
-    }
-    const [discount, setDiscount] = useState([initialData])
+const DiscountTab = ({ discount, setDiscount }) => {
+
     const [customerGroups, setCustomerGroups] = useState({ data: [], isLoading: true })
 
     // LOAD CUSTOMER GROUPS
@@ -45,7 +36,20 @@ const DiscountTab = () => {
             title: 'Customer Group',
             dataIndex: 'title',
             key: 'title',
-            render: (text, record) => <Select style={{ width: "150px" }} placeholder={customerGroups.isLoading ? "Loading.." : "customer group"} >
+            render: (text, record, index) => <Select
+                style={{ width: "150px" }}
+                placeholder={customerGroups.isLoading ? "Loading.." : "customer group"}
+                onSelect={value => {
+                    setDiscount(state => {
+                        let data = state[index];
+                        const copy = [...state];
+                        copy[index] = { ...data, customer_group_uuid: value }
+                        console.log(copy)
+                        return copy;
+                    })
+
+                }}
+            >
                 {customerGroups?.data?.map(item => (
                     <Select.Option key={item.customer_group_uuid} value={item.customer_group_uuid} >{item.customer_group_name}</Select.Option>
                 ))}
@@ -56,33 +60,90 @@ const DiscountTab = () => {
             dataIndex: 'q',
             key: 'q',
             width: 100,
-            render: (text, record) => <Input type="number" placeholder="Quantity" style={{ width: "100px" }} />
+            render: (text, record, index) => <Input type="number" placeholder="Quantity" style={{ width: "100px" }}
+                onBlur={e => {
+                    console.log(e.target.value)
+                    setDiscount(state => {
+                        let data = state[index];
+                        const copy = [...state];
+                        copy[index] = { ...data, discount_quantity: e.target.value }
+                        console.log(copy)
+                        return copy;
+                    })
+                }}
+            />
         },
         {
             title: 'Priority',
             dataIndex: 'title',
             key: 'title',
             width: 100,
-            render: (text, record) => <Input type="number" placeholder="Priority" style={{ width: "100px" }} />
+            render: (text, record, index) => <Input type="number" placeholder="Priority" style={{ width: "100px" }}
+                onBlur={e => {
+                    console.log(e.target.value)
+                    setDiscount(state => {
+                        let data = state[index];
+                        const copy = [...state];
+                        copy[index] = { ...data, discount_priority: e.target.value }
+                        console.log(copy)
+                        return copy;
+                    })
+                }}
+            />
         },
         {
             title: 'Price',
             dataIndex: 'title',
             key: 'title',
             width: 100,
-            render: (text, record) => <Input placeholder="Price" style={{ width: "100px" }} />
+            render: (text, record, index) => <Input type="number" placeholder="Price" style={{ width: "100px" }}
+                onBlur={e => {
+                    console.log(e.target.value)
+                    setDiscount(state => {
+                        let data = state[index];
+                        const copy = [...state];
+                        copy[index] = { ...data, discount_price: e.target.value }
+                        console.log(copy)
+                        return copy;
+                    })
+                }}
+            />
         },
         {
             title: 'Date Start',
             dataIndex: 'title',
             key: 'title',
-            render: (text, record) => <DatePicker />
+            render: (text, record, index) => <DatePicker
+                onChange={value => {
+                    const dateGmt = new Date(value._d).toGMTString()
+                    console.log(dateGmt)
+                    setDiscount(state => {
+                        let data = state[index];
+                        const copy = [...state];
+                        copy[index] = { ...data, discount_startdate: dateGmt }
+                        console.log(copy)
+                        return copy;
+                    })
+                }}
+            />
         },
         {
             title: 'Date End',
             dataIndex: 'title',
             key: 'title',
-            render: (text, record) => <DatePicker />
+            render: (text, record, index) => <DatePicker
+                onChange={value => {
+                    const dateGmt = new Date(value._d).toGMTString()
+                    console.log(dateGmt)
+                    setDiscount(state => {
+                        let data = state[index];
+                        const copy = [...state];
+                        copy[index] = { ...data, discount_enddate: dateGmt }
+                        console.log(copy)
+                        return copy;
+                    })
+                }}
+            />
         },
         {
             title: 'Action',
@@ -97,12 +158,12 @@ const DiscountTab = () => {
         const newData = (
             {
                 id: new Date().getTime(),
-                CustomerGroup: "",
-                Quantity: "",
-                Priority: "",
-                Price: "",
-                Date_Start: "",
-                Date_End: ""
+                customer_group_uuid: "",
+                discount_quantity: "",
+                discount_priority: "",
+                discount_price: "",
+                discount_startdate: "",
+                discount_enddate: ""
             }
         )
         setDiscount(prevState => [...prevState, newData])

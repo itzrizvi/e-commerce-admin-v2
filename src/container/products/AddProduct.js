@@ -140,6 +140,20 @@ const AddProduct = () => {
     const [attributesTableData, setAttributesTableData] = useState(initalData)
     // ================= 6.for Attribute tab END =================
 
+    // ================= 8.for Discount tab START =================
+    const disInitialValue = {
+        id: new Date().getTime(),
+        customer_group_uuid: "",
+        discount_quantity: "",
+        discount_priority: "",
+        discount_price: "",
+        discount_startdate: "",
+        discount_enddate: ""
+    }
+    const [discount, setDiscount] = useState([disInitialValue])
+    // ================= 8.for Discount tab END =================
+
+
     // ================= 9.for Parts Of Product tab START =================
     const [products, setProducts] = useState({ data: [], isLoading: true })
     const [selectedPartsOfProducts, setSelectedPartsOfProducts] = useState([])
@@ -207,6 +221,33 @@ const AddProduct = () => {
         if (!isAttrCorrect && isAttribute) return toast.warning("Please fill all Attribute field correctly")
 
 
+        let isDiscount = true;
+        let idDiscountCorrect = true;
+        const discount_type = discount.map(item => {
+            const {
+                id,
+                customer_group_uuid,
+                discount_quantity,
+                discount_priority,
+                discount_price,
+                discount_startdate,
+                discount_enddate
+            } = item
+            // for empty attribute
+            if (!customer_group_uuid && !discount_quantity && !discount_priority && !discount_price && !discount_startdate && !discount_enddate) {
+                isDiscount = false
+            }
+            // for incorrect inputs
+            if (!customer_group_uuid || !discount_quantity || !discount_priority || !discount_price || !discount_startdate || !discount_enddate) {
+                idDiscountCorrect = false
+            }
+            return ({
+                customer_group_uuid, discount_quantity, discount_priority, discount_price, discount_startdate, discount_enddate
+            })
+        })
+        if (!idDiscountCorrect && isDiscount) return toast.warning("Please fill all Discount field correctly")
+
+
 
         const related_product = relatedProducts.map(item => item.uid)
         const partof_product = selectedPartsOfProducts.map(item => {
@@ -240,6 +281,9 @@ const AddProduct = () => {
         }
         if (isAttribute) {
             data.product_attributes = product_attributes
+        }
+        if (isDiscount) {
+            data.discount_type = discount_type
         }
         if (prod_weight) {
             data.prod_weight = prod_weight
@@ -300,7 +344,6 @@ const AddProduct = () => {
         }).finally(() => {
             setIsLoading(false)
         })
-
     }
 
     return (
@@ -329,6 +372,10 @@ const AddProduct = () => {
                                     labelCol={{ span: 4 }}
                                 >
                                     <Tabs>
+
+                                        <Tabs.TabPane tab="Discount" key="Discount">
+                                            <DiscountTab {...{ discount, setDiscount }} />
+                                        </Tabs.TabPane>
 
                                         <Tabs.TabPane tab="General" key="general">
                                             <Form.Item
@@ -599,9 +646,7 @@ const AddProduct = () => {
 
                                         </Tabs.TabPane>
 
-                                        <Tabs.TabPane tab="Discount" key="Discount">
-                                            <DiscountTab />
-                                        </Tabs.TabPane>
+
 
                                         <Tabs.TabPane tab="Parts Of Product" key="PartsOf">
                                             <PartsOfProductTab {...{ products, setProducts, selectedPartsOfProducts, setSelectedPartsOfProducts, partOfProductQuantities, setPartOfProductQuantities }} />

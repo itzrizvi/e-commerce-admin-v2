@@ -12,9 +12,9 @@ const Inputs = ({ index, setAttributesTableData }) => {
     const [file, setFile] = useState([])
 
     const handleOnBlur = e => {
-        setAttributesTableData(arr => {
-            let data = arr[index];
-            const copy = [...arr];
+        setAttributesTableData(state => {
+            let data = state[index];
+            const copy = [...state];
             copy[index] = { ...data, attribute_value: e.target.value }
             return copy;
         })

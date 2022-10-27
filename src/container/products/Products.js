@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Col, Spin, Input, Table, Switch } from 'antd';
+import { Row, Col, Spin, Input, Table, Switch, Checkbox, DatePicker, Select } from 'antd';
 import FeatherIcon from 'feather-icons-react';
 import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
@@ -14,12 +14,14 @@ import Cookies from 'js-cookie';
 import config from '../../config/config';
 import { errorImageSrc, renderImage } from '../../utility/images';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
+const { RangePicker } = DatePicker;
 
 const Products = () => {
     viewPermission('product');
     const [products, setProducts] = useState({ data: [], isLoading: true })
     const [filteredProducts, setFilteredProducts] = useState([])
     const [searchText, setSearchText] = useState('')
+    const [isFilter, setIsFilter] = useState(true)
 
 
     useEffect(() => {
@@ -172,6 +174,11 @@ const Products = () => {
         },
     ]
 
+    useEffect(() => {
+        if (searchText) {
+            setFilteredProducts(products.data.filter(prod => (prod?.prod_name + prod?.prod_sku).toLowerCase().includes(searchText.toLowerCase())))
+        }
+    }, [searchText])
 
     const onChangeSearch = e => {
         const value = e.target.value
@@ -186,6 +193,10 @@ const Products = () => {
                 title="Products"
                 buttons={[
                     <div key="1" className="page-header-actions">
+                        <Button size="small" type="white" onClick={() => setIsFilter(state => !state)}>
+                            <FeatherIcon icon="filter" />
+                            Filter
+                        </Button>
                         <Link to="/admin/products/add">
                             <Button size="small" title="Add Product" type="primary">
                                 <FeatherIcon icon="file-plus" />
@@ -204,8 +215,156 @@ const Products = () => {
                                 </div>
                                 :
                                 <>
-                                    <Input placeholder="Search Permission..." prefix={<SearchOutlined />} onChange={onChangeSearch} />
+                                    <Input
+                                        placeholder="Search Products..."
+                                        prefix={<SearchOutlined />}
+                                        onChange={(e) => {
+                                            const value = e.target.value
+                                            setSearchText(value)
+                                        }}
+
+                                    />
                                     <br /><br />
+
+                                    {isFilter && <div style={{ marginBottom: "2.5em" }}>
+                                        <Row gutter={16} >
+                                            <Col span={8} >
+                                                Availability : <br />
+                                                <Select
+                                                    style={{ width: "100%" }}
+                                                    placeholder="Select status"
+                                                    size="middle"
+                                                    mode="multiple"
+                                                    options={[
+                                                        {
+                                                            label: "2-3 Days",
+                                                            value: "2-3 Days"
+                                                        },
+                                                        {
+                                                            label: "In Stock",
+                                                            value: "In Stock"
+                                                        },
+                                                        {
+                                                            label: "Out Of Stock",
+                                                            value: "Out Of Stock"
+                                                        },
+                                                        {
+                                                            label: "Pre-Order",
+                                                            value: "Pre-Order"
+                                                        },
+                                                    ]}
+                                                />
+
+                                            </Col>
+                                            <Col span={8} >
+                                                Category: <br />
+                                                <Select
+                                                    style={{ width: "100%" }}
+                                                    placeholder="select category"
+                                                    size="middle"
+                                                    mode="multiple"
+                                                    options={[
+                                                        {
+                                                            label: "Test1",
+                                                            value: "test1"
+                                                        },
+                                                        {
+                                                            label: "Test2",
+                                                            value: "test2"
+                                                        },
+                                                        {
+                                                            label: "Test3",
+                                                            value: "test3"
+                                                        },
+                                                        {
+                                                            label: "Test4",
+                                                            value: "test4"
+                                                        },
+                                                    ]}
+                                                />
+                                            </Col>
+
+                                            <Col span={8} >
+                                                Date: <br />
+                                                <RangePicker
+                                                    style={{ height: '40px', width: '100%' }}
+                                                    size="small"
+                                                />
+                                            </Col>
+                                        </Row>
+                                        <Row gutter={16} style={{ marginTop: '.5em' }} >
+                                            <Col span={8} >
+                                                Condition: <br />
+                                                <Select
+                                                    style={{ width: "100%" }}
+                                                    placeholder="Select Condition"
+                                                    size="middle"
+                                                    mode="multiple"
+                                                    options={[
+                                                        {
+                                                            label: "Test1",
+                                                            value: "test1"
+                                                        },
+                                                        {
+                                                            label: "Test2",
+                                                            value: "test2"
+                                                        },
+                                                        {
+                                                            label: "Test3",
+                                                            value: "test3"
+                                                        },
+                                                        {
+                                                            label: "Test4",
+                                                            value: "test4"
+                                                        },
+                                                    ]}
+                                                />
+                                            </Col>
+                                            <Col span={8} >
+                                                Attributes: <br />
+
+                                                <Select
+                                                    style={{ width: "100%" }}
+                                                    placeholder="select Attribute"
+                                                    size="middle"
+                                                    mode="multiple"
+                                                    options={[
+                                                        {
+                                                            label: "Test1",
+                                                            value: "test1"
+                                                        },
+                                                        {
+                                                            label: "Test2",
+                                                            value: "test2"
+                                                        },
+                                                        {
+                                                            label: "Test3",
+                                                            value: "test3"
+                                                        },
+                                                        {
+                                                            label: "Test4",
+                                                            value: "test4"
+                                                        },
+                                                    ]}
+                                                />
+                                            </Col>
+
+                                            <Col span={8} >
+                                                Price: <br />
+                                                <Input.Group
+                                                    compact
+                                                    size="default"
+                                                >
+                                                    <Input type='number' placeholder='Min' style={{ width: "50%" }} />
+                                                    <Input type='number' placeholder='Max' style={{ width: "50%" }} />
+
+                                                </Input.Group>
+                                            </Col>
+
+
+                                        </Row>
+                                    </div>}
+
 
                                     <span className={"psp_list"} >
                                         <Table
