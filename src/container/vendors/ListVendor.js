@@ -240,7 +240,7 @@ const ListVendor = () => {
                                             rowClassName={(record, index) => (index % 2 == 0 ? "" : "altTableClass")}
                                             // pagination={false}
                                             pagination={{
-                                                defaultPageSize: config.CUSTOMER_GROUPS_PER_PAGE,
+                                                defaultPageSize: config.VENDOR_PER_PAGE,
                                                 total: searchText ? filteredCustomerGroups.length : customerGroups.data.length,
                                                 showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`,
                                             }}

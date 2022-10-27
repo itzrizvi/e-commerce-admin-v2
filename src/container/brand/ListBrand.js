@@ -6,7 +6,7 @@ import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
 import { Cards } from '../../components/cards/frame/cards-frame';
 import { Button } from '../../components/buttons/buttons';
-import { Link, useHistory } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import FontAwesome from 'react-fontawesome';
 import apolloClient from '../../apollo';
 import { brandQuery } from '../../apollo/brand';
@@ -16,6 +16,7 @@ import { toast } from 'react-toastify';
 import { errorImageSrc, renderImage } from '../../utility/images';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
 import { viewPermission } from '../../utility/utility';
+import config from '../../config/config';
 
 
 
@@ -44,7 +45,7 @@ const ListBrand = () => {
             setBrand(s => ({ ...s, loading: false }))
         })
 
-    }, [brand.data])
+    }, [])
 
     const handleStatusChange = (record, checked) => {
         const variables = { data: { brand_uuid: record.brand_uuid, brand_status: checked } }
@@ -199,14 +200,14 @@ const ListBrand = () => {
                                                 className="table-responsive"
                                                 columns={columns}
                                                 pagination={{
-                                                    defaultPageSize: 10,
+                                                    defaultPageSize: config.BRAND_PER_PAGE,
                                                     total: isFilter ? brand?.data?.length : brand?.data?.length,
                                                     showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`,
                                                 }}
                                                 rowKey={'brand_uuid'}
                                                 size="small"
                                                 dataSource={isFilter ? filteredBrand : brand.data}
-                                                rowClassName={(record, index) => (index % 2 == 0 ? "" : "altTableClass")}
+                                                rowClassName={(record, index) => (index % 2 === 0 ? "" : "altTableClass")}
                                             />
                                         </span>
                                     </>

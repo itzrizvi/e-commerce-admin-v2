@@ -14,6 +14,7 @@ import { useSelector } from 'react-redux';
 import Moment from 'react-moment';
 import { toast } from 'react-toastify';
 import { viewPermission } from '../../utility/utility';
+import config from '../../config/config';
 
 
 
@@ -60,7 +61,7 @@ const ListBanner = () => {
         }).then(res => {
             const status = res?.data?.updateBanner?.status
             console.log(record);
-            if (!status) return toast.error(data.message)
+            if (!status) return toast.error(res?.data?.message)
             toast.success(`${record.banner_name} Status updated.`)
         }).catch(err => {
             console.log(err);
@@ -184,14 +185,14 @@ const ListBanner = () => {
                                                 className="table-responsive"
                                                 columns={columns}
                                                 pagination={{
-                                                    defaultPageSize: 10,
+                                                    defaultPageSize: config.BANNER_PER_PAGE,
                                                     total: isFilter ? banner?.data?.length : banner?.data?.length,
                                                     showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`,
                                                 }}
                                                 rowKey={'banner_uuid'}
                                                 size="small"
                                                 dataSource={isFilter ? filteredBanner : banner.data}
-                                                rowClassName={(record, index) => (index % 2 == 0 ? "" : "altTableClass")}
+                                                rowClassName={(record, index) => (index % 2 === 0 ? "" : "altTableClass")}
                                             />
                                         </span>
                                     </>

@@ -15,6 +15,8 @@ import Customers from './customers';
 import Banner from './banner';
 import Order from './order';
 import Vendors from './vendors';
+import ProductCondition from './product_condition';
+import ProductAvailabilityStatus from './product_availability_status';
 
 const Admin = () => {
   const { path } = useRouteMatch();
@@ -42,6 +44,8 @@ const Admin = () => {
         <Route path={`${path}/banner`} component={Banner} />
         <Route path={`${path}/order`} component={Order} />
         <Route path={`${path}/vendor`} component={Vendors} />
+        <Route path={`${path}/product-condition`} component={ProductCondition} />
+        <Route path={`${path}/product-availability-status`} component={ProductAvailabilityStatus} />
       </Suspense>
     </Switch>
   );
