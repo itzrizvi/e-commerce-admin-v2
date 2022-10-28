@@ -118,8 +118,9 @@ const AddRole = () => {
             console.log("add role res", res)
             const data = res?.data?.createRoleWithPermission
             if (!data?.status) return toast.error('Something Went wrong !!');
-            toast.success(`${values.role} Role created successfully.`);
             history.push("/admin/roles/list");
+            window.location.reload()
+            toast.success(`${values.role} Role created successfully.`);
         }).catch(err => {
             console.log("add role err", err)
             toast.error('Something Went wrong !!');
@@ -219,7 +220,8 @@ const AddRole = () => {
                                                 type='white'
                                                 size="large"
                                             // onClick={() => {
-                                            //     return form.resetFields();
+                                            //     window.location.reload()
+                                            //     // return form.resetFields();
                                             // }}
                                             >
                                                 Cancel

@@ -278,10 +278,16 @@ const Products = () => {
         {
             title: 'Action',
             dataIndex: 'action',
-            width: 70,
-            align: 'right',
+            width: 140,
+            align: 'center',
             render: (text, record) => (
                 <>
+                    <Link to={`/admin/products/view?id=${record.prod_uuid}`}>
+                        <Button size="default" type="white" title='Edit'>
+                            {/* <FontAwesome name="edit" style={{ margin: ".5em 1em" }} /> */}
+                            view
+                        </Button>
+                    </Link>
                     <Link to={`/admin/products/add?id=${record.prod_uuid}&name=${record.prod_name}`}>
                         {/* <Button size="default" type="white" title='Edit'> */}
                         <FontAwesome name="edit" style={{ margin: ".5em 1em" }} />

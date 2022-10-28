@@ -6,6 +6,7 @@ const AddProduct = lazy(() => import('../../container/products/AddProduct'));
 const AddProduct1 = lazy(() => import('../../container/products/AddProduct1'));
 const ListCoupon = lazy(() => import('../../container/products/ListCoupon'));
 const AddCoupon = lazy(() => import('../../container/products/AddCoupon'));
+const ProdDetails = lazy(() => import('../../container/products/ProdDetails'));
 
 const ProductRoutes = () => {
   const { path } = useRouteMatch();
@@ -15,6 +16,7 @@ const ProductRoutes = () => {
       <Route path={`${path}/add`} component={AddProduct} />
       <Route path={`${path}/coupon`} component={ListCoupon} />
       <Route path={`${path}/add-coupon`} component={AddCoupon} />
+      <Route path={`${path}/view`} component={ProdDetails} />
     </Switch>
   );
 };

@@ -209,9 +209,9 @@ const UpdateRole = () => {
         }).then(res => {
             const data = res?.data?.updateRole
             if (!data?.status) return toast.error('Something Went wrong !!')
-            toast.success(`${singleRole.data.role} updated successfully.`)
             history.push("/admin/roles/list");
-
+            window.location.reload();
+            toast.success(`${singleRole.data.role} updated successfully.`)
         }).catch(err => {
             console.log("🚀 ~ file: UpdateRole.js ~ line 193 ~ handleSubmit ~ err", err);
         }).finally(() => {
@@ -299,18 +299,19 @@ const UpdateRole = () => {
                                                 <Button loading={isLoading} size="default" htmlType="submit" type="primary" raised>
                                                     {isLoading ? 'Processing' : 'Save'}
                                                 </Button>
-                                                <Link to="/admin/roles/list">
-                                                    <Button
-                                                        // className="btn-cancel"
-                                                        type='white'
-                                                        size="large"
-                                                    // onClick={() => {
-                                                    //     return form.resetFields();
-                                                    // }}
-                                                    >
-                                                        Cancel
-                                                    </Button>
-                                                </Link>
+                                                {/* <Link to="/admin/roles/list"> */}
+                                                <Button
+                                                    // className="btn-cancel"
+                                                    type='white'
+                                                    size="large"
+                                                    onClick={() => {
+                                                        history.push("/admin/roles/list");
+                                                        window.location.reload();
+                                                    }}
+                                                >
+                                                    Cancel
+                                                </Button>
+                                                {/* </Link> */}
                                             </Form.Item>
                                         </div>
 
