@@ -420,9 +420,7 @@ const AddProduct = () => {
                                 >
                                     <Tabs>
 
-                                        <Tabs.TabPane tab="Attribute" key="Attribute">
-                                            <AttributeTab {...{ attributesTableData, setAttributesTableData }} />
-                                        </Tabs.TabPane>
+
 
                                         <Tabs.TabPane tab="General" key="general">
                                             <Form.Item
@@ -662,7 +660,9 @@ const AddProduct = () => {
                                             </Form.Item>
                                         </Tabs.TabPane>
 
-
+                                        <Tabs.TabPane tab="Attribute" key="Attribute">
+                                            <AttributeTab {...{ attributesTableData, setAttributesTableData }} />
+                                        </Tabs.TabPane>
 
                                         <Tabs.TabPane tab="Price" key="Price">
                                             <Form.Item

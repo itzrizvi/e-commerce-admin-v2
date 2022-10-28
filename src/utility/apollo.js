@@ -291,12 +291,12 @@ export const productQuery = {
   }
   `,
   GET_PRODUCT_LIST: gql`
-  query getProductList{
-    getProductList{
+  query getProductList {
+    getProductList {
       message
       status
       tenant_id
-      data{
+      data {
         prod_uuid
         prod_name
         prod_slug
@@ -304,18 +304,51 @@ export const productQuery = {
         prod_partnum
         prod_status
         taxable
-        is_featured
         prod_condition
         prod_thumbnail
         prod_sale_price
         prod_regular_price
         prod_outofstock_status
+        category {
+          cat_id
+          cat_name
+          cat_slug
+          cat_description
+          cat_meta_tag_title
+          cat_meta_tag_description
+          cat_meta_tag_keywords
+          image
+          cat_sort_order
+          cat_status
+          is_featured
+          tenant_id
+          cat_parent_id
+        }
+        prod_attributes {
+          prod_attr_uuid
+          attribute_type
+          attribute_value
+          attribute_data {
+            attribute_uuid
+            attribute_name
+            attribute_slug
+            attribute_status
+            attribute_group {
+              attr_group_uuid
+              attr_group_name
+              attr_group_slug
+              attrgroup_sortorder
+              attrgroup_status
+            }
+          }
+        }
         createdAt
         updatedAt
         tenant_id
       }
     }
   }
+  
   `,
   GET_PRODUCT_LIST_FOR_ADD_MINIMAL: gql`
   query getProductList{

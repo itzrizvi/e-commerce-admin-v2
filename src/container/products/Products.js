@@ -295,16 +295,60 @@ const Products = () => {
 
     // All filter
     useEffect(() => {
-        if (searchText) {
-            setFilteredProducts(products.data.filter(prod => (prod?.prod_name + prod?.prod_sku).toLowerCase().includes(searchText.toLowerCase())))
-        }
-    }, [searchText])
 
-    const onChangeSearch = e => {
-        const value = e.target.value
-        setSearchText(value)
-        setFilteredProducts(products.data.filter(prod => (prod?.prod_name + prod?.prod_sku).toLowerCase().includes(value.toLowerCase())))
-    }
+        // console.log(filterDate);
+        // return
+
+        if (products.isLoading) return
+        let filteredData = products.data
+
+        if (searchText) {
+            filteredData = products.data.filter(prod => (prod?.prod_name + prod?.prod_sku).toLowerCase().includes(searchText.toLowerCase()))
+        }
+        if (filterDate.startDate) {
+            const startDate = new Date(filterDate.startDate).valueOf()
+            const endDate = new Date(filterDate.endDate).valueOf()
+            // console.log(filterDate.startDate)
+            // console.log(new Date(filterDate.startDate).valueOf())
+            filteredData = filteredData.filter(prod => {
+                const creeatedAt = parseInt(prod.createdAt)
+                const c1 = creeatedAt >= startDate
+                const c2 = creeatedAt <= endDate
+                return (c1 && c2)
+            })
+            // console.log(filteredData);
+        }
+
+        if (filterDate.attributes.length) {
+            filteredData = filteredData.filter(prod => {
+                return filterDate.attributes.find(element => {
+                    const attrArray = prod.prod_attributes.map(attr => attr.attribute_data.attribute_uuid)
+                    return attrArray.includes(element)
+                });
+            });
+        }
+
+        if (filterDate.categories.length) {
+            filteredData = filteredData.filter(prod => filterDate.categories.includes(prod.category.cat_id))
+        }
+        if (filterDate.availability.length) {
+            filteredData = filteredData.filter(prod => filterDate.availability.includes(prod.prod_outofstock_status))
+        }
+        if (filterDate.condition.length) {
+            filteredData = filteredData.filter(prod => filterDate.condition.includes(prod.prod_condition))
+        }
+        if (filterDate.minPrice) {
+            filteredData = filteredData.filter(prod => prod.prod_regular_price >= parseFloat(filterDate.minPrice))
+        }
+        if (filterDate.maxPrice) {
+            filteredData = filteredData.filter(prod => prod.prod_regular_price <= parseFloat(filterDate.maxPrice))
+        }
+
+        setFilteredProducts(filteredData)
+
+    }, [products, searchText, filterDate])
+
+
 
 
     return (
@@ -394,14 +438,14 @@ const Products = () => {
                                                     style={{ height: '40px', width: '100%' }}
                                                     size="small"
                                                     onChange={val => {
-                                                        console.log(val);
-                                                        setFilterDate(s => (
-                                                            {
-                                                                ...s,
-                                                                startDate: val[0]._d,
-                                                                endDate: val[1]._d,
-                                                            }
-                                                        ))
+                                                        setFilterDate(s => {
+                                                            return (
+                                                                {
+                                                                    ...s,
+                                                                    startDate: val[0]._d,
+                                                                    endDate: val[1]._d,
+                                                                })
+                                                        })
                                                     }}
                                                 />
                                             </Col>
@@ -448,11 +492,18 @@ const Products = () => {
                                                     size="default"
                                                 >
                                                     <Input type='number' placeholder='Min' style={{ width: "50%" }}
-                                                        onChange={e => {
+                                                        onBlur={e => {
                                                             console.log(filterDate);
+                                                            setFilterDate(s => ({ ...s, minPrice: e?.target?.value }))
                                                         }}
                                                     />
-                                                    <Input type='number' placeholder='Max' style={{ width: "50%" }} />
+                                                    <Input type='number' placeholder='Max' style={{ width: "50%" }}
+                                                        onBlur={e => {
+                                                            console.log(filterDate);
+                                                            console.log(e.target.value);
+                                                            setFilterDate(s => ({ ...s, maxPrice: e?.target?.value }))
+                                                        }}
+                                                    />
 
                                                 </Input.Group>
                                             </Col>
@@ -468,12 +519,14 @@ const Products = () => {
                                             columns={columns}
                                             rowKey={'g_s'}
                                             size="small"
-                                            dataSource={searchText ? filteredProducts : products.data}
+                                            // dataSource={searchText ? filteredProducts : products.data}
+                                            dataSource={filteredProducts}
                                             rowClassName={(record, index) => (index % 2 == 0 ? "" : "altTableClass")}
                                             // pagination={false}
                                             pagination={{
                                                 defaultPageSize: config.PRODUCTS_PER_PAGE,
-                                                total: searchText ? filteredProducts.length : products.data.length,
+                                                // total: searchText ? filteredProducts.length : products.data.length,
+                                                total: filteredProducts.length,
                                                 showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`,
                                             }}
                                         />
