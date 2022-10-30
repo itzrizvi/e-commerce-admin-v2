@@ -127,7 +127,7 @@ const ListCondition = () => {
                                         <Table
                                             className="table-responsive"
                                             columns={columns}
-                                            rowKey={'g_s'}
+                                            rowKey={'id'}
                                             size="small"
                                             dataSource={searchText ? filteredCondition : condition.data}
                                             rowClassName={(record, index) => (index % 2 == 0 ? "" : "altTableClass")}

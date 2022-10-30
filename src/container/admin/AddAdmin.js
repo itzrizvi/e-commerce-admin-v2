@@ -48,7 +48,7 @@ const AddAdmin = () => {
             context: {
                 headers: {
                     TENANTID: process.env.REACT_APP_TENANTID,
-                    Authorization: Cookies.get('psp_t')
+                    Authorization: token
                 }
             }
         }).then(res => {
@@ -74,7 +74,7 @@ const AddAdmin = () => {
             context: {
                 headers: {
                     TENANTID: process.env.REACT_APP_TENANTID,
-                    Authorization: Cookies.get('psp_t')
+                    Authorization: token
                 }
             }
         }).then(res => {
@@ -188,6 +188,14 @@ const AddAdmin = () => {
         <>
             <PageHeader
                 title={params.uid ? `Manage User | Edit user (${params.email})` : "Add Admin"}
+                buttons={[
+                    params.uid && <div key="1" className="page-header-actions">
+                        <Button size="small" title="Reset Password" type="primary">
+                            <FeatherIcon icon="settings" />
+                            Reset Password
+                        </Button>
+                    </div>
+                ]}
             />
             <Main>
                 <Row gutter={25}>
@@ -231,23 +239,6 @@ const AddAdmin = () => {
                                 >
                                     <Input type='email' placeholder='Enter Email Address' onChange={e => setEmailInput(e.target.value)} />
                                 </Form.Item>}
-                                <Form.Item
-                                    rules={[
-                                        {
-                                            required: true,
-                                            message: "Please enter a password",
-
-                                        },
-                                        // {
-                                        //     // pattern: /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/,
-                                        //     pattern: /^[2-9]{2}\d{8}$/,
-                                        //     message: `Password Pattern`
-                                        // }
-                                    ]}
-                                    name="password" label="Password">
-                                    <Input.Password type="password" placeholder='Enter Password...' />
-                                </Form.Item>
-
                                 <Form.Item
                                     name="userStatus"
                                     label="User Status"

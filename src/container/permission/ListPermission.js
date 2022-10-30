@@ -66,7 +66,6 @@ const ListPermission = () => {
             }
         }).then(res => {
             const data = res?.data?.updateRolesPermission
-            if (!data.isAuth) return
             if (!data?.status) return toast.error(data?.message)
             toast.success(`${record.roles_permission_name} Permission Status updated successfully.`)
         }).catch(err => {

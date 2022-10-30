@@ -127,7 +127,7 @@ const ListProductAvailabilityStatus = () => {
                                         <Table
                                             className="table-responsive"
                                             columns={columns}
-                                            rowKey={'g_s'}
+                                            rowKey={'id'}
                                             size="small"
                                             dataSource={searchText ? filteredAvailability : availability.data}
                                             rowClassName={(record, index) => (index % 2 == 0 ? "" : "altTableClass")}

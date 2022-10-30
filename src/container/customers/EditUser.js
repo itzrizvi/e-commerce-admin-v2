@@ -410,7 +410,18 @@ const EditUser = () => {
 
                                     </Form>
                                 </Tabs.TabPane >
-                                <Tabs.TabPane tab="Address" key="address">
+                                <Tabs.TabPane tab="Shipping Address" key="shipping_address">
+                                    <Table
+                                        className="table-responsive"
+                                        columns={address_columns}
+                                        rowKey={'uid'}
+                                        size="small"
+                                        dataSource={[]}
+                                        rowClassName={(record, index) => (index % 2 == 0 ? "" : "altTableClass")}
+                                        pagination={false}
+                                    />
+                                </Tabs.TabPane>
+                                <Tabs.TabPane tab="Billing Address" key="billing_address">
                                     <Table
                                         className="table-responsive"
                                         columns={address_columns}
@@ -432,14 +443,6 @@ const EditUser = () => {
                                         pagination={false}
                                     />
                                 </Tabs.TabPane>
-                                <Tabs.TabPane tab="Setting" key="setting">
-                                    <Button
-                                        type="primary"
-                                        icon={<PoweroffOutlined />}
-                                    >
-                                        Reset Password
-                                    </Button>
-                                </Tabs.TabPane>
                                 <Tabs.TabPane tab="Rating" key="rating">
                                     <Table
                                         className="table-responsive"
@@ -447,17 +450,6 @@ const EditUser = () => {
                                         rowKey={'date'}
                                         size="small"
                                         dataSource={rating_data}
-                                        rowClassName={(record, index) => (index % 2 == 0 ? "" : "altTableClass")}
-                                        pagination={false}
-                                    />
-                                </Tabs.TabPane>
-                                <Tabs.TabPane tab="Message" key="message">
-                                    <Table
-                                        className="table-responsive"
-                                        columns={message_columns}
-                                        rowKey={'date'}
-                                        size="small"
-                                        dataSource={[]}
                                         rowClassName={(record, index) => (index % 2 == 0 ? "" : "altTableClass")}
                                         pagination={false}
                                     />

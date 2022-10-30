@@ -27,7 +27,7 @@ const menuPermission = (name, type = 'read') => {
 
 const viewPermission = (name) =>{
   const history = useHistory();
-  if(!menuPermission(name)) history.push('/admin');
+  if(!menuPermission(name)) history.push('/admin/403');
 }
 
 
