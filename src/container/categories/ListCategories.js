@@ -29,7 +29,7 @@ const ListCategories = () => {
     const [isFeatured, setIsFeatured] = useState(false)
 
 
-
+    // Load category
     useEffect(() => {
 
         apolloClient.query({
@@ -37,7 +37,6 @@ const ListCategories = () => {
             context: {
                 headers: {
                     TENANTID: process.env.REACT_APP_TENANTID,
-                    // Authorization: Cookies.get('psp_t')
                 }
             }
         }).then(res => {
@@ -52,8 +51,8 @@ const ListCategories = () => {
 
     }, [])
 
+    // organize category
     useEffect(() => {
-
         if (!categories.length) return
         let arrData = []
 
@@ -62,15 +61,15 @@ const ListCategories = () => {
             const parent = item.cat_name
             const cat_sort_order = item.cat_sort_order
 
-            arrData.push({ cat_name: parent, cat_id: item.cat_id, cat_sort_order, cat_des: item.cat_description, cat_isFeatured: item.is_featured, cat_status: item.cat_status, img: item.image })
+            arrData.push({ cat_name: parent, id: item.id, cat_sort_order, cat_des: item.cat_description, cat_isFeatured: item.is_featured, cat_status: item.cat_status, img: item.image })
             if (item.subcategories) {
                 item.subcategories.forEach(subCat => {
                     const sub = subCat.cat_name
-                    arrData.push({ cat_name: `${parent} > ${sub}`, cat_id: subCat.cat_id, cat_des: subCat.cat_description, cat_isFeatured: subCat.is_featured, cat_status: subCat.cat_status, img: subCat.image })
+                    arrData.push({ cat_name: `${parent} > ${sub}`, id: subCat.id, cat_des: subCat.cat_description, cat_isFeatured: subCat.is_featured, cat_status: subCat.cat_status, img: subCat.image })
                     if (subCat.subsubcategories) {
                         subCat.subsubcategories.forEach(subSubCat => {
                             const subSub = subSubCat.cat_name
-                            arrData.push({ cat_name: `${parent} > ${sub} > ${subSub}`, cat_id: subSubCat.cat_id, cat_des: subSubCat.cat_description, cat_isFeatured: subSubCat.is_featured, cat_status: subSubCat.cat_status, img: subSubCat.image })
+                            arrData.push({ cat_name: `${parent} > ${sub} > ${subSub}`, id: subSubCat.id, cat_des: subSubCat.cat_description, cat_isFeatured: subSubCat.is_featured, cat_status: subSubCat.cat_status, img: subSubCat.image })
                         })
                     }
                 })
@@ -79,12 +78,10 @@ const ListCategories = () => {
         })
 
         setCategoriesData({ data: arrData, loading: false })
-        // console.log("userEffect 2nd: \n", arrData)
-
     }, [categories])
 
     const handleStatusChange = (record, checked) => {
-        const variables = { data: { cat_id: record.cat_id, cat_status: checked } }
+        const variables = { data: { cat_id: record.id, cat_status: checked } }
 
         apolloClient.mutate({
             mutation: productMutation.UPDATE_CATEGORY,
@@ -105,7 +102,7 @@ const ListCategories = () => {
         })
     }
     const handleIsFeaturesChange = (record, checked) => {
-        const variables = { data: { cat_id: record.cat_id, is_featured: checked } }
+        const variables = { data: { cat_id: record.id, is_featured: checked } }
 
         apolloClient.mutate({
             mutation: productMutation.UPDATE_CATEGORY,
@@ -129,19 +126,19 @@ const ListCategories = () => {
     const columns = [
         {
             title: 'ID',
-            dataIndex: 'cat_id',
-            key: 'cat_id',
+            dataIndex: 'id',
+            key: 'id',
             width: 50,
             ellipsis: true,
-            sorter: (a, b) => a.cat_id.toUpperCase() > b.cat_id.toUpperCase() ? 1 : -1,
+            sorter: (a, b) => a.id.toUpperCase() > b.id.toUpperCase() ? 1 : -1,
         },
         {
             title: 'Logo',
-            dataIndex: 'cat_id',
-            key: 'cat_id',
+            dataIndex: 'id',
+            key: 'id',
             width: 70,
             // render: (text, record) => (<img src={require('../../static/img/avatar/NoPath (3).png')} alt="" />),
-            render: (text, record) => (<LazyLoadImage effect="blur" width="40" src={renderImage(record.cat_id, record.img, 'category', '128x128')} onError={errorImageSrc} onL alt={record.cat_id} />)
+            render: (text, record) => (<LazyLoadImage effect="blur" width="40" src={renderImage(record.id, record.img, 'category', '128x128')} onError={errorImageSrc} onL alt={record.id} />)
         },
         {
             title: 'Category Name',
@@ -150,13 +147,13 @@ const ListCategories = () => {
             key: 'cat_name',
             sorter: (a, b) => a.cat_name.toUpperCase() > b.cat_name.toUpperCase() ? 1 : -1,
         },
-        {
-            title: 'Description',
-            dataIndex: 'cat_des',
-            key: 'cat_des',
-            ellipsis: true,
-            sorter: (a, b) => a.cat_des.toUpperCase() > b.cat_des.toUpperCase() ? 1 : -1,
-        },
+        // {
+        //     title: 'Description',
+        //     dataIndex: 'cat_des',
+        //     key: 'cat_des',
+        //     ellipsis: true,
+        //     sorter: (a, b) => a.cat_des.toUpperCase() > b.cat_des.toUpperCase() ? 1 : -1,
+        // },
         {
             title: 'Featured',
             dataIndex: 'cat_isFeatured',
@@ -214,7 +211,7 @@ const ListCategories = () => {
             align: 'right',
             render: (text, record) => (
                 <>
-                    <Link to={`/admin/categories/add?id=${record.cat_id}&name=${record.cat_name}`}>
+                    <Link to={`/admin/categories/add?id=${record.id}&name=${record.cat_name}`}>
                         {/* <Button size="default" type="white" title='Edit'> */}
                         <FontAwesome name="edit" style={{ margin: ".5em 1em" }} />
                         {/* </Button> */}
@@ -230,7 +227,7 @@ const ListCategories = () => {
         const value = e.target.value
         console.log("🚀 ~ file: ListCategories.js ~ line 216 ~ onChangeSearch ~ value", value);
         setSearchText(value)
-        setFilteredCategoryData(categoriesData.data.filter(category => (category?.cat_name + category?.cat_des + category?.cat_id + category?.cat_sort_order).toLowerCase().includes(value.toLowerCase())))
+        setFilteredCategoryData(categoriesData.data.filter(category => (category?.cat_name + category?.cat_des + category?.id + category?.cat_sort_order).toLowerCase().includes(value.toLowerCase())))
     }
 
     // Search & filter
@@ -298,7 +295,7 @@ const ListCategories = () => {
                                         <Table
                                             className="table-responsive"
                                             columns={columns}
-                                            rowKey={'cat_id'}
+                                            rowKey={'id'}
                                             size="small"
                                             // dataSource={categoriesData.data}
                                             dataSource={searchText ? filteredCategoryData : categoriesData.data}

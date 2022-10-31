@@ -244,19 +244,18 @@ export const productQuery = {
     getAllCategories {
       message
       status
-      tenant_id
       categories {
-        cat_id
+        id
         cat_name
         cat_slug
         cat_status
         subcategories {
-          cat_id
+          id
           cat_name
           cat_slug
           cat_status
           subsubcategories {
-            cat_id
+            id
             cat_name
             cat_slug
             cat_status
@@ -272,9 +271,8 @@ export const productQuery = {
     getSingleCategory(query: $query) {
       message
       status
-      tenant_id
       category {
-        cat_id
+        id
         cat_name
         cat_slug
         cat_status
@@ -582,7 +580,6 @@ export const productMutation = {
       updateCategory(data: $data) {
         message
         status
-        tenant_id
       }
     }
     
@@ -652,7 +649,7 @@ export const attributeQuery = {
       message
       tenant_id
       data{
-        attr_group_uuid
+        id
         attr_group_name
         attr_group_slug
         attrgroup_status
@@ -661,10 +658,10 @@ export const attributeQuery = {
         createdAt
         updatedAt
         attributes {
-          attribute_uuid
+          id
           attribute_name
           attribute_slug
-          attr_group_uuid
+          attr_group_id
           attribute_status
           tenant_id
           createdAt
@@ -709,18 +706,17 @@ export const attributeQuery = {
     getAllAttributes {
       message
       status
-      tenant_id
       data {
-        attribute_uuid
+        id
         attribute_name
         attribute_slug
-        attr_group_uuid
+        attr_group_id
         attribute_status
         tenant_id
         createdAt
         updatedAt
         attribute_group {
-          attr_group_uuid
+          id
           attr_group_name
           attr_group_slug
           attrgroup_status
@@ -761,7 +757,6 @@ export const attributeMutation = {
     createAttrGroup(data:$data){
       message
       status
-      tenant_id
     }
   }
   `,
@@ -788,7 +783,6 @@ export const attributeMutation = {
     updateAttribute(data: $data) {
       message
       status
-      tenant_id
     }
   }
   `,
@@ -865,9 +859,8 @@ export const couponQuery = {
     getAllCoupons {
       message
       status
-      tenant_id
       data {
-        coupon_uuid
+        coupon_id
         coupon_name
         coupon_code
         coupon_type
@@ -891,9 +884,8 @@ export const couponQuery = {
     getSingleCoupon(query:$query){
       status
       message
-      tenant_id
       data {
-        coupon_uuid
+        coupon_id
         coupon_name
         coupon_code
         coupon_type
@@ -907,7 +899,6 @@ export const couponQuery = {
         coupon_description
         createdAt
         updatedAt
-        tenant_id
       }
     }
   }
@@ -919,7 +910,6 @@ export const couponMutation = {
     createCoupon(data:$data){
       status
       message
-      tenant_id
     }
   }
   `,

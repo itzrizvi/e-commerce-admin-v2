@@ -31,7 +31,7 @@ const AddCategory = () => {
     const [categories, setCategories] = useState([])
     const [structuredCategories, setStructuredCategories] = useState({ data: [], loading: true })
     const [singleCategory, setSingleCategory] = useState({})
-    const [parentUid, setParentUid] = useState("")
+    const [parentId, setParentId] = useState("")
     const [image, setImage] = useState(null);
     const [thumbUrl, setThumbUrl] = useState('')
 
@@ -53,7 +53,7 @@ const AddCategory = () => {
     ];
 
 
-    useEffect(() => { // load category
+    useEffect(() => { // load all category
         apolloClient.query({
             query: productQuery.GET_ALL_CATEGORIES,
             context: {
@@ -81,17 +81,17 @@ const AddCategory = () => {
             const parent = item.cat_name
             const cat_sort_order = item.cat_sort_order
 
-            arrData.push({ cat_name: parent, cat_id: item.cat_id, cat_sort_order })
+            arrData.push({ cat_name: parent, id: item.id, cat_sort_order })
             if (item.subcategories) {
                 item.subcategories.forEach(subCat => {
                     const sub = subCat.cat_name
 
-                    arrData.push({ cat_name: `${parent} > ${sub}`, cat_id: subCat.cat_id })
+                    arrData.push({ cat_name: `${parent} > ${sub}`, id: subCat.id })
                     // if (subCat.subsubcategories) {
                     //     subCat.subsubcategories.forEach(subSubCat => {
                     //         const subSub = subSubCat.cat_name
 
-                    //         arrData.push({ cat_name: `${parent} > ${sub} > ${subSub}`, cat_id: subSubCat.cat_id })
+                    //         arrData.push({ cat_name: `${parent} > ${sub} > ${subSub}`, id: subSubCat.id })
                     //     })
                     // }
                 })
@@ -107,7 +107,7 @@ const AddCategory = () => {
 
         apolloClient.query({
             query: productQuery.GET_SINGLE_CATEGORY_FOR_UPDATE,
-            variables: { query: { cat_id: params.id } },
+            variables: { query: { cat_id: parseInt(params.id) } },
             context: {
                 headers: {
                     TENANTID: process.env.REACT_APP_TENANTID,
@@ -119,6 +119,7 @@ const AddCategory = () => {
             setSingleCategory(data.category)
             setIsFeatured(state => data?.category?.is_featured || state)
             setCategoryStatus(state => data?.category?.cat_status || state)
+            setParentId(state => data?.category?.cat_parent_id || state)
         }).catch(err => {
             toast.error("Something went worng.!")
         })
@@ -158,8 +159,8 @@ const AddCategory = () => {
                 isFeatured,
                 categoryStatus,
             }
-            if (parentUid) {
-                data.categoryParentId = parentUid
+            if (parentId) {
+                data.categoryParentId = parentId
             }
             if (categorySortOrder) {
                 data.categorySortOrder = parseInt(categorySortOrder)
@@ -196,18 +197,19 @@ const AddCategory = () => {
             }).then(res => {
                 const data = res?.data?.createCategory
                 if (!data?.status) return toast.error(data?.message)
-                toast.success(data?.message)
                 history.push("/admin/categories/list");
-
+                window.location.reload()
+                toast.success(data?.message)
             }).catch(err => {
 
             }).finally(() => {
                 setIsLoading(false)
             })
         } else {
+            console.log("in upd")
             //for update 
             const data = {
-                cat_id: params.id,
+                cat_id: parseInt(params.id),
                 cat_name: categoryName,
                 cat_description: categoryDescription,
                 cat_meta_tag_title: categoryMetaTagTitle,
@@ -216,9 +218,9 @@ const AddCategory = () => {
                 is_featured: isFeatured,
                 cat_status: categoryStatus,
             }
-            if (parentUid) {
-                data.categoryParentId = parentUid
-            } if (image.file) {
+            if (parentId) {
+                data.cat_parent_id = parentId
+            } if (image) {
                 data.categoryImage = image.file
             } if (categorySortOrder) {
                 data.cat_sort_order = parseInt(categorySortOrder)
@@ -248,8 +250,9 @@ const AddCategory = () => {
             }).then(res => {
                 const data = res?.data?.updateCategory
                 if (!data?.status) return toast.error(data?.message)
-                toast.success(data?.message)
                 history.push("/admin/categories/list");
+                window.location.reload();
+                toast.success(data?.message)
             }).catch(err => {
 
             }).finally(() => {
@@ -280,7 +283,7 @@ const AddCategory = () => {
                     <Col sm={24} xs={24}>
                         <Cards headless>
 
-                            {params.id && !singleCategory.cat_id ?
+                            {params.id && !singleCategory.id ?
                                 <div className="spin">
                                     <Spin />
                                 </div>
@@ -353,11 +356,11 @@ const AddCategory = () => {
                                                         <Select
                                                             allowClear
                                                             placeholder="Please select"
-                                                            onChange={value => setParentUid(value)}
+                                                            onChange={value => setParentId(value)}
                                                             defaultValue={singleCategory.cat_parent_id}
                                                         >
                                                             {structuredCategories.data.map(item => (
-                                                                <Option key={item.cat_id} value={item.cat_id}>{item.cat_name}</Option>
+                                                                <Option key={item.id} value={item.id}>{item.cat_name}</Option>
                                                             ))}
 
                                                         </Select>

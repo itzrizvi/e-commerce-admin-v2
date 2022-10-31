@@ -66,7 +66,7 @@ const AddAttributeGroup = () => {
         }
 
         else { // Update  Attribute group
-            const variables = { data: { attr_group_uuid: params.id, attr_group_name, attrgroup_sortorder: parseInt(attrgroup_sortorder), attrgroup_status: groupStatus } }
+            const variables = { data: { attr_group_id: parseInt(params.id), attr_group_name, attrgroup_sortorder: parseInt(attrgroup_sortorder), attrgroup_status: groupStatus } }
             console.log(variables)
             // return;
             apolloClient.mutate({

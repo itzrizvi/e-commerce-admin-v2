@@ -36,7 +36,7 @@ const AddCoupon = () => {
 
         apolloClient.query({
             query: couponQuery.GET_SINGLE_COUPON,
-            variables: { query: { coupon_uuid: params.id } },
+            variables: { query: { coupon_id: parseInt(params.id) } },
             context: {
                 headers: {
                     TENANTID: process.env.REACT_APP_TENANTID,
@@ -74,7 +74,7 @@ const AddCoupon = () => {
         console.log(data)
 
         // return;
-        // ADD NEW CUSTOMER GROUP
+        // ADD NEW Coupon
         if (!params.id) {
             const variables = { data }
 
@@ -119,7 +119,7 @@ const AddCoupon = () => {
         // UPDATE Coupon
         else {
             const variables = {
-                data: { coupon_uuid: params.id, ...data }
+                data: { coupon_id: parseInt(params.id), ...data }
             }
             console.log(variables)
             apolloClient.mutate({

@@ -163,8 +163,8 @@ const ListCoupon = () => {
 
         {
             title: 'Action',
-            dataIndex: 'coupon_uuid',
-            key: 'coupon_uuid',
+            dataIndex: 'coupon_id',
+            key: 'coupon_id',
             width: 70,
             align: 'right',
             render: (value, record) => (
@@ -186,7 +186,7 @@ const ListCoupon = () => {
     }
 
     const handleStatusChange = (record, checked) => {
-        const variables = { data: { coupon_uuid: record.coupon_uuid, coupon_status: checked } }
+        const variables = { data: { coupon_id: record.coupon_id, coupon_status: checked } }
         console.log(variables)
         // return;
         apolloClient.mutate({
@@ -244,7 +244,7 @@ const ListCoupon = () => {
                                             scroll={{ x: "max-content" }}
                                             className="table-responsive"
                                             columns={columns}
-                                            rowKey={'coupon_uuid'}
+                                            rowKey={'coupon_id'}
                                             size="small"
                                             dataSource={searchText ? filteredCoupons : coupons.data}
                                             rowClassName={(record, index) => (index % 2 == 0 ? "" : "altTableClass")}

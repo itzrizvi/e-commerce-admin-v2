@@ -68,7 +68,7 @@ const ListAttributes = () => {
             align: 'right',
             render: (text, record) => (
                 <>
-                    <Link to={`/admin/attributes/add?id=${record.attribute_uuid}&name=${record.attribute_name}&g_id=${record.attribute_group.attr_group_uuid}`}>
+                    <Link to={`/admin/attributes/add?id=${record.id}&name=${record.attribute_name}&g_id=${record.attribute_group.id}`}>
                         {/* <Button size="default" type="white" title='Edit'> */}
                         <FontAwesome name="edit" style={{ margin: ".5em 1em" }} />
                         {/* </Button> */}
@@ -111,7 +111,7 @@ const ListAttributes = () => {
     }
 
     const handleStatusChange = (record, checked) => {
-        const variables = { data: { attribute_uuid: record.attribute_uuid, attribute_status: checked } }
+        const variables = { data: { attribute_id: record.id, attribute_status: checked } }
         console.log(variables)
         // return;
         apolloClient.mutate({
