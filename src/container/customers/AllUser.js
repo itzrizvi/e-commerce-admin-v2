@@ -75,21 +75,21 @@ const ListUser = () => {
 
     const columns = [
         {
-            title: 'UID',
-            dataIndex: 'uid',
-            key: 'uid',
+            title: 'id',
+            dataIndex: 'id',
+            key: 'id',
             width: 100,
             ellipsis: true,
-            sorter: (a, b) => a.uid.toUpperCase() > b.uid.toUpperCase() ? 1 : -1,
+            sorter: (a, b) => a.id.toUpperCase() > b.id.toUpperCase() ? 1 : -1,
 
         },
         {
             title: 'Image',
-            dataIndex: 'uid',
-            key: 'uid',
+            dataIndex: 'id',
+            key: 'id',
             width: 70,
             // render: (text, record) => (<img src={require('../../static/img/avatar/NoPath (3).png')} alt="" />),
-            render: (text, record) => (<LazyLoadImage effect="blur" width="40" src={renderImage(record.uid, record.image, 'user', '128x128')} onError={errorImageSrc} alt={record.uid} />)
+            render: (text, record) => (<LazyLoadImage effect="blur" width="40" src={renderImage(record.id, record.image, 'user', '128x128')} onError={errorImageSrc} alt={record.id} />)
         },
         {
             title: 'Email',
@@ -161,7 +161,7 @@ const ListUser = () => {
             align: 'center',
             render: (text, record) => (
                 <>
-                    <Link to={`/admin/customers/edit?uid=${record.uid}&first_name=${record.first_name}&last_name=${record.last_name}&email=${record.email}&status=${record.status}`}>
+                    <Link to={`/admin/customers/edit?uid=${record.id}&first_name=${record.first_name}&last_name=${record.last_name}&email=${record.email}&status=${record.status}`}>
                         {/* <Button size="default" type="white" title='Edit'> */}
                         <FontAwesome name="edit" />
                         {/* </Button> */}

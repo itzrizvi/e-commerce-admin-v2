@@ -71,27 +71,12 @@
 			]
 		},
 		{
-			"path": "src/container/products/addProducts/AttributeTab.js",
+			"path": "src/container/products/ListCoupon.js",
 			"bookmarks": [
 				{
-					"line": 190,
-					"column": 48,
-					"label": "."
-				}
-			]
-		},
-		{
-			"path": "src/container/products/AddProduct.js",
-			"bookmarks": [
-				{
-					"line": 222,
-					"column": 27,
+					"line": 198,
+					"column": 29,
 					"label": "--"
-				},
-				{
-					"line": 705,
-					"column": 40,
-					"label": "-att---"
 				}
 			]
 		}

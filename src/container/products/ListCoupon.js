@@ -16,6 +16,7 @@ import { viewPermission } from '../../utility/utility';
 
 const ListCoupon = () => {
     viewPermission('coupon');
+    const [isLoading, setIsLoading] = useState(false)
     const dummyData = [...Array(10).keys()].map(i => ({
         n: `Coupon${i + 1}`,
         c: i + 1,
@@ -163,8 +164,8 @@ const ListCoupon = () => {
 
         {
             title: 'Action',
-            dataIndex: 'coupon_id',
-            key: 'coupon_id',
+            dataIndex: 'id',
+            key: 'id',
             width: 70,
             align: 'right',
             render: (value, record) => (
@@ -186,7 +187,7 @@ const ListCoupon = () => {
     }
 
     const handleStatusChange = (record, checked) => {
-        const variables = { data: { coupon_id: record.coupon_id, coupon_status: checked } }
+        const variables = { data: { coupon_id: record.id, coupon_status: checked } }
         console.log(variables)
         // return;
         apolloClient.mutate({
@@ -244,7 +245,7 @@ const ListCoupon = () => {
                                             scroll={{ x: "max-content" }}
                                             className="table-responsive"
                                             columns={columns}
-                                            rowKey={'coupon_id'}
+                                            rowKey={'id'}
                                             size="small"
                                             dataSource={searchText ? filteredCoupons : coupons.data}
                                             rowClassName={(record, index) => (index % 2 == 0 ? "" : "altTableClass")}

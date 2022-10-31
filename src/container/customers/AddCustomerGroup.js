@@ -33,7 +33,7 @@ const AddCustomerGroup = () => {
 
         apolloClient.query({
             query: customerQuery.GET_SINGLE_CUSTOMER_GROUP,
-            variables: { query: { customer_group_uuid: params.id } },
+            variables: { query: { customer_group_id: parseInt(params.id) } },
             context: {
                 headers: {
                     TENANTID: process.env.REACT_APP_TENANTID,
@@ -101,7 +101,7 @@ const AddCustomerGroup = () => {
         else {
             const variables = {
                 data: {
-                    customer_group_uuid: params.id,
+                    id: parseInt(params.id),
                     customer_group_name,
                     customergroup_description,
                     customergroup_sortorder: parseInt(customergroup_sortorder),
@@ -191,7 +191,7 @@ const AddCustomerGroup = () => {
                                     <Form.Item
                                         rules={[{ required: true, max: maxLength, message: "Please enter Sort order" }]}
                                         name="customergroup_sortorder" label="Sort order"
-                                        initialValue={singleCustomerGroup.data.customergroup_sortorder || ""}
+                                        initialValue={singleCustomerGroup.data.customergroup_sortorder ? parseInt(singleCustomerGroup.data.customergroup_sortorder) : ""}
                                     >
                                         <Input type='number' placeholder='Enter sort order' />
                                     </Form.Item>

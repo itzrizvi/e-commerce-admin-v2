@@ -794,9 +794,8 @@ export const customerQuery = {
     getAllCustomerGroups {
       message
       status
-      tenant_id
       data {
-        customer_group_uuid
+        id
         customer_group_name
         customer_group_slug
         customergroup_description
@@ -816,13 +815,12 @@ export const customerQuery = {
       status
       tenant_id
       data {
-        customer_group_uuid
+        id
         customer_group_name
         customer_group_slug
         customergroup_description
         customergroup_sortorder
         customergroup_status
-        tenant_id
         createdAt
         updatedAt
       }
@@ -837,7 +835,6 @@ export const customerMutation = {
     createCustomerGroup(data:$data){
       message
       status
-      tenant_id
     }
   }
   `,
@@ -860,7 +857,7 @@ export const couponQuery = {
       message
       status
       data {
-        coupon_id
+        id
         coupon_name
         coupon_code
         coupon_type
@@ -885,7 +882,7 @@ export const couponQuery = {
       status
       message
       data {
-        coupon_id
+        id
         coupon_name
         coupon_code
         coupon_type

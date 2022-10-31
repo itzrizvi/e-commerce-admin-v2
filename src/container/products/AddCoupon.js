@@ -71,8 +71,8 @@ const AddCoupon = () => {
             coupon_amount: parseInt(coupon_amount),
             coupon_sortorder: parseInt(coupon_sortorder),
         }
-        console.log(data)
 
+        setIsLoading(true)
         // return;
         // ADD NEW Coupon
         if (!params.id) {
