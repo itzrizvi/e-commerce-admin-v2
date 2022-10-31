@@ -131,13 +131,13 @@ export const authQuery = {
         status
         tenant_id
         data {
-          uid
+          id
           first_name
           last_name
           user_status
           email_verified
           roles {
-            role_uuid
+            id
             role
             role_slug
             role_no

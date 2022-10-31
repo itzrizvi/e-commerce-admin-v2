@@ -70,7 +70,7 @@ const AddAdmin = () => {
 
         apolloClient.query({
             query: authQuery.GET_SINGLE_ADMIN,
-            variables: { query: { id: params.id } },
+            variables: { query: { id: parseInt(params.id) } },
             context: {
                 headers: {
                     TENANTID: process.env.REACT_APP_TENANTID,
@@ -101,7 +101,7 @@ const AddAdmin = () => {
 
         setIsLoading(true);
         if (!params.id) { // ADD NEW ADMIN
-            const variables = { data: { ...values, role_ids: selectedRoles.map(item => ({ id: item })), userStatus, sendEmail } }
+            const variables = { data: { ...values, role_ids: selectedRoles.map(item => ({ role_id: item })), userStatus, sendEmail } }
             apolloClient.mutate({
                 mutation: authMutation.ADMIN_SIGN_UP,
                 variables,
@@ -126,9 +126,9 @@ const AddAdmin = () => {
             }).then(res => {
                 const data = res.data.adminSignUp
                 if (!data.status) return toast.error(data.message);
-                toast.success(`${values.email} added successfully.`)
                 history.push("/admin/admin/admins");
-
+                window.location.reload()
+                toast.success(`${values.email} added successfully.`)
             }).catch(err => {
                 console.log("add product err", err)
                 toast.error('Soemthing Went wrong !!');
@@ -138,10 +138,10 @@ const AddAdmin = () => {
             const { first_name, last_name } = values
             const variables = {
                 data: {
-                    uid: params.id,
+                    id: parseInt(params.id),
                     first_name,
                     last_name,
-                    role_ids: selectedRoles.map(item => ({ id: item })),
+                    role_ids: selectedRoles.map(item => ({ role_id: item })),
                     user_status: userStatus,
                     sendEmail,
                 }
