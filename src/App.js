@@ -18,6 +18,7 @@ import 'antd/es/modal/style';
 // import 'antd/es/slider/style';
 import './config/customTable.css'
 import AuthVerify from './utility/auth_verify';
+import NotFound404 from './container/noFound/404';
 
 const { theme } = config;
 
@@ -52,6 +53,7 @@ const ProviderConfig = () => {
             {isLoggedIn && (path === process.env.PUBLIC_URL || path === `${process.env.PUBLIC_URL}/`) && (
               <Redirect to="/admin" />
             )}
+            {/* <Route exact path="/*" component={NotFound404} /> */}
           </Router>
         </ApolloProvider>
       </ThemeProvider>

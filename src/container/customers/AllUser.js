@@ -221,7 +221,7 @@ const ListUser = () => {
                                                 rowClassName={(record, index) => (index % 2 == 0 ? "" : "altTableClass")}
                                                 // pagination={false}
                                                 pagination={{
-                                                    defaultPageSize: config.USERS_PER_PAGE,
+                                                    defaultPageSize: config.CUSTOMER_PER_PAGE,
                                                     total: searchText ? filteredUser.length : staffs.data.length,
                                                     showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`,
                                                 }}

@@ -95,7 +95,9 @@ const MenuItems = ({ darkMode, toggleCollapsed, topMenu }) => {
         menuPermission('attribute') || 
         menuPermission('attribute-group') ||
         menuPermission('category') ||
-        menuPermission('product')) && (
+        menuPermission('product') ||
+        menuPermission('product-availability-status') ||
+        menuPermission('product-condition')) && (
           <SubMenu key="products" icon={!topMenu && <FeatherIcon icon="shopping-cart" />} title="Products">
             {
               menuPermission('coupon') && 
@@ -136,6 +138,23 @@ const MenuItems = ({ darkMode, toggleCollapsed, topMenu }) => {
                   Products
                 </NavLink>
               </Menu.Item>
+            }
+
+            {
+              menuPermission('product-condition') &&
+                <Menu.Item key="product_condition">
+                  <NavLink onClick={toggleCollapsed} to={`${path}/product-condition/list`}>
+                    Product Conditions
+                  </NavLink>
+                </Menu.Item>
+            }
+            {
+              menuPermission('product-availability-status') &&
+                <Menu.Item key="product-availability-status">
+                  <NavLink onClick={toggleCollapsed} to={`${path}/product-availability-status/list`}>
+                    Product Availability Statuses
+                  </NavLink>
+                </Menu.Item>
             }
           </SubMenu>
         )
@@ -206,6 +225,13 @@ const MenuItems = ({ darkMode, toggleCollapsed, topMenu }) => {
           </Menu.Item>
         </SubMenu>
       }
+
+      
+            
+      {/* <SubMenu key="settings" icon={!topMenu && <FeatherIcon icon="settings" />} title="Settings">
+        
+      </SubMenu>
+       */}
 
     </Menu>
   );
