@@ -8,8 +8,9 @@ const PartsOfProductTab = ({ products, setProducts, selectedPartsOfProducts, set
     const columns = [
         {
             title: 'Name',
-            dataIndex: 'name',
-            key: 'name',
+            dataIndex: 'label',
+            key: 'label',
+            // render: (val, record) => record.label
         },
         {
             title: 'SKU',
@@ -22,7 +23,7 @@ const PartsOfProductTab = ({ products, setProducts, selectedPartsOfProducts, set
             key: 'q',
             width: 120,
             render: (text, record) => <Input
-                defaultValue={"1"}
+                defaultValue={record.quantity || "1"}
                 type="number"
                 placeholder="Quantity"
                 onBlur={e => {

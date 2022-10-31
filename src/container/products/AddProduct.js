@@ -38,6 +38,11 @@ const AddProduct = () => {
     useEffect(() => {
         if (!params.id) return;
 
+        // test START
+
+        // test END
+        
+        
         apolloClient.query({
             query: productQuery.GET_SINGLE_PRODUCT,
             variables: { query: { prod_uuid: params.id } },
@@ -82,20 +87,28 @@ const AddProduct = () => {
                 return n
             })
             setSelectedPartsOfProducts(s => {
-                console.log(data?.data?.part_of_products);
+                // console.log(data?.data?.part_of_products);
                 const n = data?.data?.part_of_products?.map(item => (
                     {
-                        label: item.prod_name,
-                        value: item.prod_uuid,
-                        uid: item.prod_uuid,
-                        key: item.prod_uuid,
-                        name: item.prod_name,
-                        sku: item.prod_sku,
+                        label: item.part_product.prod_name,
+                        value: item.part_product.prod_uuid,
+                        uid: item.part_product.prod_uuid,
+                        key: item.part_product.prod_uuid,
+                        name: item.part_product.prod_name,
+                        sku: item.part_product.prod_sku,
+                        quantity: item.prod_quantity,
                     }
                 ))
-                console.log(n)
+                // console.log(n)
                 return n
             })
+            setFeaturesImage(state => {
+                const thumbnail = `https://api.primeserverparts.com/images/product/image/thumbnail/${data?.data?.prod_uuid}/128x128_${data?.data?.prod_uuid}.jpg`
+                return ({ file: '', thumbnail })
+            })
+            setGallaryImages(data?.data.gallery.map(img => ({ file: '', url: `https://api.primeserverparts.com/images/product/image/gallery/${data?.data?.prod_uuid}/128x128_${img.prod_image}`, prod_gallery_uuid: img.prod_gallery_uuid })))
+
+
         }).catch(err => {
             console.log("error on loading porduct,\n", err)
         })
@@ -107,7 +120,7 @@ const AddProduct = () => {
     // ================= 1.for General tab START =================
     const [longDescription, setLongDescription] = useState(RichTextEditor.createEmptyValue());
     const [prod_long_desc, setProd_long_desc] = useState("")
-    const onChangeRte = value => {
+    const onChangeRte = value => { 
         setProd_long_desc(value.toString('html'))
         setLongDescription(value);
     }
@@ -147,6 +160,8 @@ const AddProduct = () => {
     // get all brands with category
     useEffect(() => {
         // Load Manufacture/brand
+        if (params.id && singleProduct.isLoading) return
+
         apolloClient.query({
             query: brandQuery.GET_ALL_BRAND_WITH_CATEGORY,
             context: {
@@ -158,6 +173,33 @@ const AddProduct = () => {
         }).then(res => {
             const data = res?.data?.getAllBrands
             setBrand(s => ({ ...s, data: data?.data, error: '' }))
+            // set initial value - category for selected brand/manufacture
+            if (params.id) {
+                const uid = singleProduct?.data.brand?.brand_uuid
+                const selectedBrand = data?.data.find(brand => brand.brand_uuid === uid)
+                // Loop & organize categories
+                let arrData = []
+                selectedBrand?.categories?.forEach(item => {
+                    const parent = item.cat_name
+
+                    arrData.push({ cat_name: parent, cat_id: item.cat_id, cat_status: item.cat_status })
+                    if (item.subcategories) {
+                        item.subcategories.forEach(subCat => {
+                            const sub = subCat.cat_name
+                            arrData.push({ cat_name: `${parent} > ${sub}`, cat_id: subCat.cat_id, cat_status: subCat.cat_status })
+                            if (subCat.subsubcategories) {
+                                subCat.subsubcategories.forEach(subSubCat => {
+                                    const subSub = subSubCat.cat_name
+                                    arrData.push({ cat_name: `${parent} > ${sub} > ${subSub}`, cat_id: subSubCat.cat_id, cat_status: subSubCat.cat_status })
+                                })
+                            }
+                        })
+                    }
+                })
+                setCategories(arrData)
+
+            }
+
         }).catch(err => {
             setBrand(s => ({ ...s, error: 'Something went Wrong.!! ' }))
         }).finally(() => {
@@ -165,7 +207,7 @@ const AddProduct = () => {
         })
 
 
-    }, [])
+    }, [singleProduct])
     // ================= 3.for links tab END =================
 
 
@@ -701,7 +743,7 @@ const AddProduct = () => {
 
 
                                         <Tabs.TabPane tab="Images" key="Images">
-                                            <ImageTab {...{ featuresImage, setFeaturesImage, gallaryImages, setGallaryImages }} />
+                                            <ImageTab {...{ featuresImage, setFeaturesImage, gallaryImages, setGallaryImages, singleProdUid: singleProduct?.data?.prod_uuid, setIsLoading }} />
                                         </Tabs.TabPane>
 
                                     </Tabs>

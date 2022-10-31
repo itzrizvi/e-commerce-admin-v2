@@ -31,10 +31,10 @@ const RoleListTable = () => {
   const [isFilter, setIsFilter] = useState(false)
 
   rolesData.map(roles => {
-    const { role_uuid, role, createdAt, role_description, permissions, role_status, } = roles;
+    const { id, role, createdAt, role_description, permissions, role_status, } = roles;
 
     return rolesTableData.push({
-      key: role_uuid,
+      key: id,
       name: role,
       role_description,
       permissions,
@@ -60,7 +60,7 @@ const RoleListTable = () => {
 
   const handleStatusChange = (record, checked) => {
 
-    const variables = { data: { role_uuid: record.key, role_status: checked } }
+    const variables = { data: { id: record.key, role_status: checked } }
 
 
     apolloClient.mutate({

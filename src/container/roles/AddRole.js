@@ -41,7 +41,7 @@ const AddRole = () => {
         },
         {
             title: 'Access',
-            dataIndex: 'roles_permission_uuid',
+            dataIndex: 'id',
             render: (value, item, index) => <Checkbox onChange={e => {
                 const isChecked = e.target.checked
                 setSelectedPermission(state => {
@@ -67,6 +67,7 @@ const AddRole = () => {
         },
     ];
 
+    // get all permission
     useEffect(() => {
         apolloClient.query({
             query: authQuery.GET_ALL_ROLES_PERMISSION,
@@ -84,7 +85,7 @@ const AddRole = () => {
             setAllPermission(s => ({ ...s, data: data?.data, error: '' }))
             setSelectedPermission(state => {
                 const newState = data?.data.map(item => ({
-                    permission_uuid: item.roles_permission_uuid,
+                    permission_id: item.id,
                     read_access: false,
                     edit_access: false
                 }))
@@ -196,7 +197,7 @@ const AddRole = () => {
                                             <Table
                                                 pagination={false}
                                                 columns={columns}
-                                                rowKey={'roles_permission_uuid'}
+                                                rowKey={'id'}
                                                 dataSource={allPermission.data}
                                             />
                                     }

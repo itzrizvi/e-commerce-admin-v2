@@ -21,7 +21,7 @@ import { viewPermission } from '../../utility/utility';
 
 const handleStatusChange = (record, checked) => {
     const dispatch = useDispatch();
-    const variables = { data: { uid: record.uid, user_status: checked } }
+    const variables = { data: { id: record.id, user_status: checked } }
 
     apolloClient.mutate({
         mutation: authMutation.ADMIN_UPDATE,
@@ -60,6 +60,7 @@ const AllAdmin = () => {
     const [allRole, setAllRole] = useState({ data: [], isLoading: true })
     const [roleFilters, setRoleFilters] = useState([])
 
+    // Load admin list
     useEffect(() => {
         apolloClient.query({
             query: authQuery.GET_ALL_STAFF,
@@ -83,44 +84,27 @@ const AllAdmin = () => {
 
 
 
-        // apolloClient.query({
-        //     query: authQuery.GET_ALL_ROLES,
-        //     context: {
-        //         headers: {
-        //             TENANTID: process.env.REACT_APP_TENANTID,
-        //             Authorization: token
-        //         }
-        //     }
-        // }).then(res => {
-        //     if (res?.data?.getAllRoles?.isAuth) {
-        //         setAllRole(s => ({ ...s, data: res?.data?.getAllRoles?.data, error: '' }))
-        //         setRoleFilters(res?.data?.getAllRoles?.data?.map(role => ({ text: "aa", value: role.role_uuid })))
-        //     }
-        // }).catch(err => {
-        //     setAllRole(s => ({ ...s, error: 'Something went Wrong.!! ' }))
-        // }).finally(() => {
-        //     setAllRole(s => ({ ...s, isLoading: false }))
-        // })
+
 
     }, [])
 
     const columns = [
         {
-            title: 'UID',
-            dataIndex: 'uid',
-            key: 'uid',
+            title: 'ID',
+            dataIndex: 'id',
+            key: 'id',
             width: 100,
             ellipsis: true,
-            sorter: (a, b) => a.uid.toUpperCase() > b.uid.toUpperCase() ? 1 : -1,
+            sorter: (a, b) => a.id.toUpperCase() > b.id.toUpperCase() ? 1 : -1,
 
         },
         {
             title: 'Image',
-            dataIndex: 'uid',
-            key: 'uid',
+            dataIndex: 'id',
+            key: 'id',
             width: 70,
             // render: (text, record) => (<img src={require('../../static/img/avatar/NoPath (3).png')} alt="" />),
-            render: (text, record) => (<LazyLoadImage effect="blur" width="40" src={renderImage(record.uid, record.image, 'user', '128x128')} onError={errorImageSrc} alt={record.uid} />)
+            render: (text, record) => (<LazyLoadImage effect="blur" width="40" src={renderImage(record.id, record.image, 'user', '128x128')} onError={errorImageSrc} alt={record.id} />)
         },
         {
             title: 'Email',
@@ -135,12 +119,14 @@ const AllAdmin = () => {
             title: 'First Name',
             dataIndex: 'first_name',
             key: 'first_name',
+            ellipsis: true,
             sorter: (a, b) => a.first_name.toUpperCase() > b.first_name.toUpperCase() ? 1 : -1,
         },
         {
             title: 'Last Name',
             dataIndex: 'last_name',
             key: 'last_name',
+            ellipsis: true,
             sorter: (a, b) => a.last_name.toUpperCase() > b.last_name.toUpperCase() ? 1 : -1,
         },
         {
@@ -205,7 +191,7 @@ const AllAdmin = () => {
             align: 'center',
             render: (text, record) => (
                 <>
-                    <Link to={`/admin/admin/add-admin?uid=${record.uid}&first_name=${record.first_name}&last_name=${record.last_name}&email=${record.email}&status=${record.status}`}>
+                    <Link to={`/admin/admin/add-admin?id=${record.id}&first_name=${record.first_name}&last_name=${record.last_name}&email=${record.email}&status=${record.status}`}>
                         {/* <Button size="default" type="white" title='Edit'> */}
                         <FontAwesome name="edit" />
                         {/* </Button> */}
@@ -259,7 +245,7 @@ const AllAdmin = () => {
                                                 className="table-responsive"
                                                 columns={columns}
 
-                                                rowKey={'uid'}
+                                                rowKey={'id'}
                                                 size="small"
                                                 dataSource={searchText ? filteredUser : staffs.data}
                                                 rowClassName={(record, index) => (index % 2 == 0 ? "" : "altTableClass")}

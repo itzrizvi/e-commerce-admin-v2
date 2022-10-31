@@ -53,7 +53,7 @@ const ListPermission = () => {
     }, [])
 
     const handleStatusChange = (record, checked) => {
-        const variables = { data: { roles_permission_uuid: record.roles_permission_uuid, roles_permission_status: checked } }
+        const variables = { data: { id: record.id, roles_permission_status: checked } }
 
         apolloClient.mutate({
             mutation: authMutation.UPDATE_ROLES_PERMISSION,
@@ -116,7 +116,7 @@ const ListPermission = () => {
             align: 'right',
             render: (text, record) => (
                 <>
-                    <Link to={`/admin/permission/add?name=${record.roles_permission_name}&status=${record.roles_permission_status}&id=${record.roles_permission_uuid}`}>
+                    <Link to={`/admin/permission/add?name=${record.roles_permission_name}&status=${record.roles_permission_status}&id=${record.id}`}>
                         {/* <Button size="default" type="white" title='Edit'> */}
                         <FontAwesome name="edit" style={{ margin: ".5em 1em" }} />
                         {/* </Button> */}
@@ -168,7 +168,7 @@ const ListPermission = () => {
                                             <Table
                                                 className="table-responsive"
                                                 columns={columns}
-                                                rowKey={'roles_permission_uuid'}
+                                                rowKey={'id'}
                                                 size="small"
                                                 dataSource={searchText ? filteredPermissions : permissions.data}
                                                 rowClassName={(record, index) => (index % 2 == 0 ? "" : "altTableClass")}

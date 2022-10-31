@@ -15,19 +15,22 @@ const ellipsis = (text, size) => {
 const menuPermission = (name, type = 'read') => {
   const permissions_json = Cookies.get('permissions') ?? "[]";
   const permissions = JSON.parse(permissions_json);
-  for(const ele of permissions){
-    if(ele.permission_name.toLowerCase() === name.toLowerCase()){
-      if( type === 'read') return ele.read_access
-      else if( type === 'edit' ) return ele.edit_access
+  for (const ele of permissions) {
+    if (ele.permission_name.toLowerCase() === name.toLowerCase()) {
+      if (type === 'read') return ele.read_access
+      else if (type === 'edit') return ele.edit_access
     }
   }
 
-  return false;
+  // todo: uidChange -return false
+  return true;
+  // return false;
 }
 
-const viewPermission = (name) =>{
+const viewPermission = (name) => {
   const history = useHistory();
-  if(!menuPermission(name)) history.push('/admin');
+  // todo: uidChange -uncomment
+  // if (!menuPermission(name)) history.push('/admin');
 }
 
 

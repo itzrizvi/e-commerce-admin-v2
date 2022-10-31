@@ -16,7 +16,8 @@ const Dashboard = () => {
   const user = useSelector(state => state.auth.user);
   const dispatch = useDispatch();
   setTimeout(() => {
-    if(!menuPermission('dashboard')) dispatch(logOut());
+    // todo: uidChange
+    // if(!menuPermission('dashboard')) dispatch(logOut());
   }, 2000);
   return (
     <>

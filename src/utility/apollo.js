@@ -21,7 +21,7 @@ export const authQuery = {
           message
           status
           data {
-            role_uuid
+            id
             role_no
             role
             role_slug
@@ -29,9 +29,9 @@ export const authQuery = {
             role_description
             tenant_id
             permissions {
-              permission_data_uuid
+              id
               rolesPermission {
-                roles_permission_uuid
+                id
                 roles_permission_name
                 roles_permission_slug
                 roles_permission_status
@@ -50,7 +50,7 @@ export const authQuery = {
           message
           status
           data {
-            uid
+            id
             first_name
             last_name
             email
@@ -86,12 +86,13 @@ export const authQuery = {
           isAuth
           message
           status
-          tenant_id
           data {
-            roles_permission_uuid
+            id
             roles_permission_name
             roles_permission_slug
             roles_permission_status
+            createdAt
+            updatedAt 
           }
         }
       }
@@ -102,17 +103,16 @@ export const authQuery = {
             message
             status
             data {
-              role_uuid
+              id
               role_no
               role
               role_slug
               role_status
               role_description
-              tenant_id
               permissions {
-                permission_data_uuid
+                id
                 rolesPermission {
-                  roles_permission_uuid
+                  id
                   roles_permission_name
                   roles_permission_slug
                   roles_permission_status
@@ -161,18 +161,17 @@ export const authMutation = {
   `,
   LOGIN_MUTATION: gql`
     mutation adminSignIn($email: String!, $password: String!) {
-      adminSignIn(email: $email, password: $password) {
-        email
-        emailVerified
-        authToken
-        uid
-        message
-        first_name
-        last_name
-        status
-        user_status
-      }
-    }
+  adminSignIn(email: $email, password: $password) {
+    email
+    emailVerified
+    authToken
+    id
+    message
+    first_name
+    status
+    user_status
+  }
+}
   `,
   CREATE_ROLE_WITH_PERMISSION: gql`
         mutation createRoleWithPermission($data: CreateRoleWithPermissionInput){
@@ -596,6 +595,37 @@ export const productMutation = {
       tenant_id
     }
   }
+    `,
+  UPDATE_THUMBNAIL: gql`
+    mutation updateThumbnail($data:UpdateThumbnailInput) {
+      updateThumbnail(
+        data: $data
+      ) {
+        message
+        status
+        tenant_id
+      }
+    }
+    `,
+  DELETE_GALLERY_IMAGE: gql`
+    mutation deleteGalleryImage($data:GalleryImageDeleteInput){
+      deleteGalleryImage(data:$data){
+        message
+        status
+        tenant_id
+      }
+    }
+    `,
+  UPLOAD_GALLERY_IMAGE: gql`
+    mutation uploadGalleryImage($data:GalleryImageUploadInput) {
+      uploadGalleryImage(
+        data: $data
+      ) {
+        message
+        status
+        tenant_id
+      }
+    }
     `,
 }
 

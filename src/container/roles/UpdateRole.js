@@ -39,12 +39,12 @@ const UpdateRole = () => {
             render: (value, item, index) => <Checkbox
                 defaultChecked={value}
                 onChange={e => {
-                    const { roles_permission_uuid, read_access, edit_access } = item
+                    const { id, read_access, edit_access } = item
                     const variables = {
                         data: {
                             permissionsData: {
-                                role_uuid: singleRole?.data?.role_uuid,
-                                permission_uuid: roles_permission_uuid,
+                                role_id: parseInt(singleRole?.data?.id),
+                                permission_id: parseInt(id),
                                 read_access: e.target.checked,
                                 edit_access
                             }
@@ -85,12 +85,12 @@ const UpdateRole = () => {
             render: (value, item, index) => <Checkbox
                 defaultChecked={value}
                 onChange={e => {
-                    const { roles_permission_uuid, read_access, edit_access } = item
+                    const { id, read_access, edit_access } = item
                     const variables = {
                         data: {
                             permissionsData: {
-                                role_uuid: singleRole?.data?.role_uuid,
-                                permission_uuid: roles_permission_uuid,
+                                role_id: parseInt(singleRole?.data?.id),
+                                permission_id: parseInt(id),
                                 read_access,
                                 edit_access: e.target.checked
                             }
@@ -130,14 +130,16 @@ const UpdateRole = () => {
 
     const [allPermissions, setAllPermissions] = useState({ data: [], loading: true, error: '' })
 
+    // Load single role & get all permission
     useEffect(() => {
         if (!id) return;
 
+        // Load single role 
         apolloClient.query({
             query: authQuery.GET_SINGLE_ROLE,
             variables: {
                 query: {
-                    role_uuid: id
+                    id: parseInt(id)
                 }
             },
             context: {
@@ -156,6 +158,8 @@ const UpdateRole = () => {
             setSingleRole({ data: {}, loading: false, error: 'Something went worng' })
         })
 
+
+        // Load all permission
         apolloClient.query({
             query: authQuery.GET_ALL_ROLES_PERMISSION,
             context: {
@@ -174,13 +178,15 @@ const UpdateRole = () => {
         })
 
     }, [])
+
+    // organize permission
     useEffect(() => {
         if (singleRole.loading || allPermissions.loading) return;
 
 
         const data = allPermissions.data.map(item => {
-            const puuid1 = item.roles_permission_uuid
-            let findRes = singleRole.data.permissions.find(permission => permission.rolesPermission.roles_permission_uuid == puuid1)
+            const pid1 = item.id
+            let findRes = singleRole?.data?.permissions?.find(permission => permission.rolesPermission.id == pid1)
             const copyItem = { ...item, edit_access: false, read_access: false }
 
             if (findRes) {
@@ -192,10 +198,12 @@ const UpdateRole = () => {
         })
         setPermissionList(data)
     }, [singleRole, allPermissions])
+
+
     const handleSubmit = values => {
         // console.log(values);
         setIsLoading(true)
-        const variables = { data: { ...values, role_status, role_uuid: singleRole.data.role_uuid } }
+        const variables = { data: { ...values, role_status, id: singleRole.data.id } }
 
         apolloClient.mutate({
             mutation: authMutation.UPDATE_ROLE,
@@ -278,7 +286,7 @@ const UpdateRole = () => {
                                             <Table
                                                 pagination={false}
                                                 columns={columns}
-                                                rowKey={'roles_permission_uuid'}
+                                                rowKey={'id'}
                                                 dataSource={permissionList}
                                             />
                                         </Form.Item>

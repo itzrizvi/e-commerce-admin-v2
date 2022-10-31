@@ -66,11 +66,11 @@ const AddAdmin = () => {
 
     // get Single admin - update admin
     useEffect(() => {
-        if (!params.uid) return
+        if (!params.id) return
 
         apolloClient.query({
             query: authQuery.GET_SINGLE_ADMIN,
-            variables: { query: { uid: params.uid } },
+            variables: { query: { id: params.id } },
             context: {
                 headers: {
                     TENANTID: process.env.REACT_APP_TENANTID,
@@ -81,7 +81,7 @@ const AddAdmin = () => {
             const data = res?.data?.getSingleAdmin
             if (data.status) {
                 const roles = data?.data?.roles;
-                const rolesArray = roles.map(item => item.role_uuid)
+                const rolesArray = roles.map(item => item.id)
                 setExistingRoles({ data: rolesArray, isLoading: false })
                 setSelectedRoles(rolesArray)
             }
@@ -100,8 +100,8 @@ const AddAdmin = () => {
         if (!selectedRoles.length) return toast.warn("Select At List 1 Role..")
 
         setIsLoading(true);
-        if (!params.uid) { // ADD NEW ADMIN
-            const variables = { data: { ...values, roleUUID: selectedRoles.map(item => ({ role_uuid: item })), userStatus, sendEmail } }
+        if (!params.id) { // ADD NEW ADMIN
+            const variables = { data: { ...values, role_ids: selectedRoles.map(item => ({ id: item })), userStatus, sendEmail } }
             apolloClient.mutate({
                 mutation: authMutation.ADMIN_SIGN_UP,
                 variables,
@@ -125,7 +125,7 @@ const AddAdmin = () => {
                 }
             }).then(res => {
                 const data = res.data.adminSignUp
-                if (!data.status) return toast.error(message);
+                if (!data.status) return toast.error(data.message);
                 toast.success(`${values.email} added successfully.`)
                 history.push("/admin/admin/admins");
 
@@ -138,10 +138,10 @@ const AddAdmin = () => {
             const { first_name, last_name } = values
             const variables = {
                 data: {
-                    uid: params.uid,
+                    uid: params.id,
                     first_name,
                     last_name,
-                    roleUUID: selectedRoles.map(item => ({ role_uuid: item })),
+                    role_ids: selectedRoles.map(item => ({ id: item })),
                     user_status: userStatus,
                     sendEmail,
                 }
@@ -187,7 +187,7 @@ const AddAdmin = () => {
     return (
         <>
             <PageHeader
-                title={params.uid ? `Manage User | Edit user (${params.email})` : "Add Admin"}
+                title={params.id ? `Manage User | Edit user (${params.email})` : "Add Admin"}
             />
             <Main>
                 <Row gutter={25}>
@@ -219,7 +219,7 @@ const AddAdmin = () => {
                                 >
                                     <Input placeholder='Enter Last Name' />
                                 </Form.Item>
-                                {!params.uid && <Form.Item
+                                {!params.id && <Form.Item
                                     rules={[{
                                         required: true, message: "Please enter an email",
                                         max: maxLength,
@@ -231,22 +231,17 @@ const AddAdmin = () => {
                                 >
                                     <Input type='email' placeholder='Enter Email Address' onChange={e => setEmailInput(e.target.value)} />
                                 </Form.Item>}
-                                <Form.Item
+                                {/* <Form.Item
                                     rules={[
                                         {
                                             required: true,
                                             message: "Please enter a password",
 
                                         },
-                                        // {
-                                        //     // pattern: /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/,
-                                        //     pattern: /^[2-9]{2}\d{8}$/,
-                                        //     message: `Password Pattern`
-                                        // }
                                     ]}
                                     name="password" label="Password">
                                     <Input.Password type="password" placeholder='Enter Password...' />
-                                </Form.Item>
+                                </Form.Item> */}
 
                                 <Form.Item
                                     name="userStatus"
@@ -266,9 +261,9 @@ const AddAdmin = () => {
 
 
                                 <Form.Item
-                                    name="roleUUID" initialValue="" label="Role"
+                                    name="role_ids" initialValue="" label="Role"
                                 >
-                                    {(params.uid && existingRoles.isLoading) || roles.isLoading
+                                    {(params.id && existingRoles.isLoading) || roles.isLoading
                                         ?
                                         <div className="spin">
                                             <Spin />
@@ -286,7 +281,7 @@ const AddAdmin = () => {
                                                 <Row>
                                                     {roles.roles.map(item => (
                                                         <Col span={12}>
-                                                            <Checkbox value={item.role_uuid}>{item.role}</Checkbox>
+                                                            <Checkbox value={item.id}>{item.role}</Checkbox>
                                                             <br />
                                                             <Paragraph
                                                                 style={{
@@ -314,30 +309,7 @@ const AddAdmin = () => {
 
 
 
-                                {/* OLD MULTISELECT ROLESS */}
-                                {/* <Form.Item
-                                    name="roleUUID" initialValue="" label="Role"
-                                >
-                                    {(params.uid && existingRoles.isLoading) || roles.isLoading
-                                        ?
-                                        <div className="spin">
-                                            <Spin />
-                                        </div>
-                                        : <>
-                                            <Select
-                                                mode="multiple"
-                                                allowClear
-                                                placeholder="Please select"
-                                                onChange={value => setSelectedRoles(value)}
-                                                defaultValue={existingRoles.data}
-                                            >
-                                                {roles.roles.map(item => (
-                                                    <Option key={item.role_uuid} value={item.role_uuid}>{item.role}</Option>
-                                                ))}
-                                            </Select>
-                                        </>
-                                    }
-                                </Form.Item> */}
+
 
 
                                 <div
@@ -360,9 +332,7 @@ const AddAdmin = () => {
                                                 // className="btn-cancel"
                                                 type='white'
                                                 size="large"
-                                            // onClick={() => {
-                                            //     return form.resetFields();
-                                            // }}
+
                                             >
                                                 Cancel
                                             </Button>

@@ -34,6 +34,7 @@ const AddPermission = () => {
         setIsLoading(true)
 
 
+        // Add Permission START -------
         if (!params.id) {
             apolloClient.mutate({
                 mutation: authMutation.CREATE_ROLES_PERMISSION,
@@ -61,8 +62,9 @@ const AddPermission = () => {
             }).then(res => {
                 const data = res?.data?.createRolesPermission
                 if (!data.status) return toast.error(data.message);
-                toast.success(`${values.permissionName} added successfully`);
                 history.push("/admin/permission/list");
+                window.location.reload()
+                toast.success(`${values.permissionName} added successfully`);
 
             }).catch(err => {
                 console.log("got error on addPermission", err)
@@ -72,8 +74,12 @@ const AddPermission = () => {
             })
 
 
-        } else {
-            const variables = { data: { roles_permission_uuid: params.id, roles_permission_name: values.permissionName, roles_permission_status: permissionStatus, } }
+        }
+        // Add Permission END -------
+
+        // Update Permission START -------
+        else {
+            const variables = { data: { id: parseInt(params.id), roles_permission_name: values.permissionName, roles_permission_status: permissionStatus, } }
             apolloClient.mutate({
                 mutation: authMutation.UPDATE_ROLES_PERMISSION,
                 variables,
@@ -98,8 +104,9 @@ const AddPermission = () => {
             }).then(res => {
                 const data = res?.data?.updateRolesPermission
                 if (!data.status) return toast.error(data.message);
-                toast.success(`${values.permissionName} updated successfully`);
                 history.push("/admin/permission/list");
+                window.location.reload()
+                toast.success(`${values.permissionName} updated successfully`);
 
             }).catch(err => {
                 console.log("got error on addPermission", err)
@@ -107,8 +114,8 @@ const AddPermission = () => {
             }).finally(() => {
                 setIsLoading(false)
             })
-
         }
+        // Update Permission END -------
     }
 
 

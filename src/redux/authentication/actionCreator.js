@@ -28,10 +28,10 @@ const login = (email, password, history) => {
 
         apolloClient.mutate({
           mutation: authQuery.GET_AUTH_PERMISSION,
-          variables: { 
+          variables: {
             query: {
-              "uid": adminSignIn?.uid
-            } 
+              "id": parseInt(adminSignIn?.id)
+            }
           },
           context: {
             headers: {
@@ -39,23 +39,23 @@ const login = (email, password, history) => {
               Authorization: adminSignIn?.authToken
             }
           }
-        }).then( res => {
-            const roles = res?.data?.getSingleAdmin?.data?.roles;
-            roles.forEach(per => {
-              per.permissions.forEach( permission => {
-                permissions.push(
-                  {
-                    edit_access: permission.edit_access,
-                    read_access: permission.read_access,
-                    permission_name: permission?.rolesPermission?.roles_permission_slug
-                  }
-                )
-              });
+        }).then(res => {
+          const roles = res?.data?.getSingleAdmin?.data?.roles;
+          roles.forEach(per => {
+            per.permissions.forEach(permission => {
+              permissions.push(
+                {
+                  edit_access: permission.edit_access,
+                  read_access: permission.read_access,
+                  permission_name: permission?.rolesPermission?.roles_permission_slug
+                }
+              )
             });
+          });
 
-            Cookies.set('permissions', JSON.stringify(permissions));
+          Cookies.set('permissions', JSON.stringify(permissions));
         })
- 
+
 
         dispatch(loginSuccess({
           login: true,
@@ -66,7 +66,8 @@ const login = (email, password, history) => {
         }));
         history.push('/admin');
         setTimeout(() => {
-          window.location.reload();
+          // todo: uidChange
+          // window.location.reload();
         }, 2000);
       } else {
         dispatch(loginErr('wrong email or password'));
