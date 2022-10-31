@@ -47,7 +47,7 @@ const ListBanner = () => {
     }, [])
 
     const handleStatusChange = (record, checked) => {
-        const variables = { data: { banner_uuid: record.banner_uuid, banner_status: checked } }
+        const variables = { data: { banner_id: record.id, status: checked } }
     
         apolloClient.mutate({
             mutation: bannerQuery.BANNER_UPDATE,
@@ -62,7 +62,7 @@ const ListBanner = () => {
             const status = res?.data?.updateBanner?.status
             console.log(record);
             if (!status) return toast.error(res?.data?.message)
-            toast.success(`${record.banner_name} Status updated.`)
+            toast.success(`${record.name} Status updated.`)
         }).catch(err => {
             console.log(err);
             toast.error(`Something went wrong!!`)
@@ -73,32 +73,32 @@ const ListBanner = () => {
     const columns = [
         {
             title: 'ID',
-            dataIndex: 'banner_uuid',
-            key: 'banner_uuid',
+            dataIndex: 'id',
+            key: 'id',
             width: 80,
             ellipsis: true,
-            sorter: (a, b) => a.banner_uuid.toUpperCase() > b.banner_uuid.toUpperCase() ? 1 : -1,
+            sorter: (a, b) => a.id.toUpperCase() > b.id.toUpperCase() ? 1 : -1,
         },
         {
             title: 'Name',
-            dataIndex: 'banner_name',
-            key: 'banner_name',
+            dataIndex: 'name',
+            key: 'name',
             width: 250,
             ellipsis: true,
-            sorter: (a, b) => a.banner_name.toUpperCase() > b.banner_name.toUpperCase() ? 1 : -1,
+            sorter: (a, b) => a.name.toUpperCase() > b.name.toUpperCase() ? 1 : -1,
         },
         {
             title: 'Alias',
-            dataIndex: 'banner_slug',
-            key: 'banner_slug',
+            dataIndex: 'slug',
+            key: 'slug',
             width: 250,
             ellipsis: true,
-            sorter: (a, b) => a.banner_slug.toUpperCase() > b.banner_slug.toUpperCase() ? 1 : -1,
+            sorter: (a, b) => a.slug.toUpperCase() > b.slug.toUpperCase() ? 1 : -1,
         },
         {
             title: 'Status',
-            dataIndex: 'banner_status',
-            key: 'banner_status',
+            dataIndex: 'status',
+            key: 'status',
             align: 'right',
             width:120,
             render: (text, record) => (
@@ -114,8 +114,8 @@ const ListBanner = () => {
                   value: false,
                 }
             ],
-            onFilter: (value, record) => record.banner_status === value,
-            sorter: (a, b) => a.banner_status - b.banner_status,
+            onFilter: (value, record) => record.status === value,
+            sorter: (a, b) => a.status - b.status,
         },
         {
             title: 'Date',
@@ -135,7 +135,7 @@ const ListBanner = () => {
             width: 100,
             render: (text, record) => (
                 <>
-                    <Link to={`/admin/banner/edit?id=${record.banner_uuid}`}>
+                    <Link to={`/admin/banner/edit?id=${record.id}`}>
                         <FontAwesome name="edit" />
                     </Link>
                 </>
@@ -146,7 +146,7 @@ const ListBanner = () => {
     const onChangeSearch = e => {
         const value = e.target.value
         setIsFilter(value)
-        setFilteredBanner(banner.data.filter(banner => (banner?.banner_name + banner?.banner_slug + banner?.banner_uuid).toLowerCase().includes(value.toLowerCase())))
+        setFilteredBanner(banner.data.filter(banner => (banner?.name + banner?.slug + banner?.id).toLowerCase().includes(value.toLowerCase())))
     }
 
 
