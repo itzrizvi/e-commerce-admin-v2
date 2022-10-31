@@ -8,7 +8,7 @@ export const bannerQuery = {
         message
         status
         data {
-            banner_uuid
+            id
         }
       }
     }`,
@@ -18,7 +18,7 @@ export const bannerQuery = {
         message
         status
         data {
-          banner_uuid
+          id
           title
           link
           sort_order
@@ -32,26 +32,26 @@ export const bannerQuery = {
         status
         tenant_id
         data {
-          banner_uuid
-          banner_name
-          banner_slug
-          banner_status
+          id
+          name
+          slug
+          status
           createdAt
         }
       }
     }`,
   GET_SINGLE_BANNER: gql`
-    query getSingleBanner($banner_uuid : UUID!){
-    getSingleBanner(query: {banner_uuid: $banner_uuid}) {
+    query getSingleBanner($banner_id : Int!){
+    getSingleBanner(query: {banner_id: $banner_id}) {
       message
       tenant_id
       status
       data {
-        banner_uuid
-        banner_name
-        banner_status
-        bannerimages {
-          banner_uuid 
+        id
+        name
+        status
+        banner_images {
+          id 
           image
           link
           sort_order

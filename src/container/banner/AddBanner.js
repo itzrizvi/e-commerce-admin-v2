@@ -73,19 +73,23 @@ const AddBanner = () => {
             }).then(res => {
                 const data = res?.data?.addBanner
                 if (!data?.status) return toast.error('Something Went wrong !');
-                const banner_uuid = data?.data?.banner_uuid;
-                bannerData.forEach((val) => {
+                const banner_id = data?.data?.id;
+                bannerData.forEach((val, index) => {
                     apolloUploadClient.mutate({
                         mutation: bannerQuery.BANNER_IMAGE_ADD,
-                        variables: { data: { banner_id: banner_uuid, title: val.title, sort_order: val.sort_order, link: val.link, image: val.image } },
+                        variables: { data: { banner_id: banner_id, title: val.title, sort_order: val.sort_order, link: val.link, image: val.image } },
                         context: {
                             headers: {
                                 TENANTID: process.env.REACT_APP_TENANTID,
                                 Authorization: token
                             }
                         }
-                    }).then(res => {
-                        console.log(res);
+                    }).then( _ => {
+                        if( bannerData.length === index + 1 ){
+                            setTimeout(() => {
+                                window.location.reload(); 
+                            }, 2000);
+                        }
                     }).catch(err => {
                         toast.error('Something Went wrong !!');
                     })
@@ -97,9 +101,6 @@ const AddBanner = () => {
                 setIsLoading(false)
                 history.push("/admin/banner/list");
                 toast.success("Banner Added Successfully!");
-                setTimeout(() => {
-                    window.location.reload(); 
-                }, 2000);
             })
         }
     };
@@ -254,8 +255,8 @@ const AddBanner = () => {
                                 />
 
                                 <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '10px', marginBottom: '10px' }}>
-                                    <Button size="small" title="Add Banner" htmlType="button" type="primary">
-                                        <FeatherIcon icon="plus" onClick={addNewRow} />
+                                    <Button onClick={addNewRow} size="small" title="Add Banner" htmlType="button" type="primary">
+                                        <FeatherIcon icon="plus"/>
                                     </Button>
                                 </div>
 

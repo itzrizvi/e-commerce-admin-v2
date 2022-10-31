@@ -34,7 +34,7 @@ const AddBanner = () => {
         apolloClient.query({
             query: bannerQuery.GET_SINGLE_BANNER,
             variables: {
-                banner_uuid: params?.id
+                banner_id: parseInt(params?.id)
             },
             context: {
                 headers: {
@@ -47,9 +47,9 @@ const AddBanner = () => {
             if (!data.status) return;
             setSingleBanner({ data: data?.data, loading: false, error: '' })
             const all_banner_data = []
-            data?.data?.bannerimages.forEach(val => {
+            data?.data?.banner_images.forEach(val => {
                 all_banner_data.push({
-                    "banner_id": val.banner_uuid,
+                    "banner_id": val.id,
                     "title": val.title,
                     "link": val.link,
                     "image": val.image,
@@ -57,9 +57,9 @@ const AddBanner = () => {
                 })
             })
             setBannerData(all_banner_data)
-            setBannerStatus(data?.data?.banner_status)
+            setBannerStatus(data?.data?.status)
             form.setFieldsValue({
-                "banner_name": data?.data?.banner_name
+                "name": data?.data?.name
             })
         }).catch(err => {
             console.log(err);
@@ -80,7 +80,7 @@ const AddBanner = () => {
 
         if (check_point) {
             setIsLoading(true)
-            const data = { ...values, banner_status: bannerStatus, banner_uuid: singleBanner?.data?.banner_uuid }
+            const data = { ...values, status: bannerStatus, banner_id: singleBanner?.data?.id }
 
             apolloClient.mutate({
                 mutation: bannerQuery.BANNER_UPDATE,
@@ -104,11 +104,11 @@ const AddBanner = () => {
                     'getAllBanners'
                 ],
             }).then(res => {
-                bannerData.forEach(val => {
+                bannerData.forEach((val, index) => {
                     if(val?.isNew){
                         apolloUploadClient.mutate({
                             mutation: bannerQuery.BANNER_IMAGE_ADD,
-                            variables: { data: { banner_id: singleBanner?.data?.banner_uuid, title: val.title, sort_order: val.sort_order, link: val.link, image: val.image } },
+                            variables: { data: { banner_id: singleBanner?.data?.id, title: val.title, sort_order: val.sort_order, link: val.link, image: val.image } },
                             context: {
                                 headers: {
                                     TENANTID: process.env.REACT_APP_TENANTID,
@@ -122,8 +122,8 @@ const AddBanner = () => {
                         })
                     }else{
                         let data_var;
-                        if( typeof val.image == 'string' ) data_var = { banner_id: singleBanner?.data?.banner_uuid, banner_uuid: val.banner_id, title: val.title, sort_order: val.sort_order, link: val.link }
-                        else data_var = { banner_id: singleBanner?.data?.banner_uuid, banner_uuid: val.banner_id, title: val.title, sort_order: val.sort_order, link: val.link, image: val.image }
+                        if( typeof val.image == 'string' ) data_var = { id: val.banner_id, title: val.title, sort_order: val.sort_order, link: val.link }
+                        else data_var = { id: val.banner_id, title: val.title, sort_order: val.sort_order, link: val.link, image: val.image }
                         apolloUploadClient.mutate({
                             mutation: bannerQuery.BANNER_IMAGE_UPDATE,
                             variables: { data: data_var },
@@ -133,8 +133,12 @@ const AddBanner = () => {
                                     Authorization: token
                                 }
                             }
-                        }).then(res => {
-                            console.log(res);
+                        }).then(_ => {
+                            if( bannerData.length === index + 1 ){
+                                // setTimeout(() => {
+                                //     window.location.reload(); 
+                                // }, 2000);
+                            }
                         }).catch(err => {
                             toast.error('Something Went wrong!!');
                         })
@@ -145,11 +149,8 @@ const AddBanner = () => {
                 toast.error('Something Went wrong !!!');
             }).finally(() =>{
                 setIsLoading(false)
-                history.push("/admin/banner/list");
+                // history.push("/admin/banner/list");
                 toast.success("Banner Updated Successfully!");
-                setTimeout(() => {
-                    window.location.reload(); 
-                }, 1000);
             })
         }
     };
@@ -281,7 +282,7 @@ const AddBanner = () => {
                 }else{
                     apolloUploadClient.mutate({
                         mutation: bannerQuery.BANNER_IMAGE_DELETE,
-                        variables: { banner_uuid: banner_id},
+                        variables: { banner_id: banner_id},
                         context: {
                             headers: {
                                 TENANTID: process.env.REACT_APP_TENANTID,
@@ -328,7 +329,7 @@ const AddBanner = () => {
                                         labelCol={{ span: 4 }} >
                                         <Form.Item
                                             rules={[{ required: true, max: maxLength, message: "Please Enter Banner Name" }]}
-                                            name="banner_name" label="Banner Name" >
+                                            name="name" label="Banner Name" >
                                             <Input placeholder='Enter Banner Name' />
                                         </Form.Item>
 
