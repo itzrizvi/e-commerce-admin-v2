@@ -20,8 +20,7 @@ import { viewPermission } from '../../utility/utility';
 
 
 const handleStatusChange = (record, checked) => {
-    const dispatch = useDispatch();
-    const variables = { data: { id: record.id, user_status: checked } }
+    const variables = { data: { id: record.id, user_status: checked, sendEmail: false } }
 
     apolloClient.mutate({
         mutation: authMutation.ADMIN_UPDATE,
