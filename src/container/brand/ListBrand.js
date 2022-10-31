@@ -48,8 +48,8 @@ const ListBrand = () => {
     }, [])
 
     const handleStatusChange = (record, checked) => {
-        const variables = { data: { brand_uuid: record.brand_uuid, brand_status: checked } }
-    
+        const variables = { data: { brand_id: record.id, brand_status: checked } }
+
         apolloClient.mutate({
             mutation: brandQuery.BRAND_UPDATE,
             variables,
@@ -67,17 +67,17 @@ const ListBrand = () => {
             console.log(err);
             toast.error(`Something went wrong!!`)
         })
-    
+
     }
 
     const columns = [
         {
             title: 'ID',
-            dataIndex: 'brand_uuid',
-            key: 'brand_uuid',
+            dataIndex: 'id',
+            key: 'id',
             width: 120,
             ellipsis: true,
-            sorter: (a, b) => a.brand_uuid.toUpperCase() > b.brand_uuid.toUpperCase() ? 1 : -1,
+            sorter: (a, b) => a.id.toUpperCase() > b.id.toUpperCase() ? 1 : -1,
         },
         {
             title: 'Name',
@@ -93,7 +93,7 @@ const ListBrand = () => {
             key: 'image',
             width: 70,
             align: 'center',
-            render: (text, record) => (<LazyLoadImage effect="blur" height="32" src={renderImage(record.brand_uuid, record.image, 'brand', '128x128')} onError={errorImageSrc} onL alt={record.brand_name} />),
+            render: (text, record) => (<LazyLoadImage effect="blur" height="32" src={renderImage(record.id, record.image, 'brand', '128x128')} onError={errorImageSrc} onL alt={record.brand_name} />),
         },
         {
             title: 'Alias',
@@ -121,12 +121,12 @@ const ListBrand = () => {
             ),
             filters: [
                 {
-                  text: "Enable",
-                  value: true,
+                    text: "Enable",
+                    value: true,
                 },
                 {
-                  text: 'Disable',
-                  value: false,
+                    text: 'Disable',
+                    value: false,
                 }
             ],
             onFilter: (value, record) => record.brand_status === value,
@@ -150,7 +150,7 @@ const ListBrand = () => {
             width: 80,
             render: (text, record) => (
                 <>
-                    <Link to={`/admin/brand/edit?id=${record.brand_uuid}`}>
+                    <Link to={`/admin/brand/edit?id=${record.id}`}>
                         <FontAwesome name="edit" />
                     </Link>
                 </>
@@ -161,7 +161,7 @@ const ListBrand = () => {
     const onChangeSearch = e => {
         const value = e.target.value
         setIsFilter(value)
-        setFilteredBrand(brand.data.filter(brand => (brand?.brand_name + brand?.brand_slug + brand?.brand_uuid).toLowerCase().includes(value.toLowerCase())))
+        setFilteredBrand(brand.data.filter(brand => (brand?.brand_name + brand?.brand_slug + brand?.id).toLowerCase().includes(value.toLowerCase())))
     }
 
 
@@ -204,7 +204,7 @@ const ListBrand = () => {
                                                     total: isFilter ? brand?.data?.length : brand?.data?.length,
                                                     showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`,
                                                 }}
-                                                rowKey={'brand_uuid'}
+                                                rowKey={'id'}
                                                 size="small"
                                                 dataSource={isFilter ? filteredBrand : brand.data}
                                                 rowClassName={(record, index) => (index % 2 === 0 ? "" : "altTableClass")}

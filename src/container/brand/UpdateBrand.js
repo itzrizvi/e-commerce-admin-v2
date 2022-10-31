@@ -42,20 +42,20 @@ const UpdateBrand = () => {
                 { "cat_id": val },
             )
         })
-        const data = { ...values, brand_status: brandStatus, brand_sort_order: order, categories: modify_category, brand_uuid: params?.id }
+        const data = { ...values, brand_status: brandStatus, brand_sort_order: order, categories: modify_category, brand_id: parseInt(params?.id) }
         // console.log(data);
         apolloUploadClient.mutate({
             mutation: image ? brandQuery.BRAND_UPDATE : brandQuery.BRAND_UPDATE_WI,
             variables: image ? { data, file: image } : { data },
             refetchQueries: [
                 {
-                  query: brandQuery.GET_ALL_BRAND,
-                  context: {
-                    headers: {
-                      TENANTID: process.env.REACT_APP_TENANTID,
-                      Authorization: token
+                    query: brandQuery.GET_ALL_BRAND,
+                    context: {
+                        headers: {
+                            TENANTID: process.env.REACT_APP_TENANTID,
+                            Authorization: token
+                        }
                     }
-                  }
                 },
                 'getAllBrands'
             ],
@@ -71,7 +71,7 @@ const UpdateBrand = () => {
             if (!data?.status) return toast.error('Something Went wrong !!');
             history.push("/admin/brand/list");
             toast.success(data?.message);
-            window.location.reload(false); 
+            window.location.reload(false);
         }).catch(err => {
             toast.error('Something Went wrong !!');
         }).finally(() => setIsLoading(false))
@@ -118,7 +118,9 @@ const UpdateBrand = () => {
         apolloClient.query({
             query: brandQuery.GET_SINGLE_BRAND,
             variables: {
-                brand_uuid: params?.id
+                query: {
+                    brand_id: parseInt(params?.id)
+                }
             },
             context: {
                 headers: {
@@ -130,9 +132,9 @@ const UpdateBrand = () => {
             const data = res?.data?.getSingleBrand
             if (!data.status) return;
             setSingleBrand({ data: data?.data, loading: false, error: '' })
-            const inputSelectedCategories =  []
+            const inputSelectedCategories = []
             data?.data?.categories.map(item => {
-                inputSelectedCategories.push(item.cat_id)
+                inputSelectedCategories.push(item.id)
             })
             setCategory(inputSelectedCategories)
             setLoading(false);
@@ -152,7 +154,7 @@ const UpdateBrand = () => {
     return (
         <>
             <PageHeader
-                title={ `Manage Manufacture | Edit Manufacture ${singleBrand?.data?.brand_name ? `(${singleBrand?.data?.brand_name})` : ""}` }
+                title={`Manage Manufacture | Edit Manufacture ${singleBrand?.data?.brand_name ? `(${singleBrand?.data?.brand_name})` : ""}`}
             />
             <Main>
                 <Row gutter={25}>
@@ -195,7 +197,7 @@ const UpdateBrand = () => {
                                                 {
                                                     categories.map(val => {
                                                         return (
-                                                            <Select.Option key={val.cat_id} value={val.cat_id} label={val.cat_name}>
+                                                            <Select.Option key={val.id} value={val.id} label={val.cat_name}>
                                                                 <div className="demo-option-label-item">
                                                                     {
                                                                         val.cat_name

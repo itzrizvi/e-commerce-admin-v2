@@ -62,11 +62,11 @@ const AddBrand = () => {
             )
         })
 
-        if(modify_category.length == 0){
+        if (modify_category.length == 0) {
             setIsLoading(false)
             return toast.error("Please Select Category")
-        } 
-        
+        }
+
 
         const data = { ...values, brandStatus: brandStatus, brandSortOrder: order, categories: modify_category }
         apolloUploadClient.mutate({
@@ -74,13 +74,13 @@ const AddBrand = () => {
             variables: image ? { data, file: image } : { data },
             refetchQueries: [
                 {
-                  query: brandQuery.GET_ALL_BRAND,
-                  context: {
-                    headers: {
-                      TENANTID: process.env.REACT_APP_TENANTID,
-                      Authorization: token
+                    query: brandQuery.GET_ALL_BRAND,
+                    context: {
+                        headers: {
+                            TENANTID: process.env.REACT_APP_TENANTID,
+                            Authorization: token
+                        }
                     }
-                  }
                 },
                 'getAllBrands'
             ],
@@ -95,7 +95,7 @@ const AddBrand = () => {
             if (!data?.status) return toast.error('Something Went wrong !!');
             history.push("/admin/brand/list");
             toast.success(data?.message);
-            window.location.reload(); 
+            window.location.reload();
         }).catch(err => {
             toast.error('Something Went wrong !!');
         }).finally(() => setIsLoading(false))
@@ -136,9 +136,9 @@ const AddBrand = () => {
                         <Cards headless>
                             {
                                 loading ? (
-                                <div style={{ textAlign: "center" }}>
-                                    <Spin tip="processing..." />
-                                </div>
+                                    <div style={{ textAlign: "center" }}>
+                                        <Spin tip="processing..." />
+                                    </div>
                                 ) :
                                     <Form
                                         style={{ width: '100%' }}
@@ -171,7 +171,7 @@ const AddBrand = () => {
                                                 {
                                                     categories.map(val => {
                                                         return (
-                                                            <Select.Option key={val.cat_id} value={val.cat_id} label={val.cat_name}>
+                                                            <Select.Option key={val.id} value={val.id} label={val.cat_name}>
                                                                 <div className="demo-option-label-item">
                                                                     {
                                                                         val.cat_name
