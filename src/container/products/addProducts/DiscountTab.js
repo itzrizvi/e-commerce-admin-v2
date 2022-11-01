@@ -34,17 +34,17 @@ const DiscountTab = ({ discount, setDiscount }) => {
     const column = [
         {
             title: 'Customer Group',
-            dataIndex: 'customer_group_uuid',
-            key: 'customer_group_uuid',
+            dataIndex: 'customer_group_id',
+            key: 'customer_group_id',
             render: (text, record, index) => <Select
                 style={{ width: "150px" }}
                 placeholder={customerGroups.isLoading ? "Loading.." : "customer group"}
-                defaultValue={text}
+                defaultValue={text || null}
                 onSelect={value => {
                     setDiscount(state => {
                         let data = state[index];
                         const copy = [...state];
-                        copy[index] = { ...data, customer_group_uuid: value }
+                        copy[index] = { ...data, customer_group_id: value }
                         console.log(copy)
                         return copy;
                     })
@@ -52,7 +52,7 @@ const DiscountTab = ({ discount, setDiscount }) => {
                 }}
             >
                 {customerGroups?.data?.map(item => (
-                    <Select.Option key={item.customer_group_uuid} value={item.customer_group_uuid} >{item.customer_group_name}</Select.Option>
+                    <Select.Option key={item.id} value={item.id} >{item.customer_group_name}</Select.Option>
                 ))}
             </Select>
         },
@@ -161,7 +161,7 @@ const DiscountTab = ({ discount, setDiscount }) => {
         const newData = (
             {
                 id: new Date().getTime(),
-                customer_group_uuid: "",
+                customer_group_id: "",
                 discount_quantity: "",
                 discount_priority: "",
                 discount_price: "",

@@ -39,9 +39,9 @@ const Products = () => {
     })
 
 
+    // Load Product List 
     useEffect(() => {
         // return
-        // Load Product List 
         apolloClient.query({
             query: productQuery.GET_PRODUCT_LIST,
             context: {
@@ -85,15 +85,15 @@ const Products = () => {
 
                 const parent = item.cat_name
 
-                arrData.push({ cat_name: parent, cat_id: item.cat_id })
+                arrData.push({ cat_name: parent, id: item.id })
                 if (item.subcategories) {
                     item.subcategories.forEach(subCat => {
                         const sub = subCat.cat_name
-                        arrData.push({ cat_name: `${parent} > ${sub}`, cat_id: subCat.cat_id })
+                        arrData.push({ cat_name: `${parent} > ${sub}`, id: subCat.id })
                         if (subCat.subsubcategories) {
                             subCat.subsubcategories.forEach(subSubCat => {
                                 const subSub = subSubCat.cat_name
-                                arrData.push({ cat_name: `${parent} > ${sub} > ${subSub}`, cat_id: subSubCat.cat_id })
+                                arrData.push({ cat_name: `${parent} > ${sub} > ${subSub}`, id: subSubCat.id })
                             })
                         }
                     })
@@ -118,7 +118,7 @@ const Products = () => {
                   status
                   tenant_id
                   data {
-                    attribute_uuid
+                    id
                     attribute_name
                   }
                 }
@@ -170,7 +170,7 @@ const Products = () => {
 
     const handleStatusChange = (record, checked) => {
         return
-        const variables = { data: { attribute_uuid: record.attribute_uuid, attribute_status: checked } }
+        const variables = { data: { id: record.id, attribute_status: checked } }
         console.log(variables)
         // return;
         apolloClient.mutate({
@@ -196,20 +196,20 @@ const Products = () => {
 
     const columns = [
         {
-            title: 'UID',
-            dataIndex: 'prod_uuid',
-            key: 'prod_uuid',
+            title: 'ID',
+            dataIndex: 'id',
+            key: 'id',
             width: 70,
             // width: "70%",
             ellipsis: true,
-            sorter: (a, b) => a.prod_uuid.toUpperCase() > b.prod_uuid.toUpperCase() ? 1 : -1,
+            sorter: (a, b) => a.id.toUpperCase() > b.id.toUpperCase() ? 1 : -1,
         },
         {
             title: 'Logo',
-            dataIndex: 'prod_uuid',
-            key: 'prod_uuid',
+            dataIndex: 'id',
+            key: 'id',
             width: 70,
-            render: (text, record) => (<LazyLoadImage effect="blur" width="40" src={renderImage(record.prod_uuid, record.prod_thumbnail, 'product/image/thumbnail', '128x128')} onError={errorImageSrc} alt={record.prod_uuid} />)
+            render: (text, record) => (<LazyLoadImage effect="blur" width="40" src={renderImage(record.id, record.prod_thumbnail, 'product/image/thumbnail', '128x128')} onError={errorImageSrc} alt={record.id} />)
         },
 
         {
@@ -282,13 +282,13 @@ const Products = () => {
             align: 'center',
             render: (text, record) => (
                 <>
-                    <Link to={`/admin/products/view?id=${record.prod_uuid}`}>
+                    <Link to={`/admin/products/view?id=${record.id}`}>
                         <Button size="default" type="white" title='Edit'>
                             {/* <FontAwesome name="edit" style={{ margin: ".5em 1em" }} /> */}
                             view
                         </Button>
                     </Link>
-                    <Link to={`/admin/products/add?id=${record.prod_uuid}&name=${record.prod_name}`}>
+                    <Link to={`/admin/products/add?id=${record.id}&name=${record.prod_name}`}>
                         {/* <Button size="default" type="white" title='Edit'> */}
                         <FontAwesome name="edit" style={{ margin: ".5em 1em" }} />
                         {/* </Button> */}
@@ -328,14 +328,14 @@ const Products = () => {
         if (filterDate.attributes.length) {
             filteredData = filteredData.filter(prod => {
                 return filterDate.attributes.find(element => {
-                    const attrArray = prod.prod_attributes.map(attr => attr.attribute_data.attribute_uuid)
+                    const attrArray = prod.prod_attributes.map(attr => attr.attribute_data.id)
                     return attrArray.includes(element)
                 });
             });
         }
 
         if (filterDate.categories.length) {
-            filteredData = filteredData.filter(prod => filterDate.categories.includes(prod.category.cat_id))
+            filteredData = filteredData.filter(prod => filterDate.categories.includes(prod.category.id))
         }
         if (filterDate.availability.length) {
             filteredData = filteredData.filter(prod => filterDate.availability.includes(prod.prod_outofstock_status))
@@ -432,7 +432,7 @@ const Products = () => {
                                                     options={categories.data.map(item => (
                                                         {
                                                             label: item.cat_name,
-                                                            value: item.cat_id
+                                                            value: item.id
                                                         }
                                                     ))}
                                                 />
@@ -485,7 +485,7 @@ const Products = () => {
                                                     options={attributes.data.map(item => (
                                                         {
                                                             label: item.attribute_name,
-                                                            value: item.attribute_uuid
+                                                            value: item.id
                                                         }
                                                     ))}
                                                 />

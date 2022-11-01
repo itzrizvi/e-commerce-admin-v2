@@ -22,10 +22,9 @@ export const brandQuery = {
 query getAllBrands {
   getAllBrands {
     message
-    tenant_id
     status
     data {
-      brand_uuid
+      id
       brand_name
       brand_slug
       brand_status
@@ -33,19 +32,18 @@ query getAllBrands {
       image
       createdAt
       updatedAt
-      tenant_id
       categories {
-        cat_id
+        id
         cat_name
         cat_slug
         cat_status
         subcategories {
-          cat_id
+          id
           cat_name
           cat_slug
           cat_status
           subsubcategories {
-            cat_id
+            id
             cat_name
             cat_slug
             cat_status
@@ -106,7 +104,6 @@ query getAllBrands {
     mutation createBrand($data: BrandCreateInput, $file:Upload) {
       createBrand(data: $data, file:$file) {
         message
-        tenant_id
         status
       }
     }`,
@@ -114,7 +111,6 @@ query getAllBrands {
       mutation createBrand($data: BrandCreateInput) {
         createBrand(data: $data) {
           message
-          tenant_id
           status
         }
      }`

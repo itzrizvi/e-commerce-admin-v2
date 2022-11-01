@@ -292,9 +292,8 @@ export const productQuery = {
     getProductList {
       message
       status
-      tenant_id
       data {
-        prod_uuid
+        id
         prod_name
         prod_slug
         prod_sku
@@ -307,7 +306,7 @@ export const productQuery = {
         prod_regular_price
         prod_outofstock_status
         category {
-          cat_id
+          id
           cat_name
           cat_slug
           cat_description
@@ -318,20 +317,19 @@ export const productQuery = {
           cat_sort_order
           cat_status
           is_featured
-          tenant_id
           cat_parent_id
         }
         prod_attributes {
-          prod_attr_uuid
+          id
           attribute_type
           attribute_value
           attribute_data {
-            attribute_uuid
+            id
             attribute_name
             attribute_slug
             attribute_status
             attribute_group {
-              attr_group_uuid
+              id
               attr_group_name
               attr_group_slug
               attrgroup_sortorder
@@ -341,7 +339,6 @@ export const productQuery = {
         }
         createdAt
         updatedAt
-        tenant_id
       }
     }
   }
@@ -353,7 +350,7 @@ export const productQuery = {
       message
       status
       data{
-        prod_uuid
+        id
         prod_name
         prod_status
         prod_sku
@@ -736,12 +733,12 @@ export const attributeQuery = {
       message
       tenant_id
       data{
-        attr_group_uuid
+        id
         attr_group_name
         attrgroup_status
         attrgroup_sortorder
         attributes {
-          attribute_uuid
+          id
           attribute_name
           attribute_status
         }

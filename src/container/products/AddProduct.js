@@ -34,15 +34,16 @@ const AddProduct = () => {
     const { search } = useLocation();
     const params = queryString.parse(search)
     const [singleProduct, setSingleProduct] = useState({ data: {}, isLoading: true })
-    // Load single product
-    useEffect(() => {
+
+
+    useEffect(() => {// Load single product
         if (!params.id) return;
 
         // test START
 
         // test END
-        
-        
+
+
         apolloClient.query({
             query: productQuery.GET_SINGLE_PRODUCT,
             variables: { query: { prod_uuid: params.id } },
@@ -60,7 +61,7 @@ const AddProduct = () => {
                 const n = data?.data?.discount_type?.map(item => (
                     {
                         id: new Date().getTime(),
-                        customer_group_uuid: item.discount_type_uuid,
+                        customer_group_id: item.discount_type_uuid,
                         discount_quantity: item.discount_quantity,
                         discount_priority: item.discount_priority,
                         discount_price: item.discount_price,
@@ -77,8 +78,8 @@ const AddProduct = () => {
                 const n = data?.data?.prod_attributes?.map(item => (
                     {
                         id: new Date().getTime(),
-                        attr_group_uuid: item.attribute_data?.attribute_group?.attr_group_uuid,
-                        attribute_uuid: item?.attribute_data?.attribute_uuid,
+                        attr_group_id: item.attribute_data?.attribute_group?.attr_group_id,
+                        attribute_id: item?.attribute_data?.attribute_id,
                         attribute_type: item.attribute_type,
                         attribute_value: item.attribute_value,
                     }
@@ -120,7 +121,7 @@ const AddProduct = () => {
     // ================= 1.for General tab START =================
     const [longDescription, setLongDescription] = useState(RichTextEditor.createEmptyValue());
     const [prod_long_desc, setProd_long_desc] = useState("")
-    const onChangeRte = value => { 
+    const onChangeRte = value => {
         setProd_long_desc(value.toString('html'))
         setLongDescription(value);
     }
@@ -140,15 +141,15 @@ const AddProduct = () => {
         !item?.categories?.forEach(item => {
             const parent = item.cat_name
 
-            arrData.push({ cat_name: parent, cat_id: item.cat_id, cat_status: item.cat_status })
+            arrData.push({ cat_name: parent, id: item.id, cat_status: item.cat_status })
             if (item.subcategories) {
                 item.subcategories.forEach(subCat => {
                     const sub = subCat.cat_name
-                    arrData.push({ cat_name: `${parent} > ${sub}`, cat_id: subCat.cat_id, cat_status: subCat.cat_status })
+                    arrData.push({ cat_name: `${parent} > ${sub}`, id: subCat.id, cat_status: subCat.cat_status })
                     if (subCat.subsubcategories) {
                         subCat.subsubcategories.forEach(subSubCat => {
                             const subSub = subSubCat.cat_name
-                            arrData.push({ cat_name: `${parent} > ${sub} > ${subSub}`, cat_id: subSubCat.cat_id, cat_status: subSubCat.cat_status })
+                            arrData.push({ cat_name: `${parent} > ${sub} > ${subSub}`, id: subSubCat.id, cat_status: subSubCat.cat_status })
                         })
                     }
                 })
@@ -175,22 +176,22 @@ const AddProduct = () => {
             setBrand(s => ({ ...s, data: data?.data, error: '' }))
             // set initial value - category for selected brand/manufacture
             if (params.id) {
-                const uid = singleProduct?.data.brand?.brand_uuid
-                const selectedBrand = data?.data.find(brand => brand.brand_uuid === uid)
+                const uid = singleProduct?.data.brand?.id
+                const selectedBrand = data?.data.find(brand => brand.id === uid)
                 // Loop & organize categories
                 let arrData = []
                 selectedBrand?.categories?.forEach(item => {
                     const parent = item.cat_name
 
-                    arrData.push({ cat_name: parent, cat_id: item.cat_id, cat_status: item.cat_status })
+                    arrData.push({ cat_name: parent, id: item.id, cat_status: item.cat_status })
                     if (item.subcategories) {
                         item.subcategories.forEach(subCat => {
                             const sub = subCat.cat_name
-                            arrData.push({ cat_name: `${parent} > ${sub}`, cat_id: subCat.cat_id, cat_status: subCat.cat_status })
+                            arrData.push({ cat_name: `${parent} > ${sub}`, id: subCat.id, cat_status: subCat.cat_status })
                             if (subCat.subsubcategories) {
                                 subCat.subsubcategories.forEach(subSubCat => {
                                     const subSub = subSubCat.cat_name
-                                    arrData.push({ cat_name: `${parent} > ${sub} > ${subSub}`, cat_id: subSubCat.cat_id, cat_status: subSubCat.cat_status })
+                                    arrData.push({ cat_name: `${parent} > ${sub} > ${subSub}`, id: subSubCat.id, cat_status: subSubCat.cat_status })
                                 })
                             }
                         })
@@ -219,8 +220,8 @@ const AddProduct = () => {
     // ================= 6.for Attribute tab START =================
     const initalData = [{
         id: new Date().getTime(),
-        attr_group_uuid: "",
-        attribute_uuid: '',
+        attr_group_id: "",
+        attribute_id: '',
         attribute_type: '',
         attribute_value: ''
     }]
@@ -230,7 +231,7 @@ const AddProduct = () => {
     // ================= 8.for Discount tab START =================
     const disInitialValue = [{
         id: new Date().getTime(),
-        customer_group_uuid: "",
+        customer_group_id: "",
         discount_quantity: "",
         discount_priority: "",
         discount_price: "",
@@ -296,11 +297,11 @@ const AddProduct = () => {
                 attributes.attribute_value = "none"
             }
             // for empty attribute
-            if (!attributes.attr_group_uuid && !attributes.attribute_type && !attributes.attribute_value) {
+            if (!attributes.attr_group_id && !attributes.attribute_type && !attributes.attribute_value) {
                 isAttribute = false
             }
             // for incorrect inputs
-            if (!attributes.attr_group_uuid || !attributes.attribute_type || !attributes.attribute_value) {
+            if (!attributes.attr_group_id || !attributes.attribute_type || !attributes.attribute_value) {
                 isAttrCorrect = false
             }
             return ({ ...attributes })
@@ -313,7 +314,7 @@ const AddProduct = () => {
         const discount_type = discount.map(item => {
             const {
                 id,
-                customer_group_uuid,
+                customer_group_id,
                 discount_quantity,
                 discount_priority,
                 discount_price,
@@ -321,15 +322,15 @@ const AddProduct = () => {
                 discount_enddate
             } = item
             // for empty attribute
-            if (!customer_group_uuid && !discount_quantity && !discount_priority && !discount_price && !discount_startdate && !discount_enddate) {
+            if (!customer_group_id && !discount_quantity && !discount_priority && !discount_price && !discount_startdate && !discount_enddate) {
                 isDiscount = false
             }
             // for incorrect inputs
-            if (!customer_group_uuid || !discount_quantity || !discount_priority || !discount_price || !discount_startdate || !discount_enddate) {
+            if (!customer_group_id || !discount_quantity || !discount_priority || !discount_price || !discount_startdate || !discount_enddate) {
                 idDiscountCorrect = false
             }
             return ({
-                customer_group_uuid, discount_quantity, discount_priority, discount_price, discount_startdate, discount_enddate
+                customer_group_id, discount_quantity, discount_priority, discount_price, discount_startdate, discount_enddate
             })
         })
         if (!idDiscountCorrect && isDiscount) return toast.warning("Please fill all Discount field correctly")
@@ -339,7 +340,7 @@ const AddProduct = () => {
         const related_product = relatedProducts.map(item => item.uid)
         const partof_product = selectedPartsOfProducts.map(item => {
             const data = {
-                prod_uuid: item.uid,
+                prod_id: item.uid,
                 prod_quantity: partOfProductQuantities[item.uid] ? parseInt(partOfProductQuantities[item.uid]) : 1
             }
             return data
@@ -400,7 +401,7 @@ const AddProduct = () => {
         if (!data.prod_short_desc) return toast.warning("Please enter a long description")
         if (!data.prod_sku) return toast.warning("Please enter Product SKU")
         if (!data.prod_partnum) return toast.warning("Please enter Part No")
-        if (!data.brand_uuid) return toast.warning("Please select a Manufacture")
+        if (!data.brand_id) return toast.warning("Please select a Manufacture")
         if (!data.prod_category) return toast.warning("Please select a Category")
         if (!data.prod_outofstock_status) return toast.warning("Please select an Availability Status")
         if (!data.prod_regular_price) return toast.warning("Please enter Regular Price")
@@ -411,6 +412,8 @@ const AddProduct = () => {
         // return;
         if (params.id) return
 
+        console.log("submit:\n", data)
+        // return console.log("submit:\n", data)
         setIsLoading(true)
         apolloUploadClient.mutate({
             mutation: productMutation.ADD_PRODUCT,
@@ -556,15 +559,15 @@ const AddProduct = () => {
 
                                         <Tabs.TabPane tab="Links" key="Links">
                                             <Form.Item
-                                                rules={[{ required: true, message: "Please enter Product Name" }]}
-                                                name="brand_uuid"
+                                                rules={[{ required: true, message: "Please select a Brand" }]}
+                                                name="brand_id"
                                                 label="Manufacturer"
-                                                initialValue={params.id ? singleProduct.data?.brand?.brand_uuid : null}
+                                                initialValue={params.id ? singleProduct.data?.brand?.brand_id : null}
                                             >
                                                 <Select placeholder={brand.loading ? "Loading..." : "select Manufacture"}
-                                                    options={brand.data.map(item => ({
+                                                    options={brand?.data?.map(item => ({
                                                         label: item.brand_name,
-                                                        value: item.brand_uuid,
+                                                        value: item.id,
                                                         categories: item.categories,
                                                     }))}
                                                     onSelect={onManufactureSelect}
@@ -575,7 +578,7 @@ const AddProduct = () => {
                                                 rules={[{ required: true, message: "Please enter Product Name" }]}
                                                 name="prod_category"
                                                 label="Categories"
-                                                initialValue={params.id ? singleProduct.data?.category?.cat_id : null}
+                                                initialValue={params.id ? singleProduct.data?.category?.id : null}
                                             >
                                                 <Select placeholder={brand.loading ? "Loading..." :
                                                     categories.length ?
@@ -585,8 +588,8 @@ const AddProduct = () => {
                                                 }
                                                     options={categories.map(item => ({
                                                         label: item.cat_name,
-                                                        value: item.cat_id,
-                                                        key: item.cat_id,
+                                                        value: item.id,
+                                                        key: item.id,
                                                     }))}
                                                 // mode="multiple"
                                                 />
@@ -608,8 +611,8 @@ const AddProduct = () => {
                                                     options={products?.data?.map(item => (
                                                         {
                                                             label: item.prod_name,
-                                                            value: item.prod_uuid,
-                                                            uid: item.prod_uuid,
+                                                            value: item.id,
+                                                            uid: item.id,
                                                         }
                                                     ))}
 

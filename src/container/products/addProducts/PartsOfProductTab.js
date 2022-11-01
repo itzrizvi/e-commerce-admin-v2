@@ -72,9 +72,9 @@ const PartsOfProductTab = ({ products, setProducts, selectedPartsOfProducts, set
                     options={products?.data?.map(item => (
                         {
                             label: item.prod_name,
-                            value: item.prod_uuid,
-                            uid: item.prod_uuid,
-                            key: item.prod_uuid,
+                            value: item.id,
+                            uid: item.id,
+                            key: item.id,
                             name: item.prod_name,
                             sku: item.prod_sku,
                         }
