@@ -943,6 +943,36 @@ export const utilityQuery = {
   `,
 }
 
+export const vendorMutation = {
+  CREATE_VENDOR: gql`
+  mutation createVendor($data:CreateVendorInput){
+    createVendor(data: $data) {
+      message
+      status
+      id
+    }
+  }
+  `,
+  ADD_VENDOR_BILLING_ADDRESS: gql`
+  mutation addVendorBillingAddress($data:Address){
+    addVendorBillingAddress(data: $data) {
+      message
+      status
+      tenant_id
+    }
+  }
+  `,
+  ADD_VENDOR_SHIPPING_ADDRESS: gql`
+  mutation addVendorShippingAddress($data:Address) {
+    addVendorShippingAddress(data: $data) {
+      message
+      status
+      tenant_id
+    }
+  }`,
+
+
+}
 
 
 export default apolloClient;
