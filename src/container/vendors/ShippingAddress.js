@@ -23,55 +23,55 @@ const ShippingAddress = ({ initialData2, shippingAddresses, setShippingAddresses
             title: 'Address 1',
             dataIndex: 'address1',
             key: 'address1',
-            render: (text, record) => <Input type='text' placeholder="Address 1" onChange={(e) => record.address1 = e.target.value} />
+            render: (text, record) => <Input defaultValue={text} type='text' placeholder="Address 1" onChange={(e) => record.address1 = e.target.value} />
         },
         {
             title: 'Address 2',
             dataIndex: 'address2',
             key: 'address2',
-            render: (text, record) => <Input type='text' placeholder="Address 2" onChange={(e) => record.address2 = e.target.value} />
+            render: (text, record) => <Input defaultValue={text} type='text' placeholder="Address 2" onChange={(e) => record.address2 = e.target.value} />
         },
         {
             title: 'Country',
             dataIndex: 'country ',
             key: 'country ',
-            render: (text, record) => <Input type='text' placeholder="Country" onChange={(e) => record.country = e.target.value} />
+            render: (text, record) => <Input defaultValue={record.country} type='text' placeholder="Country" onChange={(e) => record.country = e.target.value} />
         },
         {
             title: 'City',
             dataIndex: 'city',
             key: 'city',
-            render: (text, record) => <Input type='text' placeholder="City" onChange={(e) => record.city = e.target.value} />
+            render: (text, record) => <Input defaultValue={text} type='text' placeholder="City" onChange={(e) => record.city = e.target.value} />
         },
         {
             title: 'State',
             dataIndex: 'state',
             key: 'state',
-            render: (text, record) => <Input type='text' placeholder="State" onChange={(e) => record.state = e.target.value} />
+            render: (text, record) => <Input defaultValue={text} type='text' placeholder="State" onChange={(e) => record.state = e.target.value} />
         },
         {
             title: 'Zip Code',
             dataIndex: 'zip_code',
             key: 'zip_code',
-            render: (text, record) => <Input type='text' placeholder="Zip Code" onChange={(e) => record.zip_code = e.target.value} />
+            render: (text, record) => <Input defaultValue={text} type='text' placeholder="Zip Code" onChange={(e) => record.zip_code = e.target.value} />
         },
         {
             title: 'Fax',
             dataIndex: 'fax',
             key: 'fax',
-            render: (text, record) => <Input type='text' placeholder="Fax" onChange={(e) => record.fax = e.target.value} />
+            render: (text, record) => <Input defaultValue={text} type='text' placeholder="Fax" onChange={(e) => record.fax = e.target.value} />
         },
         {
             title: 'Email',
             dataIndex: 'email',
             key: 'email',
-            render: (text, record) => <Input type='email' placeholder="Email" onChange={(e) => record.email = e.target.value} />
+            render: (text, record) => <Input defaultValue={text} type='email' placeholder="Email" onChange={(e) => record.email = e.target.value} />
         },
         {
             title: 'Phone',
             dataIndex: 'phone',
             key: 'phone',
-            render: (text, record) => <Input type='text' placeholder="Phone" onChange={(e) => record.phone = e.target.value} />
+            render: (text, record) => <Input defaultValue={text} type='text' placeholder="Phone" onChange={(e) => record.phone = e.target.value} />
         },
         {
             title: 'Status',

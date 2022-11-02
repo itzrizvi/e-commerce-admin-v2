@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Col, Form, Input, Select, Spin, Switch, Checkbox, Typography } from 'antd';
+import { Row, Col, Form, Input, Select, Spin, Switch, Checkbox, Typography, Tabs } from 'antd';
 import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
 import { Cards } from '../../components/cards/frame/cards-frame';
@@ -10,6 +10,8 @@ import apolloClient, { authMutation, authQuery } from '../../utility/apollo';
 import { toast } from 'react-toastify';
 import queryString from 'query-string'
 import { viewPermission } from '../../utility/utility';
+import BillingAdderess from './BillingAdderess';
+import ShippingAddress from './ShippingAddress';
 const { Paragraph, Text } = Typography;
 
 const AddUser = () => {
@@ -148,7 +150,7 @@ const AddUser = () => {
     return (
         <>
             <PageHeader
-                title={params.uid ? `Manage User | Edit user (${params.email})` : "Add Admin"}
+                title={params.uid ? `Manage User | Edit user (${params.email})` : "Add Customer"}
             />
             <Main>
                 <Row gutter={25}>
@@ -164,66 +166,76 @@ const AddUser = () => {
                             // wrapperCol={{ span: 14 }}
                             // layout={'vertical'}
                             >
-                                <Form.Item
-                                    rules={[{ required: true, max: maxLength, message: "Please enter First Name" }]}
-                                    name="first_name" label="First Name"
-                                    initialValue={params.first_name}
-                                // help={`Maximum length is ${maxLength}`}
-                                >
-                                    <Input placeholder='Enter First Name' />
-                                </Form.Item>
-                                <Form.Item
-                                    rules={[{ required: true, message: "Please enter Last Name" }]}
-                                    name="last_name" label="Last Name"
-                                    initialValue={params.last_name}
+                                <Tabs>
 
-                                >
-                                    <Input placeholder='Enter Last Name' />
-                                </Form.Item>
-                                {!params.uid && <Form.Item
-                                    rules={[{
-                                        required: true, message: "Please enter an email",
-                                        max: maxLength,
-                                        // type: 'email'
-                                    }]}
-                                    name="email" label="Email"
-                                    initialValue={params.email}
-                                // help={`Maximum length is ${maxLength}`}
-                                >
-                                    <Input type='email' placeholder='Enter Email Address' />
-                                </Form.Item>}
-                                <Form.Item
-                                    rules={[
-                                        {
-                                            required: true,
-                                            message: "Please enter a password",
 
-                                        },
-                                        // {
-                                        //     // pattern: /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/,
-                                        //     pattern: /^[2-9]{2}\d{8}$/,
-                                        //     message: `Password Pattern`
-                                        // }
-                                    ]}
-                                    name="password" label="Password">
-                                    <Input.Password type="password" placeholder='Enter Password...' />
-                                </Form.Item>
+                                    <Tabs.TabPane tab="Information" key="general">
 
-                                <Form.Item
-                                    name="userStatus"
-                                    label="User Status"
-                                >
-                                    <Switch checked={userStatus} onChange={checked => setUserStatus(checked)} />
-                                </Form.Item>
 
-                                <Form.Item
-                                    label="Send Email"
-                                >
-                                    <Checkbox
-                                        value={sendEmail}
-                                        onChange={e => setSendEmail(e.target.checked)}
-                                    ></Checkbox>
-                                </Form.Item>
+                                        <Form.Item
+                                            rules={[{ required: true, max: maxLength, message: "Please enter First Name" }]}
+                                            name="first_name"
+                                            label="First Name"
+                                        >
+                                            <Input placeholder='Enter First Name' />
+                                        </Form.Item>
+                                        <Form.Item
+                                            rules={[{ required: true, message: "Please enter Last Name" }]}
+                                            name="last_name"
+                                            label="Last Name"
+                                        >
+                                            <Input placeholder='Enter Last Name' />
+                                        </Form.Item>
+                                        {!params.uid &&
+                                            <>
+                                                <Form.Item
+                                                    rules={[{
+                                                        required: true, message: "Please enter an email",
+                                                        max: maxLength,
+                                                        // type: 'email'
+                                                    }]}
+                                                    name="email" label="Email"
+                                                >
+                                                    <Input type='email' placeholder='Enter Email Address' />
+                                                </Form.Item>
+                                                <Form.Item
+                                                    rules={[{ required: true, message: "Please enter Phone Number" }]}
+                                                    name="p" label="Phone Number"
+                                                >
+                                                    <Input placeholder='Enter Last Name' />
+                                                </Form.Item>
+
+                                            </>}
+
+                                        <Form.Item
+                                            name="userStatus"
+                                            label="User Status"
+                                        >
+                                            <Switch checked={userStatus} onChange={checked => setUserStatus(checked)} />
+                                        </Form.Item>
+
+                                        {/* <Form.Item
+                                            label="Send Email"
+                                        >
+                                            <Checkbox
+                                                value={sendEmail}
+                                                onChange={e => setSendEmail(e.target.checked)}
+                                            ></Checkbox>
+                                        </Form.Item> */}
+
+                                    </Tabs.TabPane>
+
+
+                                    <Tabs.TabPane tab="Shipping Address" key="sAddress">
+                                        <ShippingAddress />
+                                    </Tabs.TabPane>
+
+                                    <Tabs.TabPane tab="Billing Address" key="bAddress">
+                                        <BillingAdderess />
+                                    </Tabs.TabPane>
+
+                                </Tabs>
+
                                 <div
                                     style={{
                                         display: 'flex',

@@ -186,7 +186,7 @@ const ListUser = () => {
                 buttons={[
                     <div key="1" className="page-header-actions">
                         <Link to="/admin/customers/add">
-                            <Button size="small" title="Add User" type="primary">
+                            <Button size="small" title="Add Customer" type="primary">
                                 <FeatherIcon icon="user-plus" />
                             </Button>
                         </Link>

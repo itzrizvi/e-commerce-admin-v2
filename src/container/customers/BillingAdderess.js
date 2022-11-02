@@ -3,22 +3,21 @@ import React from 'react';
 import { useState } from 'react';
 import FeatherIcon from 'feather-icons-react';
 
-const BillingAdderess = ({ initialData1, billingAddresses, setBillingAddresses }) => {
-    // const initialData = {
-    //     id: new Date().getTime(),
-    //     address1: "",
-    //     address1: "",
-    //     country: "",
-    //     city: "",
-    //     state: "",
-    //     zip_code: "",
-    //     email: "",
-    //     fax: "",
-    //     phone: "",
-    //     status: true,
-    //     // contactPerson: "",
-    // }
-    // const [billingAddresses, setBillingAddresses] = useState([initialData1])
+// const BillingAdderess = ({ initialData1, billingAddresses, setBillingAddresses }) => {
+const BillingAdderess = () => {
+    const initialData1 = {
+        id: new Date().getTime(),
+        address1: "",
+        address1: "",
+        country: "",
+        city: "",
+        state: "",
+        zip_code: "",
+        // email: "",
+        fax: "",
+        // phone: "",
+    }
+    const [billingAddresses, setBillingAddresses] = useState([initialData1])
     const column = [
         {
             title: 'Address 1',
@@ -62,34 +61,17 @@ const BillingAdderess = ({ initialData1, billingAddresses, setBillingAddresses }
             key: 'fax',
             render: (text, record) => <Input defaultValue={text} type='text' placeholder="Fax" onChange={(e) => record.fax = e.target.value} />
         },
-        {
-            title: 'Email',
-            dataIndex: 'email',
-            key: 'email',
-            render: (text, record) => <Input defaultValue={text} type='email' placeholder="Email" onChange={(e) => record.email = e.target.value} />
-        },
-        {
-            title: 'Phone',
-            dataIndex: 'phone',
-            key: 'phone',
-            render: (text, record) => <Input defaultValue={text} type='text' placeholder="Phone" onChange={(e) => record.phone = e.target.value} />
-        },
-        {
-            title: 'Status',
-            dataIndex: 'status',
-            key: 'status',
-            align: 'right',
-            // width: 90,
-            render: (text, record) => (
-                <Switch defaultChecked={text} title='Status' onChange={checked => record.status = checked} />
-            ),
-
-        },
         // {
-        //     title: 'Contact Person',
-        //     dataIndex: 'contactPerson',
-        //     key: 'contactPerson',
-        //     render: (text, record) => <Input type='text' placeholder="Contact Person" onChange={(e) => record.contactPerson = e.target.value} />
+        //     title: 'Email',
+        //     dataIndex: 'email',
+        //     key: 'email',
+        //     render: (text, record) => <Input defaultValue={text} type='email' placeholder="Email" onChange={(e) => record.email = e.target.value} />
+        // },
+        // {
+        //     title: 'Phone',
+        //     dataIndex: 'phone',
+        //     key: 'phone',
+        //     render: (text, record) => <Input defaultValue={text} type='text' placeholder="Phone" onChange={(e) => record.phone = e.target.value} />
         // },
         {
             title: 'Action',

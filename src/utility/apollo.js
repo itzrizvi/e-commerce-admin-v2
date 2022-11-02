@@ -943,6 +943,65 @@ export const utilityQuery = {
   `,
 }
 
+export const vendorQuery = {
+  GET_ALL_VENDOR: gql`
+  query getAllVendor{
+    getAllVendor {
+      message
+      status
+      data {
+        id
+        contact_person
+        company_name
+        email
+        description
+        phone_number
+        EIN_no
+        TAX_ID
+        FAX_no
+        status
+      }
+    }
+  }
+  `,
+  GET_SINGLE_VENDOR: gql`
+  query getSingleVendor($query:GetSingleVendorInput){
+    getSingleVendor(query: $query) {
+      message
+      status
+      data {
+        id
+        contact_person
+        company_name
+        email
+        description
+        phone_number
+        EIN_no
+        TAX_ID
+        FAX_no
+        status
+        addresses {
+          id
+          address1
+          address2
+          phone
+          fax
+          email
+          city
+          state
+          zip_code
+          country
+          status
+          updatedAt
+          createdAt
+          type
+        }
+      }
+    }
+  }
+  `,
+}
+
 export const vendorMutation = {
   CREATE_VENDOR: gql`
   mutation createVendor($data:CreateVendorInput){
@@ -970,6 +1029,23 @@ export const vendorMutation = {
       tenant_id
     }
   }`,
+  UPDATE_VENDOR: gql`
+  mutation updateVendor($data:UpdateVendorInput){
+    updateVendor(data:$data) {
+      message
+      status
+    }
+  }
+  `,
+  UPDATE_VENDOR_ADDRESS: gql`
+  mutation updateVendorAddress($data:UpdateAddress) {
+    updateVendorAddress(data: $data) {
+      message
+      status
+      tenant_id
+    }
+  }
+  `,
 
 
 }

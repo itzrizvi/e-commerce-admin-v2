@@ -12,6 +12,8 @@ import queryString from 'query-string'
 import Cookies from 'js-cookie';
 import Moment from 'react-moment';
 import { viewPermission } from '../../utility/utility';
+import BillingAdderess from './BillingAdderess';
+import ShippingAddress from './ShippingAddress';
 const { Paragraph, Text } = Typography;
 
 const { Option } = Select;
@@ -411,7 +413,8 @@ const EditUser = () => {
                                     </Form>
                                 </Tabs.TabPane >
                                 <Tabs.TabPane tab="Shipping Address" key="shipping_address">
-                                    <Table
+                                    <ShippingAddress />
+                                    {/* <Table
                                         className="table-responsive"
                                         columns={address_columns}
                                         rowKey={'uid'}
@@ -419,10 +422,12 @@ const EditUser = () => {
                                         dataSource={[]}
                                         rowClassName={(record, index) => (index % 2 == 0 ? "" : "altTableClass")}
                                         pagination={false}
-                                    />
+                                    /> */}
                                 </Tabs.TabPane>
                                 <Tabs.TabPane tab="Billing Address" key="billing_address">
-                                    <Table
+                                    <BillingAdderess />
+
+                                    {/* <Table
                                         className="table-responsive"
                                         columns={address_columns}
                                         rowKey={'uid'}
@@ -430,7 +435,7 @@ const EditUser = () => {
                                         dataSource={[]}
                                         rowClassName={(record, index) => (index % 2 == 0 ? "" : "altTableClass")}
                                         pagination={false}
-                                    />
+                                    /> */}
                                 </Tabs.TabPane>
                                 <Tabs.TabPane tab="Order" key="order">
                                     <Table

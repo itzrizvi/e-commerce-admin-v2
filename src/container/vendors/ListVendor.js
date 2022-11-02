@@ -9,7 +9,7 @@ import { Link } from 'react-router-dom';
 import FontAwesome from 'react-fontawesome';
 import { SearchOutlined } from '@ant-design/icons';
 import config from '../../config/config';
-import apolloClient, { customerMutation, customerQuery } from '../../utility/apollo';
+import apolloClient, { customerMutation, customerQuery, vendorQuery } from '../../utility/apollo';
 import Cookies from 'js-cookie';
 import { toast } from 'react-toastify';
 import { viewPermission } from '../../utility/utility';
@@ -17,24 +17,10 @@ import { viewPermission } from '../../utility/utility';
 
 const ListVendor = () => {
     viewPermission('vendor');
-    const dummyData = [...Array(10).keys()].map(i => ({
-        v_n: `Vendor ${i + 1}`,
-        v_e: `Vendor${i + 1}@gmail.com`,
-        v_a: `Address, aaaa${i + 1},bbb${i + 1}`,
-        v_c: `Test Vendor City${i + 1}`,
-        v_c1: `Vendor Country${i + 1}`,
-        v_c_n: `Vendor Company${i + 1}`,
-        v_d: `Lorem ipsum dolor sit amet consectetur adipisicing elit. Ex unde obcaecati sed alias repellendus adipisci ullam ea eveniet quaerat voluptate dolore veniam soluta aliquam labore ratione, quidem iusto, sit aspernatur!`,
-        // v_s: i + 1,
-        v_s: true,
 
+    const [vendors, setVendors] = useState({ data: [], isLoading: true })
 
-    }))
-
-    // const [customerGroups, setCustomerGroups] = useState({ data: [], isLoading: true })
-    const [customerGroups, setCustomerGroups] = useState({ data: dummyData, isLoading: false })
-
-    const [filteredCustomerGroups, setFilteredCustomerGroups] = useState([])
+    const [filteredVendors, setFilteredVendors] = useState([])
     const [searchText, setSearchText] = useState('')
 
     const handleStatusChange = (record, checked) => {
@@ -68,71 +54,56 @@ const ListVendor = () => {
 
     const columns = [
         {
-            title: 'Name',
-            dataIndex: 'v_n',
-            key: 'v_n',
-            sorter: (a, b) => a.v_n.toUpperCase() > b.v_n.toUpperCase() ? 1 : -1,
+            title: 'Company Name',
+            dataIndex: 'company_name',
+            key: 'company_name',
+            ellipsis: true,
+            sorter: (a, b) => a.company_name.toUpperCase() > b.company_name.toUpperCase() ? 1 : -1,
         },
         {
             title: 'Email',
-            dataIndex: 'v_e',
-            key: 'v_e',
+            dataIndex: 'email',
+            key: 'email',
             ellipsis: true,
-            sorter: (a, b) => a.v_e.toUpperCase() > b.v_e.toUpperCase() ? 1 : -1,
+            sorter: (a, b) => a.email.toUpperCase() > b.email.toUpperCase() ? 1 : -1,
         },
         {
-            title: 'Address',
-            dataIndex: 'v_a',
-            key: 'v_a',
+            title: 'Phone',
+            dataIndex: 'phone_number',
+            key: 'phone_number',
             // width: 200,
             ellipsis: true,
-            sorter: (a, b) => a.v_a.toUpperCase() > b.v_a.toUpperCase() ? 1 : -1,
+            sorter: (a, b) => a.phone_number.toUpperCase() > b.phone_number.toUpperCase() ? 1 : -1,
         },
         {
-            title: 'City',
-            dataIndex: 'v_c',
-            key: 'v_c',
+            title: 'EIN',
+            dataIndex: 'EIN_no',
+            key: 'EIN_no',
             ellipsis: true,
-            sorter: (a, b) => a.v_c.toUpperCase() > b.v_c.toUpperCase() ? 1 : -1,
+            sorter: (a, b) => a.EIN_no.toUpperCase() > b.EIN_no.toUpperCase() ? 1 : -1,
         },
         {
-            title: 'Country',
-            dataIndex: 'v_c1',
-            key: 'v_c1',
+            title: 'Fax',
+            dataIndex: 'FAX_no',
+            key: 'FAX_no',
             ellipsis: true,
-            sorter: (a, b) => a.v_c1.toUpperCase() > b.v_c1.toUpperCase() ? 1 : -1,
+            sorter: (a, b) => a.FAX_no.toUpperCase() > b.FAX_no.toUpperCase() ? 1 : -1,
         },
-        // {
-        //     title: 'Description',
-        //     dataIndex: 'v_d',
-        //     key: 'v_d',
-        //     // width: 200,
-        //     ellipsis: true,
-        //     sorter: (a, b) => a.v_d.toUpperCase() > b.v_d.toUpperCase() ? 1 : -1,
-        // },
         {
-            title: 'company Name',
-            dataIndex: 'v_c_n',
-            key: 'v_c_n',
+            title: 'Description',
+            dataIndex: 'description',
+            key: 'description',
             // width: 200,
             ellipsis: true,
-            sorter: (a, b) => a.v_c_n.toUpperCase() > b.v_c_n.toUpperCase() ? 1 : -1,
+            sorter: (a, b) => a.description.toUpperCase() > b.description.toUpperCase() ? 1 : -1,
         },
-        // {
-        //     title: 'Sort Order',
-        //     dataIndex: 'customergroup_sortorder',
-        //     key: 'customergroup_sortorder',
-        //     width: 100,
-        //     align: 'center',
-        //     sorter: (a, b) => (a.customergroup_sortorder === b.customergroup_sortorder) ? 0 : a.customergroup_sortorder ? -1 : 1,
-        // },
         {
             title: 'Status',
-            dataIndex: 'v_s',
-            key: 'v_s',
+            dataIndex: 'status',
+            key: 'status',
             align: 'center',
             width: 100,
-            sorter: (a, b) => (a.v_s === b.v_s) ? 0 : a.v_s ? -1 : 1,
+            sorter: (a, b) => (a.status === b.status) ? 0 : a.status ? -1 : 1,
             filters: [
                 {
                     text: 'Active',
@@ -143,7 +114,7 @@ const ListVendor = () => {
                     value: false,
                 }
             ],
-            onFilter: (value, record) => record.v_s === value,
+            onFilter: (value, record) => record.status === value,
             render: (value, record) => (
                 <Switch defaultChecked={value} title='Status' onChange={checked => handleStatusChange(record, checked)} />
             )
@@ -156,7 +127,7 @@ const ListVendor = () => {
             align: 'right',
             render: (text, record) => (
                 <>
-                    <Link to={`/admin/vendor/add?id=${record.customer_group_uuid}&name=${record.v_n}`}>
+                    <Link to={`/admin/vendor/add?id=${record.id}&name=${record.company_name}`}>
                         {/* <Button size="default" type="white" title='Edit'> */}
                         <FontAwesome name="edit" style={{ margin: ".5em 1em" }} />
                         {/* </Button> */}
@@ -170,9 +141,9 @@ const ListVendor = () => {
 
     // LOAD CUSTOMER GROUPS
     useEffect(() => {
-        return;
+        // return;
         apolloClient.query({
-            query: customerQuery.GET_ALL_CUSTOMER_GROUPS,
+            query: vendorQuery.GET_ALL_VENDOR,
             context: {
                 headers: {
                     TENANTID: process.env.REACT_APP_TENANTID,
@@ -180,14 +151,14 @@ const ListVendor = () => {
                 }
             }
         }).then(res => {
-            const data = res?.data?.getAllCustomerGroups
+            const data = res?.data?.getAllVendor
 
             if (!data?.status) return
-            setCustomerGroups(s => ({ ...s, data: data?.data, error: '' }))
+            setVendors(s => ({ ...s, data: data?.data, error: '' }))
         }).catch(err => {
-            setCustomerGroups(s => ({ ...s, error: 'Something went Wrong.!! ' }))
+            setVendors(s => ({ ...s, error: 'Something went Wrong.!! ' }))
         }).finally(() => {
-            setCustomerGroups(s => ({ ...s, isLoading: false }))
+            setVendors(s => ({ ...s, isLoading: false }))
         })
 
     }, [])
@@ -198,7 +169,7 @@ const ListVendor = () => {
     const onChangeSearch = e => {
         const value = e.target.value
         setSearchText(value)
-        setFilteredCustomerGroups(customerGroups.data.filter(group => (group?.customer_group_name + group?.customergroup_description + group.customergroup_sortorder).toLowerCase().includes(value.toLowerCase())))
+        setFilteredVendors(vendors.data.filter(group => (group?.customer_group_name + group?.customergroup_description + group.customergroup_sortorder).toLowerCase().includes(value.toLowerCase())))
     }
 
 
@@ -221,7 +192,7 @@ const ListVendor = () => {
                     <Col sm={24} xs={24}>
                         <Cards headless>
 
-                            {customerGroups.isLoading ?
+                            {vendors.isLoading ?
                                 <div className="spin">
                                     <Spin />
                                 </div>
@@ -236,12 +207,12 @@ const ListVendor = () => {
                                             columns={columns}
                                             rowKey={'g_s'}
                                             size="small"
-                                            dataSource={searchText ? filteredCustomerGroups : customerGroups.data}
+                                            dataSource={searchText ? filteredVendors : vendors.data}
                                             rowClassName={(record, index) => (index % 2 == 0 ? "" : "altTableClass")}
                                             // pagination={false}
                                             pagination={{
                                                 defaultPageSize: config.VENDOR_PER_PAGE,
-                                                total: searchText ? filteredCustomerGroups.length : customerGroups.data.length,
+                                                total: searchText ? filteredVendors.length : vendors.data.length,
                                                 showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`,
                                             }}
                                         />
