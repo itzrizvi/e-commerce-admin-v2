@@ -86,6 +86,9 @@ const AddBanner = () => {
                         }
                     }).then( _ => {
                         if( bannerData.length === index + 1 ){
+                            history.push("/admin/banner/list");
+                            setIsLoading(false)
+                            toast.success("Banner Added Successfully!");
                             setTimeout(() => {
                                 window.location.reload(); 
                             }, 2000);
@@ -97,10 +100,6 @@ const AddBanner = () => {
                 })
             }).catch(err => {
                 toast.error('Something Went wrong !!!');
-            }).finally(() =>{
-                setIsLoading(false)
-                history.push("/admin/banner/list");
-                toast.success("Banner Added Successfully!");
             })
         }
     };

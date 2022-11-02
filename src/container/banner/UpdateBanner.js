@@ -122,8 +122,8 @@ const AddBanner = () => {
                         })
                     }else{
                         let data_var;
-                        if( typeof val.image == 'string' ) data_var = { id: val.banner_id, title: val.title, sort_order: val.sort_order, link: val.link }
-                        else data_var = { id: val.banner_id, title: val.title, sort_order: val.sort_order, link: val.link, image: val.image }
+                        if( typeof val.image == 'string' ) data_var = { id: val.banner_id, title: val.title, sort_order: val.sort_order, link: val.link, banner_id: singleBanner?.data?.id }
+                        else data_var = { id: val.banner_id, title: val.title, sort_order: val.sort_order, link: val.link, image: val.image, banner_id: singleBanner?.data?.id }
                         apolloUploadClient.mutate({
                             mutation: bannerQuery.BANNER_IMAGE_UPDATE,
                             variables: { data: data_var },
@@ -135,9 +135,12 @@ const AddBanner = () => {
                             }
                         }).then(_ => {
                             if( bannerData.length === index + 1 ){
-                                // setTimeout(() => {
-                                //     window.location.reload(); 
-                                // }, 2000);
+                                setIsLoading(false)
+                                toast.success("Banner Updated Successfully!");
+                                history.push("/admin/banner/list");
+                                setTimeout(() => {
+                                    window.location.reload(); 
+                                }, 2000);
                             }
                         }).catch(err => {
                             toast.error('Something Went wrong!!');
@@ -147,10 +150,6 @@ const AddBanner = () => {
                 })
             }).catch(err => {
                 toast.error('Something Went wrong !!!');
-            }).finally(() =>{
-                setIsLoading(false)
-                // history.push("/admin/banner/list");
-                toast.success("Banner Updated Successfully!");
             })
         }
     };
@@ -245,7 +244,7 @@ const AddBanner = () => {
             title: 'Action',
             dataIndex: 'action',
             key: 'action',
-            render: (text, record) => <Button size="" title="Remove" type="danger"><FeatherIcon icon="minus" onClick={() => removeRow(record.banner_id)} /></Button>
+            render: (text, record) => <Button onClick={() => removeRow(record.banner_id)} size="" title="Remove" type="danger"><FeatherIcon icon="minus"/></Button>
         },
     ];
 
@@ -280,9 +279,9 @@ const AddBanner = () => {
                         return prevState.filter((value) => value.banner_id !== banner_id)
                     })
                 }else{
-                    apolloUploadClient.mutate({
+                    apolloClient.mutate({
                         mutation: bannerQuery.BANNER_IMAGE_DELETE,
-                        variables: { banner_id: banner_id},
+                        variables: { banner_id: parseInt(banner_id)},
                         context: {
                             headers: {
                                 TENANTID: process.env.REACT_APP_TENANTID,
@@ -347,8 +346,8 @@ const AddBanner = () => {
                                         />
 
                                         <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '10px', marginBottom: '10px' }}>
-                                            <Button size="small" title="Add Banner" htmlType="button" type="primary">
-                                                <FeatherIcon icon="plus" onClick={addNewRow} />
+                                            <Button onClick={addNewRow} size="small" title="Add Banner" htmlType="button" type="primary">
+                                                <FeatherIcon icon="plus" />
                                             </Button>
                                         </div>
 

@@ -17,7 +17,7 @@ import Order from './order';
 import Vendors from './vendors';
 import ProductCondition from './product_condition';
 import ProductAvailabilityStatus from './product_availability_status';
-import NotFound404 from '../../container/noFound/404';
+import CompanyInfo from '../../container/companyInfo/companyInfo';
 import NotFound403 from '../../container/noFound/403';
 
 const Admin = () => {
@@ -48,6 +48,7 @@ const Admin = () => {
         <Route path={`${path}/vendor`} component={Vendors} />
         <Route path={`${path}/product-condition`} component={ProductCondition} />
         <Route path={`${path}/product-availability-status`} component={ProductAvailabilityStatus} />
+        <Route path={`${path}/company-info`} component={CompanyInfo} />
         <Route path={`${path}/403`} component={NotFound403} />
       </Suspense>
     </Switch>

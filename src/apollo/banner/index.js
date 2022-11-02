@@ -75,8 +75,8 @@ export const bannerQuery = {
     }
   }`,
   BANNER_IMAGE_DELETE: gql`
-    mutation deleteBannerImage($banner_uuid: UUID!) {
-      deleteBannerImage(data: {banner_uuid: $banner_uuid}) {
+    mutation deleteBannerImage($banner_id: Int!) {
+      deleteBannerImage(data: {banner_id: $banner_id}) {
         message
         status
         tenant_id

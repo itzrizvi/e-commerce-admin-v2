@@ -228,10 +228,14 @@ const MenuItems = ({ darkMode, toggleCollapsed, topMenu }) => {
 
       
             
-      {/* <SubMenu key="settings" icon={!topMenu && <FeatherIcon icon="settings" />} title="Settings">
-        
+      <SubMenu key="settings" icon={!topMenu && <FeatherIcon icon="settings" />} title="Settings">
+          <Menu.Item key="company_info">
+            <NavLink onClick={toggleCollapsed} to={`${path}/company-info`}>
+              Company Info
+            </NavLink>
+          </Menu.Item>
       </SubMenu>
-       */}
+      
 
     </Menu>
   );
