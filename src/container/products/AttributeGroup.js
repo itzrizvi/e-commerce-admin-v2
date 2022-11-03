@@ -85,8 +85,8 @@ const AttributeGroup = () => {
 
         {
             title: 'Action',
-            dataIndex: 'attr_group_uuid',
-            key: 'attr_group_uuid',
+            dataIndex: 'id',
+            key: 'id',
             width: 70,
             align: 'right',
             render: (value, record) => (
@@ -108,7 +108,7 @@ const AttributeGroup = () => {
     }
 
     const handleStatusChange = (record, checked) => {
-        const variables = { data: { attr_group_uuid: record.attr_group_uuid, attrgroup_status: checked } }
+        const variables = { data: { attr_group_id: record.id, attrgroup_status: checked } }
         console.log(variables)
         // return;
         apolloClient.mutate({

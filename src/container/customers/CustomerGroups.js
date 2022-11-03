@@ -27,7 +27,7 @@ const CustomerGroups = () => {
     const handleStatusChange = (record, checked) => {
         const variables = {
             data: {
-                customer_group_uuid: record.customer_group_uuid,
+                id: record.id,
                 customergroup_status: checked,
             }
         }
@@ -106,7 +106,7 @@ const CustomerGroups = () => {
             align: 'right',
             render: (text, record) => (
                 <>
-                    <Link to={`/admin/customers/add-group?id=${record.customer_group_uuid}&name=${record.customer_group_name}`}>
+                    <Link to={`/admin/customers/add-group?id=${record.id}&name=${record.customer_group_name}`}>
                         {/* <Button size="default" type="white" title='Edit'> */}
                         <FontAwesome name="edit" style={{ margin: ".5em 1em" }} />
                         {/* </Button> */}

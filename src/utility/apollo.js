@@ -244,19 +244,18 @@ export const productQuery = {
     getAllCategories {
       message
       status
-      tenant_id
       categories {
-        cat_id
+        id
         cat_name
         cat_slug
         cat_status
         subcategories {
-          cat_id
+          id
           cat_name
           cat_slug
           cat_status
           subsubcategories {
-            cat_id
+            id
             cat_name
             cat_slug
             cat_status
@@ -272,9 +271,8 @@ export const productQuery = {
     getSingleCategory(query: $query) {
       message
       status
-      tenant_id
       category {
-        cat_id
+        id
         cat_name
         cat_slug
         cat_status
@@ -294,9 +292,8 @@ export const productQuery = {
     getProductList {
       message
       status
-      tenant_id
       data {
-        prod_uuid
+        id
         prod_name
         prod_slug
         prod_sku
@@ -309,7 +306,7 @@ export const productQuery = {
         prod_regular_price
         prod_outofstock_status
         category {
-          cat_id
+          id
           cat_name
           cat_slug
           cat_description
@@ -320,20 +317,19 @@ export const productQuery = {
           cat_sort_order
           cat_status
           is_featured
-          tenant_id
           cat_parent_id
         }
         prod_attributes {
-          prod_attr_uuid
+          id
           attribute_type
           attribute_value
           attribute_data {
-            attribute_uuid
+            id
             attribute_name
             attribute_slug
             attribute_status
             attribute_group {
-              attr_group_uuid
+              id
               attr_group_name
               attr_group_slug
               attrgroup_sortorder
@@ -343,7 +339,6 @@ export const productQuery = {
         }
         createdAt
         updatedAt
-        tenant_id
       }
     }
   }
@@ -355,7 +350,7 @@ export const productQuery = {
       message
       status
       data{
-        prod_uuid
+        id
         prod_name
         prod_status
         prod_sku
@@ -582,7 +577,6 @@ export const productMutation = {
       updateCategory(data: $data) {
         message
         status
-        tenant_id
       }
     }
     
@@ -652,7 +646,7 @@ export const attributeQuery = {
       message
       tenant_id
       data{
-        attr_group_uuid
+        id
         attr_group_name
         attr_group_slug
         attrgroup_status
@@ -661,10 +655,10 @@ export const attributeQuery = {
         createdAt
         updatedAt
         attributes {
-          attribute_uuid
+          id
           attribute_name
           attribute_slug
-          attr_group_uuid
+          attr_group_id
           attribute_status
           tenant_id
           createdAt
@@ -709,18 +703,17 @@ export const attributeQuery = {
     getAllAttributes {
       message
       status
-      tenant_id
       data {
-        attribute_uuid
+        id
         attribute_name
         attribute_slug
-        attr_group_uuid
+        attr_group_id
         attribute_status
         tenant_id
         createdAt
         updatedAt
         attribute_group {
-          attr_group_uuid
+          id
           attr_group_name
           attr_group_slug
           attrgroup_status
@@ -740,12 +733,12 @@ export const attributeQuery = {
       message
       tenant_id
       data{
-        attr_group_uuid
+        id
         attr_group_name
         attrgroup_status
         attrgroup_sortorder
         attributes {
-          attribute_uuid
+          id
           attribute_name
           attribute_status
         }
@@ -761,7 +754,6 @@ export const attributeMutation = {
     createAttrGroup(data:$data){
       message
       status
-      tenant_id
     }
   }
   `,
@@ -788,7 +780,6 @@ export const attributeMutation = {
     updateAttribute(data: $data) {
       message
       status
-      tenant_id
     }
   }
   `,
@@ -800,9 +791,8 @@ export const customerQuery = {
     getAllCustomerGroups {
       message
       status
-      tenant_id
       data {
-        customer_group_uuid
+        id
         customer_group_name
         customer_group_slug
         customergroup_description
@@ -822,13 +812,12 @@ export const customerQuery = {
       status
       tenant_id
       data {
-        customer_group_uuid
+        id
         customer_group_name
         customer_group_slug
         customergroup_description
         customergroup_sortorder
         customergroup_status
-        tenant_id
         createdAt
         updatedAt
       }
@@ -843,7 +832,6 @@ export const customerMutation = {
     createCustomerGroup(data:$data){
       message
       status
-      tenant_id
     }
   }
   `,
@@ -865,9 +853,8 @@ export const couponQuery = {
     getAllCoupons {
       message
       status
-      tenant_id
       data {
-        coupon_uuid
+        id
         coupon_name
         coupon_code
         coupon_type
@@ -891,9 +878,8 @@ export const couponQuery = {
     getSingleCoupon(query:$query){
       status
       message
-      tenant_id
       data {
-        coupon_uuid
+        id
         coupon_name
         coupon_code
         coupon_type
@@ -907,7 +893,6 @@ export const couponQuery = {
         coupon_description
         createdAt
         updatedAt
-        tenant_id
       }
     }
   }
@@ -919,7 +904,6 @@ export const couponMutation = {
     createCoupon(data:$data){
       status
       message
-      tenant_id
     }
   }
   `,
@@ -959,6 +943,112 @@ export const utilityQuery = {
   `,
 }
 
+export const vendorQuery = {
+  GET_ALL_VENDOR: gql`
+  query getAllVendor{
+    getAllVendor {
+      message
+      status
+      data {
+        id
+        contact_person
+        company_name
+        email
+        description
+        phone_number
+        EIN_no
+        TAX_ID
+        FAX_no
+        status
+      }
+    }
+  }
+  `,
+  GET_SINGLE_VENDOR: gql`
+  query getSingleVendor($query:GetSingleVendorInput){
+    getSingleVendor(query: $query) {
+      message
+      status
+      data {
+        id
+        contact_person
+        company_name
+        email
+        description
+        phone_number
+        EIN_no
+        TAX_ID
+        FAX_no
+        status
+        addresses {
+          id
+          address1
+          address2
+          phone
+          fax
+          email
+          city
+          state
+          zip_code
+          country
+          status
+          updatedAt
+          createdAt
+          type
+        }
+      }
+    }
+  }
+  `,
+}
+
+export const vendorMutation = {
+  CREATE_VENDOR: gql`
+  mutation createVendor($data:CreateVendorInput){
+    createVendor(data: $data) {
+      message
+      status
+      id
+    }
+  }
+  `,
+  ADD_VENDOR_BILLING_ADDRESS: gql`
+  mutation addVendorBillingAddress($data:Address){
+    addVendorBillingAddress(data: $data) {
+      message
+      status
+      tenant_id
+    }
+  }
+  `,
+  ADD_VENDOR_SHIPPING_ADDRESS: gql`
+  mutation addVendorShippingAddress($data:Address) {
+    addVendorShippingAddress(data: $data) {
+      message
+      status
+      tenant_id
+    }
+  }`,
+  UPDATE_VENDOR: gql`
+  mutation updateVendor($data:UpdateVendorInput){
+    updateVendor(data:$data) {
+      message
+      status
+    }
+  }
+  `,
+  UPDATE_VENDOR_ADDRESS: gql`
+  mutation updateVendorAddress($data:UpdateAddress) {
+    updateVendorAddress(data: $data) {
+      message
+      status
+      tenant_id
+    }
+  }
+  `,
+
+
+}
 
 
 export default apolloClient;

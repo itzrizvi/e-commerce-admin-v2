@@ -20,12 +20,13 @@ const AddAttribute = () => {
     const history = useHistory();
 
     const [attributeGroups, setAttributeGroups] = useState({ data: [], isLoading: true });
-    const [attr_group_uuid, setAttr_group_uuid] = useState(params.g_id || "")
+    const [attr_group_id, setAttr_group_id] = useState(params.g_id || "")
     const [attribute_status, setAttribute_status] = useState(true)
     const [isLoading, setIsLoading] = useState(false)
     const [form] = Form.useForm();
     const maxLength = 30;
 
+    // Load all attribute group
     useEffect(() => {
         apolloClient.query({
             query: attributeQuery.GET_ALL_ATTR_GROUPS,
@@ -52,13 +53,11 @@ const AddAttribute = () => {
 
     const handleSubmit = values => {
         const { attribute_name } = values;
-        if (!attr_group_uuid) return toast.warning("Attribute Group is not selected")
+        if (!attr_group_id) return toast.warning("Attribute Group is not selected")
 
         setIsLoading(true)
         if (!params.id) { // Create Attribute group
-            const variables = { data: { attribute_name, attribute_status, attr_group_uuid } }
-
-            // return console.log(variables);
+            const variables = { data: { attribute_name, attribute_status, attr_group_id } }
 
             apolloClient.mutate({
                 mutation: attributeMutation.CREATE_ATTRIBUTE,
@@ -94,8 +93,9 @@ const AddAttribute = () => {
             }).finally(() => {
                 setIsLoading(false)
             })
-        } else { // Update  Attribute group
-            const variables = { data: { attribute_uuid: params.id, attribute_name, attribute_status, attr_group_uuid } }
+        }
+        else { // Update  Attribute group
+            const variables = { data: { attribute_id: parseInt(params.id), attribute_name, attribute_status, attr_group_id: parseInt(attr_group_id) } }
             console.log(variables)
             // return;
             apolloClient.mutate({
@@ -125,7 +125,7 @@ const AddAttribute = () => {
                 if (!data.status) return toast.error(data.message);
                 history.push("/admin/attributes/list");
                 window.location.reload()
-                toast.success(`${values.attr_group_name} updated successfully`);
+                toast.success(data.message);
             }).catch(err => {
                 console.log("got error on addPermission", err)
                 return toast.error('Something Went wrong !!')
@@ -177,11 +177,11 @@ const AddAttribute = () => {
                                                 // mode="multiple"
                                                 allowClear
                                                 placeholder="Select Attribute Group"
-                                                value={attr_group_uuid}
-                                                onChange={value => setAttr_group_uuid(value)}
+                                                value={attr_group_id}
+                                                onChange={value => setAttr_group_id(value)}
                                             >
                                                 {attributeGroups.data.map(item => (
-                                                    <Option key={item.attr_group_uuid} value={item.attr_group_uuid}>{item.attr_group_name}</Option>
+                                                    <Option key={item.id} value={item.id}>{item.attr_group_name}</Option>
                                                 ))}
                                             </Select>
                                         </>)}

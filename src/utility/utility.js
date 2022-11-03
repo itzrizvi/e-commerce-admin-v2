@@ -22,15 +22,12 @@ const menuPermission = (name, type = 'read') => {
     }
   }
 
-  // todo: uidChange -return false
-  return true;
-  // return false;
+  return false;
 }
 
 const viewPermission = (name) => {
   const history = useHistory();
-  // todo: uidChange -uncomment
-  // if(!menuPermission(name)) history.push('/admin/403');
+  if (!menuPermission(name)) history.push('/admin/403');
 }
 
 

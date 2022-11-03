@@ -7,10 +7,12 @@ import { Cards } from '../../components/cards/frame/cards-frame';
 import { Button } from '../../components/buttons/buttons';
 import { Link, useHistory, useLocation } from 'react-router-dom';
 import queryString from 'query-string'
-import apolloClient, { customerMutation, customerQuery } from '../../utility/apollo';
+import apolloClient, { customerMutation, customerQuery, vendorMutation, vendorQuery } from '../../utility/apollo';
 import Cookies from 'js-cookie';
 import { toast } from 'react-toastify';
 import { viewPermission } from '../../utility/utility';
+import BillingAdderess from './BillingAdderess';
+import ShippingAddress from './ShippingAddress';
 const { TextArea } = Input;
 
 
@@ -20,54 +22,58 @@ const AddVendor = () => {
     const params = queryString.parse(search)
     const history = useHistory();
 
-    const [singleCustomerGroup, setSingleCustomerGroup] = useState({ data: [], isLoading: true })
-    const [customergroup_status, setCustomergroup_status] = useState(true);
+    const [singleVendor, setSingleVendor] = useState({ data: [], isLoading: true })
+    const [status, setStatus] = useState(true);
     const [isLoading, setIsLoading] = useState(false)
     const [form] = Form.useForm();
     const maxLength = 30;
 
     // ============+ for billing START +====================
-    const initialData = {
+    const initialData1 = {
         id: new Date().getTime(),
+        address1: "",
+        address1: "",
+        country: "",
+        city: "",
+        state: "",
+        zip_code: "",
+        email: "",
+        fax: "",
+        phone: "",
+        status: true,
+        // contactPerson: "",
     }
-    const [billingAddresses, setBillingAddresses] = useState([initialData])
-    const handleAddAddress = () => {
-        setBillingAddresses(state => [...state, { id: new Date().getTime(), }])
-    }
-    const handleRemoveAddress = (id, index) => {
-        setBillingAddresses(state => {
-            const copy = [...state]
-            copy.splice(index, 1)
-            return copy
-        })
-    }
+    const [billingAddresses, setBillingAddresses] = useState([initialData1])
     // ============+ for billing END +====================
 
     // ============+ for billing START +====================
-    const initialData1 = {
+    const initialData2 = {
         id: new Date().getTime(),
+        address1: "",
+        address1: "",
+        country: "",
+        city: "",
+        state: "",
+        zip_code: "",
+        email: "",
+        fax: "",
+        phone: "",
+        status: true,
     }
-    const [shippingAddresses, setShippingAddresses] = useState([initialData1])
-    const handleAddAddress_s = () => {
-        setShippingAddresses(state => [...state, { id: new Date().getTime(), }])
-    }
-    const handleRemoveAddress_s = (id, index) => {
-        setShippingAddresses(state => {
-            const copy = [...state]
-            copy.splice(index, 1)
-            return copy
-        })
-    }
+    const [shippingAddresses, setShippingAddresses] = useState([initialData2])
     // ============+ for billing END +====================
 
 
-    // LOAD SINGLE CUSTOMER GROUP
+
+
+
+    // LOAD SINGLE Vendor
     useEffect(() => {
         if (!params.id) return;
 
         apolloClient.query({
-            query: customerQuery.GET_SINGLE_CUSTOMER_GROUP,
-            variables: { query: { customer_group_uuid: params.id } },
+            query: vendorQuery.GET_SINGLE_VENDOR,
+            variables: { query: { id: parseInt(params.id) } },
             context: {
                 headers: {
                     TENANTID: process.env.REACT_APP_TENANTID,
@@ -75,112 +81,186 @@ const AddVendor = () => {
                 }
             }
         }).then(res => {
-            const data = res?.data?.getSingleCustomerGroup
-
+            const data = res?.data?.getSingleVendor
             if (!data?.status) return
-            setSingleCustomerGroup(s => ({ ...s, data: data?.data, error: '' }))
+            setSingleVendor(s => ({ ...s, data: data?.data, error: '' }))
+
+            let billings = []
+            let shippings = []
+            data?.data?.addresses?.forEach(address => {
+                const item = {
+                    "id": address.id,
+                    "address1": address.address1,
+                    "address2": address.address2,
+                    "country": address.country,
+                    "city": address.city,
+                    "state": address.state,
+                    "zip_code": address.zip_code,
+                    "email": address.email,
+                    "fax": address.fax,
+                    "phone": address.phone,
+                    "status": address.status,
+                }
+                if (address.type === "billing") return billings.push(item)
+                return shippings.push(item)
+            })
+            console.log(billings, "\n", shippings);
+            setBillingAddresses(billings)
+            setShippingAddresses(shippings)
+
+            console.log("single vendor\n", res)
+
         }).catch(err => {
-            setSingleCustomerGroup(s => ({ ...s, error: 'Something went Wrong.!! ' }))
+            setSingleVendor(s => ({ ...s, error: 'Something went Wrong.!! ' }))
         }).finally(() => {
-            setSingleCustomerGroup(s => ({ ...s, isLoading: false }))
+            setSingleVendor(s => ({ ...s, isLoading: false }))
         })
 
     }, [])
 
     const handleSubmit = values => {
         console.log(values)
-        return;
+        const variables = { ...values, status }
+        console.log(variables)
 
-        const { customer_group_name, customergroup_description, customergroup_sortorder } = values
-        // console.log(values)
+        // validate billingAddresses.
+        const notValidate = billingAddresses.find(item => {
+            const { id, address1, country, city, state, zip_code, email, fax, phone, address2 } = item
+            const checkFalse = !(id && address1 && country && city && state && zip_code && email && fax && phone && address2)
+            return checkFalse
+        })
+        if (notValidate?.id) return toast.warning("Enter Billing Address Correctly!")
 
-        // ADD NEW CUSTOMER GROUP
+        // validate shippingAddresses.
+        const notValidate1 = shippingAddresses.find(item => {
+            const { id, address1, country, city, state, zip_code, email, fax, phone, address2 } = item
+            const checkFalse = !(id && address1 && country && city && state && zip_code && email && fax && phone && address2)
+            return checkFalse
+        })
+        if (notValidate1?.id) return toast.warning("Enter Shipping Address Correctly!")
+
+        // ADD NEW Vendor
+        setIsLoading(true)
         if (!params.id) {
-            const variables = { data: { customer_group_name, customergroup_description, customergroup_sortorder: parseInt(customergroup_sortorder), customergroup_status, } }
-            console.log(variables)
             apolloClient.mutate({
-                mutation: customerMutation.CREATE_CUSTOMER_GROUP,
-                variables,
-                refetchQueries: [
-                    {
-                        query: customerQuery.GET_ALL_CUSTOMER_GROUPS,
-                        context: {
-                            headers: {
-                                TENANTID: process.env.REACT_APP_TENANTID,
-                                Authorization: Cookies.get('psp_t')
-                            }
-                        }
-                    },
-                    'getAllCustomerGroups'
-                ],
+                mutation: vendorMutation.CREATE_VENDOR,
+                variables: { data: variables },
                 context: {
                     headers: {
                         TENANTID: process.env.REACT_APP_TENANTID,
                         Authorization: Cookies.get('psp_t')
                     },
-
                 },
-
             }).then(res => {
-                const data = res?.data?.createCustomerGroup
+                console.log(res);
+                const data = res?.data?.createVendor
                 if (!data.status) return toast.error(data.message);
-                history.push("/admin/customers/group");
-                window.location.reload()
-                toast.success(`${values.customer_group_name} Group added successfully`);
+
+                // add billing address
+                const parent_id = data.id
+                billingAddresses.forEach((val, index) => {
+                    const { id, ...rest } = val
+                    apolloClient.mutate({
+                        mutation: vendorMutation.ADD_VENDOR_BILLING_ADDRESS,
+                        variables: { data: { ...rest, parent_id } },
+                        context: {
+                            headers: {
+                                TENANTID: process.env.REACT_APP_TENANTID,
+                                Authorization: Cookies.get('psp_t')
+                            },
+                        },
+                    }).then(res => {
+                        console.log(`billing res ${index}:\n`, res);
+                        const data = res?.data?.addVendorBillingAddress
+                    }).catch(err => {
+                        console.log("error on add billing:\n", res)
+                        isLoading(false)
+                        return toast.error("Something went wrong")
+                    })
+
+                })
+                // add shipping address
+                shippingAddresses.forEach((val, index) => {
+                    const { id, ...rest } = val
+                    apolloClient.mutate({
+                        mutation: vendorMutation.ADD_VENDOR_SHIPPING_ADDRESS,
+                        variables: { data: { ...rest, parent_id } },
+                        context: {
+                            headers: {
+                                TENANTID: process.env.REACT_APP_TENANTID,
+                                Authorization: Cookies.get('psp_t')
+                            },
+                        },
+                    }).then(res => {
+                        console.log(`Shipping res ${index}:\n`, res);
+                        const data = res?.data?.addVendorShippingAddress
+                        if (shippingAddresses.length === index + 1) {
+                            setTimeout(() => {
+                                history.push("/admin/vendor/list");
+                                window.location.reload();
+                            }, 2000);
+                        }
+                    }).catch(err => {
+                        console.log("error on add billing:\n", res)
+                        isLoading(false)
+                        return toast.error("Something went wrong")
+                    })
+                })
             }).catch(err => {
-                console.log("got error on addCustomerGroup", err)
+                console.log("got error on add vendor", err)
                 return toast.error('Something Went wrong !!')
-            }).finally(() => {
-                setIsLoading(false)
             })
         }
-        // UPDATE CUSTOMER GROUP
+        // UPDATE vendor
         else {
-            const variables = {
-                data: {
-                    customer_group_uuid: params.id,
-                    customer_group_name,
-                    customergroup_description,
-                    customergroup_sortorder: parseInt(customergroup_sortorder),
-                    customergroup_status,
-                }
-            }
-            console.log(variables)
             apolloClient.mutate({
-                mutation: customerMutation.UPDATE_CUSTOMER_GROUP,
-                variables,
-                refetchQueries: [
-                    {
-                        query: customerQuery.GET_ALL_CUSTOMER_GROUPS,
-                        context: {
-                            headers: {
-                                TENANTID: process.env.REACT_APP_TENANTID,
-                                Authorization: Cookies.get('psp_t')
-                            }
-                        }
-                    },
-                    'getAllCustomerGroups'
-                ],
+                mutation: vendorMutation.UPDATE_VENDOR,
+                variables: { data: { ...variables, id: parseInt(params.id) } },
                 context: {
                     headers: {
                         TENANTID: process.env.REACT_APP_TENANTID,
                         Authorization: Cookies.get('psp_t')
                     },
-
                 },
-
             }).then(res => {
-                const data = res?.data?.updateCustomerGroup
+                console.log(res);
+                const data = res?.data?.updateVendor
                 if (!data.status) return toast.error(data.message);
-                history.push("/admin/customers/group");
-                window.location.reload()
-                toast.success(`${values.customer_group_name} Group Updated successfully`);
+
+                // add shipping address
+                const addresses = [...billingAddresses, ...shippingAddresses]
+                addresses.forEach((val, index) => {
+                    // const { __typename, updatedAt, createdAt, type, ...rest } = val
+                    apolloClient.mutate({
+                        mutation: vendorMutation.UPDATE_VENDOR_ADDRESS,
+                        variables: { data: val },
+                        context: {
+                            headers: {
+                                TENANTID: process.env.REACT_APP_TENANTID,
+                                Authorization: Cookies.get('psp_t')
+                            },
+                        },
+                    }).then(res => {
+                        console.log(`Updarte ${val.type} address res ${index}:\n`, res);
+                        const data = res?.data?.addVendorShippingAddress
+                        if (addresses.length === index + 1) {
+                            setTimeout(() => {
+                                history.push("/admin/vendor/list");
+                                window.location.reload();
+                            }, 2000);
+                        }
+                    }).catch(err => {
+                        console.log("error on add billing:\n", res)
+                        isLoading(false)
+                        return toast.error("Something went wrong")
+                    })
+                })
+
             }).catch(err => {
-                console.log("got error on addCustomerGroup", err)
+                console.log("got error on update vendor", err)
                 return toast.error('Something Went wrong !!')
-            }).finally(() => {
-                setIsLoading(false)
             })
+
         }
 
     }
@@ -195,7 +275,7 @@ const AddVendor = () => {
                     <Col sm={24} xs={24}>
                         <Cards headless>
 
-                            {params.id && singleCustomerGroup.isLoading ?
+                            {params.id && singleVendor.isLoading ?
                                 <div div className="spin">
                                     <Spin />
                                 </div>
@@ -203,217 +283,96 @@ const AddVendor = () => {
                                 : <Form
                                     style={{ width: '100%' }}
                                     form={form}
-                                    name="addRole"
+                                    name="addVendor"
                                     onFinish={handleSubmit}
                                     onFinishFailed={errorInfo => console.log('form error info:\n', errorInfo)}
                                     labelCol={{ span: 4 }}
+                                    initialValues={params.id ? {
+                                        company_name: params.name,
+                                        contact_person: singleVendor.data.contact_person,
+                                        email: singleVendor.data.email,
+                                        description: singleVendor.data.description,
+                                        phone_number: singleVendor.data.phone_number,
+                                        EIN_no: singleVendor.data.EIN_no,
+                                        TAX_ID: singleVendor.data.TAX_ID,
+                                        FAX_no: singleVendor.data.FAX_no,
+                                    } : null}
                                 >
                                     <Tabs>
 
 
-
-
-
                                         <Tabs.TabPane tab="General" key="general">
                                             <Form.Item
-                                                // rules={[{ required: true, max: maxLength, message: "Please enter Vendor Company Name" }]}
-                                                name="v_c_n" label="Company Name"
-                                            // initialValue={params.name || ""}
+                                                rules={[{ required: true, max: maxLength, message: "Please enter Vendor Company Name" }]}
+                                                name="company_name"
+                                                label="Company Name"
                                             >
                                                 <Input placeholder='Enter Vendor Company Name' />
                                             </Form.Item>
+
                                             <Form.Item
-                                                // rules={[{ required: true, max: maxLength, message: "Please enter Vendor Name" }]}
-                                                name="v_n" label="Contact Person"
-                                                initialValue={params.name || ""}
+                                                rules={[{ required: true, max: maxLength, message: "Please enter Vendor Contact Person" }]}
+                                                label="Contact Person"
+                                                name="contact_person"
                                             >
                                                 <Input placeholder='Enter Contact Person' />
                                             </Form.Item>
+
                                             <Form.Item
-                                                // rules={[{ required: true, max: maxLength, message: "Please enter Vendor Email" }]}
-                                                name="v_e" label="Email"
-                                            // initialValue={params.name || ""}
+                                                rules={[{ required: true, max: maxLength, message: "Please enter Email" }]}
+                                                name="email" label="Email"
                                             >
-                                                <Input placeholder='Enter Vendor Email' />
+                                                <Input placeholder='Enter Vendor Email' type='email' />
                                             </Form.Item>
 
 
                                             <Form.Item
-                                                // rules={[{ required: true, max: maxLength, message: "Please enter Vendor Email" }]}
-                                                name="v_p" label="Phone"
-                                            // initialValue={params.name || ""}
+                                                rules={[{ required: true, max: maxLength, message: "Please enter Phone Number" }]}
+                                                name="phone_number" label="Phone"
                                             >
                                                 <Input placeholder='Enter Vendor Phone Number' />
                                             </Form.Item>
                                             <Form.Item
-                                                // rules={[{ required: true, max: maxLength, message: "Please enter Vendor Email" }]}
-                                                name="v_f" label="Fax"
-                                            // initialValue={params.name || ""}
+                                                rules={[{ required: true, max: maxLength, message: "Please enter Fax No" }]}
+                                                name="FAX_no" label="Fax"
                                             >
                                                 <Input placeholder='Enter Vendor Fax' />
                                             </Form.Item>
                                             <Form.Item
-                                                // rules={[{ required: true, max: maxLength, message: "Please enter Vendor Email" }]}
-                                                name="v_ein" label="EIN"
-                                            // initialValue={params.name || ""}
+                                                rules={[{ required: true, max: maxLength, message: "Please enter EIN No" }]}
+                                                name="EIN_no" label="EIN"
                                             >
                                                 <Input placeholder='Enter Vendor EIN Number' />
                                             </Form.Item>
                                             <Form.Item
-                                                // rules={[{ required: true, max: maxLength, message: "Please enter Vendor Email" }]}
-                                                name="v_fax" label="Tax Id"
-                                            // initialValue={params.name || ""}
+                                                rules={[{ required: true, max: maxLength, message: "Please enter Fax Id" }]}
+                                                name="TAX_ID" label="Tax Id"
                                             >
                                                 <Input placeholder='Enter Vendor Tax Id' />
                                             </Form.Item>
                                             <Form.Item
-                                                // rules={[{ required: true, message: "Please enter Vendor Description" }]}
-                                                name="v_d" label="Description"
-                                                initialValue={singleCustomerGroup.data.v_d || ""}
+                                                rules={[{ required: true, message: "Please enter Vendor Description" }]}
+                                                name="description" label="Description"
                                             >
                                                 <TextArea rows={4} placeholder="Enter Vendor Description" />
                                             </Form.Item>
                                             <Form.Item
                                                 label="Vendor Status"
                                             >
-                                                <Switch checked={customergroup_status} onChange={checked => setCustomergroup_status(checked)} />
+                                                <Switch checked={status} onChange={checked => setStatus(checked)} />
                                             </Form.Item>
 
                                         </Tabs.TabPane>
 
-
                                         <Tabs.TabPane tab="Billing Address" key="billing_address">
-                                            <div
-                                                style={{
-                                                    display: 'flex',
-                                                    justifyContent: 'flex-end',
-                                                }}
-                                            >
-                                                <Button
-                                                    title="Add Address"
-                                                    type='primary'
-                                                    size="small"
-                                                    onClick={handleAddAddress}
-                                                >
-                                                    <FeatherIcon icon="plus" />
-                                                </Button>
-                                            </div>
-                                            <Row >
-                                                {billingAddresses.map((item, index) => (
-                                                    <Col span={12} >
-                                                        <Cards key={item.id} headless size="small" >
-                                                            <Form.Item
-                                                                label="Address"
-                                                            >
-                                                                <Input placeholder='Enter Billing Address' />
-                                                            </Form.Item>
-                                                            <Form.Item
-                                                                label="Country"
-                                                            >
-                                                                <Input placeholder='Enter Vendor Country' />
-                                                            </Form.Item>
-                                                            <Form.Item
-                                                                label="City"
-                                                            >
-                                                                <Input placeholder='Enter Vendor City' />
-                                                            </Form.Item>
-                                                            <Form.Item
-                                                                label="Zip Code"
-                                                            >
-                                                                <Input placeholder='Enter Vendor Zip Code' />
-                                                            </Form.Item>
-                                                            <Form.Item
-                                                                label="PO Code"
-                                                            >
-                                                                <Input placeholder='Enter Vendor PO Code' />
-                                                            </Form.Item>
-
-                                                            {billingAddresses.length !== 1 && <div style={{ display: "flex", justifyContent: "flex-end" }}>
-                                                                <Button size="small" title="Remove" type="danger" onClick={() => handleRemoveAddress(item.id, index)} ><FeatherIcon icon="minus" /></Button>
-                                                            </div>}
-                                                        </Cards>
-                                                    </Col>
-                                                ))}
-                                            </Row>
-
-
+                                            <BillingAdderess {...{ initialData1, billingAddresses, setBillingAddresses }} />
                                         </Tabs.TabPane>
-
-
 
                                         <Tabs.TabPane tab="Shipping Address" key="shipping_address">
-                                            <div
-                                                style={{
-                                                    display: 'flex',
-                                                    justifyContent: 'flex-end',
-                                                }}
-                                            >
-                                                <Button
-                                                    title="Add Address"
-                                                    type='primary'
-                                                    size="small"
-                                                    onClick={handleAddAddress_s}
-                                                >
-                                                    <FeatherIcon icon="plus" />
-                                                </Button>
-                                            </div>
-                                            <Row >
-                                                {shippingAddresses.map((item, index) => (
-                                                    <Col span={12} >
-                                                        <Cards key={item.id} headless size="small" >
-                                                            <Form.Item
-                                                                label="Address"
-                                                            >
-                                                                <Input placeholder='Enter Shipping Address' />
-                                                            </Form.Item>
-                                                            <Form.Item
-                                                                label="Country"
-                                                            >
-                                                                <Input placeholder='Enter Vendor Country' />
-                                                            </Form.Item>
-                                                            <Form.Item
-                                                                label="City"
-                                                            >
-                                                                <Input placeholder='Enter Vendor City' />
-                                                            </Form.Item>
-                                                            <Form.Item
-                                                                label="Zip Code"
-                                                            >
-                                                                <Input placeholder='Enter Vendor Zip Code' />
-                                                            </Form.Item>
-                                                            <Form.Item
-                                                                label="PO Code"
-                                                            >
-                                                                <Input placeholder='Enter Vendor PO Code' />
-                                                            </Form.Item>
-
-                                                            {billingAddresses.length !== 1 && <div style={{ display: "flex", justifyContent: "flex-end" }}>
-                                                                <Button size="small" title="Remove" type="danger" onClick={() => handleRemoveAddress_s(item.id, index)} ><FeatherIcon icon="minus" /></Button>
-                                                            </div>}
-                                                        </Cards>
-                                                    </Col>
-                                                ))}
-                                            </Row>
-
-
+                                            <ShippingAddress {...{ initialData2, shippingAddresses, setShippingAddresses }} />
                                         </Tabs.TabPane>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
                                     </Tabs>
+
 
                                     <div
                                         style={{

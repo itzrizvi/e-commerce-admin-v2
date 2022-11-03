@@ -66,8 +66,7 @@ const login = (email, password, history) => {
         }));
         history.push('/admin');
         setTimeout(() => {
-          // todo: uidChange
-          // window.location.reload();
+          window.location.reload();
         }, 2000);
       } else {
         dispatch(loginErr('wrong email or password'));

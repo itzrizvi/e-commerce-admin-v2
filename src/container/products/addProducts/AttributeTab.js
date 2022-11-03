@@ -81,8 +81,8 @@ const AttributeTab = ({ attributesTableData, setAttributesTableData }) => {
     const addNewRow = () => {
         const newData = {
             id: new Date().getTime(),
-            attr_group_uuid: "",
-            attribute_uuid: '',
+            attr_group_id: "",
+            attribute_id: '',
             attribute_type: '',
             attribute_value: ''
         }
@@ -99,20 +99,22 @@ const AttributeTab = ({ attributesTableData, setAttributesTableData }) => {
     const [attributeGroups, setAttributeGroups] = useState({ data: [], isLoading: true })
     const [selectedGroup, setSelectedGroup] = useState({})
     const handleAttrGroupSelect = (val, item, index) => {
+        console.log(item)
         setSelectedGroup(item)
 
         setAttributesTableData(arr => {
             let data = arr[index];
             const copy = [...arr];
-            copy[index] = { ...data, attr_group_uuid: val }
+            copy[index] = { ...data, attr_group_id: val }
             return copy;
         })
     }
     const handleAttributeSelect = (val, item, index) => {
+        console.log(val)
         setAttributesTableData(arr => {
             let data = arr[index];
             const copy = [...arr];
-            copy[index] = { ...data, attribute_uuid: val }
+            copy[index] = { ...data, attribute_id: val }
             return copy;
         })
     }
@@ -146,8 +148,8 @@ const AttributeTab = ({ attributesTableData, setAttributesTableData }) => {
     const column = [
         {
             title: 'Attribute Group',
-            dataIndex: 'attr_group_uuid',
-            key: 'attr_group_uuid',
+            dataIndex: 'attr_group_id',
+            key: 'attr_group_id',
             width: 200,
             render: (val, record, index) => <Select
                 style={{ width: "100%" }}
@@ -155,7 +157,7 @@ const AttributeTab = ({ attributesTableData, setAttributesTableData }) => {
                 defaultValue={val || null}
                 options={attributeGroups.data.map(item => ({
                     label: item.attr_group_name,
-                    value: item.attr_group_uuid,
+                    value: item.id,
                     attributes: item.attributes
                 }))}
                 onSelect={(val, item) => handleAttrGroupSelect(val, item, index)}
@@ -163,8 +165,8 @@ const AttributeTab = ({ attributesTableData, setAttributesTableData }) => {
         },
         {
             title: 'Attribute',
-            dataIndex: 'attribute_uuid',
-            key: 'attribute_uuid',
+            dataIndex: 'attribute_id',
+            key: 'attribute_id',
             width: 200,
             render: (val, record, index) => <Select
                 style={{ width: "100%" }}
@@ -175,7 +177,7 @@ const AttributeTab = ({ attributesTableData, setAttributesTableData }) => {
                 }
                 options={selectedGroup?.attributes?.map(item => ({
                     label: item.attribute_name,
-                    value: item.attribute_uuid,
+                    value: item.id,
                 }))}
                 onSelect={(val, item) => handleAttributeSelect(val, item, index)}
             // onSelect={val => {
