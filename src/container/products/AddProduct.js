@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Col, Tabs, Form, Input, Switch, Select, DatePicker, Checkbox, Spin } from 'antd';
-import FeatherIcon from 'feather-icons-react';
+import { Row, Col, Tabs, Form, Input, Switch, Select, Spin } from 'antd';
 import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
 import { Cards } from '../../components/cards/frame/cards-frame';
@@ -38,15 +37,9 @@ const AddProduct = () => {
 
     useEffect(() => {// Load single product
         if (!params.id) return;
-
-        // test START
-
-        // test END
-
-
         apolloClient.query({
             query: productQuery.GET_SINGLE_PRODUCT,
-            variables: { query: { prod_uuid: params.id } },
+            variables: { query: { prod_id: parseInt(params.id) } },
             context: {
                 headers: {
                     TENANTID: process.env.REACT_APP_TENANTID,
@@ -55,13 +48,16 @@ const AddProduct = () => {
             }
         }).then(res => {
             const data = res?.data?.getSingleProduct
+            console.log(data.data)
             if (!data.status) return toast.error("Try reload..!")
             setSingleProduct({ data: data?.data, isLoading: false })
+            setLongDescription(RichTextEditor.createValueFromString(data?.data?.prod_long_desc, 'html'))
+            setProd_long_desc(data?.data?.prod_long_desc)
             setDiscount(s => {
                 const n = data?.data?.discount_type?.map(item => (
                     {
                         id: new Date().getTime(),
-                        customer_group_id: item.discount_type_uuid,
+                        customer_group_id: item.id,
                         discount_quantity: item.discount_quantity,
                         discount_priority: item.discount_priority,
                         discount_price: item.discount_price,
@@ -69,7 +65,6 @@ const AddProduct = () => {
                         discount_enddate: item.discount_enddate
                     }
                 ))
-                // console.log(n)
                 return n
             })
 
@@ -78,13 +73,12 @@ const AddProduct = () => {
                 const n = data?.data?.prod_attributes?.map(item => (
                     {
                         id: new Date().getTime(),
-                        attr_group_id: item.attribute_data?.attribute_group?.attr_group_id,
-                        attribute_id: item?.attribute_data?.attribute_id,
+                        attr_group_id: item.attribute_data?.attribute_group?.id,
+                        attribute_id: item?.attribute_data?.id,
                         attribute_type: item.attribute_type,
                         attribute_value: item.attribute_value,
                     }
                 ))
-                // console.log(n)
                 return n
             })
             setSelectedPartsOfProducts(s => {
@@ -92,9 +86,9 @@ const AddProduct = () => {
                 const n = data?.data?.part_of_products?.map(item => (
                     {
                         label: item.part_product.prod_name,
-                        value: item.part_product.prod_uuid,
-                        uid: item.part_product.prod_uuid,
-                        key: item.part_product.prod_uuid,
+                        value: item.part_product.id,
+                        uid: item.part_product.id,
+                        key: item.part_product.id,
                         name: item.part_product.prod_name,
                         sku: item.part_product.prod_sku,
                         quantity: item.prod_quantity,
@@ -104,10 +98,10 @@ const AddProduct = () => {
                 return n
             })
             setFeaturesImage(state => {
-                const thumbnail = `https://api.primeserverparts.com/images/product/image/thumbnail/${data?.data?.prod_uuid}/128x128_${data?.data?.prod_uuid}.jpg`
+                const thumbnail = `https://api.primeserverparts.com/images/product/image/thumbnail/${data?.data?.id}/128x128_${data?.data?.id}.jpg`
                 return ({ file: '', thumbnail })
             })
-            setGallaryImages(data?.data.gallery.map(img => ({ file: '', url: `https://api.primeserverparts.com/images/product/image/gallery/${data?.data?.prod_uuid}/128x128_${img.prod_image}`, prod_gallery_uuid: img.prod_gallery_uuid })))
+            setGallaryImages(data?.data.gallery.map(img => ({ file: '', url: `https://api.primeserverparts.com/images/product/image/gallery/${data?.data?.id}/128x128_${img.prod_image}`, prod_gallery_uuid: img.id })))
 
 
         }).catch(err => {
@@ -345,8 +339,7 @@ const AddProduct = () => {
             }
             return data
         })
-        const prod_thumbnail = featuresImage.file
-        const prod_gallery = gallaryImages.map(item => item.file)
+
 
 
 
@@ -357,8 +350,8 @@ const AddProduct = () => {
             prod_status,
             partof_product,
             taxable: isTaxable,
-            prod_thumbnail,
-            prod_gallery,
+            // prod_thumbnail,
+            // prod_gallery,
         }
 
         if (prod_regular_price) {
@@ -393,9 +386,6 @@ const AddProduct = () => {
         }
 
 
-        console.log("values:\n", values);
-        console.log("data:\n", data);
-
         // All Validation Start
         if (!data.prod_long_desc) return toast.warning("Please enter a long description")
         if (!data.prod_short_desc) return toast.warning("Please enter a long description")
@@ -405,37 +395,66 @@ const AddProduct = () => {
         if (!data.prod_category) return toast.warning("Please select a Category")
         if (!data.prod_outofstock_status) return toast.warning("Please select an Availability Status")
         if (!data.prod_regular_price) return toast.warning("Please enter Regular Price")
-        if (!prod_thumbnail) { return toast.warning("Please select a Feature image") }
         // All Validation End
 
 
-        // return;
-        if (params.id) return
-
-        console.log("submit:\n", data)
-        // return console.log("submit:\n", data)
         setIsLoading(true)
-        apolloUploadClient.mutate({
-            mutation: productMutation.ADD_PRODUCT,
-            variables: { data },
-            context: {
-                headers: {
-                    TENANTID: process.env.REACT_APP_TENANTID,
-                    Authorization: Cookies.get('psp_t')
+        if (!params.id) {
+
+            data.prod_thumbnail = featuresImage.file
+            data.prod_gallery = gallaryImages.map(item => item.file)
+            // Validataion for add only 
+            if (!prod_thumbnail) { return toast.warning("Please select a Feature image") }
+
+            apolloUploadClient.mutate({
+                mutation: productMutation.ADD_PRODUCT,
+                variables: { data },
+                context: {
+                    headers: {
+                        TENANTID: process.env.REACT_APP_TENANTID,
+                        Authorization: Cookies.get('psp_t')
+                    }
                 }
-            }
-        }).then(res => {
-            const data = res?.data?.addProduct
-            if (!data.status) return toast.error(data.message);
-            history.push("/admin/products/list");
-            window.location.reload()
-            toast.success(data.message);
-        }).catch(err => {
-            console.log("add Prod err:\n", err)
-            return toast.error('Something Went wrong !!')
-        }).finally(() => {
-            setIsLoading(false)
-        })
+            }).then(res => {
+                const data = res?.data?.addProduct
+                if (!data.status) return toast.error(data.message);
+                history.push("/admin/products/list");
+                window.location.reload()
+                toast.success(data.message);
+            }).catch(err => {
+                console.log("add Prod err:\n", err)
+                return toast.error('Something Went wrong !!')
+            }).finally(() => {
+                setIsLoading(false)
+            })
+        }
+        // update prod
+        else {
+            data.prod_id = parseInt(params.id)
+
+            apolloUploadClient.mutate({
+                mutation: productMutation.UPDATE_PRODUCT,
+                variables: { data },
+                context: {
+                    headers: {
+                        TENANTID: process.env.REACT_APP_TENANTID,
+                        Authorization: Cookies.get('psp_t')
+                    }
+                }
+            }).then(res => {
+                const data = res?.data?.updateProduct
+                if (!data.status) return toast.error(data.message);
+                history.push("/admin/products/list");
+                window.location.reload()
+                toast.success(data.message);
+            }).catch(err => {
+                console.log("add Prod err:\n", err)
+                return toast.error('Something Went wrong !!')
+            }).finally(() => {
+                setIsLoading(false)
+            })
+
+        }
     }
 
     return (
@@ -452,40 +471,60 @@ const AddProduct = () => {
                                 <div div className="spin">
                                     <Spin />
                                 </div>
-
                                 :
-
                                 <Form
                                     style={{ width: '100%' }}
                                     form={form}
                                     name="addRole"
                                     onFinish={handleSubmit}
-                                    onFinishFailed={errorInfo => console.log('form error info:\n', errorInfo)}
+                                    onFinishFailed={errorInfo => {
+                                        console.log('form error info:\n', errorInfo)
+                                        toast.warning('Please fill all required data in all tab')
+                                    }}
                                     labelCol={{ span: 4 }}
+                                    initialValues={params.id ? {
+                                        prod_name: singleProduct.data.prod_name,
+                                        prod_short_desc: singleProduct.data.prod_short_desc,
+                                        prod_meta_title: singleProduct.data.prod_meta_title,
+                                        prod_meta_desc: singleProduct.data.prod_meta_desc,
+                                        prod_meta_keywords: singleProduct.data.prod_meta_keywords,
+                                        prod_tags: singleProduct.data.prod_tags,
+                                        prod_partnum: singleProduct.data.prod_partnum,
+                                        prod_sku: singleProduct.data.prod_sku,
+                                        brand_id: singleProduct.data?.brand?.id,
+                                        prod_category: singleProduct.data?.category?.id,
+                                        dimension_class: singleProduct.data?.dimensions?.dimension_class || "",
+                                        prod_weight: singleProduct.data?.prod_weight || "",
+                                        prod_weight_class: singleProduct.data?.prod_weight_class || "",
+                                        prod_outofstock_status: singleProduct.data?.prod_outofstock_status || "",
+                                        prod_regular_price: singleProduct.data?.prod_regular_price || "",
+                                        prod_sale_price: singleProduct.data?.prod_sale_price || "",
+
+                                    } :
+                                        {
+                                            dimension_class: "Inch",
+                                            prod_weight_class: "Pound",
+                                            prod_outofstock_status: "In Stock",
+                                        }
+                                    }
                                 >
                                     <Tabs>
 
-
-
                                         <Tabs.TabPane tab="General" key="general">
-                                            <Form.Item
+                                            <Form.Item name="prod_name"
                                                 rules={[{ required: true, message: "Please enter Product Name" }]}
-                                                name="prod_name"
                                                 label="Name"
-                                                initialValue={params.id ? singleProduct.data.prod_name : ""}
                                             >
                                                 <Input placeholder='Enter Product Name' />
                                             </Form.Item>
-                                            <Form.Item
+                                            <Form.Item name="prod_short_desc"
                                                 rules={[{ required: true, message: "Please enter n" }]}
-                                                name="prod_short_desc"
+
                                                 label="Short Description"
-                                                initialValue={params.id ? singleProduct.data.prod_short_desc : ""}
                                             >
                                                 <TextArea rows={3} placeholder="Enter Short Description" />
                                             </Form.Item>
-                                            <Form.Item
-                                                label="Long Description"
+                                            <Form.Item label="Long Description"
                                             >
                                                 <RichTextEditor
 
@@ -497,72 +536,53 @@ const AddProduct = () => {
                                                     toolbarClassName={style.rteToolbar}
                                                 />
                                             </Form.Item>
-                                            <Form.Item
+                                            <Form.Item name="prod_meta_title"
                                                 rules={[{ required: true, message: "Please enter Meta Title" }]}
-                                                name="prod_meta_title"
                                                 label="Meta Title"
-                                                initialValue={params.id ? singleProduct.data.prod_meta_title : ""}
                                             >
                                                 <Input placeholder='Enter Meta Title' />
                                             </Form.Item>
-                                            <Form.Item
+                                            <Form.Item name="prod_meta_desc"
                                                 rules={[{ required: true, message: "Please enter Meta Description" }]}
-                                                name="prod_meta_desc"
                                                 label="Meta Description"
-                                                initialValue={params.id ? singleProduct.data.prod_meta_desc : ""}
                                             >
                                                 <Input placeholder='Enter Meta Description' />
                                             </Form.Item>
-                                            <Form.Item
+                                            <Form.Item name="prod_meta_keywords"
                                                 rules={[{ required: true, message: "Please enter Meta Keywords" }]}
-                                                name="prod_meta_keywords"
                                                 label="Meta Keywords"
-                                                initialValue={params.id ? singleProduct.data.prod_meta_keywords : ""}
                                             >
                                                 <Input placeholder='Enter comma separated Meta Keywords' />
                                             </Form.Item>
-                                            <Form.Item
+                                            <Form.Item name="prod_tags"
                                                 rules={[{ required: true, message: "Please enter Tags" }]}
-                                                name="prod_tags"
                                                 label="Tags"
-                                                initialValue={params.id ? singleProduct.data.prod_tags : ""}
                                             >
                                                 <Input placeholder='Enter comma separated Tags' />
                                             </Form.Item>
-                                            <Form.Item
-                                                label="Status"
+                                            <Form.Item label="Status"
                                             >
                                                 <Switch checked={prod_status} onChange={checked => setProd_status(checked)} />
                                             </Form.Item>
-
-
                                         </Tabs.TabPane>
-
                                         <Tabs.TabPane tab="Data" key="Data">
-                                            <Form.Item
+                                            <Form.Item name="prod_partnum"
                                                 rules={[{ required: true, message: "Please enter Part NO" }]}
-                                                name="prod_partnum"
                                                 label="Part NO"
-                                                initialValue={params.id ? singleProduct.data.prod_partnum : ""}
                                             >
                                                 <Input placeholder='Enter Part No' />
                                             </Form.Item>
-                                            <Form.Item
+                                            <Form.Item name="prod_sku"
                                                 rules={[{ required: true, message: "Please enter SKU" }]}
-                                                name="prod_sku"
                                                 label="SKU"
-                                                initialValue={params.id ? singleProduct.data.prod_sku : ""}
                                             >
                                                 <Input placeholder='Enter Product SKU' />
                                             </Form.Item>
                                         </Tabs.TabPane>
-
                                         <Tabs.TabPane tab="Links" key="Links">
-                                            <Form.Item
+                                            <Form.Item name="brand_id"
                                                 rules={[{ required: true, message: "Please select a Brand" }]}
-                                                name="brand_id"
                                                 label="Manufacturer"
-                                                initialValue={params.id ? singleProduct.data?.brand?.brand_id : null}
                                             >
                                                 <Select placeholder={brand.loading ? "Loading..." : "select Manufacture"}
                                                     options={brand?.data?.map(item => ({
@@ -574,11 +594,9 @@ const AddProduct = () => {
                                                 />
 
                                             </Form.Item>
-                                            <Form.Item
+                                            <Form.Item name="prod_category"
                                                 rules={[{ required: true, message: "Please enter Product Name" }]}
-                                                name="prod_category"
                                                 label="Categories"
-                                                initialValue={params.id ? singleProduct.data?.category?.id : null}
                                             >
                                                 <Select placeholder={brand.loading ? "Loading..." :
                                                     categories.length ?
@@ -594,18 +612,15 @@ const AddProduct = () => {
                                                 // mode="multiple"
                                                 />
                                             </Form.Item>
-
-                                            <Form.Item
+                                            <Form.Item label="Related Product"
                                                 rules={[{ required: true, message: "Please enter Product Name" }]}
-                                                // name=""
-                                                label="Related Product"
                                             >
                                                 <Select
                                                     placeholder={products.isLoading ? "Loading..." : "select Related Products"}
                                                     mode="multiple"
                                                     optionFilterProp="label"
-                                                    defaultValue={params.id ?
-                                                        singleProduct?.data?.related_products?.map(item => item?.related_prod?.prod_uuid)
+                                                    defaultValue={params.id
+                                                        ? singleProduct?.data?.related_products?.map(item => item?.related_prod?.id)
                                                         : []
                                                     }
                                                     options={products?.data?.map(item => (
@@ -615,20 +630,16 @@ const AddProduct = () => {
                                                             uid: item.id,
                                                         }
                                                     ))}
-
                                                     onChange={(newVal, items) => {
                                                         setRelatedProducts(items)
                                                     }}
                                                 >
-
                                                 </Select>
                                             </Form.Item>
 
                                         </Tabs.TabPane>
-
                                         <Tabs.TabPane tab="Specifications" key="Specifications">
-                                            <Form.Item
-                                                label={<p>Dimensions <br /> (L x W x H)</p>}
+                                            <Form.Item label={<p>Dimensions <br /> (L x W x H)</p>}
                                             >
                                                 <Input.Group compact
                                                 >
@@ -652,11 +663,8 @@ const AddProduct = () => {
                                                     />
                                                 </Input.Group>
                                             </Form.Item>
-                                            <Form.Item
-                                                // rules={[{ required: true, message: "Please enter Model" }]}
-                                                name="dimension_class"
+                                            <Form.Item name="dimension_class"
                                                 label={<p>Dimensions <br />Class </p>}
-                                                initialValue="Inch"
                                             >
                                                 <Select style={{ height: '3.5em' }} placeholder="Enter Dimension Class" >
                                                     <Option key={1} value="Centimeter" >Centimeter</Option>
@@ -664,20 +672,13 @@ const AddProduct = () => {
                                                     <Option key={3} value="Inch" >Inch</Option>
                                                 </Select>
                                             </Form.Item>
-
-                                            <Form.Item
-                                                // rules={[{ required: true, message: "Please enter Model" }]}
-                                                name="prod_weight"
+                                            <Form.Item name="prod_weight"
                                                 label="Weight"
-                                                initialValue={!params.id ? "" : singleProduct?.data?.prod_weight ? singleProduct?.data?.prod_weight : ''}
                                             >
                                                 <Input type='number' placeholder='Enter Weight' />
                                             </Form.Item>
-                                            <Form.Item
-                                                // rules={[{ required: true, message: "Please enter Model" }]}
-                                                name="prod_weight_class"
+                                            <Form.Item name="prod_weight_class"
                                                 label="Weight Class"
-                                                initialValue="Pound"
                                             >
                                                 <Select placeholder="Enter Weight Class" >
                                                     <Option key={1} value="Kilogram" >Kilogram</Option>
@@ -686,15 +687,11 @@ const AddProduct = () => {
                                                     <Option key={3} value="Ounce" >Ounce</Option>
                                                 </Select>
                                             </Form.Item>
-
                                         </Tabs.TabPane>
-
                                         <Tabs.TabPane tab="Stock" key="Stock">
-                                            <Form.Item
+                                            <Form.Item name="prod_outofstock_status"
                                                 rules={[{ required: true, message: "Please enter Availability Status" }]}
-                                                name="prod_outofstock_status"
                                                 label="Availability"
-                                                initialValue={params.id ? singleProduct?.data?.prod_outofstock_status : "In Stock"}
                                             >
                                                 <Select placeholder="Please select a Status">
                                                     <Select.Option key={1} value="2-3 Days" >2-3 Days</Select.Option>
@@ -704,38 +701,26 @@ const AddProduct = () => {
                                                 </Select>
                                             </Form.Item>
                                         </Tabs.TabPane>
-
                                         <Tabs.TabPane tab="Attribute" key="Attribute">
                                             <AttributeTab {...{ attributesTableData, setAttributesTableData }} />
                                         </Tabs.TabPane>
-
                                         <Tabs.TabPane tab="Price" key="Price">
-                                            <Form.Item
+                                            <Form.Item name="prod_regular_price"
                                                 rules={[{ required: true, message: "Please Enter Regular Price" }]}
-                                                name="prod_regular_price"
                                                 label="Regular Price"
-                                                initialValue={params.id ? singleProduct?.data?.prod_regular_price : ""}
                                             >
                                                 <Input placeholder='Enter Regular Price' prefix="US$  " type='number' />
                                             </Form.Item>
-
-                                            <Form.Item
-                                                name="prod_sale_price"
+                                            <Form.Item name="prod_sale_price"
                                                 label="Sales Price"
-                                                initialValue={params.id ? singleProduct?.data?.prod_sale_price : ""}
                                             >
                                                 <Input prefix="US$  " type='number' placeholder='Enter Sales Price' />
                                             </Form.Item>
-
-                                            <Form.Item
-                                                label="Taxable"
+                                            <Form.Item label="Taxable"
                                             >
                                                 <Switch checked={isTaxable} onChange={checked => setIsTaxable(checked)} />
                                             </Form.Item>
-
-
                                         </Tabs.TabPane>
-
                                         <Tabs.TabPane tab="Discount" key="Discount">
                                             <DiscountTab {...{ discount, setDiscount }} />
                                         </Tabs.TabPane>
@@ -743,10 +728,8 @@ const AddProduct = () => {
                                         <Tabs.TabPane tab="Parts Of Product" key="PartsOf">
                                             <PartsOfProductTab {...{ products, setProducts, selectedPartsOfProducts, setSelectedPartsOfProducts, partOfProductQuantities, setPartOfProductQuantities }} />
                                         </Tabs.TabPane>
-
-
                                         <Tabs.TabPane tab="Images" key="Images">
-                                            <ImageTab {...{ featuresImage, setFeaturesImage, gallaryImages, setGallaryImages, singleProdUid: singleProduct?.data?.prod_uuid, setIsLoading }} />
+                                            <ImageTab {...{ featuresImage, setFeaturesImage, gallaryImages, setGallaryImages, singleProdUid: singleProduct?.data?.id, setIsLoading }} />
                                         </Tabs.TabPane>
 
                                     </Tabs>
@@ -756,8 +739,7 @@ const AddProduct = () => {
                                             display: 'flex',
                                             justifyContent: 'flex-end',
                                             marginTop: '3em'
-                                        }}
-                                    >
+                                        }}>
                                         <Form.Item>
 
                                             <Button loading={isLoading} size="default" htmlType="submit" type="primary" raised>

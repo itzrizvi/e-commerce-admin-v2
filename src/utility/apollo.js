@@ -372,7 +372,7 @@ export const productQuery = {
         tenant_id
         status
         data {
-          prod_uuid
+          id
           prod_name
           prod_slug
           prod_long_desc
@@ -391,11 +391,10 @@ export const productQuery = {
           prod_weight_class
           prod_outofstock_status
           prod_thumbnail
-          tenant_id
           createdAt
           updatedAt
           brand {
-            brand_uuid
+            id
             brand_name
             brand_slug
             brand_description
@@ -404,7 +403,7 @@ export const productQuery = {
             image
           }
           category {
-            cat_id
+            id
             cat_name
             cat_slug
             cat_description
@@ -415,13 +414,12 @@ export const productQuery = {
             cat_sort_order
             cat_status
             is_featured
-            tenant_id
             cat_parent_id
           }
           discount_type {
-            discount_type_uuid
+            id
             customer_group {
-              customer_group_uuid
+              id
               customer_group_name
               customer_group_slug
               customergroup_description
@@ -435,22 +433,22 @@ export const productQuery = {
             discount_enddate
           }
           dimensions {
-            prod_dimension_uuid
+            id
             length
             width
             height
             dimension_class
           }
           gallery {
-            prod_gallery_uuid
-            prod_uuid
+            id
+            prod_id
             prod_image
           }
           part_of_products {
-            partof_product_uuid
+            id
             prod_quantity
             part_product {
-              prod_uuid
+              id
               prod_name
               prod_slug
               prod_long_desc
@@ -472,16 +470,16 @@ export const productQuery = {
             }
           }
           prod_attributes {
-            prod_attr_uuid
+            id
             attribute_type
             attribute_value
             attribute_data {
-              attribute_uuid
+              id
               attribute_name
               attribute_slug
               attribute_status
               attribute_group {
-                attr_group_uuid
+                id
                 attr_group_name
                 attr_group_slug
                 attrgroup_sortorder
@@ -490,9 +488,9 @@ export const productQuery = {
             }
           }
           related_products {
-            related_prod_uuid
+            id
             related_prod {
-              prod_uuid
+              id
               prod_name
               prod_slug
               prod_long_desc
@@ -514,13 +512,13 @@ export const productQuery = {
             }
           }
           created_by {
-            uid
+            id
             first_name
             last_name
             email
             image
             roles {
-              role_uuid
+              id
               role_no
               role
               role_slug
@@ -621,6 +619,15 @@ export const productMutation = {
         tenant_id
       }
     }
+  `,
+  UPDATE_PRODUCT: gql`
+  mutation updateProduct($data: UpdateProductInput) {
+    updateProduct(data: $data) {
+      message
+      status
+      tenant_id
+    }
+  }
   `,
 };
 

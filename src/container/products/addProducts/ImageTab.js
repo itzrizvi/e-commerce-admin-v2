@@ -6,7 +6,7 @@ import { InboxOutlined } from '@ant-design/icons'
 import { apolloUploadClient, productMutation } from '../../../utility/apollo';
 import Cookies from 'js-cookie';
 
-const ImageTab = ({ featuresImage, setFeaturesImage, gallaryImages, setGallaryImages, singleProdUid, setIsLoading }) => {
+const ImageTab = ({ featuresImage, setFeaturesImage, gallaryImages, setGallaryImages, singleProdId, setIsLoading }) => {
 
 
     const handleBeforeUpload = file => {
@@ -20,13 +20,13 @@ const ImageTab = ({ featuresImage, setFeaturesImage, gallaryImages, setGallaryIm
 
 
             // update thumbnail img
-            if (singleProdUid) {
+            if (singleProdId) {
                 setIsLoading(true)
                 apolloUploadClient.mutate({
                     mutation: productMutation.UPDATE_THUMBNAIL,
                     variables: {
                         data: {
-                            prod_uuid: singleProdUid,
+                            prod_id: singleProdId,
                             prod_thumbnail: file
                         }
                     },
@@ -60,13 +60,13 @@ const ImageTab = ({ featuresImage, setFeaturesImage, gallaryImages, setGallaryIm
         setGallaryImages(state => [...state, { file, url: URL.createObjectURL(file), uid: file.uid }])
 
         // update galary img
-        if (singleProdUid) {
+        if (singleProdId) {
             setIsLoading(true)
             apolloUploadClient.mutate({
                 mutation: productMutation.UPLOAD_GALLERY_IMAGE,
                 variables: {
                     data: {
-                        prod_uuid: singleProdUid,
+                        prod_id: singleProdId,
                         gallery_img: file
                     }
                 },
@@ -96,7 +96,6 @@ const ImageTab = ({ featuresImage, setFeaturesImage, gallaryImages, setGallaryIm
             <Form.Item
                 label="Features Image"
             >
-                {/* <Input placeholder='Enter price' prefix="US$  " type='number' /> */}
                 <Upload
                     multiple
                     listType="picture-card"
@@ -110,7 +109,6 @@ const ImageTab = ({ featuresImage, setFeaturesImage, gallaryImages, setGallaryIm
 
             </Form.Item>
             <Form.Item
-                // name="Price"
                 label="Gallery Image"
             >
                 <Dragger
@@ -125,14 +123,14 @@ const ImageTab = ({ featuresImage, setFeaturesImage, gallaryImages, setGallaryIm
                         })
 
                         // delete galary img
-                        if (singleProdUid) {
+                        if (singleProdId) {
                             setIsLoading(true)
                             apolloUploadClient.mutate({
                                 mutation: productMutation.DELETE_GALLERY_IMAGE,
                                 variables: {
                                     data: {
-                                        prod_uuid: singleProdUid,
-                                        prod_gallery_uuid: file.prod_gallery_uuid
+                                        prod_id: singleProdId,
+                                        prod_gallery_id: file.prod_gallery_uuid
                                     }
                                 },
                                 context: {

@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import FeatherIcon from 'feather-icons-react';
 import apolloClient, { customerQuery } from '../../../utility/apollo';
 import Cookies from 'js-cookie';
+import moment from 'moment';
 
 const DiscountTab = ({ discount, setDiscount }) => {
 
@@ -114,9 +115,10 @@ const DiscountTab = ({ discount, setDiscount }) => {
         },
         {
             title: 'Date Start',
-            dataIndex: 'title',
-            key: 'title',
-            render: (text, record, index) => <DatePicker
+            dataIndex: 'discount_startdate',
+            key: 'discount_startdate',
+            render: (val, record, index) => <DatePicker
+                defaultValue={val && moment(parseInt(val))}
                 onChange={value => {
                     const dateGmt = new Date(value._d).toGMTString()
                     console.log(dateGmt)
@@ -132,9 +134,10 @@ const DiscountTab = ({ discount, setDiscount }) => {
         },
         {
             title: 'Date End',
-            dataIndex: 'title',
-            key: 'title',
-            render: (text, record, index) => <DatePicker
+            dataIndex: 'discount_enddate',
+            key: 'discount_enddate',
+            render: (val, record, index) => <DatePicker
+                defaultValue={val && moment(parseInt(val))}
                 onChange={value => {
                     const dateGmt = new Date(value._d).toGMTString()
                     console.log(dateGmt)

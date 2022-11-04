@@ -100,14 +100,11 @@ const Products = () => {
 
                 }
             })
-            // console.log(arrData);
             setCategories({ data: arrData, isLoading: false })
 
         }).catch(err => {
 
         })
-
-
 
         // 2.load Arrributes
         apolloClient.query({
@@ -301,10 +298,6 @@ const Products = () => {
 
     // All filter
     useEffect(() => {
-
-        // console.log(filterDate);
-        // return
-
         if (products.isLoading) return
         let filteredData = products.data
 
@@ -314,15 +307,12 @@ const Products = () => {
         if (filterDate.startDate) {
             const startDate = new Date(filterDate.startDate).valueOf()
             const endDate = new Date(filterDate.endDate).valueOf()
-            // console.log(filterDate.startDate)
-            // console.log(new Date(filterDate.startDate).valueOf())
             filteredData = filteredData.filter(prod => {
                 const creeatedAt = parseInt(prod.createdAt)
                 const c1 = creeatedAt >= startDate
                 const c2 = creeatedAt <= endDate
                 return (c1 && c2)
             })
-            // console.log(filteredData);
         }
 
         if (filterDate.attributes.length) {
@@ -499,14 +489,11 @@ const Products = () => {
                                                 >
                                                     <Input type='number' placeholder='Min' style={{ width: "50%" }}
                                                         onBlur={e => {
-                                                            console.log(filterDate);
                                                             setFilterDate(s => ({ ...s, minPrice: e?.target?.value }))
                                                         }}
                                                     />
                                                     <Input type='number' placeholder='Max' style={{ width: "50%" }}
                                                         onBlur={e => {
-                                                            console.log(filterDate);
-                                                            console.log(e.target.value);
                                                             setFilterDate(s => ({ ...s, maxPrice: e?.target?.value }))
                                                         }}
                                                     />
@@ -523,7 +510,7 @@ const Products = () => {
                                         <Table
                                             className="table-responsive"
                                             columns={columns}
-                                            rowKey={'g_s'}
+                                            rowKey={'id'}
                                             size="small"
                                             // dataSource={searchText ? filteredProducts : products.data}
                                             dataSource={filteredProducts}
