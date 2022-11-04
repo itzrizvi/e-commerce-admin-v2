@@ -285,7 +285,7 @@ const Products = () => {
                             view
                         </Button>
                     </Link>
-                    <Link to={`/admin/products/add?id=${record.id}&name=${record.prod_name}`}>
+                    <Link to={`/admin/products/add?id=${record.id}`}>
                         {/* <Button size="default" type="white" title='Edit'> */}
                         <FontAwesome name="edit" style={{ margin: ".5em 1em" }} />
                         {/* </Button> */}
