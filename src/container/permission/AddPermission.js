@@ -24,6 +24,7 @@ const AddPermission = () => {
     const [singlePermission, setSinglePermission] = useState({ data: [], isLoading: true })
 
     useEffect(() => {
+        if (!params.id) return
         apolloClient.query({
             query: authQuery.GET_SINGLE_ROLES_PERMISSION,
             variables: {
@@ -42,7 +43,6 @@ const AddPermission = () => {
             setSinglePermission({ data: data.data, isLoading: false })
             setPermissionStatus(data.data.roles_permission_status)
         }).catch(err => {
-            setCategories([])
             console.log(err);
         })
     }, [])

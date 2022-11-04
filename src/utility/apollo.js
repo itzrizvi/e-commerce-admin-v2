@@ -695,33 +695,32 @@ export const attributeQuery = {
     }
   `,
   GET_SINGLE_ATTR_GROUP: gql`
-    query getSingleAttrGroup($query: GetSingleAttrGroupInput) {
-      getSingleAttrGroup(query: $query) {
-        message
-        status
+  query getSingleAttrGroup($query: GetSingleAttrGroupInput) {
+    getSingleAttrGroup(query: $query) {
+      message
+      status
+      data {
+        id
+        attr_group_name
+        attr_group_slug
+        attrgroup_status
+        attrgroup_sortorder
         tenant_id
-        data {
-          attr_group_uuid
-          attr_group_name
-          attr_group_slug
-          attrgroup_status
-          attrgroup_sortorder
+        createdAt
+        updatedAt
+        attributes {
+          id
+          attribute_name
+          attribute_slug
+          attr_group_id
+          attribute_status
           tenant_id
           createdAt
           updatedAt
-          attributes {
-            attribute_uuid
-            attribute_name
-            attribute_slug
-            attr_group_uuid
-            attribute_status
-            tenant_id
-            createdAt
-            updatedAt
-          }
         }
       }
     }
+  }
   `,
   GET_ALL_ATTRIBUTES: gql`
     query getAllAttributes {

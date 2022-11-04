@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Row, Col, Form, Input, Switch } from 'antd';
+import React, { useEffect, useState } from 'react';
+import { Row, Col, Form, Input, Switch, Spin } from 'antd';
 import FeatherIcon from 'feather-icons-react';
 import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
@@ -18,10 +18,36 @@ const AddAttributeGroup = () => {
     const params = queryString.parse(search)
     const history = useHistory();
 
-    const [groupStatus, setGroupStatus] = useState(params.status ? params.status === "true" : true);
+    const [groupStatus, setGroupStatus] = useState(true);
     const [isLoading, setIsLoading] = useState(false)
     const [form] = Form.useForm();
     const maxLength = 30;
+
+    const [singleAttributeGroup, setSingleAttributeGroup] = useState({ data: [], isLoading: true })
+
+    useEffect(() => {
+        if (!params.id) return
+        apolloClient.query({
+            query: attributeQuery.GET_SINGLE_ATTR_GROUP,
+            variables: {
+                query: {
+                    attr_group_id: parseInt(params.id)
+                }
+            },
+            context: {
+                headers: {
+                    TENANTID: process.env.REACT_APP_TENANTID,
+                    Authorization: Cookies.get('psp_t')
+                }
+            }
+        }).then(res => {
+            const data = res?.data?.getSingleAttrGroup
+            setSingleAttributeGroup({ data: data.data, isLoading: false })
+            setGroupStatus(data.data.attrgroup_status)
+        }).catch(err => {
+            console.log(err);
+        })
+    }, [])
 
     const handleSubmit = values => {
         const { attr_group_name, attrgroup_sortorder } = values;
@@ -109,66 +135,73 @@ const AddAttributeGroup = () => {
     return (
         <>
             <PageHeader
-                title={params.id ? `Manage Group | Edit (${params.name})` : "Add Attribute Group"}
+                title={params.id ? `Manage Group | Edit ${singleAttributeGroup.isLoading ? '' : `(${singleAttributeGroup.data.attr_group_name})`}` : "Add Attribute Group"}
             />
             <Main>
                 <Row gutter={25}>
                     <Col sm={24} xs={24}>
                         <Cards headless>
 
-                            <Form
-                                style={{ width: '100%' }}
-                                form={form}
-                                name="addRole"
-                                onFinish={handleSubmit}
-                                onFinishFailed={errorInfo => console.log('form error info:\n', errorInfo)}
-                                labelCol={{ span: 4 }}
-                            >
-                                <Form.Item
-                                    rules={[{ required: true, max: maxLength, message: "Please enter Attribute Group Name" }]}
-                                    name="attr_group_name" label="Group Name"
-                                    initialValue={params.name || ""}
-                                >
-                                    <Input placeholder='Enter Attribute Group Name' />
-                                </Form.Item>
-                                <Form.Item
-                                    rules={[{ required: true, max: maxLength, message: "Please enter Role Name" }]}
-                                    name="attrgroup_sortorder" label="Sort order"
-                                    initialValue={params.s || ""}
-                                >
-                                    <Input type='number' placeholder='Enter sort order' />
-                                </Form.Item>
-                                <Form.Item
-                                    name="attrgroup_status"
-                                    label="Status"
-                                >
-                                    <Switch checked={groupStatus} onChange={checked => setGroupStatus(checked)} />
-                                </Form.Item>
+                            {
+                                params.id && singleAttributeGroup.isLoading ? (
+                                    <div style={{ textAlign: "center" }}>
+                                        <Spin tip="processing..." />
+                                    </div>
+                                ) :
+                                    <Form
+                                        style={{ width: '100%' }}
+                                        form={form}
+                                        name="addRole"
+                                        onFinish={handleSubmit}
+                                        onFinishFailed={errorInfo => console.log('form error info:\n', errorInfo)}
+                                        labelCol={{ span: 4 }}
+                                    >
+                                        <Form.Item
+                                            rules={[{ required: true, max: maxLength, message: "Please enter Attribute Group Name" }]}
+                                            name="attr_group_name" label="Group Name"
+                                            initialValue={params.id ? singleAttributeGroup.data.attrgroup_status : ""}
+                                        >
+                                            <Input placeholder='Enter Attribute Group Name' />
+                                        </Form.Item>
+                                        <Form.Item
+                                            rules={[{ required: true, max: maxLength, message: "Please enter Role Name" }]}
+                                            name="attrgroup_sortorder" label="Sort order"
+                                            initialValue={params.id ? singleAttributeGroup.data.attrgroup_sortorder : ""}
+                                        >
+                                            <Input type='number' placeholder='Enter sort order' />
+                                        </Form.Item>
+                                        <Form.Item
+                                            name="attrgroup_status"
+                                            label="Status"
+                                        >
+                                            <Switch checked={groupStatus} onChange={checked => setGroupStatus(checked)} />
+                                        </Form.Item>
 
-                                <div
-                                    style={{
-                                        display: 'flex',
-                                        justifyContent: 'flex-end',
-                                        marginTop: '3em'
-                                    }}
-                                >
-                                    <Form.Item>
-                                        <Button loading={isLoading} size="default" htmlType="submit" type="primary" raised>
-                                            {isLoading ? 'Processing' : 'Save'}
-                                        </Button>
-                                        <Link to="/admin/attributes/list-group">
-                                            <Button
-                                                type='white'
-                                                size="large"
-                                            >
-                                                Cancel
-                                            </Button>
-                                        </Link>
-                                    </Form.Item>
-                                </div>
+                                        <div
+                                            style={{
+                                                display: 'flex',
+                                                justifyContent: 'flex-end',
+                                                marginTop: '3em'
+                                            }}
+                                        >
+                                            <Form.Item>
+                                                <Button loading={isLoading} size="default" htmlType="submit" type="primary" raised>
+                                                    {isLoading ? 'Processing' : 'Save'}
+                                                </Button>
+                                                <Link to="/admin/attributes/list-group">
+                                                    <Button
+                                                        type='white'
+                                                        size="large"
+                                                    >
+                                                        Cancel
+                                                    </Button>
+                                                </Link>
+                                            </Form.Item>
+                                        </div>
 
 
-                            </Form>
+                                    </Form>
+                            }
                         </Cards>
                     </Col>
                 </Row>

@@ -53,6 +53,7 @@ const AddAttribute = () => {
     }, [])
 
     useEffect(() => {
+        if (!params.id) return
         apolloClient.query({
             query: attributeQuery.GET_SINGLE_ATTRIBUTE,
             variables: {
@@ -71,7 +72,6 @@ const AddAttribute = () => {
             setSingleAttribute({ data: data.data, isLoading: false })
             setAttr_group_id(data.data.attr_group_id)
         }).catch(err => {
-            setCategories([])
             console.log(err);
         })
     }, [])

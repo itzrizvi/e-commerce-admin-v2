@@ -45,6 +45,8 @@ const AttributeGroup = () => {
     }, [])
 
 
+
+
     const columns = [
         {
             title: 'Group Name',
@@ -91,7 +93,7 @@ const AttributeGroup = () => {
             align: 'right',
             render: (value, record) => (
                 <>
-                    <Link to={`/admin/attributes/add-group?id=${value}&name=${record.attr_group_name}&s=${record.attrgroup_sortorder}&status=${record.attrgroup_status}`}>
+                    <Link to={`/admin/attributes/add-group?id=${value}`}>
                         {/* <Button size="default" type="white" title='Edit'> */}
                         <FontAwesome name="edit" style={{ margin: ".5em 1em" }} />
                         {/* </Button> */}
