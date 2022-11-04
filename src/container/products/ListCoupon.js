@@ -170,7 +170,7 @@ const ListCoupon = () => {
             align: 'right',
             render: (value, record) => (
                 <>
-                    <Link to={`/admin/products/add-coupon?id=${value}&name=${record.coupon_name}`}>
+                    <Link to={`/admin/products/add-coupon?id=${value}`}>
                         {/* <Button size="default" type="white" title='Edit'> */}
                         <FontAwesome name="edit" style={{ margin: ".5em 1em" }} />
                         {/* </Button> */}

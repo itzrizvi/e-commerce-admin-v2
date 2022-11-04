@@ -135,7 +135,7 @@ const AddCoupon = () => {
     return (
         <>
             <PageHeader
-                title={params.id ? `Manage Coupon | Edit (${params.name})` : "Add Coupon"}
+                title={params.id ? `Manage Coupon | Edit ${singleCoupon.isLoading ? '' : `(${singleCoupon.data.coupon_name})`}` : "Add Coupon"}
             />
             <Main>
                 <Row gutter={25}>
