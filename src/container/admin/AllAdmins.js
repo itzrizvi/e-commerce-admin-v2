@@ -191,7 +191,7 @@ const AllAdmin = () => {
             align: 'center',
             render: (text, record) => (
                 <>
-                    <Link to={`/admin/admin/add-admin?id=${record.id}&email=${record.email}`}>
+                    <Link to={`/admin/admin/add-admin?id=${record.id}`}>
                         <FontAwesome name="edit" />
                     </Link>
                 </>

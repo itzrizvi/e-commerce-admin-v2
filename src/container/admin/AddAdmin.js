@@ -226,7 +226,7 @@ const AddAdmin = () => {
   return (
     <>
       <PageHeader
-        title={params.id ? `Manage User | Edit user (${params.email})` : 'Add Admin'}
+        title={params.id ? `Manage User | Edit user ${singleUser.isLoading ? '' : `(${singleUser.data.email})`}` : 'Add Admin'}
         buttons={[
           params.id && (
             <div key="1" className="page-header-actions">
