@@ -112,7 +112,7 @@ const ListPermission = () => {
             align: 'right',
             render: (text, record) => (
                 <>
-                    <Link to={`/admin/permission/add?name=${record.roles_permission_name}&status=${record.roles_permission_status}&id=${record.id}`}>
+                    <Link to={`/admin/permission/add?id=${record.id}`}>
                         {/* <Button size="default" type="white" title='Edit'> */}
                         <FontAwesome name="edit" style={{ margin: ".5em 1em" }} />
                         {/* </Button> */}

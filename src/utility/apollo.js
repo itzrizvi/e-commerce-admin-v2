@@ -156,6 +156,23 @@ export const authQuery = {
       }
     }
   `,
+  GET_SINGLE_ROLES_PERMISSION: gql`
+  query getSingleRolesPermission($query:GetSingleRolesPermissionInput){
+    getSingleRolesPermission(query:$query){
+      message
+      status
+      data{
+        id
+        roles_permission_name
+        roles_permission_slug
+        roles_permission_status
+        tenant_id
+        createdAt
+        updatedAt
+      }
+    }
+  }
+  `,
 };
 
 export const authMutation = {

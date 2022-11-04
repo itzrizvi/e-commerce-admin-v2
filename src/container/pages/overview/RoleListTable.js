@@ -137,7 +137,7 @@ const RoleListTable = () => {
       width: 90,
       align: "center",
       render: (text, record) => (
-        <Link to={`/admin/roles/update?id=${record.key}&role=${record.name}`} style={{ cursor: 'pointer' }} >
+        <Link to={`/admin/roles/update?id=${record.key}`} style={{ cursor: 'pointer' }} >
           <FontAwesome name="edit" style={{ margin: ".5em 1em" }} />
         </Link>
       ),

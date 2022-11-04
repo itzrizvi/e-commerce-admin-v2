@@ -230,7 +230,8 @@ const UpdateRole = () => {
     return (
         <>
             <PageHeader
-                title={`Manage Role | Edit Role (${params.role})`}
+                title={`Manage Role | Edit Role ${singleRole.loading ? '' : `(${singleRole.data.role})`}`}
+
             />
             <Main>
                 <Row gutter={25}>

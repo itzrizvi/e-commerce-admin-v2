@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Row, Col, Form, Input, Switch, Checkbox } from 'antd';
+import React, { useEffect, useState } from 'react';
+import { Row, Col, Form, Input, Switch, Checkbox, Spin } from 'antd';
 import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
 import { Cards } from '../../components/cards/frame/cards-frame';
@@ -19,8 +19,37 @@ const AddPermission = () => {
 
     const [form] = Form.useForm();
     const maxLength = 30
-    const [permissionStatus, setPermissionStatus] = useState(params.status ? params.status == "true" : true)
+    const [permissionStatus, setPermissionStatus] = useState(true)
     const [isLoading, setIsLoading] = useState(false)
+    const [singlePermission, setSinglePermission] = useState({ data: [], isLoading: true })
+
+    useEffect(() => {
+
+        apolloClient.query({
+            query: authQuery.GET_SINGLE_ROLES_PERMISSION,
+            variables: {
+                query: {
+                    id: parseInt(params.id)
+                }
+            },
+            context: {
+                headers: {
+                    TENANTID: process.env.REACT_APP_TENANTID,
+                    Authorization: Cookies.get('psp_t')
+                }
+            }
+        }).then(res => {
+            const data = res?.data?.getSingleRolesPermission
+            setSinglePermission({ data: data.data, isLoading: false })
+            setPermissionStatus(data.data.roles_permission_status)
+            // setCategories(data)
+        }).catch(err => {
+            setCategories([])
+            console.log(err);
+        })
+
+
+    }, [])
 
 
 
@@ -118,8 +147,8 @@ const AddPermission = () => {
     return (
         <>
             <PageHeader
-                title={params.name
-                    ? `Manage Permission | Edit Permission (${params.name})`
+                title={params.id
+                    ? `Manage Permission | Edit Permission ${singlePermission.isLoading ? '' : `(${singlePermission.data.roles_permission_name})`}`
                     : "Add Permission"
                 }
             />
@@ -127,54 +156,60 @@ const AddPermission = () => {
                 <Row gutter={25}>
                     <Col sm={24} xs={24}>
                         <Cards headless>
-                            <Form
-                                style={{ width: '100%' }}
-                                form={form}
-                                name="addRole"
-                                onFinish={handleSubmit}
-                                onFinishFailed={errorInfo => console.log('form error info:\n', errorInfo)}
-                                labelCol={{ span: 4 }}
-                            >
-                                <Form.Item
-                                    rules={[{ required: true, max: maxLength, message: "Please enter Role Name" }]}
-                                    name="permissionName" label="Name"
-                                    initialValue={params.name || ""}
-                                >
-                                    <Input placeholder='Enter Permission Name' />
-                                </Form.Item>
+                            {
+                                params.id && singlePermission.isLoading ? (
+                                    <div style={{ textAlign: "center" }}>
+                                        <Spin tip="processing..." />
+                                    </div>
+                                ) :
+                                    <Form
+                                        style={{ width: '100%' }}
+                                        form={form}
+                                        name="addRole"
+                                        onFinish={handleSubmit}
+                                        onFinishFailed={errorInfo => console.log('form error info:\n', errorInfo)}
+                                        labelCol={{ span: 4 }}
+                                    >
+                                        <Form.Item
+                                            rules={[{ required: true, max: maxLength, message: "Please enter Role Name" }]}
+                                            name="permissionName" label="Name"
+                                            initialValue={params.id ? singlePermission.data.roles_permission_name : ''}
+                                        >
+                                            <Input placeholder='Enter Permission Name' />
+                                        </Form.Item>
 
-                                <Form.Item
-                                    name="permissionStatus" label="Status"
-                                >
-                                    <Switch checked={permissionStatus} onChange={checked => setPermissionStatus(checked)} />
-                                </Form.Item>
+                                        <Form.Item
+                                            name="permissionStatus" label="Status"
+                                        >
+                                            <Switch checked={permissionStatus} onChange={checked => setPermissionStatus(checked)} />
+                                        </Form.Item>
 
-                                <div
-                                    style={{
-                                        display: 'flex',
-                                        justifyContent: 'flex-end',
-                                        marginTop: '3em'
-                                    }}
-                                >
-                                    <Form.Item>
+                                        <div
+                                            style={{
+                                                display: 'flex',
+                                                justifyContent: 'flex-end',
+                                                marginTop: '3em'
+                                            }}
+                                        >
+                                            <Form.Item>
 
-                                        <Button loading={isLoading} size="default" htmlType="submit" type="primary" raised>
-                                            {isLoading ? 'Processing' : 'Save'}
-                                        </Button>
-                                        <Link to="/admin/permission/list">
-                                            <Button
-                                                type='white'
-                                                size="large"
-                                            >
-                                                Cancel
-                                            </Button>
-                                        </Link>
-                                    </Form.Item>
-                                </div>
+                                                <Button loading={isLoading} size="default" htmlType="submit" type="primary" raised>
+                                                    {isLoading ? 'Processing' : 'Save'}
+                                                </Button>
+                                                <Link to="/admin/permission/list">
+                                                    <Button
+                                                        type='white'
+                                                        size="large"
+                                                    >
+                                                        Cancel
+                                                    </Button>
+                                                </Link>
+                                            </Form.Item>
+                                        </div>
 
 
-                            </Form>
-
+                                    </Form>
+                            }
 
                         </Cards>
                     </Col>
