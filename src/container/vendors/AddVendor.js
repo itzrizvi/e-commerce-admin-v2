@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { Row, Col, Form, Input, Switch, Spin, Tabs } from 'antd';
-import FeatherIcon from 'feather-icons-react';
 import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
 import { Cards } from '../../components/cards/frame/cards-frame';
@@ -104,11 +103,8 @@ const AddVendor = () => {
                 if (address.type === "billing") return billings.push(item)
                 return shippings.push(item)
             })
-            console.log(billings, "\n", shippings);
             setBillingAddresses(billings)
             setShippingAddresses(shippings)
-
-            console.log("single vendor\n", res)
 
         }).catch(err => {
             setSingleVendor(s => ({ ...s, error: 'Something went Wrong.!! ' }))
@@ -119,10 +115,7 @@ const AddVendor = () => {
     }, [])
 
     const handleSubmit = values => {
-        console.log(values)
         const variables = { ...values, status }
-        console.log(variables)
-
         // validate billingAddresses.
         const notValidate = billingAddresses.find(item => {
             const { id, address1, country, city, state, zip_code, email, fax, phone, address2 } = item

@@ -22,14 +22,8 @@ const SignIn = () => {
     checked: null,
   });
 
-  // const handleSubmit = () => {
-  //   dispatch(login());
-  //   history.push('/admin');
-  // };
-
   const handleSubmit = e => {
     e.preventDefault();
-
     dispatch(login(email, password, history));
   }
 
@@ -62,7 +56,6 @@ const SignIn = () => {
           >
             <Input
               onChange={e => {
-                console.log(e.target.value)
                 setEmail(e.target.value)
               }}
             />
@@ -78,12 +71,12 @@ const SignIn = () => {
               onChange={e => setPassword(e.target.value)}
             />
           </Form.Item>
-          <div className="auth-form-action">
+          {/* <div className="auth-form-action">
             <Checkbox onChange={onChange}>Keep me logged in</Checkbox>
             <NavLink className="forgot-pass-link" to="#">
               Forgot password?
             </NavLink>
-          </div>
+          </div> */}
           <Form.Item>
             <Button className="btn-signin" htmlType="submit" type="primary" size="large">
               {isLoading ? 'Loading...' : 'Sign In'}

@@ -4,11 +4,10 @@ import { Switch, Route, Redirect } from 'react-router-dom';
 import AuthLayout from '../container/profile/authentication/Index';
 
 const Login = lazy(() => import('../container/profile/authentication/overview/SignIn'));
-
+const ResetPassword = lazy(() => import('../container/profile/authentication/overview/ResetPassword'));
 const NotFound = () => {
   return <Redirect to="/" />;
 };
-
 const FrontendRoutes = () => {
   return (
     <Switch>
@@ -19,6 +18,7 @@ const FrontendRoutes = () => {
           </div>
         }
       >
+        <Route exact path="/reset-password/:codeHashed" component={ResetPassword} />
         <Route exact path="/" component={Login} />
         <Route exact path="*" component={NotFound} />
       </Suspense>

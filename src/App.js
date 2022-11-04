@@ -18,6 +18,7 @@ import 'antd/es/modal/style';
 // import 'antd/es/slider/style';
 import './config/customTable.css'
 import AuthVerify from './utility/auth_verify';
+import ResetPassword from './container/profile/authentication/overview/ResetPassword';
 import NotFound404 from './container/noFound/404';
 
 const { theme } = config;
@@ -42,18 +43,19 @@ const ProviderConfig = () => {
     // eslint-disable-next-line no-return-assign
     return () => (unmounted = true);
   }, [setPath]);
-
   return (
     <ConfigProvider direction={rtl ? 'rtl' : 'ltr'}>
       <ThemeProvider theme={{ ...theme, rtl, topMenu, darkMode }}>
         <ApolloProvider client={apolloClient} >
           <Router basename={process.env.PUBLIC_URL}>
             <AuthVerify />
-            {!isLoggedIn ? <Route path="/" component={Auth} /> : <ProtectedRoute path="/admin" component={Admin} />}
-            {isLoggedIn && (path === process.env.PUBLIC_URL || path === `${process.env.PUBLIC_URL}/`) && (
-              <Redirect to="/admin" />
-            )}
-            {/* <Route exact path="/*" component={NotFound404} /> */}
+            {
+              path.split("/")[1] === "reset-password" ? <Route exact path="/reset-password/:codeHashed" component={ResetPassword} /> :
+              !isLoggedIn ? <Route path="/" component={Auth} /> : <ProtectedRoute path="/admin" component={Admin} />}
+              {isLoggedIn && (path === process.env.PUBLIC_URL || path === `${process.env.PUBLIC_URL}/`) && (
+                <Redirect to="/admin" />
+              )
+            }
           </Router>
         </ApolloProvider>
       </ThemeProvider>

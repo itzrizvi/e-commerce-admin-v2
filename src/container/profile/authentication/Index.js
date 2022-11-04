@@ -2,6 +2,7 @@ import React from 'react';
 import { Row, Col } from 'antd';
 import { Aside, Content } from './overview/style';
 import Heading from '../../../components/heading/heading';
+import { ToastContainer } from 'react-toastify';
 
 const AuthLayout = WraperContent => {
   return () => {
@@ -34,6 +35,17 @@ const AuthLayout = WraperContent => {
         <Col xxl={16} xl={15} lg={12} md={16} xs={24}>
           <WraperContent />
         </Col>
+        <ToastContainer
+            position="top-center"
+            autoClose={5000}
+            newestOnTop={false}
+            closeOnClick
+            rtl={false}
+            pauseOnHover
+          // hideProgressBar={false}
+          // pauseOnFocusLoss
+          // draggable
+          />
       </Row>
     );
   };
