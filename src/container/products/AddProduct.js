@@ -48,7 +48,6 @@ const AddProduct = () => {
             }
         }).then(res => {
             const data = res?.data?.getSingleProduct
-            console.log(data.data)
             if (!data.status) return toast.error("Try reload..!")
             setSingleProduct({ data: data?.data, isLoading: false })
             setLongDescription(RichTextEditor.createValueFromString(data?.data?.prod_long_desc, 'html'))
