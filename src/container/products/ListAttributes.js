@@ -68,7 +68,7 @@ const ListAttributes = () => {
             align: 'right',
             render: (text, record) => (
                 <>
-                    <Link to={`/admin/attributes/add?id=${record.id}&name=${record.attribute_name}&g_id=${record.attribute_group.id}`}>
+                    <Link to={`/admin/attributes/add?id=${record.id}`}>
                         {/* <Button size="default" type="white" title='Edit'> */}
                         <FontAwesome name="edit" style={{ margin: ".5em 1em" }} />
                         {/* </Button> */}

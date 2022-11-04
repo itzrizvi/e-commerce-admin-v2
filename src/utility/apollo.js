@@ -771,6 +771,35 @@ export const attributeQuery = {
       }
     }
   `,
+  GET_SINGLE_ATTRIBUTE: gql`
+  query getSingleAttribute($query: GetSingleAttributeInput) {
+    getSingleAttribute(query: $query) {
+      message
+      status
+      tenant_id
+      data {
+        id
+        attribute_name
+        attribute_slug
+        attr_group_id
+        attribute_status
+        tenant_id
+        createdAt
+        updatedAt
+        attribute_group {
+          id
+          attr_group_name
+          attr_group_slug
+          attrgroup_status
+          attrgroup_sortorder
+          tenant_id
+          createdAt
+          updatedAt
+        }
+      }
+    }
+  }
+  `,
 };
 
 export const attributeMutation = {
