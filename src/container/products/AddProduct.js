@@ -460,7 +460,7 @@ const AddProduct = () => {
     return (
         <>
             <PageHeader
-                title={params.id ? `Manage Product | Edit Product (${params.name})` : "Add Product"}
+                title={params.id ? `Manage Product | Edit Product ${singleProduct.isLoading ? '' : `(${singleProduct.data.prod_name})`}` : "Add Product"}
             />
             <Main>
                 <Row gutter={25}>
