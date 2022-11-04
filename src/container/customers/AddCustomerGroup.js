@@ -55,12 +55,10 @@ const AddCustomerGroup = () => {
 
     const handleSubmit = values => {
         const { customer_group_name, customergroup_description, customergroup_sortorder } = values
-        // console.log(values)
 
         // ADD NEW CUSTOMER GROUP
         if (!params.id) {
             const variables = { data: { customer_group_name, customergroup_description, customergroup_sortorder: parseInt(customergroup_sortorder), customergroup_status, } }
-            console.log(variables)
             apolloClient.mutate({
                 mutation: customerMutation.CREATE_CUSTOMER_GROUP,
                 variables,
@@ -108,7 +106,6 @@ const AddCustomerGroup = () => {
                     customergroup_status,
                 }
             }
-            console.log(variables)
             apolloClient.mutate({
                 mutation: customerMutation.UPDATE_CUSTOMER_GROUP,
                 variables,
