@@ -43,9 +43,7 @@ const AddCoupon = () => {
             }
         }).then(res => {
             const data = res?.data?.getSingleCoupon
-
             if (!data?.status) return
-            console.log(data.data)
             setSingleCoupon(s => ({ ...s, data: data?.data, error: '' }))
             setCoupon_type(data.data.coupon_type)
         }).catch(err => {
@@ -57,7 +55,6 @@ const AddCoupon = () => {
     }, [])
 
     const handleSubmit = values => {
-        // const { customer_group_name, customergroup_description, customergroup_sortorder } = values
         const { coupon_startdate, coupon_enddate, coupon_maxamount, coupon_minamount, coupon_amount, coupon_sortorder, ...rest } = values
         const data = {
             ...rest,
@@ -97,7 +94,7 @@ const AddCoupon = () => {
                 window.location.reload()
                 toast.success(`${values.coupon_name} coupon added successfully`);
             }).catch(err => {
-                console.log("got error on addCustomerGroup", err)
+                console.log("Error on add coupon", err)
                 return toast.error('Something Went wrong !!')
             }).finally(() => {
                 setIsLoading(false)
@@ -145,7 +142,6 @@ const AddCoupon = () => {
                     <Col sm={24} xs={24}>
                         <Cards headless>
 
-                            {/* {params.id && singleCustomerGroup.isLoading ? */}
                             {params.id && singleCoupon.isLoading ?
                                 <div div className="spin">
                                     <Spin />
@@ -191,7 +187,6 @@ const AddCoupon = () => {
                                     </Form.Item>
                                     <Form.Item
                                         rules={[{ required: true, max: maxLength, message: "Please enter Coupon Type" }]}
-                                        // name="customer_group_name"
                                         label="Type"
                                     >
                                         <Select value={coupon_type} onChange={value => setCoupon_type(value)} placeholder="Select Coupon type" >
