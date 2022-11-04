@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Col, Form, Input, Switch, Spin, Select, DatePicker, InputNumber } from 'antd';
-import FeatherIcon from 'feather-icons-react';
+import { Row, Col, Form, Input, Switch, Spin, Select, DatePicker } from 'antd';
 import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
 import { Cards } from '../../components/cards/frame/cards-frame';
 import { Button } from '../../components/buttons/buttons';
 import { Link, useHistory, useLocation } from 'react-router-dom';
 import queryString from 'query-string'
-import apolloClient, { couponMutation, couponQuery, customerMutation, customerQuery } from '../../utility/apollo';
+import apolloClient, { couponMutation, couponQuery } from '../../utility/apollo';
 import Cookies from 'js-cookie';
 import { toast } from 'react-toastify';
 import moment from 'moment';
@@ -21,7 +20,6 @@ const AddCoupon = () => {
     const params = queryString.parse(search)
     const history = useHistory();
 
-    // const [singleCustomerGroup, setSingleCustomerGroup] = useState({ data: [], isLoading: true })
     const [singleCoupon, setSingleCoupon] = useState({ data: [], isLoading: true })
     const [coupon_type, setCoupon_type] = useState("");
     const [coupon_status, setCoupon_status] = useState(true);
@@ -30,8 +28,8 @@ const AddCoupon = () => {
     const maxLength = 30;
 
 
-    // LOAD SINGLE CUSTOMER GROUP
-    useEffect(() => {
+
+    useEffect(() => { // Load single coupon
         if (!params.id) return;
 
         apolloClient.query({
@@ -47,6 +45,7 @@ const AddCoupon = () => {
             const data = res?.data?.getSingleCoupon
 
             if (!data?.status) return
+            console.log(data.data)
             setSingleCoupon(s => ({ ...s, data: data?.data, error: '' }))
             setCoupon_type(data.data.coupon_type)
         }).catch(err => {
@@ -83,18 +82,6 @@ const AddCoupon = () => {
             apolloClient.mutate({
                 mutation: couponMutation.CREATE_COUPON,
                 variables,
-                // refetchQueries: [
-                //     {
-                //         query: customerQuery.GET_ALL_CUSTOMER_GROUPS,
-                //         context: {
-                //             headers: {
-                //                 TENANTID: process.env.REACT_APP_TENANTID,
-                //                 Authorization: Cookies.get('psp_t')
-                //             }
-                //         }
-                //     },
-                //     'getAllCustomerGroups'
-                // ],
                 context: {
                     headers: {
                         TENANTID: process.env.REACT_APP_TENANTID,
@@ -125,18 +112,6 @@ const AddCoupon = () => {
             apolloClient.mutate({
                 mutation: couponMutation.UPDATE_COUPON,
                 variables,
-                // refetchQueries: [
-                //     {
-                //         query: customerQuery.GET_ALL_CUSTOMER_GROUPS,
-                //         context: {
-                //             headers: {
-                //                 TENANTID: process.env.REACT_APP_TENANTID,
-                //                 Authorization: Cookies.get('psp_t')
-                //             }
-                //         }
-                //     },
-                //     'getAllCustomerGroups'
-                // ],
                 context: {
                     headers: {
                         TENANTID: process.env.REACT_APP_TENANTID,
@@ -183,11 +158,21 @@ const AddCoupon = () => {
                                     onFinish={handleSubmit}
                                     onFinishFailed={errorInfo => console.log('form error info:\n', errorInfo)}
                                     labelCol={{ span: 4 }}
+                                    initialValues={params.id ? {
+                                        coupon_name: singleCoupon.data.coupon_name,
+                                        coupon_description: singleCoupon.data.coupon_description,
+                                        coupon_code: singleCoupon.data.coupon_code,
+                                        coupon_amount: singleCoupon.data.coupon_amount,
+                                        coupon_minamount: singleCoupon.data.coupon_minamount,
+                                        coupon_maxamount: singleCoupon.data.coupon_maxamount,
+                                        coupon_startdate: moment(parseInt(singleCoupon.data.coupon_startdate)),
+                                        coupon_enddate: moment(parseInt(singleCoupon.data.coupon_enddate)),
+                                        coupon_sortorder: singleCoupon.data.coupon_sortorder,
+                                    } : null}
                                 >
                                     <Form.Item
                                         rules={[{ required: true, max: maxLength, message: "Please enter Coupon Name" }]}
                                         name="coupon_name" label="Coupon Name"
-                                        initialValue={params.name || ""}
                                     >
                                         <Input placeholder='Enter Coupon Name' />
                                     </Form.Item>
@@ -195,14 +180,12 @@ const AddCoupon = () => {
                                     <Form.Item
                                         rules={[{ required: true, message: "Please enter Coupon Description" }]}
                                         name="coupon_description" label="Description"
-                                        initialValue={singleCoupon.data.coupon_description || ""}
                                     >
                                         <TextArea rows={4} placeholder="Enter Coupon Description" />
                                     </Form.Item>
                                     <Form.Item
                                         rules={[{ required: true, max: maxLength, message: "Please enter Coupon CODE" }]}
                                         name="coupon_code" label="CODE"
-                                        initialValue={singleCoupon.data.coupon_code || ""}
                                     >
                                         <Input placeholder='Enter Coupon CODE' />
                                     </Form.Item>
@@ -221,21 +204,18 @@ const AddCoupon = () => {
                                     <Form.Item
                                         rules={[{ required: true, message: "Please enter Coupon Amount" }]}
                                         name="coupon_amount" label="Amount"
-                                        initialValue={singleCoupon.data.coupon_amount || ""}
                                     >
                                         <Input type='number' placeholder='Enter Coupon Amount' />
                                     </Form.Item>
                                     <Form.Item
                                         rules={[{ required: true, message: "Please enter Minimum Amount" }]}
                                         name="coupon_minamount" label="Minimum Amount"
-                                        initialValue={singleCoupon.data.coupon_minamount || ""}
                                     >
                                         <Input type='number' placeholder='Enter Minimum Amount' />
                                     </Form.Item>
                                     <Form.Item
                                         rules={[{ required: true, message: "Please enter Maximum Amount" }]}
                                         name="coupon_maxamount" label="Maximum Amount"
-                                        initialValue={singleCoupon.data.coupon_maxamount || ""}
                                     >
                                         <Input type='number' placeholder='Enter Maximum Amount' />
                                     </Form.Item>
@@ -244,8 +224,6 @@ const AddCoupon = () => {
                                         rules={[{ required: true, message: "Please enter Start Date" }]}
                                         name="coupon_startdate"
                                         label="Start Date"
-                                    // initialValue={moment(parseInt(singleCoupon.data.coupon_startdate)) || this.initialValue}
-                                    // init
 
                                     >
                                         <DatePicker />
@@ -254,8 +232,6 @@ const AddCoupon = () => {
                                         rules={[{ required: true, message: "Please enter End Date" }]}
                                         name="coupon_enddate"
                                         label="End Date"
-                                    // initialValue={moment(parseInt(singleCoupon.data.coupon_enddate)) || ""}
-                                    // initialValue={""}
                                     >
                                         <DatePicker />
                                     </Form.Item>
@@ -263,7 +239,6 @@ const AddCoupon = () => {
                                     <Form.Item
                                         rules={[{ required: true, message: "Please enter Sort order" }]}
                                         name="coupon_sortorder" label="Sort order"
-                                        initialValue={singleCoupon.data.coupon_sortorder || ""}
 
                                     >
                                         <Input type='number' placeholder='Enter sort order' />

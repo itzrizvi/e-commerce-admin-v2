@@ -135,6 +135,7 @@ export const authQuery = {
           last_name
           user_status
           email_verified
+          email
           roles {
             id
             role

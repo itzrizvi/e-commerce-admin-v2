@@ -56,8 +56,6 @@ const AllAdmin = () => {
         isLoading: true,
         error: ''
     })
-    const [allRole, setAllRole] = useState({ data: [], isLoading: true })
-    const [roleFilters, setRoleFilters] = useState([])
 
     // Load admin list
     useEffect(() => {
@@ -102,8 +100,12 @@ const AllAdmin = () => {
             dataIndex: 'id',
             key: 'id',
             width: 70,
-            // render: (text, record) => (<img src={require('../../static/img/avatar/NoPath (3).png')} alt="" />),
-            render: (text, record) => (<LazyLoadImage effect="blur" width="40" src={renderImage(record.id, record.image, 'user', '128x128')} onError={errorImageSrc} alt={record.id} />)
+            render: (text, record) => (<LazyLoadImage
+                effect="blur"
+                width="40"
+                src={renderImage(record.id, record.image, 'user', '128x128')}
+                onError={errorImageSrc}
+                alt={record.id} />)
         },
         {
             title: 'Email',
@@ -139,7 +141,6 @@ const AllAdmin = () => {
                 const data = roles.map(role => role.role).join(", ")
                 return (<p>{data}</p>)
             },
-            filters: roleFilters,
         },
         {
             title: 'Verified',
@@ -190,10 +191,8 @@ const AllAdmin = () => {
             align: 'center',
             render: (text, record) => (
                 <>
-                    <Link to={`/admin/admin/add-admin?id=${record.id}&first_name=${record.first_name}&last_name=${record.last_name}&email=${record.email}&status=${record.status}`}>
-                        {/* <Button size="default" type="white" title='Edit'> */}
+                    <Link to={`/admin/admin/add-admin?id=${record.id}&email=${record.email}`}>
                         <FontAwesome name="edit" />
-                        {/* </Button> */}
                     </Link>
                 </>
             ),
@@ -226,7 +225,6 @@ const AllAdmin = () => {
                 <Row gutter={25}>
                     <Col sm={24} xs={24}>
                         <Cards headless>
-                            {/* {(staffs.isLoading || allRole.isLoading) ? */}
                             {staffs.isLoading ?
                                 <div className="spin">
                                     <Spin />
@@ -248,7 +246,6 @@ const AllAdmin = () => {
                                                 size="small"
                                                 dataSource={searchText ? filteredUser : staffs.data}
                                                 rowClassName={(record, index) => (index % 2 == 0 ? "" : "altTableClass")}
-                                                // pagination={false}
                                                 pagination={{
                                                     defaultPageSize: config.USERS_PER_PAGE,
                                                     total: searchText ? filteredUser.length : staffs.data.length,
@@ -258,8 +255,6 @@ const AllAdmin = () => {
                                         </span>
                                     </>
                             }
-
-
                         </Cards>
                     </Col>
                 </Row>
