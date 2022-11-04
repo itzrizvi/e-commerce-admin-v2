@@ -145,7 +145,6 @@ const AddVendor = () => {
                     },
                 },
             }).then(res => {
-                console.log(res);
                 const data = res?.data?.createVendor
                 if (!data.status) return toast.error(data.message);
 
@@ -163,7 +162,6 @@ const AddVendor = () => {
                             },
                         },
                     }).then(res => {
-                        console.log(`billing res ${index}:\n`, res);
                         const data = res?.data?.addVendorBillingAddress
                     }).catch(err => {
                         console.log("error on add billing:\n", res)
@@ -185,7 +183,6 @@ const AddVendor = () => {
                             },
                         },
                     }).then(res => {
-                        console.log(`Shipping res ${index}:\n`, res);
                         const data = res?.data?.addVendorShippingAddress
                         if (shippingAddresses.length === index + 1) {
                             setTimeout(() => {
@@ -216,7 +213,6 @@ const AddVendor = () => {
                     },
                 },
             }).then(res => {
-                console.log(res);
                 const data = res?.data?.updateVendor
                 if (!data.status) return toast.error(data.message);
 
@@ -234,7 +230,6 @@ const AddVendor = () => {
                             },
                         },
                     }).then(res => {
-                        console.log(`Updarte ${val.type} address res ${index}:\n`, res);
                         const data = res?.data?.addVendorShippingAddress
                         if (addresses.length === index + 1) {
                             setTimeout(() => {
@@ -243,7 +238,6 @@ const AddVendor = () => {
                             }, 2000);
                         }
                     }).catch(err => {
-                        console.log("error on add billing:\n", res)
                         isLoading(false)
                         return toast.error("Something went wrong")
                     })
@@ -261,7 +255,7 @@ const AddVendor = () => {
     return (
         <>
             <PageHeader
-                title={params.id ? `Manage Vendor | Edit (${params.name})` : "Add Vendor"}
+                title={params.id ? `Manage Vendor | Edit ${singleVendor.data.company_name ? `(${singleVendor.data.company_name})` : ''}` : "Add Vendor"}
             />
             <Main>
                 <Row gutter={25}>
@@ -281,7 +275,7 @@ const AddVendor = () => {
                                     onFinishFailed={errorInfo => console.log('form error info:\n', errorInfo)}
                                     labelCol={{ span: 4 }}
                                     initialValues={params.id ? {
-                                        company_name: params.name,
+                                        company_name: singleVendor.data.company_name,
                                         contact_person: singleVendor.data.contact_person,
                                         email: singleVendor.data.email,
                                         description: singleVendor.data.description,
