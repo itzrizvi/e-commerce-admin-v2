@@ -268,7 +268,7 @@ const AddCategory = () => {
     return (
         <>
             <PageHeader
-                title={params.id ? `Edit category - ${params.name}` : "Add Category"}
+                title={params.id ? `Manage category | Edit - ${!singleCategory.cat_name ? '' : `(${singleCategory.cat_name})`}	` : "Add Category"}
             // buttons={[
             //     <div key="1" className="page-header-actions">
             //         <Switch

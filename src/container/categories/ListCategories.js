@@ -211,7 +211,7 @@ const ListCategories = () => {
             align: 'right',
             render: (text, record) => (
                 <>
-                    <Link to={`/admin/categories/add?id=${record.id}&name=${record.cat_name}`}>
+                    <Link to={`/admin/categories/add?id=${record.id}`}>
                         {/* <Button size="default" type="white" title='Edit'> */}
                         <FontAwesome name="edit" style={{ margin: ".5em 1em" }} />
                         {/* </Button> */}
