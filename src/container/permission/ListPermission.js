@@ -6,9 +6,6 @@ import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
 import { Cards } from '../../components/cards/frame/cards-frame';
 import { Button } from '../../components/buttons/buttons';
-import { ShareButtonPageHeader } from '../../components/buttons/share-button/share-button';
-import { ExportButtonPageHeader } from '../../components/buttons/export-button/export-button';
-import { CalendarButtonPageHeader } from '../../components/buttons/calendar-button/calendar-button';
 import { Link } from 'react-router-dom';
 import apolloClient, { authMutation, authQuery } from '../../utility/apollo';
 import Cookies from 'js-cookie';
@@ -69,7 +66,7 @@ const ListPermission = () => {
             if (!data?.status) return toast.error(data?.message)
             toast.success(`${record.roles_permission_name} Permission Status updated successfully.`)
         }).catch(err => {
-            console.log("🚀 ~ file: AllAdmins.js ~ line 33 ~ handleStatusChange ~ err", err);
+            console.log("error on status change: ", err)
             toast.error(`Something went wrong!!`)
         })
 
@@ -171,7 +168,6 @@ const ListPermission = () => {
                                                 size="small"
                                                 dataSource={searchText ? filteredPermissions : permissions.data}
                                                 rowClassName={(record, index) => (index % 2 == 0 ? "" : "altTableClass")}
-                                                // pagination={false}
                                                 pagination={{
                                                     defaultPageSize: config.PERMISSIONS_PER_PAGE,
                                                     total: searchText ? filteredPermissions.length : permissions.length,

@@ -1,13 +1,9 @@
 import React, { useState } from 'react';
 import { Row, Col, Form, Input, Switch, Checkbox } from 'antd';
-import FeatherIcon from 'feather-icons-react';
 import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
 import { Cards } from '../../components/cards/frame/cards-frame';
 import { Button } from '../../components/buttons/buttons';
-import { ShareButtonPageHeader } from '../../components/buttons/share-button/share-button';
-import { ExportButtonPageHeader } from '../../components/buttons/export-button/export-button';
-import { CalendarButtonPageHeader } from '../../components/buttons/calendar-button/calendar-button';
 import { Link, useLocation, useHistory } from 'react-router-dom';
 import apolloClient, { authMutation, authQuery } from '../../utility/apollo';
 import Cookies from 'js-cookie';
@@ -109,7 +105,7 @@ const AddPermission = () => {
                 toast.success(`${values.permissionName} updated successfully`);
 
             }).catch(err => {
-                console.log("got error on addPermission", err)
+                console.log("got error on update Permission", err)
                 return toast.error('Soemthing Went wrong !!')
             }).finally(() => {
                 setIsLoading(false)
@@ -122,7 +118,10 @@ const AddPermission = () => {
     return (
         <>
             <PageHeader
-                title={params.name ? `Manage Permission | Edit Permission (${params.name})` : "Add Permission"}
+                title={params.name
+                    ? `Manage Permission | Edit Permission (${params.name})`
+                    : "Add Permission"
+                }
             />
             <Main>
                 <Row gutter={25}>
@@ -164,12 +163,8 @@ const AddPermission = () => {
                                         </Button>
                                         <Link to="/admin/permission/list">
                                             <Button
-                                                // className="btn-cancel"
                                                 type='white'
                                                 size="large"
-                                            // onClick={() => {
-                                            //     return form.resetFields();
-                                            // }}
                                             >
                                                 Cancel
                                             </Button>
