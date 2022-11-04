@@ -151,7 +151,7 @@ const AddCustomerGroup = () => {
     return (
         <>
             <PageHeader
-                title={params.id ? `Manage Group | Edit (${params.name})` : "Add Customer Group"}
+                title={params.id ? `Manage Group | Edit ${singleCustomerGroup.isLoading ? '' : `(${singleCustomerGroup.data.customer_group_name})`}` : "Add Customer Group"}
             />
             <Main>
                 <Row gutter={25}>
@@ -174,7 +174,7 @@ const AddCustomerGroup = () => {
                                     <Form.Item
                                         rules={[{ required: true, max: maxLength, message: "Please enter Attribute Group Name" }]}
                                         name="customer_group_name" label="Group Name"
-                                        initialValue={params.name || ""}
+                                        initialValue={params.id ? singleCustomerGroup.data.customer_group_name : ""}
                                     >
                                         <Input placeholder='Enter Attribute Group Name' />
                                     </Form.Item>
