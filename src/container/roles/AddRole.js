@@ -1,25 +1,19 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Col, Form, Input, Table, Spin, Switch, Checkbox, Select } from 'antd';
-import FeatherIcon from 'feather-icons-react';
+import { Row, Col, Form, Input, Table, Spin, Switch, Checkbox } from 'antd';
 import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
 import { Cards } from '../../components/cards/frame/cards-frame';
 import { Button } from '../../components/buttons/buttons';
-import { Link, useHistory, useLocation } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 import apolloClient, { authMutation, authQuery } from '../../utility/apollo';
 import { useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 const { TextArea } = Input;
-import queryString from 'query-string'
 import { viewPermission } from '../../utility/utility';
 
 const AddRole = () => {
     viewPermission('role');
     const history = useHistory();
-    const { search } = useLocation();
-    const params = queryString.parse(search)
-    const [emailInput, setEmailInput] = useState(params.email || '')
-
 
     const token = useSelector(state => state.auth.token);
     const [selectedPermission, setSelectedPermission] = useState([])
@@ -116,14 +110,13 @@ const AddRole = () => {
                 }
             }
         }).then(res => {
-            console.log("add role res", res)
             const data = res?.data?.createRoleWithPermission
             if (!data?.status) return toast.error('Something Went wrong !!');
             history.push("/admin/roles/list");
             window.location.reload()
             toast.success(`${values.role} Role created successfully.`);
         }).catch(err => {
-            console.log("add role err", err)
+            console.log("Error on add role: ", err)
             toast.error('Something Went wrong !!');
         }).finally(() => setIsLoading(false))
     };
@@ -136,16 +129,6 @@ const AddRole = () => {
         <>
             <PageHeader
                 title="Add Role"
-            // buttons={[
-            //     <div key="1" className="page-header-actions">
-            //         <Link to="/admin/roles/list">
-            //             <Button size="small" type="primary">
-            //                 <FeatherIcon icon="users" size={14} />
-            //                 Manage Roles
-            //             </Button>
-            //         </Link>
-            //     </div>,
-            // ]}
             />
             <Main>
                 <Row gutter={25}>
@@ -158,14 +141,10 @@ const AddRole = () => {
                                 onFinish={handleSubmit}
                                 onFinishFailed={errorInfo => console.log('form error info:\n', errorInfo)}
                                 labelCol={{ span: 4 }}
-                            // wrapperCol={{ span: 14 }}
-                            // layout={'vertical'}
                             >
                                 <Form.Item
                                     rules={[{ required: true, max: maxLength, message: "Please enter Role Name" }]}
                                     name="role" label="Name"
-                                // initialValue={params.first_name}
-                                // help={`Maximum length is ${ maxLength }`}
                                 >
                                     <Input placeholder='Enter Role Name' />
                                 </Form.Item>
@@ -217,13 +196,8 @@ const AddRole = () => {
                                         </Button>
                                         <Link to="/admin/roles/list">
                                             <Button
-                                                // className="btn-cancel"
                                                 type='white'
                                                 size="large"
-                                            // onClick={() => {
-                                            //     window.location.reload()
-                                            //     // return form.resetFields();
-                                            // }}
                                             >
                                                 Cancel
                                             </Button>

@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Col, Input, Row, Spin, Switch, Table } from 'antd';
+import { Input, Spin, Switch, Table } from 'antd';
 import FeatherIcon from 'feather-icons-react';
-import { TableWrapper } from '../../styled';
 import { Button } from '../../../components/buttons/buttons';
 import { Cards } from '../../../components/cards/frame/cards-frame';
 import { useDispatch, useSelector } from 'react-redux';
@@ -26,9 +25,7 @@ const RoleListTable = () => {
 
 
   let rolesTableData = [];
-
   const [filteredRoles, setFilteredRoles] = useState([]);
-  const [isFilter, setIsFilter] = useState(false)
 
   rolesData.map(roles => {
     const { id, role, createdAt, role_description, permissions, role_status, } = roles;
@@ -78,7 +75,7 @@ const RoleListTable = () => {
       toast.success(`${record.name} Role Status updated successfully.`)
     }).catch(err => {
       toast.error('Something went wrong.!')
-      console.log("🚀 ~ file: UpdateRole.js ~ line 193 ~ handleSubmit ~ err", err);
+      console.log("Error on role status change: ", err);
     })
 
   }
@@ -97,7 +94,6 @@ const RoleListTable = () => {
       dataIndex: 'role_description',
       key: 'role_description',
       sorter: (a, b) => a.role_description.toUpperCase() > b.role_description.toUpperCase() ? 1 : -1,
-      // render: (text) => (<p style={{ width: "10px" }}>{text}</p>)
     },
     {
       title: 'Permissions',
@@ -130,7 +126,6 @@ const RoleListTable = () => {
       ],
       onFilter: (value, record) => record.role_status === value,
       sorter: (a, b) => (a.role_status === b.role_status) ? 0 : a.role_status ? -1 : 1,
-      // (x === y)? 0 : x? -1 : 1
       render: (role_status, record) => (
         <Switch defaultChecked={role_status} title='Status' onChange={checked => handleStatusChange(record, checked)} />
       )
@@ -175,13 +170,11 @@ const RoleListTable = () => {
           <span className={"psp_list"} >
 
             <Table
-              // dataSource={isFilter ? tableData : rolesTableData}
               dataSource={searchText ? filteredRoles : rolesTableData}
               columns={rolesTableColumns}
               size="small"
               rowClassName={(record, index) => (index % 2 == 0 ? "" : "altTableClass")}
               rowKey={'key'}
-              // pagination={false}
               pagination={{
                 defaultPageSize: config.ROLES_PER_PAGE,
                 total: searchText ? filteredRoles.length : rolesTableData.length,

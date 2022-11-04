@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { Row, Col, Form, Input, Switch, Table, Checkbox, Spin } from 'antd';
-import FeatherIcon from 'feather-icons-react';
 import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
 import { Cards } from '../../components/cards/frame/cards-frame';
 import { Button } from '../../components/buttons/buttons';
-import { Link, useHistory, useLocation } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import queryString from 'query-string'
 import apolloClient, { authMutation, authQuery } from '../../utility/apollo';
 import Cookies from 'js-cookie';
@@ -18,8 +17,7 @@ const UpdateRole = () => {
     const history = useHistory();
     const { search } = useLocation();
     const params = queryString.parse(search)
-    const [id, setId] = useState(params.id)
-    const [role, setRole] = useState(params.role)
+
     const [permissionList, setPermissionList] = useState([])
     const [role_status, setRole_status] = useState(true)
     const [isLoading, setIsLoading] = useState(false)
@@ -130,16 +128,16 @@ const UpdateRole = () => {
 
     const [allPermissions, setAllPermissions] = useState({ data: [], loading: true, error: '' })
 
-    // Load single role & get all permission
-    useEffect(() => {
-        if (!id) return;
+
+    useEffect(() => { // Load single role & get all permission
+        if (!params.id) return;
 
         // Load single role 
         apolloClient.query({
             query: authQuery.GET_SINGLE_ROLE,
             variables: {
                 query: {
-                    id: parseInt(id)
+                    id: parseInt(params.id)
                 }
             },
             context: {
@@ -201,7 +199,6 @@ const UpdateRole = () => {
 
 
     const handleSubmit = values => {
-        // console.log(values);
         setIsLoading(true)
         const variables = { data: { ...values, role_status, id: singleRole.data.id } }
 
@@ -221,7 +218,7 @@ const UpdateRole = () => {
             window.location.reload();
             toast.success(`${singleRole.data.role} updated successfully.`)
         }).catch(err => {
-            console.log("🚀 ~ file: UpdateRole.js ~ line 193 ~ handleSubmit ~ err", err);
+            console.log("Error on update role: ", err);
         }).finally(() => {
             setIsLoading(false)
         })
@@ -233,18 +230,17 @@ const UpdateRole = () => {
     return (
         <>
             <PageHeader
-                title={`Manage Role | Edit Role (${role})`}
+                title={`Manage Role | Edit Role (${params.role})`}
             />
             <Main>
                 <Row gutter={25}>
                     <Col sm={24} xs={24}>
                         <Cards headless>
-                            {singleRole.loading || allPermissions.loading ?
-                                <div className="spin">
+                            {singleRole.loading || allPermissions.loading
+                                ? <div className="spin">
                                     <Spin />
                                 </div>
-                                :
-                                <>
+                                : <>
                                     <Form
                                         style={{ width: '100%' }}
                                         form={form}
@@ -257,7 +253,6 @@ const UpdateRole = () => {
                                             rules={[{ required: true, max: maxLength, message: "Please enter Role Name" }]}
                                             name="role" label="Name"
                                             initialValue={singleRole.data.role}
-                                        // help={`Maximum length is ${ maxLength }`}
                                         >
                                             <Input placeholder='Enter Role Name' />
                                         </Form.Item>
@@ -274,7 +269,6 @@ const UpdateRole = () => {
                                             name="role_status" label="Status"
                                         >
                                             <Switch
-                                                // defaultChecked={singleRole.data.role_status}
                                                 checked={role_status}
                                                 onChange={checked => setRole_status(checked)}
                                             />
@@ -307,9 +301,7 @@ const UpdateRole = () => {
                                                 <Button loading={isLoading} size="default" htmlType="submit" type="primary" raised>
                                                     {isLoading ? 'Processing' : 'Save'}
                                                 </Button>
-                                                {/* <Link to="/admin/roles/list"> */}
                                                 <Button
-                                                    // className="btn-cancel"
                                                     type='white'
                                                     size="large"
                                                     onClick={() => {
@@ -319,15 +311,10 @@ const UpdateRole = () => {
                                                 >
                                                     Cancel
                                                 </Button>
-                                                {/* </Link> */}
                                             </Form.Item>
                                         </div>
-
                                     </Form>
-
-
                                 </>}
-
                         </Cards>
                     </Col>
                 </Row>
