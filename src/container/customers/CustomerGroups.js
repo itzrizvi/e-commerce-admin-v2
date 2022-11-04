@@ -17,7 +17,6 @@ import { viewPermission } from '../../utility/utility';
 
 const CustomerGroups = () => {
     viewPermission('customer-group');
-    // const dummyData = [...Array(10).keys()].map(i => ({ g_n: `Customer Group ${i + 1}`, g_s: i + 1, g_status: true }))
 
     const [customerGroups, setCustomerGroups] = useState({ data: [], isLoading: true })
 
@@ -31,7 +30,6 @@ const CustomerGroups = () => {
                 customergroup_status: checked,
             }
         }
-        console.log(variables)
         apolloClient.mutate({
             mutation: customerMutation.UPDATE_CUSTOMER_GROUP,
             variables,
@@ -106,7 +104,7 @@ const CustomerGroups = () => {
             align: 'right',
             render: (text, record) => (
                 <>
-                    <Link to={`/admin/customers/add-group?id=${record.id}&name=${record.customer_group_name}`}>
+                    <Link to={`/admin/customers/add-group?id=${record.id}`}>
                         {/* <Button size="default" type="white" title='Edit'> */}
                         <FontAwesome name="edit" style={{ margin: ".5em 1em" }} />
                         {/* </Button> */}
