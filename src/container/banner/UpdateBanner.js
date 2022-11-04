@@ -93,19 +93,19 @@ const AddBanner = () => {
                 },
                 refetchQueries: [
                     {
-                    query: bannerQuery.GET_ALL_BANNER,
-                    context: {
-                        headers: {
-                        TENANTID: process.env.REACT_APP_TENANTID,
-                        Authorization: token
+                        query: bannerQuery.GET_ALL_BANNER,
+                        context: {
+                            headers: {
+                                TENANTID: process.env.REACT_APP_TENANTID,
+                                Authorization: token
+                            }
                         }
-                    }
                     },
                     'getAllBanners'
                 ],
             }).then(res => {
                 bannerData.forEach((val, index) => {
-                    if(val?.isNew){
+                    if (val?.isNew) {
                         apolloUploadClient.mutate({
                             mutation: bannerQuery.BANNER_IMAGE_ADD,
                             variables: { data: { banner_id: singleBanner?.data?.id, title: val.title, sort_order: val.sort_order, link: val.link, image: val.image } },
@@ -120,9 +120,9 @@ const AddBanner = () => {
                         }).catch(err => {
                             toast.error('Something Went wrong!!');
                         })
-                    }else{
+                    } else {
                         let data_var;
-                        if( typeof val.image == 'string' ) data_var = { id: val.banner_id, title: val.title, sort_order: val.sort_order, link: val.link, banner_id: singleBanner?.data?.id }
+                        if (typeof val.image == 'string') data_var = { id: val.banner_id, title: val.title, sort_order: val.sort_order, link: val.link, banner_id: singleBanner?.data?.id }
                         else data_var = { id: val.banner_id, title: val.title, sort_order: val.sort_order, link: val.link, image: val.image, banner_id: singleBanner?.data?.id }
                         apolloUploadClient.mutate({
                             mutation: bannerQuery.BANNER_IMAGE_UPDATE,
@@ -134,19 +134,19 @@ const AddBanner = () => {
                                 }
                             }
                         }).then(_ => {
-                            if( bannerData.length === index + 1 ){
+                            if (bannerData.length === index + 1) {
                                 setIsLoading(false)
                                 toast.success("Banner Updated Successfully!");
                                 history.push("/admin/banner/list");
                                 setTimeout(() => {
-                                    window.location.reload(); 
+                                    window.location.reload();
                                 }, 2000);
                             }
                         }).catch(err => {
                             toast.error('Something Went wrong!!');
                         })
                     }
-    
+
                 })
             }).catch(err => {
                 toast.error('Something Went wrong !!!');
@@ -221,7 +221,7 @@ const AddBanner = () => {
                 {
                     record.image ? (
                         <LazyLoadImage
-                            src={ typeof record.image === 'string' ? renderImage(params?.id, record.image, 'banner', '128x128') : URL.createObjectURL(record.image)}
+                            src={typeof record.image === 'string' ? renderImage(params?.id, record.image, 'banner', '128x128') : URL.createObjectURL(record.image)}
                             onError={errorImageSrc}
                             alt="image"
                             style={{
@@ -244,7 +244,7 @@ const AddBanner = () => {
             title: 'Action',
             dataIndex: 'action',
             key: 'action',
-            render: (text, record) => <Button onClick={() => removeRow(record.banner_id)} size="" title="Remove" type="danger"><FeatherIcon icon="minus"/></Button>
+            render: (text, record) => <Button onClick={() => removeRow(record.banner_id)} size="" title="Remove" type="danger"><FeatherIcon icon="minus" /></Button>
         },
     ];
 
@@ -273,15 +273,15 @@ const AddBanner = () => {
             okType: 'danger',
             onOk: () => {
                 const filter_verify = bannerData.find(o => o.banner_id === banner_id);
-                if(filter_verify?.isNew){
+                if (filter_verify?.isNew) {
                     toast.success("Slider Removed successfully");
                     setBannerData(prevState => {
                         return prevState.filter((value) => value.banner_id !== banner_id)
                     })
-                }else{
+                } else {
                     apolloClient.mutate({
                         mutation: bannerQuery.BANNER_IMAGE_DELETE,
-                        variables: { banner_id: parseInt(banner_id)},
+                        variables: { banner_id: parseInt(banner_id) },
                         context: {
                             headers: {
                                 TENANTID: process.env.REACT_APP_TENANTID,
@@ -289,7 +289,7 @@ const AddBanner = () => {
                             }
                         }
                     }).then(res => {
-                        if(res?.data?.deleteBannerImage?.status){
+                        if (res?.data?.deleteBannerImage?.status) {
                             toast.success("Slider Removed successfully");
                             setBannerData(prevState => {
                                 return prevState.filter((value) => value.banner_id !== banner_id)
@@ -299,15 +299,15 @@ const AddBanner = () => {
                         toast.error('Something Went wrong!!');
                     })
                 }
-                
+
             }
-          });
+        });
 
     }
 
     return (
         <>
-            <PageHeader title={ `Manage Banner | Edit Banner ${singleBanner?.data?.banner_name ? `(${singleBanner?.data?.banner_name})` : ""}` }/>
+            <PageHeader title={`Manage Banner | Edit Banner ${singleBanner?.data?.name ? `(${singleBanner?.data?.name})` : ""}`} />
 
             <Main>
                 <Row gutter={25}>
