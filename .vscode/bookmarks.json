@@ -1,16 +1,6 @@
 {
 	"files": [
 		{
-			"path": "src/routes/admin/admin.js",
-			"bookmarks": [
-				{
-					"line": 11,
-					"column": 1,
-					"label": ""
-				}
-			]
-		},
-		{
 			"path": "src/routes/admin/index.js",
 			"bookmarks": [
 				{

@@ -744,7 +744,7 @@ const AddProduct = () => {
                                             <Button loading={isLoading} size="default" htmlType="submit" type="primary" raised>
                                                 {isLoading ? 'Processing' : 'Save'}
                                             </Button>
-                                            <Link to="/admin/roles/list">
+                                            <Link to="/admin/products/list">
                                                 <Button
                                                     // className="btn-cancel"
                                                     type='white'
