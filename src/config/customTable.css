@@ -11,3 +11,24 @@
 .wrap-label .ant-form-item-label {
     white-space: normal;
 }
+
+
+/* ------for order view START ------*/
+.productTable .ant-table-thead .ant-table-cell {
+    background-color: #cfd4d5;
+    padding: 10px 16px;
+}
+
+.productTable .ant-table-cell:first-child {
+    padding-left: 2em;
+}
+
+.productTable .ant-table-cell:last-child {
+    padding-right: 2em;
+}
+
+.altTableClass {
+    background-color: #cfd0fb54;
+}
+
+/* ------for order view END ------*/

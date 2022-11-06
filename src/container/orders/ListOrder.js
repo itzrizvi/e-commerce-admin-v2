@@ -18,13 +18,11 @@ import { viewPermission } from '../../utility/utility';
 const ListOrder = () => {
     viewPermission('order');
     const dummyData = [...Array(10).keys()].map(i => ({
-        o_u: 'asdasd5asd5asd676d67asd6as',
+        o_i: 10001 + i,
+        o_ci: 100 + 2 * i,
         o_a: 2000,
-        o_da: 410,
-        o_ga: 320,
-        o_ci: "dasda57da7sd66das6d6ad66766da6a797",
-        o_s: "pending",
-        o_d: "166627543598"
+        o_dd: "20-12-2022",
+        o_ds: 'Completed',
     }))
 
     const [customerGroups, setCustomerGroups] = useState({ data: dummyData, isLoading: false })
@@ -64,27 +62,37 @@ const ListOrder = () => {
 
     const columns = [
         {
-            title: 'UID',
-            dataIndex: 'o_u',
-            key: 'o_u',
-            width: 70,
+            title: 'Order Id',
+            dataIndex: 'o_i',
+            key: 'o_i',
+            width: 120,
             ellipsis: true,
-            sorter: (a, b) => a.o_u.toUpperCase() > b.o_u.toUpperCase() ? 1 : -1,
+            sorter: (a, b) => a.o_i.toUpperCase() > b.o_i.toUpperCase() ? 1 : -1,
+        },
+        {
+            title: 'Customer',
+            dataIndex: 'o_ci',
+            key: 'o_ci',
+            sorter: (a, b) => a.o_ci.toUpperCase() > b.o_ci.toUpperCase() ? 1 : -1,
         },
         {
             title: 'Amount',
             dataIndex: 'o_a',
             key: 'o_a',
+            render: (val) => `$${val}`,
             sorter: (a, b) => a.o_a.toUpperCase() > b.o_a.toUpperCase() ? 1 : -1,
         },
-
         {
-            title: 'Sort Order',
-            dataIndex: 'customergroup_sortorder',
-            key: 'customergroup_sortorder',
-            width: 100,
-            align: 'center',
-            sorter: (a, b) => (a.customergroup_sortorder === b.customergroup_sortorder) ? 0 : a.customergroup_sortorder ? -1 : 1,
+            title: 'Delivery Date',
+            dataIndex: 'o_dd',
+            key: 'o_dd',
+            sorter: (a, b) => a.o_dd.toUpperCase() > b.o_dd.toUpperCase() ? 1 : -1,
+        },
+        {
+            title: 'Delivery Status',
+            dataIndex: 'o_ds',
+            key: 'o_ds',
+            sorter: (a, b) => a.o_ds.toUpperCase() > b.o_ds.toUpperCase() ? 1 : -1,
         },
         {
             title: 'Status',
@@ -110,20 +118,36 @@ const ListOrder = () => {
         },
 
         {
+            title: 'View',
+            dataIndex: 'o_i',
+            width: 70,
+            align: 'right',
+            key: 'o_i',
+            render: (text, record) => (
+                <>
+                    <Link to={`/admin/order/view?id=${text}`}>
+                        {/* <Button size="default" type="white" title='Edit'> */}
+                        <FontAwesome name="eye" style={{ margin: ".5em 1em" }} />
+                        {/* </Button> */}
+                    </Link>
+                </>
+            ),
+        },
+        {
             title: 'Action',
             dataIndex: 'action',
             width: 70,
             align: 'right',
+            key: 'last_name',
             render: (text, record) => (
                 <>
-                    <Link to={`/admin/customers/add-group?id=${record.customer_group_uuid}&name=${record.customer_group_name}`}>
+                    <Link to={`/admin/order/add?id=${text}`}>
                         {/* <Button size="default" type="white" title='Edit'> */}
                         <FontAwesome name="edit" style={{ margin: ".5em 1em" }} />
                         {/* </Button> */}
                     </Link>
                 </>
             ),
-            key: 'last_name',
         },
     ]
 
