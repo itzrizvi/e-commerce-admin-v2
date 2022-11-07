@@ -25,6 +25,7 @@ const ListOrder = () => {
   const token = useSelector(state => state.auth.token);
 
   useEffect(() => {
+    setOrders(s => ({ ...s, loading: true }));
     apolloClient
       .query({
         query: orderQuery.GET_ALL_ORDER,
@@ -38,10 +39,10 @@ const ListOrder = () => {
       .then(res => {
         const data = res?.data?.getOrderlistAdmin;
         if (!data.status) return;
-        const order_data = [];
-        data?.data.forEach(item => {
+        var order_data = [];
+        data.data.forEach(item => {
           const { customer, id, createdAt, orderStatus, payment, total } = item;
-          order_data.push({
+          const item_one = {
             id,
             customer_name: customer.first_name,
             customer_email: customer.email,
@@ -49,8 +50,11 @@ const ListOrder = () => {
             orderStatus: orderStatus.name,
             payment_name: payment.name,
             total,
-          });
+          }
+          order_data.push(item_one);
         });
+
+        console.log(item_one);
 
         setOrders(s => ({ ...s, data: order_data, error: '' }));
       })
@@ -61,6 +65,10 @@ const ListOrder = () => {
         setOrders(s => ({ ...s, loading: false }));
       });
   }, []);
+
+  useEffect(() => {
+    console.log(orders);
+  }, [orders.data])
 
   const handleStatusChange = (record, checked) => {
     const variables = {
@@ -76,7 +84,7 @@ const ListOrder = () => {
         context: {
           headers: {
             TENANTID: process.env.REACT_APP_TENANTID,
-            Authorization: Cookies.get('psp_t'),
+            Authorization: token,
           },
         },
       })
@@ -166,10 +174,10 @@ const ListOrder = () => {
 
     {
       title: 'View',
-      dataIndex: 'o_i',
+      dataIndex: 'id',
       width: 70,
       align: 'right',
-      key: 'o_i',
+      key: 'id',
       render: (text, record) => (
         <>
           <Link to={`/admin/order/view?id=${text}`}>
@@ -228,7 +236,7 @@ const ListOrder = () => {
         <Row gutter={25}>
           <Col sm={24} xs={24}>
             <Cards headless>
-              {orders.isLoading ? (
+              {orders.loading ? (
                 <div className="spin">
                   <Spin />
                 </div>
