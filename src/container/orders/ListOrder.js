@@ -63,35 +63,6 @@ const ListOrder = () => {
       });
   }, []);
 
-  const handleStatusChange = (record, checked) => {
-    // const variables = {
-    //   data: {
-    //     customer_group_uuid: record.customer_group_uuid,
-    //     customergroup_status: checked,
-    //   },
-    // };
-    // apolloClient
-    //   .mutate({
-    //     mutation: customerMutation.UPDATE_CUSTOMER_GROUP,
-    //     variables,
-    //     context: {
-    //       headers: {
-    //         TENANTID: process.env.REACT_APP_TENANTID,
-    //         Authorization: token,
-    //       },
-    //     },
-    //   })
-    //   .then(res => {
-    //     const data = res?.data?.updateCustomerGroup;
-    //     if (!data.status) return toast.error(data.message);
-    //     toast.success(`${record.customer_group_name} Group Status Updated successfully`);
-    //   })
-    //   .catch(err => {
-    //     console.log('got error on updateStatus', err);
-    //     return toast.error('Something Went wrong !!');
-    //   });
-  };
-
   const columns = [
     {
       title: 'Order Id',
@@ -131,29 +102,6 @@ const ListOrder = () => {
       width: 150,
       sorter: (a, b) => (a.payment_name.toUpperCase() > b.payment_name.toUpperCase() ? 1 : -1),
     },
-    {
-      title: 'Status',
-      dataIndex: 'orderStatus',
-      key: 'orderStatus',
-      align: 'center',
-      width: 100,
-      sorter: (a, b) => (a.orderStatus === b.orderStatus ? 0 : a.orderStatus ? -1 : 1),
-      filters: [
-        {
-          text: 'Pending',
-          value: 'Pending',
-        },
-        {
-          text: 'Delivered',
-          value: 'Delivered',
-        },
-      ],
-      onFilter: (value, record) => record.orderStatus === value,
-      render: (value, record) => (
-        <Switch defaultChecked={value} title="Status" onChange={checked => handleStatusChange(record, checked)} />
-      ),
-    },
-
     {
       title: 'Date',
       dataIndex: 'createdAt',
