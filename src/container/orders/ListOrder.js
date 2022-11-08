@@ -42,19 +42,16 @@ const ListOrder = () => {
         var order_data = [];
         data.data.forEach(item => {
           const { customer, id, createdAt, orderStatus, payment, total } = item;
-          const item_one = {
+          order_data.push({
             id,
             customer_name: customer.first_name,
             customer_email: customer.email,
             createdAt,
             orderStatus: orderStatus.name,
-            payment_name: payment.name,
+            payment_name: payment?.name ?? "No Payment Method",
             total,
-          }
-          order_data.push(item_one);
+          });
         });
-
-        console.log(item_one);
 
         setOrders(s => ({ ...s, data: order_data, error: '' }));
       })
@@ -65,39 +62,6 @@ const ListOrder = () => {
         setOrders(s => ({ ...s, loading: false }));
       });
   }, []);
-
-  useEffect(() => {
-    console.log(orders);
-  }, [orders.data])
-
-  const handleStatusChange = (record, checked) => {
-    const variables = {
-      data: {
-        customer_group_uuid: record.customer_group_uuid,
-        customergroup_status: checked,
-      },
-    };
-    apolloClient
-      .mutate({
-        mutation: customerMutation.UPDATE_CUSTOMER_GROUP,
-        variables,
-        context: {
-          headers: {
-            TENANTID: process.env.REACT_APP_TENANTID,
-            Authorization: token,
-          },
-        },
-      })
-      .then(res => {
-        const data = res?.data?.updateCustomerGroup;
-        if (!data.status) return toast.error(data.message);
-        toast.success(`${record.customer_group_name} Group Status Updated successfully`);
-      })
-      .catch(err => {
-        console.log('got error on updateStatus', err);
-        return toast.error('Something Went wrong !!');
-      });
-  };
 
   const columns = [
     {
@@ -132,35 +96,12 @@ const ListOrder = () => {
       sorter: (a, b) => (a.total.toUpperCase() > b.total.toUpperCase() ? 1 : -1),
     },
     {
-        title: 'Payment Method',
-        dataIndex: 'payment_name',
-        key: 'payment_name',
-        width: 150,
-        sorter: (a, b) => (a.payment_name.toUpperCase() > b.payment_name.toUpperCase() ? 1 : -1),
-      },
-    {
-      title: 'Status',
-      dataIndex: 'orderStatus',
-      key: 'orderStatus',
-      align: 'center',
-      width: 100,
-      sorter: (a, b) => (a.orderStatus === b.orderStatus ? 0 : a.orderStatus ? -1 : 1),
-      filters: [
-        {
-          text: 'Pending',
-          value: "Pending",
-        },
-        {
-          text: 'Delivered',
-          value: "Delivered",
-        },
-      ],
-      onFilter: (value, record) => record.orderStatus === value,
-      render: (value, record) => (
-        <Switch defaultChecked={value} title="Status" onChange={checked => handleStatusChange(record, checked)} />
-      ),
+      title: 'Payment Method',
+      dataIndex: 'payment_name',
+      key: 'payment_name',
+      width: 150,
+      sorter: (a, b) => (a.payment_name.toUpperCase() > b.payment_name.toUpperCase() ? 1 : -1),
     },
-
     {
       title: 'Date',
       dataIndex: 'createdAt',
@@ -211,7 +152,14 @@ const ListOrder = () => {
     setIsFilter(value);
     setFilteredOrders(
       orders.data.filter(order =>
-        (order?.id + order?.customer_name + order?.customer_email + order?.orderStatus + order?.payment_name + order?.total)
+        (
+          order?.id +
+          order?.customer_name +
+          order?.customer_email +
+          order?.orderStatus +
+          order?.payment_name +
+          order?.total
+        )
           .toLowerCase()
           .includes(value.toLowerCase()),
       ),
