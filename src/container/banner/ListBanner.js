@@ -189,7 +189,7 @@ const ListBanner = () => {
                                                     total: isFilter ? banner?.data?.length : banner?.data?.length,
                                                     showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`,
                                                 }}
-                                                rowKey={'banner_uuid'}
+                                                rowKey={'id'}
                                                 size="small"
                                                 dataSource={isFilter ? filteredBanner : banner.data}
                                                 rowClassName={(record, index) => (index % 2 === 0 ? "" : "altTableClass")}
