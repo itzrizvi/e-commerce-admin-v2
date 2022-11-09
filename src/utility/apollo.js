@@ -275,16 +275,19 @@ export const productQuery = {
           cat_name
           cat_slug
           cat_status
+          is_featured
           subcategories {
             id
             cat_name
             cat_slug
             cat_status
+            is_featured
             subsubcategories {
               id
               cat_name
               cat_slug
               cat_status
+              is_featured
             }
           }
         }
