@@ -322,7 +322,7 @@ const AddBanner = () => {
             <LazyLoadImage
               src={
                 typeof record.image === 'string'
-                  ? renderImage(params?.id, record.image, 'banner', '128x128')
+                  ? renderImage(params?.id, record.image, 'banner', '', true)
                   : URL.createObjectURL(record.image)
               }
               onError={errorImageSrc}

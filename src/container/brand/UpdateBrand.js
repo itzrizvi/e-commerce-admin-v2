@@ -139,7 +139,7 @@ const UpdateBrand = () => {
             setCategory(inputSelectedCategories)
             setLoading(false);
             setBrandStatus(data?.data?.brand_status)
-            setThumbnail(renderImage(params?.id, data?.data?.image, 'brand', '128x128'))
+            setThumbnail(renderImage(params?.id, data?.data?.image, 'brand', '', true))
             form.setFieldsValue({
                 "brand_name": data?.data?.brand_name,
                 "brand_description": data?.data?.brand_description

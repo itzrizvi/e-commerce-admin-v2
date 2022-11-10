@@ -93,7 +93,7 @@ const ListBrand = () => {
             key: 'image',
             width: 70,
             align: 'center',
-            render: (text, record) => (<LazyLoadImage effect="blur" height="32" src={renderImage(record.id, record.image, 'brand', '128x128')} onError={errorImageSrc} onL alt={record.brand_name} />),
+            render: (text, record) => (<LazyLoadImage effect="blur" height="32" src={renderImage(record.id, record.image, 'brand', '', true)} onError={errorImageSrc} onL alt={record.brand_name} />),
         },
         {
             title: 'Alias',
