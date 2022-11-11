@@ -18,8 +18,11 @@ export default function companyInfo() {
   const [form] = Form.useForm();
   const [isLoading, setIsLoading] = useState(false);
   const [image, setImage] = useState('');
+  const [dark_image, setDarkImage] = useState('');
+  const [fav, setFav] = useState('');
   const [emailData, setEmailData] = useState([]);
   const [phoneData, setPhoneData] = useState([]);
+  const [socialData, setSocialData] = useState([]);
   const token = useSelector(state => state.auth.token);
   const [initailData, setInitialData] = useState({
     data: [],
@@ -27,6 +30,8 @@ export default function companyInfo() {
     error: '',
   });
   const [thumbnail, setThumbnail] = useState('');
+  const [darkThumbnail, setDarkThumbnail] = useState('');
+  const [favThumbnail, setFavThumbnail] = useState('');
 
   useEffect(() => {
     ApolloClient.query({
@@ -48,7 +53,9 @@ export default function companyInfo() {
           contact_address: data?.data?.contact_address,
           fax: data?.data?.fax,
         });
-        setThumbnail(renderImage(process.env.REACT_APP_TENANTID, data?.data?.logo, 'logo', '128x128'));
+        setThumbnail(renderImage(process.env.REACT_APP_TENANTID, data?.data?.logo, 'logo', '', true));
+        setDarkThumbnail(renderImage(process.env.REACT_APP_TENANTID, data?.data?.logo_dark, 'logo_dark', '', true));
+        setFavThumbnail(renderImage(process.env.REACT_APP_TENANTID, data?.data?.fav, 'fav', '', true));
         setEmailData(data?.data?.company_emails)
         setPhoneData(data?.data?.company_phones)
       })
@@ -78,11 +85,20 @@ export default function companyInfo() {
       }
     });
 
+    socialData.forEach(val => {
+      if (check_point && (val.social == '' || val.type == '')) {
+        toast.info('Please Provide All Social Name and Type!');
+        check_point = false;
+        return;
+      }
+    });
+
     if (check_point) {
       setIsLoading(true);
       let data;
       let phoneDataNew = [];
       let emailDataNew = [];
+      let socialDataNew = [];
       phoneData.forEach(val => {
         if(val.id){
           phoneDataNew.push({
@@ -112,10 +128,23 @@ export default function companyInfo() {
             type: val.type
           })
         }
-       
       })
-      if (image) data = { ...values, logo: image, phone: phoneDataNew, email: emailDataNew };
-      else data = { ...values, phone: phoneDataNew, email: emailDataNew };
+
+      socialData.forEach(val => {
+        if(val.id){
+          socialDataNew.push({
+            id: val.id,
+            social: val.social,
+            type: val.type
+          })
+        }else{
+          socialDataNew.push({
+            social: val.social,
+            type: val.type
+          })
+        }
+      })
+      data = { ...values, logo: image, phone: phoneDataNew, email: emailDataNew, social: socialDataNew, ...(image && {logo: image}), ...(dark_image && {dark_logo: dark_image}), ...(fav && {fav}) }
       apolloUploadClient
         .mutate({
           mutation: companyInfoQuery.COMPANY_INFO,
@@ -193,6 +222,34 @@ export default function companyInfo() {
     },
   ];
 
+
+  const SocialColumn = [
+    {
+      title: 'Social',
+      dataIndex: 'social',
+      key: 'social',
+      render: (text, record) => (
+        <Input type="text" placeholder="Social Name" defaultValue={record.social} onChange={e => (record.social = e.target.value)} />
+      ),
+    },
+    {
+      title: 'Type',
+      dataIndex: 'type',
+      key: 'type',
+      render: (text, record) => <Input type="text" defaultValue={record.type} placeholder="Type" onChange={e => (record.type = e.target.value)} />,
+    },
+    {
+      title: 'Action',
+      dataIndex: 'action',
+      key: 'action',
+      render: (text, record) => (
+        <Button title="Remove" type="danger" onClick={() => removeSocial(record.key)}>
+          <FeatherIcon icon="minus" />
+        </Button>
+      ),
+    },
+  ];
+
   // Upload Button Design
   const uploadButton = (
     <div>
@@ -203,14 +260,38 @@ export default function companyInfo() {
 
   // Assign Image
   const beforeImageUpload = file => {
-    const isJpg = file.type === 'image/jpeg';
-    if (!isJpg) toast.error('You can only upload JPG file!');
-    const isLt2M = file.size / 1024 / 1024 < 1;
-    if (!isLt2M) toast.error('Image must smaller than 1MB!');
+    const isLt2M = file.size / 1024 / 1024 < 2;
+    if (!isLt2M) toast.error('Image must smaller than 2MB!');
 
-    if (isJpg && isLt2M) {
+    if (isLt2M) {
       setImage(file);
       setThumbnail(URL.createObjectURL(file));
+    }
+
+    return false;
+  };
+
+    // Assign Image
+    const beforeDarkImageUpload = file => {
+      const isLt2M = file.size / 1024 / 1024 < 2;
+      if (!isLt2M) toast.error('Image must smaller than 2MB!');
+  
+      if (isLt2M) {
+        setDarkImage(file);
+        setDarkThumbnail(URL.createObjectURL(file));
+      }
+  
+      return false;
+    };
+
+      // Assign Image
+  const beforeFavUpload = file => {
+    const isLt2M = file.size / 1024 / 1024 < 0.1;
+    if (!isLt2M) toast.error('Image must smaller than 100KB!');
+
+    if (isLt2M) {
+      setFav(file);
+      setFavThumbnail(URL.createObjectURL(file));
     }
 
     return false;
@@ -242,6 +323,21 @@ export default function companyInfo() {
 
   const removePhone = key => {
     setPhoneData(prevState => {
+      return prevState.filter(value => value.key !== key);
+    });
+  };
+
+  const addNewSocial = () => {
+    const newSocialData = {
+      phone: '',
+      type: '',
+      key: new Date().getTime() + Math.floor(Math.random() * 900000),
+    };
+    setSocialData(prevState => [...prevState, newSocialData]);
+  };
+
+  const removeSocial = key => {
+    setSocialData(prevState => {
       return prevState.filter(value => value.key !== key);
     });
   };
@@ -306,6 +402,52 @@ export default function companyInfo() {
                           )}
                         </Upload>
                       </Form.Item>
+                      <Form.Item label="Dark Logo">
+                        <Upload
+                          name="avatar"
+                          listType="picture-card"
+                          className="avatar-uploader"
+                          showUploadList={false}
+                          beforeUpload={beforeDarkImageUpload}
+                          fileList={[]}
+                        >
+                          {darkThumbnail ? (
+                            <LazyLoadImage
+                              src={darkThumbnail}
+                              onError={errorImageSrc}
+                              alt="image"
+                              style={{
+                                width: '100%',
+                              }}
+                            />
+                          ) : (
+                            uploadButton
+                          )}
+                        </Upload>
+                      </Form.Item>
+                      <Form.Item label="Fav">
+                        <Upload
+                          name="avatar"
+                          listType="picture-card"
+                          className="avatar-uploader"
+                          showUploadList={false}
+                          beforeUpload={beforeFavUpload}
+                          fileList={[]}
+                        >
+                          {fav ? (
+                            <LazyLoadImage
+                              src={fav}
+                              onError={errorImageSrc}
+                              alt="image"
+                              style={{
+                                width: '100%',
+                              }}
+                            />
+                          ) : (
+                            uploadButton
+                          )}
+                        </Upload>
+                      </Form.Item>
                     </Tabs.TabPane>
 
                     <Tabs.TabPane tab="Email" key="email">
@@ -341,6 +483,24 @@ export default function companyInfo() {
                         rowKey={'phone'}
                         size="small"
                         dataSource={phoneData}
+                      />
+                    </Tabs.TabPane>
+
+                    <Tabs.TabPane tab="Social Account" key="social">
+                      <div
+                        style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '10px', marginBottom: '10px' }}
+                      >
+                        <Button onClick={addNewSocial} size="small" title="Add Social Account" htmlType="button" type="primary">
+                          <FeatherIcon icon="plus" />
+                        </Button>
+                      </div>
+                      <Table
+                        className="table-responsive"
+                        columns={SocialColumn}
+                        pagination={false}
+                        rowKey={'social'}
+                        size="small"
+                        dataSource={socialData}
                       />
                     </Tabs.TabPane>
                   </Tabs>
