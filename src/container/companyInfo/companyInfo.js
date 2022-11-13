@@ -54,10 +54,18 @@ export default function companyInfo() {
           fax: data?.data?.fax,
         });
         setThumbnail(renderImage(process.env.REACT_APP_TENANTID, data?.data?.logo, 'logo', '', true));
-        setDarkThumbnail(renderImage(process.env.REACT_APP_TENANTID, data?.data?.logo_dark, 'logo_dark', '', true));
-        setFavThumbnail(renderImage(process.env.REACT_APP_TENANTID, data?.data?.fav, 'fav', '', true));
-        setEmailData(data?.data?.company_emails)
-        setPhoneData(data?.data?.company_phones)
+        setDarkThumbnail(renderImage(process.env.REACT_APP_TENANTID, data?.data?.dark_logo, 'dark-logo', '', true));
+        setFavThumbnail(renderImage(process.env.REACT_APP_TENANTID, data?.data?.fav_icon, 'fav', '', true));
+
+        setEmailData(data?.data?.company_emails.map((item) => {
+          return {...item, ...{key: new Date().getTime() + Math.floor(Math.random() * 900000)}}
+        }))
+        setPhoneData(data?.data?.company_phones.map((item) => {
+          return {...item, ...{key: new Date().getTime() + Math.floor(Math.random() * 900000)}}
+        }))
+        setSocialData(data?.data?.company_socials.map((item) => {
+          return {...item, ...{key: new Date().getTime() + Math.floor(Math.random() * 900000)}}
+        }))
       })
       .catch(err => {
         setInitialData(s => ({ ...s, error: 'Something went Wrong.!! ' }));
@@ -144,7 +152,7 @@ export default function companyInfo() {
           })
         }
       })
-      data = { ...values, logo: image, phone: phoneDataNew, email: emailDataNew, social: socialDataNew, ...(image && {logo: image}), ...(dark_image && {dark_logo: dark_image}), ...(fav && {fav}) }
+      data = { ...values, phone: phoneDataNew, email: emailDataNew, social: socialDataNew, ...(image && {logo: image}), ...(dark_image && {dark_logo: dark_image}), ...(fav && {fav_icon: fav}) }
       apolloUploadClient
         .mutate({
           mutation: companyInfoQuery.COMPANY_INFO,
@@ -434,9 +442,9 @@ export default function companyInfo() {
                           beforeUpload={beforeFavUpload}
                           fileList={[]}
                         >
-                          {fav ? (
+                          {favThumbnail ? (
                             <LazyLoadImage
-                              src={fav}
+                              src={favThumbnail}
                               onError={errorImageSrc}
                               alt="image"
                               style={{

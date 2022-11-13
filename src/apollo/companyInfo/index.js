@@ -20,12 +20,13 @@ export const companyInfoQuery = {
           id
           name
           logo
+          dark_logo
+          fav_icon
           contact_address
           company_phones {
             id
             phone
             type
-            tenant_id
             createdAt
             updatedAt
           }
@@ -33,7 +34,13 @@ export const companyInfoQuery = {
             id
             email
             type
-            tenant_id
+            createdAt
+            updatedAt
+          }
+          company_socials {
+            id
+            social
+            type
             createdAt
             updatedAt
           }
