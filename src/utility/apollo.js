@@ -880,6 +880,37 @@ export const customerQuery = {
       }
     }
   `,
+  GET_ALL_CUSTOMER_FOR_ORDER: gql`
+    query{
+        getAllCustomer {
+          status
+          message
+          data {
+            id
+            first_name
+            last_name
+            email
+            addresses {
+              id
+              address1
+              address2
+              phone
+              fax
+              email
+              city
+              state
+              zip_code
+              country
+              type
+              status
+              updatedAt
+              createdAt
+            }
+          }
+        }
+      }
+      
+    `,
 };
 
 export const customerMutation = {

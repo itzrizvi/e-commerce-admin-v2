@@ -1,5 +1,5 @@
 import React from 'react';
-import { Row, Col, Table } from 'antd';
+import { Row, Col, Table, Spin } from 'antd';
 import FeatherIcon from 'feather-icons-react';
 import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
@@ -7,13 +7,20 @@ import { Cards } from '../../components/cards/frame/cards-frame';
 import { Button } from '../../components/buttons/buttons';
 import { useState } from 'react';
 import style from './ListOrder.module.css'
+import { useEffect } from 'react';
+import { useSelector } from 'react-redux';
+import apolloClient from '../../apollo';
+import { orderQuery } from '../../apollo/order';
+import { toast } from 'react-toastify';
+import { useLocation } from 'react-router-dom';
+import queryString from 'query-string';
 
 const ViewOrder = () => {
     const column = [
         {
             title: 'Item',
-            dataIndex: 'p_i',
-            key: 'p_i',
+            dataIndex: 'prod_name',
+            key: 'prod_name',
             width: 200,
             ellipsis: true,
         },
@@ -25,30 +32,30 @@ const ViewOrder = () => {
         },
         {
             title: 'Quantity',
-            dataIndex: 'p_q',
-            key: 'p_q',
+            dataIndex: 'quantity',
+            key: 'quantity',
             width: 110,
             align: "right",
             ellipsis: true,
-            // sorter: (a, b) => a.p_q.toUpperCase() > b.p_q.toUpperCase() ? 1 : -1,
+            // sorter: (a, b) => a.quantity.toUpperCase() > b.quantity.toUpperCase() ? 1 : -1,
         },
         {
             title: 'Unit Cost',
-            dataIndex: 'p_u',
-            key: 'p_u',
+            dataIndex: 'price',
+            key: 'price',
             width: 120,
             align: "right",
             render: val => `$${val}`,
-            // sorter: (a, b) => a.p_u.toUpperCase() > b.p_u.toUpperCase() ? 1 : -1,
+            // sorter: (a, b) => a.price.toUpperCase() > b.price.toUpperCase() ? 1 : -1,
         },
         {
             title: 'Line Total',
-            dataIndex: 'p_i',
-            key: 'p_i',
+            dataIndex: 'total',
+            key: 'total',
             width: 130,
             align: "right",
-            render: (val, record) => `$${record.p_q * record.p_u}`,
-            // sorter: (a, b) => a.p_i.toUpperCase() > b.p_i.toUpperCase() ? 1 : -1,
+            render: (val, record) => `$${val}`,
+            // sorter: (a, b) => a.total.toUpperCase() > b.total.toUpperCase() ? 1 : -1,
         },
 
     ]
@@ -58,7 +65,57 @@ const ViewOrder = () => {
         p_q: (i + 1) * 2,
         p_u: 103,
     }))
-    const [products, setProducts] = useState(dummyData)
+    // const [products, setProducts] = useState(dummyData)
+    const [products, setProducts] = useState([])
+
+
+    // old---
+    // new===
+    const { search } = useLocation();
+    const params = queryString.parse(search);
+
+    const token = useSelector(state => state.auth.token);
+    const [singleOrder, setSingleOrder] = useState({ data: {}, isLoading: true });
+    const [subTotal, setSubTotal] = useState(0)
+    useEffect(() => {
+        apolloClient
+            .query({
+                query: orderQuery.GET_SINGLE_ORDER_ADMIN,
+                variables: {
+                    query: {
+                        order_id: parseInt(params.id)
+                    }
+                },
+                context: {
+                    headers: {
+                        TENANTID: process.env.REACT_APP_TENANTID,
+                        Authorization: token,
+                    },
+                },
+            })
+            .then(res => {
+                const data = res.data.getSingleOrderAdmin
+                if (!data.status) return toast.error(data.message)
+                setSingleOrder({ data: data.data, isLoading: false })
+
+                let sub_total = 0
+                const prods = data.data?.orderitems?.map(item => {
+                    const { quantity, price, product: { prod_name } } = item
+                    const total = price * quantity
+                    sub_total += total
+                    return ({
+                        prod_name,
+                        quantity,
+                        price,
+                        total
+
+                    })
+                })
+                setProducts(prods)
+                setSubTotal(sub_total)
+            })
+
+    }, [])
 
 
     return (
@@ -70,69 +127,81 @@ const ViewOrder = () => {
                 <Row gutter={25}>
                     <Col sm={24} xs={24}>
                         <Cards headless>
-                            <div>
-                                <p><b>Customer ID: </b>{"100"}</p>
-                                <p><b>Customer Name: </b>{'Test customer'}</p>
-                                <p><b>Email: </b>{'Test@customer.com'}</p>
-                            </div>
-                            <br /><br />
-                            <div className={"productTable"} >
-                                <Table
-                                    columns={column}
-                                    dataSource={products}
-                                    pagination={false}
-                                />
-                            </div>
-
-                            <div className={style.tableFooter}>
-                                <div>
-                                    <p><b>Payment Details:</b></p>
-                                    <p style={{ marginLeft: "2em" }}>
-                                        using bank account <br />
-                                        ..... <br /> .....
-                                    </p>
-                                    <p><b>Delivery Option:</b> FedEx</p>
+                            {singleOrder.isLoading ? (
+                                <div className="spin">
+                                    <Spin />
                                 </div>
+                            ) : (
+                                <>
 
-                                <div className={style.total} >
-                                    <p><b>SUBTOTAL</b>$1203</p>
-                                    <p><b>TAX</b>$2421</p>
-                                    <p><b>TOTAL</b><b>$4242</b></p>
-                                </div>
-                            </div>
+                                    <div>
+                                        <p><b>Customer ID: </b>{singleOrder.data.id}</p>
+                                        <p><b>Customer Name: </b>
+                                            {singleOrder?.data?.customer?.first_name} {singleOrder?.data?.customer?.last_name}</p>
+                                        <p><b>Email: </b> {singleOrder?.data?.customer?.email} </p>
+                                    </div>
+                                    <br /><br />
+                                    <div className={"productTable"} >
+                                        <Table
+                                            columns={column}
+                                            dataSource={products}
+                                            pagination={false}
+                                            rowClassName={(record, index) => (index % 2 == 0 ? "" : "altTableClass")}
+                                        />
+                                    </div>
 
-                            <div className={style.addresses} >
-                                <div className={style.billing}>
-                                    <p><b>BILL TO:</b></p>
-                                    <p><b>Full Name:</b> Test Customer</p>
-                                    <p><b>Email:</b> test@customer.com</p>
-                                    <p><b>Phone:</b> 971-801-6172</p>
-                                    <p><b>Address 1:</b> 2687 Mattson Street</p>
-                                    <p><b>Address 2:</b> 2687 Mattson Street</p>
-                                    <p><b>country:</b> United State</p>
-                                    <p><b>City:</b> Tigard</p>
-                                    <p><b>State:</b> Oregon</p>
-                                    <p><b>Zip:</b> 97223</p>
-                                </div>
-                                <div className={style.billing}>
-                                    <p><b>SHIP TO:</b></p>
-                                    <p><b>Full Name:</b> Test Customer</p>
-                                    <p><b>Email:</b> test@customer.com</p>
-                                    <p><b>Phone:</b> 971-801-6172</p>
-                                    <p><b>Address 1:</b> 2687 Mattson Street</p>
-                                    <p><b>Address 2:</b> 2687 Mattson Street</p>
-                                    <p><b>country:</b> United State</p>
-                                    <p><b>City:</b> Tigard</p>
-                                    <p><b>State:</b> Oregon</p>
-                                    <p><b>Zip:</b> 97223</p>
+                                    <div className={style.tableFooter}>
+                                        <div>
+                                            <p><b>Payment Details:</b></p>
+                                            <p style={{ marginLeft: "2em" }}>
+                                                using bank account <br />
+                                                ..... <br /> .....
+                                            </p>
+                                            <p><b>Delivery Option:</b> FedEx</p>
+                                        </div>
 
-                                </div>
+                                        <div className={style.total} >
+                                            <p><b>SUBTOTAL</b>${subTotal}</p>
+                                            <p><b>Shipping Cost</b>${singleOrder.data?.shipping_cost}</p>
+                                            <p><b>TAX</b>${singleOrder.data?.tax_amount}</p>
+                                            <p><b>TOTAL</b><b>$
+                                                {subTotal + singleOrder.data?.shipping_cost + singleOrder.data?.tax_amount}
+                                            </b></p>
+                                        </div>
+                                    </div>
+
+                                    <div className={style.addresses} >
+                                        <div className={style.billing}>
+                                            <p><b>BILL TO:</b></p>
+                                            {/* <p><b>Full Name:</b> Test Customer</p> */}
+                                            <p><b>Email:</b> {singleOrder?.data?.payment?.billingAddress?.email}</p>
+                                            <p><b>Phone:</b> {singleOrder?.data?.payment?.billingAddress?.phone}</p>
+                                            <p><b>Address 1:</b> {singleOrder?.data?.payment?.billingAddress?.address1}</p>
+                                            <p><b>Address 2:</b> {singleOrder?.data?.payment?.billingAddress?.address2}</p>
+                                            <p><b>country:</b> {singleOrder?.data?.payment?.billingAddress?.country}</p>
+                                            <p><b>City:</b> {singleOrder?.data?.payment?.billingAddress?.city}</p>
+                                            <p><b>State:</b> {singleOrder?.data?.payment?.billingAddress?.state}</p>
+                                            <p><b>Zip:</b> {singleOrder?.data?.payment?.billingAddress?.zip_code}</p>
+                                        </div>
+                                        <div className={style.billing}>
+                                            <p><b>SHIP TO:</b></p>
+                                            {/* <p><b>Full Name:</b> Test Customer</p> */}
+                                            <p><b>Email:</b> {singleOrder?.data?.shippingAddress?.email}</p>
+                                            <p><b>Phone:</b> {singleOrder?.data?.shippingAddress?.phone}</p>
+                                            <p><b>Address 1:</b> {singleOrder?.data?.shippingAddress?.address1}</p>
+                                            <p><b>Address 2:</b> {singleOrder?.data?.shippingAddress?.address2}</p>
+                                            <p><b>country:</b> {singleOrder?.data?.shippingAddress?.country}</p>
+                                            <p><b>City:</b> {singleOrder?.data?.shippingAddress?.city}</p>
+                                            <p><b>State:</b> {singleOrder?.data?.shippingAddress?.state}</p>
+                                            <p><b>Zip:</b> {singleOrder?.data?.shippingAddress?.zip_code}</p>
+
+                                        </div>
 
 
 
-                            </div>
+                                    </div>
 
-
+                                </>)}
                         </Cards>
                     </Col>
                 </Row>

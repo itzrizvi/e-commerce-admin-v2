@@ -39,12 +39,12 @@ const ListOrder = () => {
       .then(res => {
         const data = res?.data?.getOrderlistAdmin;
         if (!data.status) return;
-        var order_data = [];
-        data.data.forEach(item => {
+        // var order_data = [];
+        var order_data = data.data.map(item => {
           const { customer, id, createdAt, orderStatus, payment, total } = item;
-          order_data.push({
+          return ({
             id,
-            customer_name: customer.first_name,
+            customer_name: customer.first_name + ' ' + customer.last_name,
             customer_email: customer.email,
             createdAt,
             orderStatus: orderStatus.name,
@@ -77,7 +77,8 @@ const ListOrder = () => {
       dataIndex: 'customer_name',
       key: 'customer_name',
       width: 150,
-      sorter: (a, b) => (a.customer_name.toUpperCase() > b.customer.first_name.toUpperCase() ? 1 : -1),
+      // render:(val, record)=>record.
+      // sorter: (a, b) => (a.customer_name.toUpperCase() > b.customer.first_name.toUpperCase() ? 1 : -1),
     },
     {
       title: 'Customer Email',
@@ -85,15 +86,32 @@ const ListOrder = () => {
       key: 'customer_email',
       width: 200,
       ellipsis: true,
-      sorter: (a, b) => (a.customer_email.toUpperCase() > b.customer.customer_email.toUpperCase() ? 1 : -1),
+      sorter: (a, b) => (a.customer_email.toUpperCase() > b.customer_email.toUpperCase() ? 1 : -1),
     },
     {
       title: 'Total Amount',
       dataIndex: 'total',
       key: 'total',
+      align: "center",
       width: 120,
       render: val => `$${val}`,
-      sorter: (a, b) => (a.total.toUpperCase() > b.total.toUpperCase() ? 1 : -1),
+      sorter: (a, b) => (a.total > b.total ? 1 : -1),
+    },
+    {
+      title: 'Status',
+      dataIndex: 'orderStatus',
+      key: 'orderStatus',
+      align: "center",
+      width: 150,
+      render: (val) => (<span
+        style={{
+          borderRadius: "4em",
+          padding: ".5em 1.5em",
+          color: val === "Pending" ? '#feaf00' : (val === "Completed" ? '#2fb083' : ''),
+          background: val === "Pending" ? '#fef6e6' : (val === "Completed" ? '#ebf9f4' : '')
+        }}
+      >{val}</span>),
+      sorter: (a, b) => (a.orderStatus.toUpperCase() > b.orderStatus.toUpperCase() ? 1 : -1),
     },
     {
       title: 'Payment Method',
@@ -172,11 +190,11 @@ const ListOrder = () => {
         title="List Orders"
         buttons={[
           <div key="1" className="page-header-actions">
-            {/* <Link to="/admin/customers/add-group"> */}
-            <Button size="small" title="Add Order" type="primary">
-              <FeatherIcon icon="user-plus" />
-            </Button>
-            {/* </Link> */}
+            <Link to="/admin/order/add">
+              <Button size="small" title="Add Order" type="primary">
+                <FeatherIcon icon="plus" />
+              </Button>
+            </Link>
           </div>,
         ]}
       />
@@ -198,7 +216,7 @@ const ListOrder = () => {
                     <Table
                       className="table-responsive"
                       columns={columns}
-                      rowKey={'g_s'}
+                      rowKey={'id'}
                       size="small"
                       dataSource={isFilter ? filteredOrders : orders.data}
                       rowClassName={(record, index) => (index % 2 == 0 ? '' : 'altTableClass')}
