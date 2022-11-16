@@ -155,7 +155,8 @@ const ListOrder = () => {
       key: 'last_name',
       render: (text, record) => (
         <>
-          <Link to={`/admin/order/add?id=${text}`}>
+          {/* <Link to={`/admin/order/add?id=${text}`}> */}
+          <Link to={`/admin/order/add`}>
             {/* <Button size="default" type="white" title='Edit'> */}
             <FontAwesome name="edit" style={{ margin: '.5em 1em' }} />
             {/* </Button> */}

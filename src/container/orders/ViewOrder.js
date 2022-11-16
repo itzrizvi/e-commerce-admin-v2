@@ -26,8 +26,8 @@ const ViewOrder = () => {
         },
         {
             title: 'Description',
-            dataIndex: 'p_d',
-            key: 'p_d',
+            dataIndex: 'des',
+            key: 'des',
             // ellipsis: true,
         },
         {
@@ -100,15 +100,15 @@ const ViewOrder = () => {
 
                 let sub_total = 0
                 const prods = data.data?.orderitems?.map(item => {
-                    const { quantity, price, product: { prod_name } } = item
+                    const { quantity, price, product: { prod_name, prod_short_desc } } = item
                     const total = price * quantity
                     sub_total += total
                     return ({
                         prod_name,
                         quantity,
                         price,
-                        total
-
+                        total,
+                        des: prod_short_desc
                     })
                 })
                 setProducts(prods)

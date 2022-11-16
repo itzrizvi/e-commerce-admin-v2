@@ -71,6 +71,7 @@ export const orderQuery = {
           tenant_id
           product {
             id
+            prod_short_desc
             prod_name
             prod_slug
             prod_sku
