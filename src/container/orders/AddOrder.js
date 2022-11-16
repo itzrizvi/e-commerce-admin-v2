@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Col, Form, Input, Switch, Spin, Select } from 'antd';
+import { Row, Col, Form, Input, Switch, Spin, Select, Card, Table } from 'antd';
 import FeatherIcon from 'feather-icons-react';
 import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
@@ -67,6 +67,56 @@ const AddOrder = () => {
     const [shippingAddresses, setShippingAddresses] = useState([])
     const [selectedAddress, setSelectedAddress] = useState({ billing: {}, shipping: {} })
     const [products, setProducts] = useState({ data: [], isLoading: true })
+    const [selectedProduct, setSelectedProduct] = useState([])
+    const [selected, setSelected] = useState(null)//dummy
+
+
+    const productColumn = [
+        {
+            title: 'Product Name',
+            dataIndex: 'name',
+            key: 'name',
+            ellipsis: true,
+        },
+        {
+            title: 'Price',
+            dataIndex: 'price',
+            key: 'price',
+            width: 100,
+        },
+        {
+            title: 'Quantity',
+            dataIndex: 'quantity',
+            key: 'quantity',
+            width: 170,
+            render: (val, record) => (
+                <Input
+                    type="number"
+                    defaultValue={val}
+                />
+            )
+        },
+        {
+            title: 'Action',
+            dataIndex: 'id',
+            key: 'id',
+            width: 100,
+            align: "center",
+            render: (val) => (
+                <Button size="small" title="Add Order" type="primary"
+                    onClick={() => {
+                        setSelectedProduct(prevState => {
+                            return prevState.filter(value => value.id !== val);
+                        });
+                    }}
+
+                >
+                    <FeatherIcon icon="minus" />
+                </Button>
+            )
+        },
+    ]
+
 
     useEffect(() => { // load customer list
         apolloClient.query({
@@ -123,6 +173,8 @@ const AddOrder = () => {
     }, [])
 
 
+
+
     return (
         <>
             <PageHeader
@@ -133,209 +185,345 @@ const AddOrder = () => {
                 <Row gutter={25}>
                     <Col sm={24} xs={24}>
                         <Cards headless>
+                            <Row>
+                                <Col sm={12} xs={12}>
+                                    {params.id && singleCustomerGroup.isLoading ?
+                                        <div div className="spin">
+                                            <Spin />
+                                        </div>
 
-                            {params.id && singleCustomerGroup.isLoading ?
-                                <div div className="spin">
-                                    <Spin />
-                                </div>
-
-                                : <Form
-                                    style={{ width: '100%' }}
-                                    form={form}
-                                    name="addRole"
-                                    onFinish={handleSubmit}
-                                    onFinishFailed={errorInfo => console.log('form error info:\n', errorInfo)}
-                                    labelCol={{ span: 4 }}
-                                >
-                                    <Form.Item
-                                        rules={[{ required: true, message: "Please select a customer" }]}
-                                        name="customer_group_name"
-                                        label="Customer"
-                                    >
-                                        <Select
-                                            placeholder={customers.isLoading ? "Loading...." : "Select a customer"}
-                                            options={customers.data}
-                                            showSearch
-                                            optionFilterProp='label'
-                                            onSelect={(val, data) => {
-                                                console.log("🚀 ~ file: AddOrder.js ~ line 160 ~ AddOrder ~ data", data);
-                                                setSelectedAddress({ billing: {}, shipping: {} }) //clear address
-                                                setSelectedCustomer(data.item)
-                                                const billing = []
-                                                const shipping = []
-                                                data?.item?.addresses.forEach(addr => {
-                                                    if (addr.type === "billing") return billing.push({
-                                                        label: addr.address1,
-                                                        value: addr.id,
-                                                        item: addr
-                                                    })
-                                                    if (addr.type === "shipping") return shipping.push({
-                                                        label: addr.address1,
-                                                        value: addr.id,
-                                                        item: addr
-                                                    })
-                                                })
-                                                setBillingAddresses(billing)
-                                                setShippingAddresses(shipping)
-                                            }}
-                                        />
-
-                                        {selectedCustomer?.id && <p
-                                            style={{
-                                                marginTop: '0.7em',
-                                                lineHeight: '2em',
-                                                paddingLeft: '1.5em',
-                                                marginBottom: 0
-                                            }}
+                                        : <Form
+                                            style={{ width: '100%' }}
+                                            form={form}
+                                            name="addRole"
+                                            onFinish={handleSubmit}
+                                            onFinishFailed={errorInfo => console.log('form error info:\n', errorInfo)}
+                                            // labelCol={{ span: 4 }}
+                                            layout="vertical"
                                         >
-                                            <b>First Name: </b> {selectedCustomer.first_name} <br />
-                                            <b>Last Name: </b> {selectedCustomer.last_name} <br />
-                                        </p>}
+                                            <Form.Item
+                                                rules={[{ required: true, message: "Please select a customer" }]}
+                                                name="customer_group_name"
+                                                label="Customer"
+                                            >
+                                                <Select
+                                                    placeholder={customers.isLoading ? "Loading...." : "Select a customer"}
+                                                    options={customers.data}
+                                                    showSearch
+                                                    optionFilterProp='label'
+                                                    onSelect={(val, data) => {
+                                                        console.log("🚀 ~ file: AddOrder.js ~ line 160 ~ AddOrder ~ data", data);
+                                                        setSelectedAddress({ billing: {}, shipping: {} }) //clear address
+                                                        setSelectedCustomer(data.item)
+                                                        const billing = []
+                                                        const shipping = []
+                                                        data?.item?.addresses.forEach(addr => {
+                                                            if (addr.type === "billing") return billing.push({
+                                                                label: addr.address1,
+                                                                value: addr.id,
+                                                                item: addr
+                                                            })
+                                                            if (addr.type === "shipping") return shipping.push({
+                                                                label: addr.address1,
+                                                                value: addr.id,
+                                                                item: addr
+                                                            })
+                                                        })
+                                                        setBillingAddresses(billing)
+                                                        setShippingAddresses(shipping)
+                                                    }}
+                                                />
 
-                                    </Form.Item>
 
-                                    <Form.Item
-                                        rules={[{ required: true, message: "Please select products" }]}
-                                        name="ps"
-                                        label="Products"
-                                        mode="multiple"
-                                        optionFilterProp='prod_slug'
+
+                                            </Form.Item>
+
+                                            <Form.Item // billing
+                                                rules={[{ required: true, message: "Please select a billing address" }]}
+                                                name="billing_address_id"
+                                                label="Billing Address"
+                                            >
+                                                <Select
+                                                    placeholder={customers.isLoading ? "Loading..."
+                                                        : "Select a billing address"
+                                                    }
+                                                    options={billingAddresses}
+                                                    onSelect={(val, data) => {
+                                                        console.log("🚀 ~ file: AddOrder.js ~ line 214 ~ AddOrder ~ data", data);
+                                                        setSelectedAddress(state => ({ ...state, billing: data.item }))
+                                                    }}
+                                                />
+
+
+                                            </Form.Item>
+
+                                            <Form.Item // shipping
+                                                rules={[{ required: true, message: "Please select a shipping address" }]}
+                                                name="shipping_address_id"
+                                                label="Shipping Address"
+                                            >
+                                                <Select
+                                                    placeholder={customers.isLoading ? "Loading..."
+                                                        : "Select a shipping address"
+                                                    }
+                                                    options={shippingAddresses}
+                                                    onSelect={(val, data) => {
+                                                        console.log("🚀 ~ file: AddOrder.js ~ line 229 ~ AddOrder ~ data", data);
+                                                        setSelectedAddress(state => ({ ...state, shipping: data.item }))
+                                                    }}
+                                                />
+
+
+                                            </Form.Item>
+
+                                            <Form.Item // payment method
+                                                rules={[{ required: true, message: "Please select a payment method" }]}
+                                                name="payment_id"
+                                                label="Payment Method"
+                                            >
+                                                <Select
+                                                    placeholder="Select payment method"
+                                                    options={[
+                                                        {
+                                                            label: "Method 1",
+                                                            value: 1
+                                                        },
+                                                        {
+                                                            label: "Method 2",
+                                                            value: 2
+                                                        },
+                                                    ]}
+                                                />
+                                            </Form.Item>
+
+                                            <Form.Item
+                                                name="ps"
+                                                label="Products"
+                                                optionFilterProp='prod_slug'
+                                            >
+                                                <Select
+                                                    placeholder={products.isLoading ? "Loading...." : "Select products"}
+                                                    options={products.data}
+                                                    allowClear
+                                                    onSelect={(val, item) => {
+                                                        console.log("🚀 ~ file: AddOrder.js ~ line 280 ~ AddOrder ~ val", val);
+                                                        console.log("🚀 ~ file: AddOrder.js ~ line 280 ~ AddOrder ~ item", item);
+                                                        const newProd = {
+                                                            "id": new Date().getTime(),
+                                                            "name": item?.item?.prod_name,
+                                                            "quantity": 1,
+                                                            "price": item?.item?.prod_sale_price
+                                                                ? item?.item?.prod_sale_price
+                                                                : item?.item?.prod_regular_price
+                                                        }
+                                                        setSelectedProduct(s => [...s, newProd])
+                                                    }}
+                                                    onChange={() =>
+                                                        setSelected(null)
+                                                    }
+                                                    value={selected}
+                                                />
+                                            </Form.Item>
+                                            <span className={"psp_list"} >
+                                                <Table
+                                                    columns={productColumn}
+                                                    dataSource={selectedProduct}
+                                                    rowClassName={(record, index) => (index % 2 === 0 ? "" : "altTableClass")}
+                                                />
+                                            </span>
+
+
+
+
+                                            <div
+                                                style={{
+                                                    display: 'flex',
+                                                    justifyContent: 'flex-end',
+                                                    marginTop: '3em'
+                                                }}
+                                            >
+                                                <Form.Item>
+                                                    <Button loading={isLoading} size="default" htmlType="submit" type="primary" raised>
+                                                        {isLoading ? 'Processing' : 'Save'}
+                                                    </Button>
+                                                    <Link to="/admin/order/list">
+                                                        <Button
+                                                            type='white'
+                                                            size="large"
+                                                        >
+                                                            Cancel
+                                                        </Button>
+                                                    </Link>
+                                                </Form.Item>
+                                            </div>
+
+
+                                        </Form>}
+                                </Col>
+                                <Col sm={12} xs={12} style={{ paddingLeft: "3em" }}>
+                                    <Card
+                                        headless
+
                                     >
-                                        <Select
-                                            placeholder={products.isLoading ? "Loading...." : "Select products"}
-                                            options={products.data}
-                                        />
-
-
-                                    </Form.Item>
-                                    <Form.Item
-                                        rules={[{ required: true, message: "Please select a billing address" }]}
-                                        name="billing_address_id"
-                                        label="Billing Address"
-                                    >
-                                        <Select
-                                            placeholder={customers.isLoading ? "Loading..."
-                                                : "Select a billing address"
-                                            }
-                                            options={billingAddresses}
-                                            onSelect={(val, data) => {
-                                                console.log("🚀 ~ file: AddOrder.js ~ line 214 ~ AddOrder ~ data", data);
-                                                setSelectedAddress(state => ({ ...state, billing: data.item }))
-                                            }}
-                                        />
-
-                                        {selectedAddress?.billing?.id && <p
+                                        <h3
                                             style={{
-                                                marginTop: '0.7em',
-                                                lineHeight: '2em',
-                                                paddingLeft: '1.5em',
-                                                marginBottom: 0
+                                                borderBottom: "1px solid #f2f1f1",
+                                                paddingBottom: "0.3em",
+                                                marginBottom: "0.9em",
                                             }}
-                                        >
-                                            <b>Address 1 : </b> {selectedAddress?.billing?.address1} <br />
-                                            <b>Address 2 : </b> {selectedAddress?.billing?.address2} <br />
-                                            <b>Email : </b> {selectedAddress?.billing?.email} <br />
-                                            <b>Phone : </b> {selectedAddress?.billing?.phone} <br />
-                                            <b>Fax : </b> {selectedAddress?.billing?.fax} <br />
-                                            <b>Country : </b> {selectedAddress?.billing?.country} <br />
-                                            <b>City : </b> {selectedAddress?.billing?.city} <br />
-                                            <b>State : </b> {selectedAddress?.billing?.state} <br />
-                                            <b>Zip Code : </b> {selectedAddress?.billing?.zip_code} <br />
-                                        </p>}
+                                        >Preview</h3>
+                                        {selectedCustomer?.id && <>
+                                            <p
+                                                style={{
+                                                    fontWeight: 500,
+                                                }}
+                                            >Customer Details :</p>
 
-                                    </Form.Item>
-                                    <Form.Item
-                                        rules={[{ required: true, message: "Please select a shipping address" }]}
-                                        name="shipping_address_id"
-                                        label="Shipping Address"
-                                    >
-                                        <Select
-                                            placeholder={customers.isLoading ? "Loading..."
-                                                : "Select a shipping address"
-                                            }
-                                            options={shippingAddresses}
-                                            onSelect={(val, data) => {
-                                                console.log("🚀 ~ file: AddOrder.js ~ line 229 ~ AddOrder ~ data", data);
-                                                setSelectedAddress(state => ({ ...state, shipping: data.item }))
-                                            }}
-                                        />
+                                            <table
+                                                style={{
+                                                    marginLeft: "1em"
+                                                }}
+                                            >
+                                                <tr>
+                                                    <td style={{ width: '150px' }}>
+                                                        <b>Email </b>
+                                                    </td>
+                                                    <td>: {selectedCustomer.email}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>
+                                                        <b>First Name </b>
+                                                    </td>
+                                                    <td>: {selectedCustomer.first_name}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td><b>Last Name:</b></td>
+                                                    <td>: {selectedCustomer.last_name}</td>
+                                                </tr>
+                                            </table>
 
-                                        {selectedAddress?.shipping?.id && <p
-                                            style={{
-                                                marginTop: '0.7em',
-                                                lineHeight: '2em',
-                                                paddingLeft: '1.5em',
-                                                marginBottom: 0
-                                            }}
-                                        >
-                                            <b>Address 1 : </b> {selectedAddress?.shipping?.address1} <br />
-                                            <b>Address 2 : </b> {selectedAddress?.shipping?.address2} <br />
-                                            <b>Email : </b> {selectedAddress?.shipping?.email} <br />
-                                            <b>Phone : </b> {selectedAddress?.shipping?.phone} <br />
-                                            <b>Fax : </b> {selectedAddress?.shipping?.fax} <br />
-                                            <b>Country : </b> {selectedAddress?.shipping?.country} <br />
-                                            <b>City : </b> {selectedAddress?.shipping?.city} <br />
-                                            <b>State : </b> {selectedAddress?.shipping?.state} <br />
-                                            <b>Zip Code : </b> {selectedAddress?.shipping?.zip_code} <br />
-                                        </p>}
-
-                                    </Form.Item>
-                                    <Form.Item
-                                        rules={[{ required: true, message: "Please select a payment method" }]}
-                                        name="payment_id"
-                                        label="Payment Method"
-                                    >
-                                        <Select
-                                            placeholder="Select payment method"
-                                            options={[
-                                                {
-                                                    label: "Method 1",
-                                                    value: 1
-                                                },
-                                                {
-                                                    label: "Method 2",
-                                                    value: 2
-                                                },
-                                            ]}
-                                        />
-                                    </Form.Item>
+                                        </>}
 
 
+                                        {selectedAddress?.billing?.id && <>
+                                            <p
+                                                style={{
+                                                    fontWeight: 500,
+                                                    marginTop: "2em",
+                                                    // marginBottom: "3px"
+                                                }}
+                                            >Billing Address :</p>
 
-                                    {/* <Form.Item
-                                        rules={[{ required: true, max: maxLength, message: "Please enter Attribute Group Name" }]}
-                                        name="customer_group_name" label="Group Name"
-                                        initialValue={params.id ? singleCustomerGroup.data.customer_group_name : ""}
-                                    >
-                                        <Input placeholder='Enter Attribute Group Name' />
-                                    </Form.Item> */}
+                                            <table
+                                                style={{
+                                                    marginLeft: "1em"
+                                                }}
+                                            >
+
+                                                <tr>
+                                                    <td style={{ width: '150px' }}><b>Address 1</b></td>
+                                                    <td>: {selectedAddress?.billing?.address1}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td><b>Address 2</b></td>
+                                                    <td>: {selectedAddress?.billing?.address2} </td>
+                                                </tr>
+                                                <tr>
+                                                    <td><b>Email</b></td>
+                                                    <td>: {selectedAddress?.billing?.email} </td>
+                                                </tr>
+                                                <tr>
+                                                    <td><b>Phone</b></td>
+                                                    <td>: {selectedAddress?.billing?.phone} </td>
+                                                </tr>
+                                                <tr>
+                                                    <td><b>Fax</b></td>
+                                                    <td>: {selectedAddress?.billing?.fax} </td>
+                                                </tr>
+                                                <tr>
+                                                    <td><b>Country</b></td>
+                                                    <td>: {selectedAddress?.billing?.country} </td>
+                                                </tr>
+                                                <tr>
+                                                    <td><b>City</b></td>
+                                                    <td>: {selectedAddress?.billing?.city} </td>
+                                                </tr>
+                                                <tr>
+                                                    <td><b>State</b></td>
+                                                    <td>: {selectedAddress?.billing?.state} </td>
+                                                </tr>
+                                                <tr>
+                                                    <td><b>Zip Code</b></td>
+                                                    <td>: {selectedAddress?.billing?.zip_code} </td>
+                                                </tr>
 
 
+                                            </table>
 
-                                    <div
-                                        style={{
-                                            display: 'flex',
-                                            justifyContent: 'flex-end',
-                                            marginTop: '3em'
-                                        }}
-                                    >
-                                        <Form.Item>
-                                            <Button loading={isLoading} size="default" htmlType="submit" type="primary" raised>
-                                                {isLoading ? 'Processing' : 'Save'}
-                                            </Button>
-                                            <Link to="/admin/order/list">
-                                                <Button
-                                                    type='white'
-                                                    size="large"
-                                                >
-                                                    Cancel
-                                                </Button>
-                                            </Link>
-                                        </Form.Item>
-                                    </div>
+                                        </>}
+
+                                        {selectedAddress?.shipping?.id && <>
+                                            <p
+                                                style={{
+                                                    fontWeight: 500,
+                                                    marginTop: "2em",
+                                                    // marginBottom: "3px"
+                                                }}
+                                            >Billing Address :</p>
+
+                                            <table
+                                                style={{
+                                                    marginLeft: "1em"
+                                                }}
+                                            >
+
+                                                <tr>
+                                                    <td style={{ width: '150px' }}><b>Address 1</b></td>
+                                                    <td>: {selectedAddress?.shipping?.address1}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td><b>Address 2</b></td>
+                                                    <td>: {selectedAddress?.shipping?.address2} </td>
+                                                </tr>
+                                                <tr>
+                                                    <td><b>Email</b></td>
+                                                    <td>: {selectedAddress?.shipping?.email} </td>
+                                                </tr>
+                                                <tr>
+                                                    <td><b>Phone</b></td>
+                                                    <td>: {selectedAddress?.shipping?.phone} </td>
+                                                </tr>
+                                                <tr>
+                                                    <td><b>Fax</b></td>
+                                                    <td>: {selectedAddress?.shipping?.fax} </td>
+                                                </tr>
+                                                <tr>
+                                                    <td><b>Country</b></td>
+                                                    <td>: {selectedAddress?.shipping?.country} </td>
+                                                </tr>
+                                                <tr>
+                                                    <td><b>City</b></td>
+                                                    <td>: {selectedAddress?.shipping?.city} </td>
+                                                </tr>
+                                                <tr>
+                                                    <td><b>State</b></td>
+                                                    <td>: {selectedAddress?.shipping?.state} </td>
+                                                </tr>
+                                                <tr>
+                                                    <td><b>Zip Code</b></td>
+                                                    <td>: {selectedAddress?.shipping?.zip_code} </td>
+                                                </tr>
 
 
-                                </Form>}
+                                            </table>
+
+                                        </>}
+
+                                    </Card>
+
+                                </Col>
+                            </Row>
+
                         </Cards>
                     </Col>
                 </Row>
