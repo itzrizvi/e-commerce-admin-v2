@@ -14,6 +14,8 @@ import { orderQuery } from '../../apollo/order';
 import { toast } from 'react-toastify';
 import { useLocation } from 'react-router-dom';
 import queryString from 'query-string';
+import Invoice from '../../utility/invoice/invoice';
+import { PDFViewer, PDFDownloadLink, BlobProvider } from "@react-pdf/renderer"
 
 const ViewOrder = () => {
     const column = [
@@ -203,6 +205,24 @@ const ViewOrder = () => {
 
                                 </>)}
                         </Cards>
+                    </Col>
+                    <Col sm={24} xs={24}>
+                        {/* <Invoice /> */}
+                        <PDFDownloadLink document={<Invoice />}>
+                            {({ loading }) => (loading
+                                ? <button>Loading....</button>
+                                : <button>Download</button>
+
+                            )}
+                        </PDFDownloadLink>
+
+                        {/* <PDFViewer
+                            style={{
+                                height: '1000px',
+                                width: '1500px'
+                            }}
+                        ><Invoice /></PDFViewer> */}
+
                     </Col>
                 </Row>
             </Main>
