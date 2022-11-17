@@ -1,16 +1,33 @@
 import React from 'react';
 import { Document, Page, View, Text, Image, StyleSheet } from "@react-pdf/renderer"
 import Logo from './logo.png'
+import LogoSvg from './logo.svg'
 
 
 
 const style = StyleSheet.create({
     body: {
         paddingTop: 50,
-        paddingBottom: 65,
-        paddingHorizontal: 35,
-        fontSize: 12,
+        // paddingBottom: 65,
+        paddingHorizontal: 50,
+        fontSize: 11,
+        backgroundColor: '#f4f4f5'
     },
+    invoice: {
+        display: "flex",
+        flexDirection: "row",
+        justifyContent: "space-between",
+        paddingHorizontal: 10,
+        paddingVertical: 5,
+    },
+    invoiceTitle: {
+        color: "#252425",
+        fontWeight: "700"
+    },
+    invoiceValue: {
+        color: "#414343"
+    },
+
     subTitle: {
         marginBottom: 10,
         fontSize: 14,
@@ -53,7 +70,14 @@ const style = StyleSheet.create({
 
 })
 
-const Invoice = () => {
+const Invoice1 = () => {
+
+    const invoice = {
+        id: "1002",
+        date: "January 13, 2022",
+        total: 2342,
+        note: "Free Shipping with 30 days money-back guarantee"
+    }
 
     const customer = {
         name: "Deniyal Brine",
@@ -62,6 +86,8 @@ const Invoice = () => {
 
     const billing = {
         id: 10001,
+        name: "Denial Brine",
+        email: "denialbrine@gmail.com",
         address1: "Address One",
         address2: "Address Two",
         phone: "0655",
@@ -70,7 +96,7 @@ const Invoice = () => {
         city: "Test City",
         state: "State",
         zip_code: "1207",
-        country: "Bangladesh",
+        country: "United State",
         type: "shipping",
     }
     const shipping = { ...billing }
@@ -116,131 +142,101 @@ const Invoice = () => {
                     style={{
                         flexDirection: "row",
                         justifyContent: 'space-between',
+                        paddingBottom: 30,
+                        borderBottom: "1 solid #ebebeb"
                     }}
                 >
-                    <View>
-                        <Text style={[style.subTitle, { color: "black", fontWeight: "700" }]}>Customer:</Text>
-                        <View
+                    <View
+                        style={{
+                            color: "#414343"
+                        }}
+                    >
+                        <Text
                             style={{
-                                display: 'flex',
-                                flexDirection: 'row',
-                                color: "#272b41",
-                                paddingLeft: 10
+                                color: "black",
+                                fontWeight: "700",
+                                marginBottom: 7
                             }}
-                        >
-                            <View>
-                                <Text>Name</Text>
-                                <Text>Email</Text>
-                            </View>
-                            <View>
-                                <Text>:  {customer.name}</Text>
-                                <Text>:  {customer.email}</Text>
-                            </View>
-                        </View>
-
+                        >BILL FROM :</Text>
+                        <Text style={{ marginBottom: 3 }} >Prime Server Parts</Text>
+                        <Text style={{ marginBottom: 3 }} >primeserverparts@gmail.com</Text>
+                        <Text style={{ marginBottom: 3 }} >+12027953213</Text>
 
                     </View>
-                    <View>
-                        <Image
-                            src={Logo}
-                            style={{
-                                height: 30,
-                            }}
-                        />
-
-                    </View>
+                    <Image
+                        src={Logo}
+                        style={{
+                            height: 35,
+                        }}
+                    />
                 </View>
-                {/* billing shipping */}
+
+                {/* bill to & invoice  */}
                 <View
                     style={{
                         display: "flex",
-                        flexDirection: 'row',
-                        marginTop: '2cm',
-                        backgroundColor: '#eef5fd',
-                        color: "#435165",
-                        padding: 24,
+                        flexDirection: "row",
+                        justifyContent: "space-between",
+                        marginTop: 40,
                     }}
                 >
-                    {/* Billing */}
                     <View
-                        style={{ flex: 1 }}
+                        style={{
+                            color: "#414343"
+                        }}
                     >
-                        <Text style={style.subTitle}>Billing Address</Text>
-                        <View
+                        <Text
                             style={{
-                                display: "flex",
-                                flexDirection: "row",
+                                color: "black",
+                                fontWeight: "700",
+                                marginBottom: 7
                             }}
-                        >
-                            <View>
-                                <Text>Email</Text>
-                                <Text>Phone</Text>
-                                <Text>fax</Text>
-                                <Text>Address 1</Text>
-                                <Text>Address 2</Text>
-                                <Text>Country</Text>
-                                <Text>City</Text>
-                                <Text>State</Text>
-                                <Text>Zip Code</Text>
-                            </View>
-                            <View
-                                style={{
-                                    marginLeft: 10
-                                }}
-                            >
-                                <Text> :  {billing.email}</Text>
-                                <Text> :  {billing.phone}</Text>
-                                <Text> :  {billing.fax}</Text>
-                                <Text> :  {billing.address1}</Text>
-                                <Text> :  {billing.address2}</Text>
-                                <Text> :  {billing.country}</Text>
-                                <Text> :  {billing.city}</Text>
-                                <Text> :  {billing.state}</Text>
-                                <Text> :  {billing.zip_code}</Text>
-                            </View>
-                        </View>
+                        >BILL TO :</Text>
+                        <Text style={{ marginBottom: 3 }} >{billing?.name}</Text>
+                        <Text style={{ marginBottom: 3 }} >{billing?.address2}</Text>
+                        <Text style={{ marginBottom: 3 }} >{billing?.address2}</Text>
+                        <Text style={{ marginBottom: 3 }} >{billing?.city}, {billing?.state}, {billing?.zip_code}</Text>
+                        <Text style={{ marginBottom: 3 }} >{billing?.country}</Text>
+                        <Text style={{ marginBottom: 3 }} >{billing?.email}</Text>
+
 
                     </View>
-                    {/* Shipping */}
                     <View
-                        style={{ flex: 1 }}
+                        style={{
+                            width: "230"
+                        }}
                     >
-                        <Text style={style.subTitle}>Billing Address</Text>
                         <View
-                            style={{
-                                display: "flex",
-                                flexDirection: "row",
-                            }}
+                            style={[style.invoice]}
                         >
-                            <View>
-                                <Text>Email</Text>
-                                <Text>Phone</Text>
-                                <Text>fax</Text>
-                                <Text>Address 1</Text>
-                                <Text>Address 2</Text>
-                                <Text>Country</Text>
-                                <Text>City</Text>
-                                <Text>State</Text>
-                                <Text>Zip Code</Text>
-                            </View>
-                            <View
-                                style={{
-                                    marginLeft: 10
-                                }}
-                            >
-                                <Text> :  {billing.email}</Text>
-                                <Text> :  {billing.phone}</Text>
-                                <Text> :  {billing.fax}</Text>
-                                <Text> :  {billing.address1}</Text>
-                                <Text> :  {billing.address2}</Text>
-                                <Text> :  {billing.country}</Text>
-                                <Text> :  {billing.city}</Text>
-                                <Text> :  {billing.state}</Text>
-                                <Text> :  {billing.zip_code}</Text>
-                            </View>
+                            <Text style={[style.invoiceTitle]}>INVOICE #</Text>
+                            <Text style={style.invoiceValue}>{invoice.id}</Text>
+                        </View>
+                        <View
+                            style={[style.invoice]}
+                        >
+                            <Text style={[style.invoiceTitle]}>INVOICE DATE</Text>
+                            <Text style={style.invoiceValue}>{invoice.date}</Text>
+                        </View>
+                        <View
+                            style={[style.invoice, {
+                                backgroundColor: "#cfd4d5",
+                                fontWeight: "700",
+                                color: "black"
+
+                            }]}
+                        >
+                            <Text style={[style.invoiceTitle]}>AMOUNT DUE</Text>
+                            <Text>${invoice.total}</Text>
                         </View>
                     </View>
+
                 </View>
+
+
+
+
+
 
                 {/* Products */}
                 <View
@@ -252,7 +248,7 @@ const Invoice = () => {
                         style={[
                             style.tr, {
                                 marginBottom: 10,
-                                fontWeight: "700",
+                                fontWeight: 700,
                                 paddingTop: 5,
                                 paddingBottom: 5,
                                 // backgroundColor: "#c8c8c8",
@@ -269,8 +265,11 @@ const Invoice = () => {
                     {product.map(item => (
                         <View style={[style.tr, {
                             // color: "#272b41"
-                            color: "gray",
-                            paddingBottom: 9
+                            color: "#4d4c4c",
+                            paddingBottom: 9,
+                            paddingTop: 9,
+                            borderBottom: "1 solid #ebebeb"
+
                         }]}>
                             <Text style={style.td1} >{item?.product?.prod_name}</Text>
                             <Text style={style.td2} >{item?.quantity}</Text>
@@ -284,12 +283,23 @@ const Invoice = () => {
                         style={{
                             display: "flex",
                             flexDirection: "row",
-                            justifyContent: "flex-end",
-                            marginTop: 15,
+                            justifyContent: "space-between",
+                            marginTop: 70,
                             // color: '#272B41'
                             color: '#3a3f59'
                         }}
                     >
+                        <View
+                            style={{
+                                paddingRight: 20,
+                                paddingTop: 12
+                            }}
+                        >
+                            <Text style={{ color: "black", marginBottom: 4 }}>NOTES / MEMO</Text>
+                            <Text style={{ color: "gray" }}>{invoice.note}</Text>
+
+                        </View>
+
                         <View>
                             <View style={style.total} >
                                 <Text>SUBTOTAL</Text>
@@ -326,4 +336,4 @@ const Invoice = () => {
     );
 };
 
-export default Invoice;
+export default Invoice1;

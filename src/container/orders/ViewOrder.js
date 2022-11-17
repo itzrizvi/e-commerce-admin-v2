@@ -16,6 +16,7 @@ import { useLocation } from 'react-router-dom';
 import queryString from 'query-string';
 import Invoice from '../../utility/invoice/invoice';
 import { PDFViewer, PDFDownloadLink, BlobProvider } from "@react-pdf/renderer"
+import Invoice1 from '../../utility/invoice/invoice1';
 
 const ViewOrder = () => {
     const column = [
@@ -208,7 +209,7 @@ const ViewOrder = () => {
                     </Col>
                     <Col sm={24} xs={24}>
                         {/* <Invoice /> */}
-                        <PDFDownloadLink document={<Invoice />}>
+                        <PDFDownloadLink document={<Invoice1 />}>
                             {({ loading }) => (loading
                                 ? <button>Loading....</button>
                                 : <button>Download</button>
@@ -221,7 +222,7 @@ const ViewOrder = () => {
                                 height: '1000px',
                                 width: '1500px'
                             }}
-                        ><Invoice /></PDFViewer> */}
+                        ><Invoice1 /></PDFViewer> */}
 
                     </Col>
                 </Row>
