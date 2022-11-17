@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Row, Col, Form, Input, Switch, Spin, Select, Card, Table } from 'antd';
 import FeatherIcon from 'feather-icons-react';
 import { PageHeader } from '../../components/page-headers/page-headers';
@@ -69,6 +69,7 @@ const AddOrder = () => {
     const [products, setProducts] = useState({ data: [], isLoading: true })
     const [selectedProduct, setSelectedProduct] = useState([])
     const [selected, setSelected] = useState(null)//dummy
+    const formRef = useRef()
 
 
     const productColumn = [
@@ -193,6 +194,7 @@ const AddOrder = () => {
                                         </div>
 
                                         : <Form
+                                            ref={formRef}
                                             style={{ width: '100%' }}
                                             form={form}
                                             name="addRole"
@@ -299,15 +301,15 @@ const AddOrder = () => {
                                             <Form.Item
                                                 name="ps"
                                                 label="Products"
-                                                optionFilterProp='prod_slug'
                                             >
                                                 <Select
+                                                    optionFilterProp='label'
                                                     placeholder={products.isLoading ? "Loading...." : "Select products"}
                                                     options={products.data}
+                                                    showSearch
+                                                    mode="multiple"
                                                     allowClear
                                                     onSelect={(val, item) => {
-                                                        console.log("🚀 ~ file: AddOrder.js ~ line 280 ~ AddOrder ~ val", val);
-                                                        console.log("🚀 ~ file: AddOrder.js ~ line 280 ~ AddOrder ~ item", item);
                                                         const newProd = {
                                                             "id": new Date().getTime(),
                                                             "name": item?.item?.prod_name,
@@ -318,10 +320,11 @@ const AddOrder = () => {
                                                         }
                                                         setSelectedProduct(s => [...s, newProd])
                                                     }}
-                                                    onChange={() =>
-                                                        setSelected(null)
-                                                    }
-                                                    value={selected}
+                                                    onChange={(val) => {
+                                                        setTimeout(() => {
+                                                            formRef.current.setFieldsValue({ ps: undefined })
+                                                        }, 20);
+                                                    }}
                                                 />
                                             </Form.Item>
                                             <span className={"psp_list"} >
