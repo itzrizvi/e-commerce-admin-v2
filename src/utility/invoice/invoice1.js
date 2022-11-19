@@ -75,14 +75,14 @@ const Invoice1 = () => {
     const invoice = {
         id: "1002",
         date: "January 13, 2022",
-        total: 2342,
+        subTotal: 2342,
+        shippingCost: 2342,
+        tax: 2342,
+        discount: 0,
         note: "Free Shipping with 30 days money-back guarantee"
     }
 
-    const customer = {
-        name: "Deniyal Brine",
-        email: "DeniyalBrine@gmail.com"
-    }
+
 
     const billing = {
         id: 10001,
@@ -303,15 +303,19 @@ const Invoice1 = () => {
                         <View>
                             <View style={style.total} >
                                 <Text>SUBTOTAL</Text>
-                                <Text>$6002</Text>
+                                <Text>${invoice.subTotal}</Text>
                             </View>
                             <View style={style.total} >
                                 <Text>SHIPPING COST</Text>
-                                <Text>$6002</Text>
+                                <Text>${invoice.shippingCost}</Text>
                             </View>
                             <View style={style.total} >
                                 <Text>TAX</Text>
-                                <Text>$6002</Text>
+                                <Text>${invoice.tax}</Text>
+                            </View>
+                            <View style={style.total} >
+                                <Text>DISCOUNT</Text>
+                                <Text>${invoice.discount}</Text>
                             </View>
                             <View style={[
                                 style.total,
@@ -324,7 +328,7 @@ const Invoice1 = () => {
                                 }
                             ]} >
                                 <Text>TOTAL</Text>
-                                <Text>$6002</Text>
+                                <Text>${invoice.subTotal + invoice.shippingCost + invoice.tax - invoice.discount}</Text>
                             </View>
                         </View>
                     </View>

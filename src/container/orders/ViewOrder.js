@@ -217,12 +217,12 @@ const ViewOrder = () => {
                             )}
                         </PDFDownloadLink>
 
-                        {/* <PDFViewer
+                        <PDFViewer
                             style={{
                                 height: '1000px',
                                 width: '1500px'
                             }}
-                        ><Invoice1 /></PDFViewer> */}
+                        ><Invoice1 /></PDFViewer>
 
                     </Col>
                 </Row>
