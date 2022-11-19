@@ -880,6 +880,39 @@ export const customerQuery = {
       }
     }
   `,
+  GET_ALL_CUSTOMER: gql`
+    query{
+      getAllCustomer {
+        status
+        message
+        data {
+          id
+          first_name
+          last_name
+          email
+          email_verified
+          user_status
+          image
+          addresses {
+            id
+            address1
+            address2
+            phone
+            fax
+            email
+            city
+            state
+            zip_code
+            country
+            type
+            status
+            updatedAt
+            createdAt
+          }
+        }
+      }
+    }
+  `,
   GET_ALL_CUSTOMER_FOR_ORDER: gql`
     query{
         getAllCustomer {
@@ -910,6 +943,40 @@ export const customerQuery = {
         }
       }
       
+    `,
+  GET_SINGLE_CUSTOMER: gql`
+    query getSingleCustomer($customer_id: Int!){
+      getSingleCustomer(query: { customer_id: $customer_id }) {
+        status
+        message
+        data {
+          id
+          first_name
+          last_name
+          email
+          email_verified
+          user_status
+          image
+          addresses {
+            id
+            address1
+            address2
+            phone
+            fax
+            email
+            city
+            state
+            zip_code
+            country
+            type
+            status
+            updatedAt
+            createdAt
+          }
+        }
+      }
+    }
+    
     `,
 };
 

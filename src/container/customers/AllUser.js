@@ -6,7 +6,7 @@ import { Main } from '../styled';
 import { Cards } from '../../components/cards/frame/cards-frame';
 import { SearchOutlined } from '@ant-design/icons';
 import { Button } from '../../components/buttons/buttons';
-import apolloClient, { authMutation, authQuery } from '../../utility/apollo';
+import apolloClient, { authMutation, authQuery, customerQuery } from '../../utility/apollo';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import FontAwesome from 'react-fontawesome';
@@ -52,7 +52,7 @@ const ListUser = () => {
 
     useEffect(() => {
         apolloClient.query({
-            query: authQuery.GET_ALL_STAFF,
+            query: customerQuery.GET_ALL_CUSTOMER,
             context: {
                 headers: {
                     TENANTID: process.env.REACT_APP_TENANTID,
@@ -60,11 +60,11 @@ const ListUser = () => {
                 }
             }
         }).then(res => {
-            if (!res?.data?.getAllStaff?.isAuth) {
-                dispatch(logOut())
-            } else {
-                setStaffs(s => ({ ...s, data: res?.data?.getAllStaff?.data, error: '' }))
-            }
+            const data = res.data.getAllCustomer
+            if (!data?.status) return
+
+            setStaffs(s => ({ ...s, data: data?.data, error: '' }))
+
         }).catch(err => {
             setStaffs(s => ({ ...s, error: 'Something went Wrong.!! ' }))
         }).finally(() => {
@@ -88,7 +88,6 @@ const ListUser = () => {
             dataIndex: 'id',
             key: 'id',
             width: 70,
-            // render: (text, record) => (<img src={require('../../static/img/avatar/NoPath (3).png')} alt="" />),
             render: (text, record) => (<LazyLoadImage effect="blur" width="40" src={renderImage(record.id, record.image, 'user', '128x128')} onError={errorImageSrc} alt={record.id} />)
         },
         {
@@ -156,19 +155,19 @@ const ListUser = () => {
         },
         {
             title: 'Action',
-            dataIndex: 'action',
+            dataIndex: 'id',
+            key: 'id',
             width: 90,
             align: 'center',
-            render: (text, record) => (
+            render: (id, record) => (
                 <>
-                    <Link to={`/admin/customers/edit?uid=${record.id}&first_name=${record.first_name}&last_name=${record.last_name}&email=${record.email}&status=${record.status}`}>
+                    <Link to={`/admin/customers/edit?id=${id}`}>
                         {/* <Button size="default" type="white" title='Edit'> */}
                         <FontAwesome name="edit" />
                         {/* </Button> */}
                     </Link>
                 </>
             ),
-            key: 'last_name',
         },
     ]
 
