@@ -19,7 +19,8 @@ const config = {
   BRAND_PER_PAGE: 10,
   CUSTOMER_PER_PAGE: 10,
   VENDOR_PER_PAGE: 10,
-  ORDER_PER_PAGE: 10
+  ORDER_PER_PAGE: 10,
+  PO_PER_PAGE: 10
 };
 
 export default config;

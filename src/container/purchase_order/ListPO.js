@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Col, Spin, Input, Table, Switch } from 'antd';
+import { Row, Col, Spin, Input, Table, Switch, Select } from 'antd';
 import FeatherIcon from 'feather-icons-react';
 import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
@@ -9,42 +9,41 @@ import { Link } from 'react-router-dom';
 import FontAwesome from 'react-fontawesome';
 import { SearchOutlined } from '@ant-design/icons';
 import config from '../../config/config';
-import apolloClient, { customerMutation, customerQuery, vendorQuery } from '../../utility/apollo';
-import Cookies from 'js-cookie';
+import apolloClient, { customerMutation } from '../../utility/apollo';
 import { toast } from 'react-toastify';
 import { viewPermission } from '../../utility/utility';
+import { useSelector } from 'react-redux';
+import { poQuery } from '../../apollo/po';
 
 
-const ListVendor = () => {
-    viewPermission('vendor');
-
-    const [vendors, setVendors] = useState({ data: [], isLoading: true })
-
-    const [filteredVendors, setFilteredVendors] = useState([])
+const ListPO = () => {
+    viewPermission('purchase-order');
+    const [po, setPO] = useState({ data: [], isLoading: true })
+    const [filteredPO, setFilteredPO] = useState([])
     const [searchText, setSearchText] = useState('')
+    const token = useSelector(state => state.auth.token);
 
     const handleStatusChange = (record, checked) => {
         const variables = {
             data: {
-                customer_group_id: record.customer_group_id,
-                customergroup_status: checked,
-            }
+                id: record.id,
+                status: checked,
+            }              
         }
-        console.log(variables)
         apolloClient.mutate({
-            mutation: customerMutation.UPDATE_CUSTOMER_GROUP,
+            mutation: poQuery.UPDATE_PO_STATUS,
             variables,
             context: {
                 headers: {
                     TENANTID: process.env.REACT_APP_TENANTID,
-                    Authorization: Cookies.get('psp_t')
+                    Authorization: token
                 },
             },
 
         }).then(res => {
-            const data = res?.data?.updateCustomerGroup
+            const data = res?.data?.updatePOStatus
             if (!data.status) return toast.error(data.message);
-            toast.success(`${record.customer_group_name} Group Status Updated successfully`);
+            toast.success(`${record.po_id} Status Updated successfully`);
         }).catch(err => {
             console.log("got error on updateStatus", err)
             return toast.error('Something Went wrong !!')
@@ -54,69 +53,83 @@ const ListVendor = () => {
 
     const columns = [
         {
-            title: 'Company Name',
-            dataIndex: 'company_name',
-            key: 'company_name',
-            ellipsis: true,
-            sorter: (a, b) => a.company_name.toUpperCase() > b.company_name.toUpperCase() ? 1 : -1,
+            title: 'PO ID',
+            dataIndex: 'po_id',
+            key: 'po_id',
+            sorter: (a, b) => a.po_id.toUpperCase() > b.po_id.toUpperCase() ? 1 : -1,
         },
         {
-            title: 'Email',
-            dataIndex: 'email',
-            key: 'email',
-            ellipsis: true,
-            sorter: (a, b) => a.email.toUpperCase() > b.email.toUpperCase() ? 1 : -1,
+            title: 'Total Amount',
+            dataIndex: 'grandTotal_price',
+            key: 'grandTotal_price',
+            sorter: (a, b) => parseFloat(a.grandTotal_price) > parseFloat(b.grandTotal_price),
         },
         {
-            title: 'Phone',
-            dataIndex: 'phone_number',
-            key: 'phone_number',
-            // width: 200,
-            ellipsis: true,
+            title: 'Order Via',
+            dataIndex: 'order_placed_via',
+            key: 'order_placed_via',
             sorter: (a, b) => a.phone_number.toUpperCase() > b.phone_number.toUpperCase() ? 1 : -1,
+            render: (value) => value.toUpperCase()
         },
         {
-            title: 'EIN',
-            dataIndex: 'EIN_no',
-            key: 'EIN_no',
+            title: 'Comments',
+            dataIndex: 'comment',
+            key: 'comment',
+            width: 250,
             ellipsis: true,
-            sorter: (a, b) => a.EIN_no.toUpperCase() > b.EIN_no.toUpperCase() ? 1 : -1,
-        },
-        {
-            title: 'Fax',
-            dataIndex: 'FAX_no',
-            key: 'FAX_no',
-            ellipsis: true,
-            sorter: (a, b) => a.FAX_no.toUpperCase() > b.FAX_no.toUpperCase() ? 1 : -1,
-        },
-        {
-            title: 'Description',
-            dataIndex: 'description',
-            key: 'description',
-            // width: 200,
-            ellipsis: true,
-            sorter: (a, b) => a.description.toUpperCase() > b.description.toUpperCase() ? 1 : -1,
+            sorter: (a, b) => a.comment.toUpperCase() > b.comment.toUpperCase() ? 1 : -1,
         },
         {
             title: 'Status',
             dataIndex: 'status',
             key: 'status',
             align: 'center',
-            width: 100,
-            sorter: (a, b) => (a.status === b.status) ? 0 : a.status ? -1 : 1,
+            width: 200,
+            sorter: (a, b) => a.comment.toUpperCase() > b.comment.toUpperCase() ? 1 : -1,
             filters: [
                 {
-                    text: 'Active',
-                    value: true,
+                    text: 'New',
+                    value: 'new',
                 },
                 {
-                    text: 'Inactive',
-                    value: false,
+                    text: 'Submitted',
+                    value: 'submitted',
+                },
+                {
+                    text: 'Partially Received',
+                    value: 'partially_received',
+                },
+                {
+                    text: 'Received',
+                    value: 'received',
                 }
             ],
             onFilter: (value, record) => record.status === value,
             render: (value, record) => (
-                <Switch defaultChecked={value} title='Status' onChange={checked => handleStatusChange(record, checked)} />
+                <Select
+                    size="middle"
+                    defaultValue={value}
+                    onChange={checked => handleStatusChange(record, checked)}
+                    style={{ width: 180 }}
+                    options={
+                        [{
+                            value: "new",
+                            label: "New",
+                        },
+                        {
+                            value: "submitted",
+                            label: "Submitted",
+                        },
+                        {
+                            value: "partially_received",
+                            label: "Partially Received",
+                        },
+                        {
+                            value: "received",
+                            label: "Received",
+                        }]
+                    }
+                />
             )
         },
 
@@ -127,38 +140,34 @@ const ListVendor = () => {
             align: 'right',
             render: (text, record) => (
                 <>
-                    <Link to={`/admin/vendor/add?id=${record.id}`}>
-                        {/* <Button size="default" type="white" title='Edit'> */}
+                    <Link to={`/admin/po/edit?id=${record.id}`}>
                         <FontAwesome name="edit" style={{ margin: ".5em 1em" }} />
-                        {/* </Button> */}
                     </Link>
                 </>
             ),
-            key: 'last_name',
+            key: 'id',
         },
     ]
 
 
     // LOAD CUSTOMER GROUPS
     useEffect(() => {
-        // return;
         apolloClient.query({
-            query: vendorQuery.GET_ALL_VENDOR,
+            query: poQuery.GET_ALL_PO,
             context: {
                 headers: {
                     TENANTID: process.env.REACT_APP_TENANTID,
-                    Authorization: Cookies.get('psp_t')
+                    Authorization: token
                 }
             }
         }).then(res => {
-            const data = res?.data?.getAllVendor
-
+            const data = res?.data?.getPurchaseOrderList
             if (!data?.status) return
-            setVendors(s => ({ ...s, data: data?.data, error: '' }))
+            setPO(s => ({ ...s, data: data?.data, error: '' }))
         }).catch(err => {
-            setVendors(s => ({ ...s, error: 'Something went Wrong.!! ' }))
+            setPO(s => ({ ...s, error: 'Something went Wrong.!! ' }))
         }).finally(() => {
-            setVendors(s => ({ ...s, isLoading: false }))
+            setPO(s => ({ ...s, isLoading: false }))
         })
 
     }, [])
@@ -169,18 +178,18 @@ const ListVendor = () => {
     const onChangeSearch = e => {
         const value = e.target.value
         setSearchText(value)
-        setFilteredVendors(vendors.data.filter(group => (group?.customer_group_name + group?.customergroup_description + group.customergroup_sortorder).toLowerCase().includes(value.toLowerCase())))
+        setFilteredPO(po.data.filter(po => (po?.id + po?.comment + po.grandTotal_price + po.order_placed_via + po.po_id + po.status).toLowerCase().includes(value.toLowerCase())))
     }
 
 
     return (
         <>
             <PageHeader
-                title="Vendors"
+                title="Purchase Order"
                 buttons={[
                     <div key="1" className="page-header-actions">
-                        <Link to="/admin/vendor/add">
-                            <Button size="small" title="Add Vendors" type="primary">
+                        <Link to="/admin/po/add">
+                            <Button size="small" title="Add Purchase Order" type="primary">
                                 <FeatherIcon icon="plus" />
                             </Button>
                         </Link>
@@ -192,40 +201,32 @@ const ListVendor = () => {
                     <Col sm={24} xs={24}>
                         <Cards headless>
 
-                            {vendors.isLoading ?
+                            {po.isLoading ?
                                 <div className="spin">
                                     <Spin />
                                 </div>
                                 :
                                 <>
-                                    <Input placeholder="Search Vendor..." prefix={<SearchOutlined />} onChange={onChangeSearch} />
+                                    <Input placeholder="Search Purchase Order..." prefix={<SearchOutlined />} onChange={onChangeSearch} />
                                     <br /><br />
-
                                     <span className={"psp_list"} >
                                         <Table
                                             className="table-responsive"
                                             columns={columns}
-                                            rowKey={'g_s'}
+                                            rowKey={'id'}
                                             size="small"
-                                            dataSource={searchText ? filteredVendors : vendors.data}
+                                            dataSource={searchText ? filteredPO : po.data}
                                             rowClassName={(record, index) => (index % 2 == 0 ? "" : "altTableClass")}
                                             // pagination={false}
                                             pagination={{
-                                                defaultPageSize: config.VENDOR_PER_PAGE,
-                                                total: searchText ? filteredVendors.length : vendors.data.length,
+                                                defaultPageSize: config.PO_PER_PAGE,
+                                                total: searchText ? filteredPO.length : po.data.length,
                                                 showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`,
                                             }}
                                         />
                                     </span>
-
-
-
                                 </>
-
                             }
-
-
-
                         </Cards>
                     </Col>
                 </Row>
@@ -234,4 +235,4 @@ const ListVendor = () => {
     );
 };
 
-export default ListVendor;
+export default ListPO;
