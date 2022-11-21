@@ -15,7 +15,7 @@ import ShippingAddress from './ShippingAddress';
 const { TextArea } = Input;
 
 
-const AddVendor = () => {
+const EditPO = () => {
     viewPermission('vendor');
     const { search } = useLocation();
     const params = queryString.parse(search)
@@ -393,4 +393,4 @@ const AddVendor = () => {
     );
 };
 
-export default AddVendor;
+export default EditPO;
