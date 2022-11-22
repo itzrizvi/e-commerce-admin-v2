@@ -157,21 +157,21 @@ export const authQuery = {
     }
   `,
   GET_SINGLE_ROLES_PERMISSION: gql`
-  query getSingleRolesPermission($query:GetSingleRolesPermissionInput){
-    getSingleRolesPermission(query:$query){
-      message
-      status
-      data{
-        id
-        roles_permission_name
-        roles_permission_slug
-        roles_permission_status
-        tenant_id
-        createdAt
-        updatedAt
+    query getSingleRolesPermission($query: GetSingleRolesPermissionInput) {
+      getSingleRolesPermission(query: $query) {
+        message
+        status
+        data {
+          id
+          roles_permission_name
+          roles_permission_slug
+          roles_permission_status
+          tenant_id
+          createdAt
+          updatedAt
+        }
       }
     }
-  }
   `,
 };
 
@@ -641,13 +641,13 @@ export const productMutation = {
     }
   `,
   UPDATE_PRODUCT: gql`
-  mutation updateProduct($data: UpdateProductInput) {
-    updateProduct(data: $data) {
-      message
-      status
-      tenant_id
+    mutation updateProduct($data: UpdateProductInput) {
+      updateProduct(data: $data) {
+        message
+        status
+        tenant_id
+      }
     }
-  }
   `,
 };
 
@@ -698,32 +698,32 @@ export const attributeQuery = {
     }
   `,
   GET_SINGLE_ATTR_GROUP: gql`
-  query getSingleAttrGroup($query: GetSingleAttrGroupInput) {
-    getSingleAttrGroup(query: $query) {
-      message
-      status
-      data {
-        id
-        attr_group_name
-        attr_group_slug
-        attrgroup_status
-        attrgroup_sortorder
-        tenant_id
-        createdAt
-        updatedAt
-        attributes {
+    query getSingleAttrGroup($query: GetSingleAttrGroupInput) {
+      getSingleAttrGroup(query: $query) {
+        message
+        status
+        data {
           id
-          attribute_name
-          attribute_slug
-          attr_group_id
-          attribute_status
+          attr_group_name
+          attr_group_slug
+          attrgroup_status
+          attrgroup_sortorder
           tenant_id
           createdAt
           updatedAt
+          attributes {
+            id
+            attribute_name
+            attribute_slug
+            attr_group_id
+            attribute_status
+            tenant_id
+            createdAt
+            updatedAt
+          }
         }
       }
     }
-  }
   `,
   GET_ALL_ATTRIBUTES: gql`
     query getAllAttributes {
@@ -774,33 +774,33 @@ export const attributeQuery = {
     }
   `,
   GET_SINGLE_ATTRIBUTE: gql`
-  query getSingleAttribute($query: GetSingleAttributeInput) {
-    getSingleAttribute(query: $query) {
-      message
-      status
-      tenant_id
-      data {
-        id
-        attribute_name
-        attribute_slug
-        attr_group_id
-        attribute_status
+    query getSingleAttribute($query: GetSingleAttributeInput) {
+      getSingleAttribute(query: $query) {
+        message
+        status
         tenant_id
-        createdAt
-        updatedAt
-        attribute_group {
+        data {
           id
-          attr_group_name
-          attr_group_slug
-          attrgroup_status
-          attrgroup_sortorder
+          attribute_name
+          attribute_slug
+          attr_group_id
+          attribute_status
           tenant_id
           createdAt
           updatedAt
+          attribute_group {
+            id
+            attr_group_name
+            attr_group_slug
+            attrgroup_status
+            attrgroup_sortorder
+            tenant_id
+            createdAt
+            updatedAt
+          }
         }
       }
     }
-  }
   `,
 };
 
@@ -881,7 +881,7 @@ export const customerQuery = {
     }
   `,
   GET_ALL_CUSTOMER: gql`
-    query{
+    query {
       getAllCustomer {
         status
         message
@@ -914,38 +914,37 @@ export const customerQuery = {
     }
   `,
   GET_ALL_CUSTOMER_FOR_ORDER: gql`
-    query{
-        getAllCustomer {
-          status
-          message
-          data {
+    query {
+      getAllCustomer {
+        status
+        message
+        data {
+          id
+          first_name
+          last_name
+          email
+          addresses {
             id
-            first_name
-            last_name
+            address1
+            address2
+            phone
+            fax
             email
-            addresses {
-              id
-              address1
-              address2
-              phone
-              fax
-              email
-              city
-              state
-              zip_code
-              country
-              type
-              status
-              updatedAt
-              createdAt
-            }
+            city
+            state
+            zip_code
+            country
+            type
+            status
+            updatedAt
+            createdAt
           }
         }
       }
-      
-    `,
+    }
+  `,
   GET_SINGLE_CUSTOMER: gql`
-    query getSingleCustomer($customer_id: Int!){
+    query getSingleCustomer($customer_id: Int!) {
       getSingleCustomer(query: { customer_id: $customer_id }) {
         status
         message
@@ -976,8 +975,7 @@ export const customerQuery = {
         }
       }
     }
-    
-    `,
+  `,
 };
 
 export const customerMutation = {
@@ -1113,6 +1111,22 @@ export const vendorQuery = {
           TAX_ID
           FAX_no
           status
+          addresses {
+            id
+            address1
+            address2
+            phone
+            fax
+            email
+            city
+            state
+            zip_code
+            country
+            type
+            status
+            updatedAt
+            createdAt
+          }
         }
       }
     }

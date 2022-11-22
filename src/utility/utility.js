@@ -1,16 +1,5 @@
 import Cookies from 'js-cookie';
 import { useHistory } from 'react-router-dom';
-/**
- * Return ellipsis of a given string
- * @param {string} text
- * @param {number} size
- */
-const ellipsis = (text, size) => {
-  return `${text
-    .split(' ')
-    .slice(0, size)
-    .join(' ')}...`;
-};
 
 const menuPermission = (name, type = 'read') => {
   const permissions_json = Cookies.get('permissions') ?? "[]";
@@ -29,6 +18,8 @@ const viewPermission = (name) => {
   const history = useHistory();
   if (!menuPermission(name)) history.push('/admin/403');
 }
+
+const ellipsis = (input, size = 30) => input.length > size ? `${input.substring(0, size)}...` : input;
 
 
 export { ellipsis, menuPermission, viewPermission };
