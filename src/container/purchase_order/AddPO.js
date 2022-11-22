@@ -1,22 +1,21 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Col, Form, Input, Switch, Spin, Tabs, Select, Radio, Card } from 'antd';
+import { Row, Col, Form, Input, Spin, Tabs, Select, Radio } from 'antd';
 import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
 import { Cards } from '../../components/cards/frame/cards-frame';
 import { Button } from '../../components/buttons/buttons';
 import { Link, useHistory, useLocation } from 'react-router-dom';
 import queryString from 'query-string';
-import apolloClient, { vendorMutation, vendorQuery } from '../../utility/apollo';
+import apolloClient, { productQuery, vendorQuery } from '../../utility/apollo';
+import { poQuery } from '../../apollo/po';
 import { toast } from 'react-toastify';
 import { ellipsis, viewPermission } from '../../utility/utility';
-import BillingAdderess from './BillingAdderess';
+import Products from './Products';
 import { useSelector } from 'react-redux';
 const { TextArea } = Input;
 
 const AddPO = () => {
   viewPermission('purchase-order');
-  const { search } = useLocation();
-  const params = queryString.parse(search);
   const history = useHistory();
   const token = useSelector(state => state.auth.token);
   const [form] = Form.useForm();
@@ -31,10 +30,10 @@ const AddPO = () => {
     id: '',
     price: '',
     quantity: '',
-    country: '',
-    recieved_quantity: '',
+    recieved_quantity: 0,
   };
   const [products, setProducts] = useState([initialData]);
+  const [productOption, setProductOption] = useState([]);
   // ============+ for product END +====================
 
   // LOAD Vendor List
@@ -61,23 +60,52 @@ const AddPO = () => {
         setVendors(s => ({ ...s, isLoading: false }));
       });
   }, []);
+/* --------------------------- product list fetch start --------------------------- */
+  useEffect(() => {
+    apolloClient.query({
+        query: productQuery.GET_PRODUCT_LIST,
+        context: {
+            headers: {
+                TENANTID: process.env.REACT_APP_TENANTID,
+                Authorization: token
+            }
+        }
+    }).then(res => {
+        const data = res.data.getProductList
+        if (!data.status) return toast.error(data.message)
+        const options = data?.data?.map(item => ({
+            label: item.prod_name,
+            value: item.id,
+        }))
+        setProductOption(options)
+    }).catch(err => {
+
+    })
+
+}, [])
+
+/* -------------------------- End of product fetch -------------------------- */
+
 
   const handleSubmit = values => {
-    const variables = { ...values, status };
-    // validate billingAddresses.
-    const notValidate = billingAddresses.find(item => {
-      const { id, address1, country, city, state, zip_code, email, fax, phone, address2 } = item;
-      const checkFalse = !(id && address1 && country && city && state && zip_code && email && fax && phone && address2);
+    // validate Products.
+    const notValidate = products.find(item => {
+      const { id, price, quantity, recieved_quantity } = item;
+      const checkFalse = !(id && price && quantity && recieved_quantity !== '');
       return checkFalse;
     });
-    if (notValidate?.id) return toast.warning('Enter Billing Address Correctly!');
+    if (notValidate?.id) return toast.warning('Please Fill Products All of Data!');
+    const newProduct = products.map((item) => {
+      const {key, ...newItem} = item
+      return newItem
+    })
+    const variables = { ...values, products: newProduct, tax_amount: parseFloat(values.tax_amount), };
 
     // ADD NEW Vendor
     setIsLoading(true);
-    if (!params.id) {
       apolloClient
         .mutate({
-          mutation: vendorMutation.CREATE_VENDOR,
+          mutation: poQuery.CREATE_PURCHASE_ORDER,
           variables: { data: variables },
           context: {
             headers: {
@@ -85,93 +113,32 @@ const AddPO = () => {
               Authorization: token,
             },
           },
+          refetchQueries: [
+            {
+              query: poQuery.GET_ALL_PO,
+              context: {
+                headers: {
+                  TENANTID: process.env.REACT_APP_TENANTID,
+                  Authorization: token,
+                },
+              },
+            },
+            'getPurchaseOrderList',
+          ],
         })
         .then(res => {
-          const data = res?.data?.createVendor;
+          const data = res?.data?.createPurchaseOrder;
           if (!data.status) return toast.error(data.message);
-
-          // add billing address
-          const parent_id = data.id;
-          billingAddresses.forEach((val, index) => {
-            const { id, ...rest } = val;
-            apolloClient
-              .mutate({
-                mutation: vendorMutation.ADD_VENDOR_BILLING_ADDRESS,
-                variables: { data: { ...rest, parent_id } },
-                context: {
-                  headers: {
-                    TENANTID: process.env.REACT_APP_TENANTID,
-                    Authorization: token,
-                  },
-                },
-              })
-              .then(res => {
-                const data = res?.data?.addVendorBillingAddress;
-              })
-              .catch(err => {
-                console.log('error on add billing:\n', res);
-                isLoading(false);
-                return toast.error('Something went wrong');
-              });
-          });
+          history.push('/admin/po/list');
+          toast.success(data.message);
+          setTimeout(() => {
+            window.location.reload();
+          }, 1000);
         })
         .catch(err => {
           console.log('got error on add vendor', err);
           return toast.error('Something Went wrong !!');
         });
-    }
-    // UPDATE vendor
-    else {
-      apolloClient
-        .mutate({
-          mutation: vendorMutation.UPDATE_VENDOR,
-          variables: { data: { ...variables, id: parseInt(params.id) } },
-          context: {
-            headers: {
-              TENANTID: process.env.REACT_APP_TENANTID,
-              Authorization: token,
-            },
-          },
-        })
-        .then(res => {
-          const data = res?.data?.updateVendor;
-          if (!data.status) return toast.error(data.message);
-
-          // add shipping address
-          const addresses = [...billingAddresses];
-          addresses.forEach((val, index) => {
-            // const { __typename, updatedAt, createdAt, type, ...rest } = val
-            apolloClient
-              .mutate({
-                mutation: vendorMutation.UPDATE_VENDOR_ADDRESS,
-                variables: { data: val },
-                context: {
-                  headers: {
-                    TENANTID: process.env.REACT_APP_TENANTID,
-                    Authorization: Cookies.get('psp_t'),
-                  },
-                },
-              })
-              .then(res => {
-                const data = res?.data?.addVendorShippingAddress;
-                if (addresses.length === index + 1) {
-                  setTimeout(() => {
-                    history.push('/admin/vendor/list');
-                    window.location.reload();
-                  }, 2000);
-                }
-              })
-              .catch(err => {
-                isLoading(false);
-                return toast.error('Something went wrong');
-              });
-          });
-        })
-        .catch(err => {
-          console.log('got error on update vendor', err);
-          return toast.error('Something Went wrong !!');
-        });
-    }
   };
 
   const handleVendorChange = e => {
@@ -230,7 +197,7 @@ const AddPO = () => {
                   labelCol={{ span: 4 }}
                 >
                   <Tabs>
-                    <Tabs.TabPane tab="General" key="general">
+                    <Tabs.TabPane tab="Vendor Info" key="vendor">
                       <Form.Item
                         rules={[{ required: true, message: 'Please Select Vendor' }]}
                         name="vendor_id"
@@ -247,7 +214,7 @@ const AddPO = () => {
                           {vendors.data.map(val => {
                             return (
                               <Select.Option key={val.id} value={val.id} label={val.company_name}>
-                                <div className="demo-option-label-item">{val.company_name}</div>
+                                <div className="demo-option-label-item">{val.company_name} - {val.contact_person} </div>
                               </Select.Option>
                             );
                           })}
@@ -256,23 +223,25 @@ const AddPO = () => {
                       {billingAddresses.length > 0 && (
                         <Form.Item
                           rules={[{ required: true, message: 'Please Select Billing Address' }]}
-                          name="billing_address"
+                          name="vendor_billing_id"
                           label="Billing Address"
                         >
-                          <Radio.Group>
-                            {billingAddresses.map(item => (
-                              <Radio value={item.id}>
-                                <Card
-                                  style={{ width: 350, border: '1px solid #f0f0f0',fontSize:12, marginBottom: 10 }}
-                                  size="small"
-                                >
-                                  <p>
-                                    <b>Address 1: </b>
-                                    {ellipsis(item.address1, 40)}
-                                  </p>
-                                </Card>
-                              </Radio>
-                            ))}
+                          <Radio.Group style={{ width: '100%', padding: 10 }}>
+                            <Row gutter={25}>
+                              {billingAddresses.map(item => (
+                                <Col xs={24} md={12} lg={12}>
+                                  <Radio style={{ width: '100%', border: '1px solid #f0f0f0', fontSize: 12, marginBottom: 10, padding: 10, borderRadius: 5 }} value={item.id}>
+                                    <p><b>Email: </b>{item.email}</p>
+                                    <p><b>Phone: </b>{item.phone}</p>
+                                    <p><b>Address 1: </b>{item.address1 && ellipsis(item.address1, 35)}</p>
+                                    <p><b>Address 2: </b>{item.address2 && ellipsis(item.address2, 35)}</p>
+                                    <p><b>City: </b>{item.city}</p>
+                                    <p><b>State: </b>{item.state}</p>
+                                    <p><b>Zip Code: </b>{item.zip_code}</p>
+                                  </Radio>
+                                </Col>
+                              ))}
+                            </Row>
                           </Radio.Group>
                         </Form.Item>
                       )}
@@ -280,35 +249,65 @@ const AddPO = () => {
                       {shippingAddresses.length > 0 && (
                         <Form.Item
                           rules={[{ required: true, message: 'Please Select Shipping Address' }]}
-                          name="shipping_address"
+                          name="vendor_shipping_id"
                           label="Shipping Address"
                         >
-                          <Radio.Group>
-                            {shippingAddresses.map(item => (
-                              <Radio value={item.id}>
-                                <Card
-                                  style={{ width: 350, border: '1px solid #f0f0f0', fontSize:12, marginBottom: 10 }}
-                                  size="small"
-                                >
-                                  <p>
-                                    <b>Address 1: </b>
-                                    {ellipsis(item.address1, 40)}
-                                  </p>
-                                </Card>
-                              </Radio>
-                            ))}
+                          <Radio.Group style={{ width: '100%', padding: 10 }}>
+                            <Row gutter={25}>
+                              {shippingAddresses.map(item => (
+                                <Col xs={24} md={12} lg={12}>
+                                  <Radio style={{ width: '100%', border: '1px solid #f0f0f0', fontSize: 12, marginBottom: 10, padding: 10, borderRadius: 5 }} value={item.id}>
+                                    <p><b>Email: </b>{item.email}</p>
+                                    <p><b>Phone: </b>{item.phone}</p>
+                                    <p><b>Address 1: </b>{item.address1 && ellipsis(item.address1, 35)}</p>
+                                    <p><b>Address 2: </b>{item.address2 && ellipsis(item.address2, 35)}</p>
+                                    <p><b>City: </b>{item.city}</p>
+                                    <p><b>State: </b>{item.state}</p>
+                                    <p><b>Zip Code: </b>{item.zip_code}</p>
+                                  </Radio>
+                                </Col>
+                              ))}
+                            </Row>
                           </Radio.Group>
                         </Form.Item>
                       )}
+                    </Tabs.TabPane>
 
+                    <Tabs.TabPane tab="Other Info" key="other">
                       <Form.Item
                         rules={[{ required: true, message: 'Please Select Shipping Method' }]}
-                        name="shipping_method"
+                        name="shipping_method_id"
                         label="Shipping Method"
                       >
                         <Select
                           size="middle"
                           placeholder="Select Shipping Method"
+                          initialvalues=""
+                          style={{ width: '100%' }}
+                          optionLabelProp="label"
+                        >
+                          <Select.Option key={1} value={1} label="Shipping Method 1">
+                            <div className="demo-option-label-item">Shipping Method 1</div>
+                          </Select.Option>
+
+                          <Select.Option key={2} value={2} label="Shipping Method 2">
+                            <div className="demo-option-label-item">Shipping Method 2</div>
+                          </Select.Option>
+
+                          <Select.Option key={3} value={3} label="Shipping Method 3">
+                            <div className="demo-option-label-item">Shipping Method 3</div>
+                          </Select.Option>
+                        </Select>
+                      </Form.Item>
+
+                      <Form.Item
+                        rules={[{ required: true, message: 'Please Select Payment Method' }]}
+                        name="payment_method_id"
+                        label="Payment Method"
+                      >
+                        <Select
+                          size="middle"
+                          placeholder="Select Payment Method"
                           initialvalues=""
                           style={{ width: '100%' }}
                           optionLabelProp="label"
@@ -386,6 +385,9 @@ const AddPO = () => {
                       <Form.Item name="comment" label="Comment">
                         <TextArea rows={4} placeholder="Enter Comment" />
                       </Form.Item>
+                    </Tabs.TabPane>
+                    <Tabs.TabPane tab="Products" key="products">
+                    <Products {...{ initialData, products, setProducts, productOption }} />
                     </Tabs.TabPane>
                   </Tabs>
 
