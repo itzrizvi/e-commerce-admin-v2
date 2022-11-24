@@ -78,7 +78,7 @@ const AddUser = () => {
                             }
                         }
                     },
-                    'getAllStaff'
+                    ['getAllStaff']
                 ],
                 context: {
                     headers: {
@@ -125,7 +125,7 @@ const AddUser = () => {
                             }
                         }
                     },
-                    'getAllStaff'
+                    ['getAllStaff']
                 ],
                 context: {
                     headers: {

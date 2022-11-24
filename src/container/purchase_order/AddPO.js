@@ -123,7 +123,7 @@ const AddPO = () => {
                 },
               },
             },
-            'getPurchaseOrderList',
+            ['getPurchaseOrderList'],
           ],
         })
         .then(res => {
@@ -131,9 +131,6 @@ const AddPO = () => {
           if (!data.status) return toast.error(data.message);
           history.push('/admin/po/list');
           toast.success(data.message);
-          setTimeout(() => {
-            window.location.reload();
-          }, 1000);
         })
         .catch(err => {
           console.log('got error on add vendor', err);

@@ -82,7 +82,7 @@ const AddBrand = () => {
                         }
                     }
                 },
-                'getAllBrands'
+                ['getAllBrands']
             ],
             context: {
                 headers: {

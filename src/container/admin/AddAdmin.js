@@ -121,7 +121,7 @@ const AddAdmin = () => {
                 },
               },
             },
-            'getAllStaff',
+            ['getAllStaff'],
           ],
           context: {
             headers: {
@@ -172,7 +172,7 @@ const AddAdmin = () => {
                 },
               },
             },
-            'getAllStaff',
+            ['getAllStaff'],
           ],
           context: {
             headers: {

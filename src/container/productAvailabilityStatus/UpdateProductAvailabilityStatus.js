@@ -70,7 +70,7 @@ const UpdateAvailabilityStatus = () => {
                 },
               },
             },
-            'getAllProductAvailabilityStatus',
+            ['getAllProductAvailabilityStatus'],
           ],
           context: {
             headers: {

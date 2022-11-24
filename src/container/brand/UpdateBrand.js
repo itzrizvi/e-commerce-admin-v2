@@ -57,7 +57,7 @@ const UpdateBrand = () => {
                         }
                     }
                 },
-                'getAllBrands'
+                ['getAllBrands']
             ],
             context: {
                 headers: {

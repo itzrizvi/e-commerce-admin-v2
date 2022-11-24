@@ -35,7 +35,7 @@ const AddCondition = () => {
               },
             },
           },
-          'getAllProductCondition',
+          ['getAllProductCondition'],
         ],
         context: {
           headers: {

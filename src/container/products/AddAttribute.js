@@ -102,7 +102,7 @@ const AddAttribute = () => {
                                 }
                             }
                         },
-                        'getAllAttributes'
+                        ['getAllAttributes']
                     ],
                 },
 
@@ -141,7 +141,7 @@ const AddAttribute = () => {
                                 }
                             }
                         },
-                        'getAllAttributes'
+                        ['getAllAttributes']
                     ],
                 },
 

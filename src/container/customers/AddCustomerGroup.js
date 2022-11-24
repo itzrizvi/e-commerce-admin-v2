@@ -72,7 +72,7 @@ const AddCustomerGroup = () => {
                             }
                         }
                     },
-                    'getAllCustomerGroups'
+                    ['getAllCustomerGroups']
                 ],
                 context: {
                     headers: {
@@ -119,7 +119,7 @@ const AddCustomerGroup = () => {
                             }
                         }
                     },
-                    'getAllCustomerGroups'
+                    ['getAllCustomerGroups']
                 ],
                 context: {
                     headers: {

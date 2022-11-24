@@ -52,7 +52,7 @@ const roleDataAdd = (data) => {
             }
           }
         },
-        'getAllRoles'
+        ['getAllRoles']
       ],
       context: {
         headers: {

@@ -213,7 +213,7 @@ const EditPO = () => {
               },
             },
           },
-          'getPurchaseOrderList',
+          ['getPurchaseOrderList'],
         ],
       })
       .then(res => {

@@ -68,7 +68,7 @@ const AddAttributeGroup = () => {
                             }
                         }
                     },
-                    'getAllAttrGroups'
+                    ['getAllAttrGroups']
                 ],
                 context: {
                     headers: {
@@ -108,7 +108,7 @@ const AddAttributeGroup = () => {
                             }
                         }
                     },
-                    'getAllAttrGroups'
+                    ['getAllAttrGroups']
                 ],
                 context: {
                     headers: {

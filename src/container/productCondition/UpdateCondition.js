@@ -70,7 +70,7 @@ const UpdateCondition = () => {
                 },
               },
             },
-            'getAllProductCondition',
+            ['getAllProductCondition'],
           ],
           context: {
             headers: {

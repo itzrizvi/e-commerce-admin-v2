@@ -76,7 +76,7 @@ const AddPermission = () => {
                             }
                         }
                     },
-                    'getAllRolesPermission'
+                    ['getAllRolesPermission']
                 ],
 
 
@@ -120,7 +120,7 @@ const AddPermission = () => {
                             }
                         }
                     },
-                    'getAllRolesPermission'
+                    ['getAllRolesPermission']
                 ],
             }).then(res => {
                 const data = res?.data?.updateRolesPermission

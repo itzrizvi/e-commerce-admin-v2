@@ -186,7 +186,7 @@ const AddCategory = () => {
                             }
                         }
                     },
-                    'getAllCategories'
+                    ['getAllCategories']
                 ],
                 context: {
                     headers: {
@@ -239,7 +239,7 @@ const AddCategory = () => {
                             }
                         }
                     },
-                    'getAllBrands'
+                    ['getAllBrands']
                 ],
                 context: {
                     headers: {

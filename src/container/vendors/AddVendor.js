@@ -185,10 +185,7 @@ const AddVendor = () => {
                     }).then(res => {
                         const data = res?.data?.addVendorShippingAddress
                         if (shippingAddresses.length === index + 1) {
-                            setTimeout(() => {
-                                history.push("/admin/vendor/list");
-                                window.location.reload();
-                            }, 2000);
+                            history.push("/admin/vendor/list");
                         }
                     }).catch(err => {
                         console.log("error on add billing:\n", res)
@@ -232,10 +229,7 @@ const AddVendor = () => {
                     }).then(res => {
                         const data = res?.data?.addVendorShippingAddress
                         if (addresses.length === index + 1) {
-                            setTimeout(() => {
-                                history.push("/admin/vendor/list");
-                                window.location.reload();
-                            }, 2000);
+                            history.push("/admin/vendor/list");
                         }
                     }).catch(err => {
                         isLoading(false)
