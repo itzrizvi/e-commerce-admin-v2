@@ -64,7 +64,7 @@ const AddBanner = () => {
             headers: {
               TENANTID: process.env.REACT_APP_TENANTID,
               Authorization: token,
-              'Apollo-Require-Preflight': 'true'
+              'Apollo-Require-Preflight': 'true',
             },
           },
           refetchQueries: [
@@ -112,7 +112,9 @@ const AddBanner = () => {
               })
               .then(_ => {
                 if (bannerData.length === index + 1) {
-                  history.push('/admin/banner/list');
+                  setTimeout(() => {
+                    history.push('/admin/banner/list');
+                  }, 1000);
                   setIsLoading(false);
                   toast.success('Banner Added Successfully!');
                 }
@@ -210,11 +212,7 @@ const AddBanner = () => {
       key: 'sale_price',
       width: 100,
       render: (text, record) => (
-        <Input
-          type="number"
-          placeholder="Sale Price"
-          onChange={e => (record.sale_price = e.target.value)}
-        />
+        <Input type="number" placeholder="Sale Price" onChange={e => (record.sale_price = e.target.value)} />
       ),
     },
     {

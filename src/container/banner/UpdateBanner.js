@@ -148,7 +148,9 @@ const AddBanner = () => {
                   if (bannerData.length === index + 1) {
                     setIsLoading(false);
                     toast.success('Banner Updated Successfully!');
-                    history.push('/admin/banner/list');
+                    setTimeout(() => {
+                      history.push('/admin/banner/list');
+                    }, 1000);
                   }
                 })
                 .catch(err => {
@@ -200,7 +202,9 @@ const AddBanner = () => {
                   if (bannerData.length === index + 1) {
                     setIsLoading(false);
                     toast.success('Banner Updated Successfully!');
-                    history.push('/admin/banner/list');
+                    setTimeout(() => {
+                      history.push('/admin/banner/list');
+                    }, 1000);
                   }
                 })
                 .catch(err => {

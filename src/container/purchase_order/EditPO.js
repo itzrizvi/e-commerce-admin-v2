@@ -171,7 +171,8 @@ const EditPO = () => {
   /* ------------------------- Get Single PO Order End ------------------------ */
 
   const handleSubmit = values => {
-    if(values.vendor_billing_id === undefined || values.vendor_shipping_id === undefined ) return toast.error('Please Select Billing and Shipping Address!');     // validate Products.
+    if (values.vendor_billing_id === undefined || values.vendor_shipping_id === undefined)
+      return toast.error('Please Select Billing and Shipping Address!'); // validate Products.
     const notValidate = products.find(item => {
       const { id, price, quantity, recieved_quantity } = item;
       const checkFalse = !(id && price && quantity && recieved_quantity !== '');
@@ -219,11 +220,10 @@ const EditPO = () => {
       .then(res => {
         const data = res?.data?.updatePurchaseOrder;
         if (!data.status) return toast.error(data.message);
-        history.push('/admin/po/list');
-        toast.success(data.message);
         setTimeout(() => {
-          window.location.reload();
+          history.push('/admin/po/list');
         }, 1000);
+        toast.success(data.message);
       })
       .catch(err => {
         console.log('got error on add vendor', err);

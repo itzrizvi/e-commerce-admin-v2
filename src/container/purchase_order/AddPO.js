@@ -60,32 +60,31 @@ const AddPO = () => {
         setVendors(s => ({ ...s, isLoading: false }));
       });
   }, []);
-/* --------------------------- product list fetch start --------------------------- */
+  /* --------------------------- product list fetch start --------------------------- */
   useEffect(() => {
-    apolloClient.query({
+    apolloClient
+      .query({
         query: productQuery.GET_PRODUCT_LIST,
         context: {
-            headers: {
-                TENANTID: process.env.REACT_APP_TENANTID,
-                Authorization: token
-            }
-        }
-    }).then(res => {
-        const data = res.data.getProductList
-        if (!data.status) return toast.error(data.message)
+          headers: {
+            TENANTID: process.env.REACT_APP_TENANTID,
+            Authorization: token,
+          },
+        },
+      })
+      .then(res => {
+        const data = res.data.getProductList;
+        if (!data.status) return toast.error(data.message);
         const options = data?.data?.map(item => ({
-            label: item.prod_name,
-            value: item.id,
-        }))
-        setProductOption(options)
-    }).catch(err => {
+          label: item.prod_name,
+          value: item.id,
+        }));
+        setProductOption(options);
+      })
+      .catch(err => {});
+  }, []);
 
-    })
-
-}, [])
-
-/* -------------------------- End of product fetch -------------------------- */
-
+  /* -------------------------- End of product fetch -------------------------- */
 
   const handleSubmit = values => {
     // validate Products.
@@ -95,47 +94,49 @@ const AddPO = () => {
       return checkFalse;
     });
     if (notValidate?.id) return toast.warning('Please Fill Products All of Data!');
-    const newProduct = products.map((item) => {
-      const {key, ...newItem} = item
-      return newItem
-    })
-    const variables = { ...values, products: newProduct, tax_amount: parseFloat(values.tax_amount), };
+    const newProduct = products.map(item => {
+      const { key, ...newItem } = item;
+      return newItem;
+    });
+    const variables = { ...values, products: newProduct, tax_amount: parseFloat(values.tax_amount) };
 
     // ADD NEW Vendor
     setIsLoading(true);
-      apolloClient
-        .mutate({
-          mutation: poQuery.CREATE_PURCHASE_ORDER,
-          variables: { data: variables },
-          context: {
-            headers: {
-              TENANTID: process.env.REACT_APP_TENANTID,
-              Authorization: token,
-            },
+    apolloClient
+      .mutate({
+        mutation: poQuery.CREATE_PURCHASE_ORDER,
+        variables: { data: variables },
+        context: {
+          headers: {
+            TENANTID: process.env.REACT_APP_TENANTID,
+            Authorization: token,
           },
-          refetchQueries: [
-            {
-              query: poQuery.GET_ALL_PO,
-              context: {
-                headers: {
-                  TENANTID: process.env.REACT_APP_TENANTID,
-                  Authorization: token,
-                },
+        },
+        refetchQueries: [
+          {
+            query: poQuery.GET_ALL_PO,
+            context: {
+              headers: {
+                TENANTID: process.env.REACT_APP_TENANTID,
+                Authorization: token,
               },
             },
-            ['getPurchaseOrderList'],
-          ],
-        })
-        .then(res => {
-          const data = res?.data?.createPurchaseOrder;
-          if (!data.status) return toast.error(data.message);
+          },
+          ['getPurchaseOrderList'],
+        ],
+      })
+      .then(res => {
+        const data = res?.data?.createPurchaseOrder;
+        if (!data.status) return toast.error(data.message);
+        setTimeout(() => {
           history.push('/admin/po/list');
-          toast.success(data.message);
-        })
-        .catch(err => {
-          console.log('got error on add vendor', err);
-          return toast.error('Something Went wrong !!');
-        });
+        }, 1000);
+        toast.success(data.message);
+      })
+      .catch(err => {
+        console.log('got error on add vendor', err);
+        return toast.error('Something Went wrong !!');
+      });
   };
 
   const handleVendorChange = e => {
@@ -211,7 +212,9 @@ const AddPO = () => {
                           {vendors.data.map(val => {
                             return (
                               <Select.Option key={val.id} value={val.id} label={val.company_name}>
-                                <div className="demo-option-label-item">{val.company_name} - {val.contact_person} </div>
+                                <div className="demo-option-label-item">
+                                  {val.company_name} - {val.contact_person}{' '}
+                                </div>
                               </Select.Option>
                             );
                           })}
@@ -227,14 +230,45 @@ const AddPO = () => {
                             <Row gutter={25}>
                               {billingAddresses.map(item => (
                                 <Col xs={24} md={12} lg={12}>
-                                  <Radio style={{ width: '100%', border: '1px solid #f0f0f0', fontSize: 12, marginBottom: 10, padding: 10, borderRadius: 5 }} value={item.id}>
-                                    <p><b>Email: </b>{item.email}</p>
-                                    <p><b>Phone: </b>{item.phone}</p>
-                                    <p><b>Address 1: </b>{item.address1 && ellipsis(item.address1, 35)}</p>
-                                    <p><b>Address 2: </b>{item.address2 && ellipsis(item.address2, 35)}</p>
-                                    <p><b>City: </b>{item.city}</p>
-                                    <p><b>State: </b>{item.state}</p>
-                                    <p><b>Zip Code: </b>{item.zip_code}</p>
+                                  <Radio
+                                    style={{
+                                      width: '100%',
+                                      border: '1px solid #f0f0f0',
+                                      fontSize: 12,
+                                      marginBottom: 10,
+                                      padding: 10,
+                                      borderRadius: 5,
+                                    }}
+                                    value={item.id}
+                                  >
+                                    <p>
+                                      <b>Email: </b>
+                                      {item.email}
+                                    </p>
+                                    <p>
+                                      <b>Phone: </b>
+                                      {item.phone}
+                                    </p>
+                                    <p>
+                                      <b>Address 1: </b>
+                                      {item.address1 && ellipsis(item.address1, 35)}
+                                    </p>
+                                    <p>
+                                      <b>Address 2: </b>
+                                      {item.address2 && ellipsis(item.address2, 35)}
+                                    </p>
+                                    <p>
+                                      <b>City: </b>
+                                      {item.city}
+                                    </p>
+                                    <p>
+                                      <b>State: </b>
+                                      {item.state}
+                                    </p>
+                                    <p>
+                                      <b>Zip Code: </b>
+                                      {item.zip_code}
+                                    </p>
                                   </Radio>
                                 </Col>
                               ))}
@@ -253,14 +287,45 @@ const AddPO = () => {
                             <Row gutter={25}>
                               {shippingAddresses.map(item => (
                                 <Col xs={24} md={12} lg={12}>
-                                  <Radio style={{ width: '100%', border: '1px solid #f0f0f0', fontSize: 12, marginBottom: 10, padding: 10, borderRadius: 5 }} value={item.id}>
-                                    <p><b>Email: </b>{item.email}</p>
-                                    <p><b>Phone: </b>{item.phone}</p>
-                                    <p><b>Address 1: </b>{item.address1 && ellipsis(item.address1, 35)}</p>
-                                    <p><b>Address 2: </b>{item.address2 && ellipsis(item.address2, 35)}</p>
-                                    <p><b>City: </b>{item.city}</p>
-                                    <p><b>State: </b>{item.state}</p>
-                                    <p><b>Zip Code: </b>{item.zip_code}</p>
+                                  <Radio
+                                    style={{
+                                      width: '100%',
+                                      border: '1px solid #f0f0f0',
+                                      fontSize: 12,
+                                      marginBottom: 10,
+                                      padding: 10,
+                                      borderRadius: 5,
+                                    }}
+                                    value={item.id}
+                                  >
+                                    <p>
+                                      <b>Email: </b>
+                                      {item.email}
+                                    </p>
+                                    <p>
+                                      <b>Phone: </b>
+                                      {item.phone}
+                                    </p>
+                                    <p>
+                                      <b>Address 1: </b>
+                                      {item.address1 && ellipsis(item.address1, 35)}
+                                    </p>
+                                    <p>
+                                      <b>Address 2: </b>
+                                      {item.address2 && ellipsis(item.address2, 35)}
+                                    </p>
+                                    <p>
+                                      <b>City: </b>
+                                      {item.city}
+                                    </p>
+                                    <p>
+                                      <b>State: </b>
+                                      {item.state}
+                                    </p>
+                                    <p>
+                                      <b>Zip Code: </b>
+                                      {item.zip_code}
+                                    </p>
                                   </Radio>
                                 </Col>
                               ))}
@@ -384,7 +449,7 @@ const AddPO = () => {
                       </Form.Item>
                     </Tabs.TabPane>
                     <Tabs.TabPane tab="Products" key="products">
-                    <Products {...{ initialData, products, setProducts, productOption }} />
+                      <Products {...{ initialData, products, setProducts, productOption }} />
                     </Tabs.TabPane>
                   </Tabs>
 

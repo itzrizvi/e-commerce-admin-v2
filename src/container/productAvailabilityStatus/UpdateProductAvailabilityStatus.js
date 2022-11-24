@@ -60,31 +60,32 @@ const UpdateAvailabilityStatus = () => {
       .mutate({
         mutation: productAvailabilityStatusQuery.AVAILABILITY_STATUS_UPDATE,
         variables: { data: { name: values.name, id: parseInt(params?.id) } },
-          refetchQueries: [
-            {
-              query: productAvailabilityStatusQuery.GET_ALL_AVAILABILITY_STATUS,
-              context: {
-                headers: {
-                  TENANTID: process.env.REACT_APP_TENANTID,
-                  Authorization: token,
-                },
+        refetchQueries: [
+          {
+            query: productAvailabilityStatusQuery.GET_ALL_AVAILABILITY_STATUS,
+            context: {
+              headers: {
+                TENANTID: process.env.REACT_APP_TENANTID,
+                Authorization: token,
               },
             },
-            ['getAllProductAvailabilityStatus'],
-          ],
-          context: {
-            headers: {
-              TENANTID: process.env.REACT_APP_TENANTID,
-              Authorization: token,
-            },
           },
+          ['getAllProductAvailabilityStatus'],
+        ],
+        context: {
+          headers: {
+            TENANTID: process.env.REACT_APP_TENANTID,
+            Authorization: token,
+          },
+        },
       })
       .then(res => {
         const data = res?.data?.updateProductAvailabilityStatus;
         if (!data?.status) return toast.error('Something Went wrong !!');
-        history.push('/admin/product-availability-status/list');
+        setTimeout(() => {
+          history.push('/admin/product-availability-status/list');
+        }, 1000);
         toast.success(data?.message);
-        window.location.reload();
       })
       .catch(err => {
         toast.error('Something Went wrong !!');
@@ -94,7 +95,11 @@ const UpdateAvailabilityStatus = () => {
 
   return (
     <>
-      <PageHeader title={ `Manage Product Availability Status | Edit Product Availability Status ${availabilityStatus?.data?.name ? `(${availabilityStatus?.data?.name})` : ""}` } />
+      <PageHeader
+        title={`Manage Product Availability Status | Edit Product Availability Status ${
+          availabilityStatus?.data?.name ? `(${availabilityStatus?.data?.name})` : ''
+        }`}
+      />
 
       <Main>
         <Row gutter={25}>
@@ -114,7 +119,9 @@ const UpdateAvailabilityStatus = () => {
                   labelCol={{ span: 4 }}
                 >
                   <Form.Item
-                    rules={[{ required: true, max: maxLength, message: 'Please Enter Product Availability Status Name' }]}
+                    rules={[
+                      { required: true, max: maxLength, message: 'Please Enter Product Availability Status Name' },
+                    ]}
                     name="name"
                     label="Name"
                   >

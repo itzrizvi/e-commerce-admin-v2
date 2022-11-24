@@ -22,7 +22,8 @@ const AddProductAvailabilityStatus = () => {
   //Submit Form
   const handleSubmit = values => {
     setLoading(true);
-    apolloClient.mutate({
+    apolloClient
+      .mutate({
         mutation: productAvailabilityStatusQuery.AVAILABILITY_STATUS_ADD,
         variables: { name: values.name },
         refetchQueries: [
@@ -35,7 +36,7 @@ const AddProductAvailabilityStatus = () => {
               },
             },
           },
-          ['getAllProductAvailabilityStatus',]
+          ['getAllProductAvailabilityStatus'],
         ],
         context: {
           headers: {
@@ -47,9 +48,10 @@ const AddProductAvailabilityStatus = () => {
       .then(res => {
         const data = res?.data?.addProductAvailabilityStatus;
         if (!data?.status) return toast.error('Something Went wrong !!');
-        history.push('/admin/product-availability-status/list');
+        setTimeout(() => {
+          history.push('/admin/product-availability-status/list');
+        }, 1000);
         toast.success(data?.message);
-        window.location.reload();
       })
       .catch(err => {
         toast.error('Something Went wrong !!');
