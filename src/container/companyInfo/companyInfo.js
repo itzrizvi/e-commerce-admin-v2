@@ -12,6 +12,7 @@ import { useSelector } from 'react-redux';
 import { useEffect } from 'react';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
 import { toast } from 'react-toastify';
+import AddressTable from './AdderessTable';
 
 export default function companyInfo() {
   viewPermission('company-info');
@@ -23,6 +24,21 @@ export default function companyInfo() {
   const [emailData, setEmailData] = useState([]);
   const [phoneData, setPhoneData] = useState([]);
   const [socialData, setSocialData] = useState([]);
+  const initialAddressData = {
+    id: new Date().getTime(),
+    address1: "",
+    address1: "",
+    country: "",
+    city: "",
+    state: "",
+    zip_code: "",
+    email: "",
+    fax: "",
+    phone: "",
+    status: true,
+  }
+  const [billingData, setBillingData] = useState([initialAddressData]);
+  const [shippingData, setShippingData] = useState([initialAddressData]);
   const token = useSelector(state => state.auth.token);
   const [initailData, setInitialData] = useState({
     data: [],
@@ -58,13 +74,13 @@ export default function companyInfo() {
         setFavThumbnail(renderImage(process.env.REACT_APP_TENANTID, data?.data?.fav_icon, 'fav', '', true));
 
         setEmailData(data?.data?.company_emails.map((item) => {
-          return {...item, ...{key: new Date().getTime() + Math.floor(Math.random() * 900000)}}
+          return { ...item, ...{ key: new Date().getTime() + Math.floor(Math.random() * 900000) } }
         }))
         setPhoneData(data?.data?.company_phones.map((item) => {
-          return {...item, ...{key: new Date().getTime() + Math.floor(Math.random() * 900000)}}
+          return { ...item, ...{ key: new Date().getTime() + Math.floor(Math.random() * 900000) } }
         }))
         setSocialData(data?.data?.company_socials.map((item) => {
-          return {...item, ...{key: new Date().getTime() + Math.floor(Math.random() * 900000)}}
+          return { ...item, ...{ key: new Date().getTime() + Math.floor(Math.random() * 900000) } }
         }))
       })
       .catch(err => {
@@ -108,29 +124,29 @@ export default function companyInfo() {
       let emailDataNew = [];
       let socialDataNew = [];
       phoneData.forEach(val => {
-        if(val.id){
+        if (val.id) {
           phoneDataNew.push({
             id: val.id,
             phone: val.phone,
             type: val.type
           })
-        }else{
+        } else {
           phoneDataNew.push({
             phone: val.phone,
             type: val.type
           })
         }
-       
+
       })
 
       emailData.forEach(val => {
-        if(val.id){
+        if (val.id) {
           emailDataNew.push({
             id: val.id,
             email: val.email,
             type: val.type
           })
-        }else{
+        } else {
           emailDataNew.push({
             email: val.email,
             type: val.type
@@ -139,20 +155,20 @@ export default function companyInfo() {
       })
 
       socialData.forEach(val => {
-        if(val.id){
+        if (val.id) {
           socialDataNew.push({
             id: val.id,
             social: val.social,
             type: val.type
           })
-        }else{
+        } else {
           socialDataNew.push({
             social: val.social,
             type: val.type
           })
         }
       })
-      data = { ...values, phone: phoneDataNew, email: emailDataNew, social: socialDataNew, ...(image && {logo: image}), ...(dark_image && {dark_logo: dark_image}), ...(fav && {fav_icon: fav}) }
+      data = { ...values, phone: phoneDataNew, email: emailDataNew, social: socialDataNew, ...(image && { logo: image }), ...(dark_image && { dark_logo: dark_image }), ...(fav && { fav_icon: fav }) }
       apolloUploadClient
         .mutate({
           mutation: companyInfoQuery.COMPANY_INFO,
@@ -165,7 +181,7 @@ export default function companyInfo() {
           },
         })
         .then(res => {
-          if(res?.data?.companyInfo?.status){
+          if (res?.data?.companyInfo?.status) {
             setIsLoading(false)
             toast.success("Company Info Updated Successfully!");
           }
@@ -279,20 +295,20 @@ export default function companyInfo() {
     return false;
   };
 
-    // Assign Image
-    const beforeDarkImageUpload = file => {
-      const isLt2M = file.size / 1024 / 1024 < 2;
-      if (!isLt2M) toast.error('Image must smaller than 2MB!');
-  
-      if (isLt2M) {
-        setDarkImage(file);
-        setDarkThumbnail(URL.createObjectURL(file));
-      }
-  
-      return false;
-    };
+  // Assign Image
+  const beforeDarkImageUpload = file => {
+    const isLt2M = file.size / 1024 / 1024 < 2;
+    if (!isLt2M) toast.error('Image must smaller than 2MB!');
 
-      // Assign Image
+    if (isLt2M) {
+      setDarkImage(file);
+      setDarkThumbnail(URL.createObjectURL(file));
+    }
+
+    return false;
+  };
+
+  // Assign Image
   const beforeFavUpload = file => {
     const isLt2M = file.size / 1024 / 1024 < 0.1;
     if (!isLt2M) toast.error('Image must smaller than 100KB!');
@@ -509,6 +525,20 @@ export default function companyInfo() {
                         rowKey={'social'}
                         size="small"
                         dataSource={socialData}
+                      />
+                    </Tabs.TabPane>
+                    <Tabs.TabPane tab="Billing Addresses" key="billing">
+                      <AddressTable
+                        initialData={initialAddressData}
+                        addresses={billingData}
+                        setAddress={setBillingData}
+                      />
+                    </Tabs.TabPane>
+                    <Tabs.TabPane tab="Shipping Addresses" key="Shipping">
+                      <AddressTable
+                        initialData={initialAddressData}
+                        addresses={shippingData}
+                        setAddress={setShippingData}
                       />
                     </Tabs.TabPane>
                   </Tabs>
