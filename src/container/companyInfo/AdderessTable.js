@@ -1,9 +1,10 @@
-import { Button, Input, Switch, Table } from 'antd';
+import { Button, Checkbox, Input, Radio, Switch, Table } from 'antd';
 import React from 'react';
 import { useState } from 'react';
 import FeatherIcon from 'feather-icons-react';
 
-const AddressTable = ({ initialData, addresses, setAddress }) => {
+const AddressTable = ({ initialData, addresses, setAddress, defaultAddressId, setDefaultAddressId }) => {
+
     const column = [
         {
             title: 'Address 1',
@@ -58,6 +59,23 @@ const AddressTable = ({ initialData, addresses, setAddress }) => {
             dataIndex: 'phone',
             key: 'phone',
             render: (text, record) => <Input defaultValue={text} type='text' placeholder="Phone" onChange={(e) => record.phone = e.target.value} />
+        },
+        {
+            title: 'Default',
+            dataIndex: 'id',
+            key: 'id',
+            align: 'right',
+            // width: 90,
+            render: (val, record) => (
+                <Checkbox
+                    checked={defaultAddressId === val ? true : false}
+                    onChange={e => {
+                        console.log(e.target.checked)
+                        if (e.target.checked) setDefaultAddressId(val)
+                        else setDefaultAddressId(null)
+                    }} />
+            ),
+
         },
         {
             title: 'Status',
