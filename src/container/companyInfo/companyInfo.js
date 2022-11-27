@@ -283,7 +283,7 @@ export default function companyInfo() {
         .then(res => {
           const data = type === "add" ? res?.data?.addCompanyBillingAddress : res?.data?.updateCompanyAddress
           if (!data.status) return toast.error(data.message)
-          toast.success(data.message)
+          // toast.success(data.message)
         }).catch(err => {
           console.log("error on billing")
         }).finally(() => {
@@ -344,7 +344,7 @@ export default function companyInfo() {
         .then(res => {
           const data = type === "add" ? res.data.addCompanyShippingAddress : 'update'
           if (!data.status) return toast.error(data.message)
-          toast.success(data.message)
+          // toast.success(data.message)
         }).catch(err => {
           console.log("error on billing")
         }).finally(() => {

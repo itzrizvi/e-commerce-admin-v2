@@ -1,11 +1,9 @@
-import { Button, Input, Switch, Table } from 'antd';
+import { Button, Checkbox, Input, Switch, Table } from 'antd';
 import React from 'react';
 import { useState } from 'react';
 import FeatherIcon from 'feather-icons-react';
 
-// const BillingAdderess = ({ initialData1, billingAddresses, setBillingAddresses }) => {
-const ShippingAddress = ({ initialData, shippingAddress, setShippingAddress }) => {
-
+const AddressTable = ({ initialData, addresses, setAddresses, defaultAddressId, setDefaultAddressId }) => {
     const column = [
         {
             title: 'Address 1',
@@ -20,10 +18,28 @@ const ShippingAddress = ({ initialData, shippingAddress, setShippingAddress }) =
             render: (text, record) => <Input defaultValue={text} type='text' placeholder="Address 2" onChange={(e) => record.address2 = e.target.value} />
         },
         {
+            title: 'Email',
+            dataIndex: 'email',
+            key: 'email ',
+            render: (text, record) => <Input defaultValue={record.email} type='text' placeholder="email" onChange={(e) => record.email = e.target.value} />
+        },
+        {
+            title: 'phone',
+            dataIndex: 'phone',
+            key: 'phone ',
+            render: (text, record) => <Input defaultValue={record.phone} type='text' placeholder="phone" onChange={(e) => record.phone = e.target.value} />
+        },
+        {
+            title: 'fax',
+            dataIndex: 'fax',
+            key: 'fax ',
+            render: (text, record) => <Input defaultValue={record.fax} type='text' placeholder="fax" onChange={(e) => record.fax = e.target.value} />
+        },
+        {
             title: 'Country',
             dataIndex: 'country ',
-            key: 'country ',
-            render: (text, record) => <Input defaultValue={record.country} type='text' placeholder="Country" onChange={(e) => record.country = e.target.value} />
+            key: 'country',
+            render: (text, record) => <Input defaultValue={record.country} type='text' placeholder="country" onChange={(e) => record.country = e.target.value} />
         },
         {
             title: 'City',
@@ -49,18 +65,37 @@ const ShippingAddress = ({ initialData, shippingAddress, setShippingAddress }) =
             key: 'fax',
             render: (text, record) => <Input defaultValue={text} type='text' placeholder="Fax" onChange={(e) => record.fax = e.target.value} />
         },
-        // {
-        //     title: 'Email',
-        //     dataIndex: 'email',
-        //     key: 'email',
-        //     render: (text, record) => <Input defaultValue={text} type='email' placeholder="Email" onChange={(e) => record.email = e.target.value} />
-        // },
-        // {
-        //     title: 'Phone',
-        //     dataIndex: 'phone',
-        //     key: 'phone',
-        //     render: (text, record) => <Input defaultValue={text} type='text' placeholder="Phone" onChange={(e) => record.phone = e.target.value} />
-        // },
+
+        {
+            title: 'Default',
+            dataIndex: 'id',
+            key: 'id',
+            align: 'right',
+            // width: 90,
+            render: (val, record) => (
+                <Checkbox
+                    checked={defaultAddressId === val ? true : false}
+                    onChange={e => {
+                        console.log(e.target.checked)
+                        if (e.target.checked) setDefaultAddressId(val)
+                        else setDefaultAddressId(null)
+                    }} />
+            ),
+
+        },
+        {
+            title: 'Status',
+            dataIndex: 'status',
+            key: 'status',
+            align: 'right',
+            // width: 90,
+            render: (text, record) => (
+                <Switch defaultChecked={text} title='Status' onChange={checked => record.status = checked} />
+            ),
+
+        },
+
+
         {
             title: 'Action',
             dataIndex: 'action',
@@ -71,11 +106,11 @@ const ShippingAddress = ({ initialData, shippingAddress, setShippingAddress }) =
 
     // Adding new row on table
     const addNewRow = () => {
-        setShippingAddress(prevState => [...prevState, { ...initialData, id: new Date().getTime() }])
+        setAddresses(prevState => [...prevState, { ...initialData, id: new Date().getTime() }])
     }
 
     const removeRow = (id) => {
-        setShippingAddress(prevState => {
+        setAddresses(prevState => {
             return prevState.filter((item) => item.id !== id)
         })
     }
@@ -88,7 +123,7 @@ const ShippingAddress = ({ initialData, shippingAddress, setShippingAddress }) =
                 pagination={false}
                 rowKey={'id'}
                 size="small"
-                dataSource={shippingAddress}
+                dataSource={addresses}
             />
             <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '10px', marginBottom: '10px' }}>
                 <Button title="Add Address" htmlType="button" type="primary" onClick={addNewRow} style={{ marginRight: ".5em" }}>
@@ -99,4 +134,4 @@ const ShippingAddress = ({ initialData, shippingAddress, setShippingAddress }) =
     );
 };
 
-export default ShippingAddress;
+export default AddressTable;

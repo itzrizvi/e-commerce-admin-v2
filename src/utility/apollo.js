@@ -996,6 +996,7 @@ export const customerMutation = {
       }
     }
   `,
+
 };
 
 export const couponQuery = {
@@ -1049,6 +1050,7 @@ export const couponQuery = {
     }
   `,
 };
+
 export const couponMutation = {
   CREATE_COUPON: gql`
     mutation createCoupon($data: CreateCouponInput) {

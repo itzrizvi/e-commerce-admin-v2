@@ -12,6 +12,8 @@ import queryString from 'query-string'
 import { viewPermission } from '../../utility/utility';
 import BillingAdderess from './BillingAdderess';
 import ShippingAddress from './ShippingAddress';
+import { customerMutation, customerQuery } from '../../apollo/customer';
+import AddressTable from './AddressTable';
 const { Paragraph, Text } = Typography;
 
 const AddUser = () => {
@@ -21,129 +23,130 @@ const AddUser = () => {
     const params = queryString.parse(search)
     const maxLength = 30;
     const [userStatus, setUserStatus] = useState(true);
-    const [selectedRoles, setSelectedRoles] = useState([])
     const [sendEmail, setSendEmail] = useState(true);
     const [isLoading, setIsLoading] = useState(false);
     const token = useSelector(state => state.auth.token);
-    const [existingRoles, setExistingRoles] = useState({ data: [], isLoading: true })
     const [form] = Form.useForm();
 
-    useEffect(() => {
-        if (!params.uid) return
+    const initialAddress = {
+        "id": new Date().getTime(),
+        "address1": '',
+        "address2": '',
+        "city": '',
+        "country": '',
+        "email": '',
+        "fax": '',
+        "isDefault": false,
+        "phone": '',
+        "state": '',
+        "status": true,
+        "zip_code": '',
+    }
+    const [shippingAddress, setShippingAddress] = useState([])
+    const [billingAddress, setBillingAddress] = useState([])
+    const [defaultShippingId, setDefaultShippingId] = useState(null)
+    const [defaultBillingId, setDefaultBillingId] = useState(null)
 
-        apolloClient.query({
-            query: authQuery.GET_SINGLE_ADMIN,
-            variables: { query: { uid: params.uid } },
+
+
+    const handleSubmit = values => {
+        console.log("🚀 ~ file: AddUser.js ~ line 61 ~ handleSubmit ~ values", values);
+
+
+        // test
+        // 10067
+
+
+        setIsLoading(true);
+
+        const variables = {
+            data: { ...values, status: userStatus, send_mail: sendEmail }
+
+        }
+        apolloClient.mutate({
+            mutation: customerMutation.ADD_CUSTOMER,
+            variables,
             context: {
                 headers: {
                     TENANTID: process.env.REACT_APP_TENANTID,
                     Authorization: token
                 }
-            }
+            },
+            refetchQueries: [
+                {
+                    query: customerQuery.GET_ALL_CUSTOMER,
+                    context: {
+                        headers: {
+                            TENANTID: process.env.REACT_APP_TENANTID,
+                            Authorization: token
+                        }
+                    }
+                },
+                ['getAllCustomer']
+            ],
         }).then(res => {
-            const data = res?.data?.getSingleAdmin
-            if (data.status) {
-                // const roles = data?.data?.roles;
-                // const rolesArray = roles.map(item => item.role_uuid)
-                // setExistingRoles({ data: rolesArray, isLoading: false })
-                // setSelectedRoles(rolesArray)
-            }
+            const data = res?.data?.addCustomer
+            if (!data.status) return toast.error(data.message)
+            toast.success(data.message)
+            history.push("/admin/customers/list");
         }).catch(err => {
-            console.log("🚀 ~ file: AddAdmin.js ~ line 46 ~ useEffect ~ err", err);
-        }).finally(() => {
-            setRoles(state => ({ ...state, isLoading: false }))
-        })
-
-
-    }, [])
+            console.log("error on adding customer", err);
+            toast.error(`Something went wrong!!`)
+        }).finally(() => setIsLoading(false))
 
 
 
-    const handleSubmit = values => {
-        if (!selectedRoles.length) return toast.warn("Select At List 1 Role..")
+        let check_point = true
 
-        setIsLoading(true);
-        if (!params.uid) { // ADD NEW ADMIN
-            const variables = { data: { ...values, roleUUID: selectedRoles.map(item => ({ role_uuid: item })), userStatus, sendEmail } }
-            apolloClient.mutate({
-                mutation: authMutation.ADMIN_SIGN_UP,
-                variables,
-                refetchQueries: [
-                    {
-                        query: authQuery.GET_ALL_STAFF,
-                        context: {
-                            headers: {
-                                TENANTID: process.env.REACT_APP_TENANTID,
-                                Authorization: Cookies.get('psp_t')
-                            }
-                        }
-                    },
-                    'getAllStaff'
-                ],
-                context: {
-                    headers: {
-                        TENANTID: process.env.REACT_APP_TENANTID,
-                        Authorization: Cookies.get('psp_t')
-                    }
-                }
-            }).then(res => {
-                const data = res.data.adminSignUp
-                if (!data.status) return toast.error(message);
-                toast.success(`${values.email} added successfully.`)
-                history.push("/admin/admin/admins");
-
-            }).catch(err => {
-                console.log("add product err", err)
-                toast.error('Soemthing Went wrong !!');
-            }).finally(() => setIsLoading(false))
-
-        } else { // UPDATE ADMIN
-            const { first_name, last_name } = values
-            const variables = {
-                data: {
-                    uid: params.uid,
-                    first_name,
-                    last_name,
-                    roleUUID: selectedRoles.map(item => ({ role_uuid: item })),
-                    user_status: userStatus,
-                    sendEmail,
-                }
+        // return
+        shippingAddress.forEach(val => {
+            const { id, ...rest } = val
+            if (check_point && Object.values(rest).some(x => x === null || x === '')) {
+                toast.info('Please Provide All Field Properly In Shipping Address Tab..');
+                check_point = false
+                return;
             }
+        });
+        if (!check_point) return
 
-            // console.log(variables)
-            // return
-            apolloClient.mutate({
-                mutation: authMutation.ADMIN_UPDATE,
-                variables,
-                refetchQueries: [
-                    {
-                        query: authQuery.GET_ALL_STAFF,
-                        context: {
-                            headers: {
-                                TENANTID: process.env.REACT_APP_TENANTID,
-                                Authorization: Cookies.get('psp_t')
-                            }
-                        }
-                    },
-                    'getAllStaff'
-                ],
-                context: {
-                    headers: {
-                        TENANTID: process.env.REACT_APP_TENANTID,
-                        Authorization: token
-                    }
-                }
-            }).then(res => {
-                const status = res?.data?.adminUpdate?.status
-                if (!status) return toast.error(data.message)
-                history.push("/admin/admin/admins");
-                window.location.reload()
-                toast.success(`${params.email} user Status updated successfully.`)
-            }).catch(err => {
-                console.log("🚀 ~ file: AllAdmins.js ~ line 33 ~ handleStatusChange ~ err", err);
-                toast.error(`Something went wrong!!`)
-            }).finally(() => setIsLoading(false))
+        return
+        const parent_id = 10067
+
+        if (shippingAddress.length) {
+            const variables = {
+                data: shippingAddress.map(add => {
+                    const { id, ...rest } = add
+                    return defaultShippingId === id ? { ...rest, isDefault: true, parent_id } : { ...rest, parent_id }
+                })
+            }
+            console.log("shipping var", variables);
         }
+
+
+        return
+        apolloClient.mutate({
+            mutation: customerMutation.ADD_CUSTOMER_BILLING_ADDRESS,
+            variables,
+            context: {
+                headers: {
+                    TENANTID: process.env.REACT_APP_TENANTID,
+                    Authorization: token
+                }
+            },
+        }).then(res => {
+            const data = res?.data?.addCustomerBillingAddress
+            if (!data.status) return toast.error(data.message)
+            toast.success(data.message)
+            history.push("/admin/customers/list");
+        }).catch(err => {
+            console.log("error on adding customer", err);
+            toast.error(`Something went wrong!!`)
+        }).finally(() => setIsLoading(false))
+
+
+
+
+
     };
 
 
@@ -170,8 +173,6 @@ const AddUser = () => {
 
 
                                     <Tabs.TabPane tab="Information" key="general">
-
-
                                         <Form.Item
                                             rules={[{ required: true, max: maxLength, message: "Please enter First Name" }]}
                                             name="first_name"
@@ -186,52 +187,55 @@ const AddUser = () => {
                                         >
                                             <Input placeholder='Enter Last Name' />
                                         </Form.Item>
-                                        {!params.uid &&
-                                            <>
-                                                <Form.Item
-                                                    rules={[{
-                                                        required: true, message: "Please enter an email",
-                                                        max: maxLength,
-                                                        // type: 'email'
-                                                    }]}
-                                                    name="email" label="Email"
-                                                >
-                                                    <Input type='email' placeholder='Enter Email Address' />
-                                                </Form.Item>
-                                                <Form.Item
-                                                    rules={[{ required: true, message: "Please enter Phone Number" }]}
-                                                    name="p" label="Phone Number"
-                                                >
-                                                    <Input placeholder='Enter Last Name' />
-                                                </Form.Item>
+                                        <Form.Item
+                                            rules={[{
+                                                required: true, message: "Please enter an email",
+                                                max: maxLength,
+                                            }]}
+                                            name="email" label="Email"
+                                        >
+                                            <Input type='email' placeholder='Enter Email Address' />
+                                        </Form.Item>
 
-                                            </>}
 
                                         <Form.Item
-                                            name="userStatus"
                                             label="User Status"
                                         >
                                             <Switch checked={userStatus} onChange={checked => setUserStatus(checked)} />
                                         </Form.Item>
 
-                                        {/* <Form.Item
+                                        <Form.Item
                                             label="Send Email"
                                         >
                                             <Checkbox
                                                 value={sendEmail}
                                                 onChange={e => setSendEmail(e.target.checked)}
                                             ></Checkbox>
-                                        </Form.Item> */}
+                                        </Form.Item>
 
                                     </Tabs.TabPane>
 
 
                                     <Tabs.TabPane tab="Shipping Address" key="sAddress">
-                                        <ShippingAddress />
+                                        {/* <ShippingAddress {...{ initialData, shippingAddress, setShippingAddress }} /> */}
+                                        <AddressTable
+                                            initialData={initialAddress}
+                                            addresses={shippingAddress}
+                                            setAddresses={setShippingAddress}
+                                            defaultAddressId={defaultShippingId}
+                                            setDefaultAddressId={setDefaultShippingId}
+                                        />
                                     </Tabs.TabPane>
 
                                     <Tabs.TabPane tab="Billing Address" key="bAddress">
-                                        <BillingAdderess />
+                                        {/* <BillingAdderess {...{ initialData, billingAddress, setBillingAddress }} /> */}
+                                        <AddressTable
+                                            initialData={initialAddress}
+                                            addresses={billingAddress}
+                                            setAddresses={setBillingAddress}
+                                            defaultAddressId={defaultBillingId}
+                                            setDefaultAddressId={setDefaultBillingId}
+                                        />
                                     </Tabs.TabPane>
 
                                 </Tabs>

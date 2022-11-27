@@ -829,7 +829,7 @@ const EditUser = () => {
     const initialData = {
         "id": new Date().getTime(),
         "address1": "",
-        "address1": "",
+        "address2": "",
         "country": "",
         "city": "",
         "state": "",
