@@ -211,6 +211,17 @@ const MenuItems = ({ darkMode, toggleCollapsed, topMenu }) => {
       )}
 
       {menuPermission('company-info') && (
+        <SubMenu key="supports" icon={!topMenu && <FeatherIcon icon="message-circle" />} title="Supports">
+          {menuPermission('company-info') && (
+            <Menu.Item key="company_info">
+              <NavLink onClick={toggleCollapsed} to={`${path}/supports/list`}>
+                Messages
+              </NavLink>
+            </Menu.Item>
+          )}
+        </SubMenu>
+      )}
+      {menuPermission('company-info') && (
         <SubMenu key="settings" icon={!topMenu && <FeatherIcon icon="settings" />} title="Settings">
           {menuPermission('company-info') && (
             <Menu.Item key="company_info">
