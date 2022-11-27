@@ -1,23 +1,10 @@
-import { Button, Input, Switch, Table } from 'antd';
+import { Button, Checkbox, Input, Radio, Switch, Table } from 'antd';
 import React from 'react';
 import { useState } from 'react';
 import FeatherIcon from 'feather-icons-react';
 
-// const BillingAdderess = ({ initialData1, billingAddresses, setBillingAddresses }) => {
-const ShippingAddress = ({ initialData, shippingAddress, setShippingAddress }) => {
-    // const initialData = {
-    //     id: new Date().getTime(),
-    //     address1: "",
-    //     address1: "",
-    //     country: "",
-    //     city: "",
-    //     state: "",
-    //     zip_code: "",
-    //     // email: "",
-    //     fax: "",
-    //     // phone: "",
-    // }
-    // const [shippingAddress, setShippingAddress] = useState([initialData])
+const AddressTable = ({ initialData, addresses, setAddress, defaultAddressId, setDefaultAddressId }) => {
+
     const column = [
         {
             title: 'Address 1',
@@ -61,17 +48,51 @@ const ShippingAddress = ({ initialData, shippingAddress, setShippingAddress }) =
             key: 'fax',
             render: (text, record) => <Input defaultValue={text} type='text' placeholder="Fax" onChange={(e) => record.fax = e.target.value} />
         },
+        {
+            title: 'Email',
+            dataIndex: 'email',
+            key: 'email',
+            render: (text, record) => <Input defaultValue={text} type='email' placeholder="Email" onChange={(e) => record.email = e.target.value} />
+        },
+        {
+            title: 'Phone',
+            dataIndex: 'phone',
+            key: 'phone',
+            render: (text, record) => <Input defaultValue={text} type='text' placeholder="Phone" onChange={(e) => record.phone = e.target.value} />
+        },
+        {
+            title: 'Default',
+            dataIndex: 'id',
+            key: 'id',
+            align: 'right',
+            // width: 90,
+            render: (val, record) => (
+                <Checkbox
+                    checked={defaultAddressId === val ? true : false}
+                    onChange={e => {
+                        console.log(e.target.checked)
+                        if (e.target.checked) setDefaultAddressId(val)
+                        else setDefaultAddressId(null)
+                    }} />
+            ),
+
+        },
+        {
+            title: 'Status',
+            dataIndex: 'status',
+            key: 'status',
+            align: 'right',
+            // width: 90,
+            render: (text, record) => (
+                <Switch defaultChecked={text} title='Status' onChange={checked => record.status = checked} />
+            ),
+
+        },
         // {
-        //     title: 'Email',
-        //     dataIndex: 'email',
-        //     key: 'email',
-        //     render: (text, record) => <Input defaultValue={text} type='email' placeholder="Email" onChange={(e) => record.email = e.target.value} />
-        // },
-        // {
-        //     title: 'Phone',
-        //     dataIndex: 'phone',
-        //     key: 'phone',
-        //     render: (text, record) => <Input defaultValue={text} type='text' placeholder="Phone" onChange={(e) => record.phone = e.target.value} />
+        //     title: 'Contact Person',
+        //     dataIndex: 'contactPerson',
+        //     key: 'contactPerson',
+        //     render: (text, record) => <Input type='text' placeholder="Contact Person" onChange={(e) => record.contactPerson = e.target.value} />
         // },
         {
             title: 'Action',
@@ -83,11 +104,11 @@ const ShippingAddress = ({ initialData, shippingAddress, setShippingAddress }) =
 
     // Adding new row on table
     const addNewRow = () => {
-        setShippingAddress(prevState => [...prevState, { ...initialData, id: new Date().getTime() }])
+        setAddress(prevState => [...prevState, { ...initialData, id: new Date().getTime() }])
     }
 
     const removeRow = (id) => {
-        setShippingAddress(prevState => {
+        setAddress(prevState => {
             return prevState.filter((item) => item.id !== id)
         })
     }
@@ -100,7 +121,7 @@ const ShippingAddress = ({ initialData, shippingAddress, setShippingAddress }) =
                 pagination={false}
                 rowKey={'id'}
                 size="small"
-                dataSource={shippingAddress}
+                dataSource={addresses}
             />
             <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '10px', marginBottom: '10px' }}>
                 <Button title="Add Address" htmlType="button" type="primary" onClick={addNewRow} style={{ marginRight: ".5em" }}>
@@ -111,4 +132,4 @@ const ShippingAddress = ({ initialData, shippingAddress, setShippingAddress }) =
     );
 };
 
-export default ShippingAddress;
+export default AddressTable;

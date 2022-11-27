@@ -12,6 +12,8 @@ import { useSelector } from 'react-redux';
 import { useEffect } from 'react';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
 import { toast } from 'react-toastify';
+import AddressTable from './AdderessTable';
+import apolloClient from './../../apollo';
 
 export default function companyInfo() {
   viewPermission('company-info');
@@ -23,6 +25,26 @@ export default function companyInfo() {
   const [emailData, setEmailData] = useState([]);
   const [phoneData, setPhoneData] = useState([]);
   const [socialData, setSocialData] = useState([]);
+  const initialAddressData = {
+    id: new Date().getTime(),
+    parent_id: 3,
+    address1: "",
+    address2: "",
+    country: "",
+    city: "",
+    state: "",
+    zip_code: "",
+    email: "",
+    fax: "",
+    phone: "",
+    status: true,
+    isDefault: false
+  }
+  const [billingData, setBillingData] = useState([]);
+  const [shippingData, setShippingData] = useState([]);
+  const [defaultBilling, setDefaultBilling] = useState(null)
+  const [defaultShipping, setDefaultShipping] = useState(null)
+
   const token = useSelector(state => state.auth.token);
   const [initailData, setInitialData] = useState({
     data: [],
@@ -33,7 +55,7 @@ export default function companyInfo() {
   const [darkThumbnail, setDarkThumbnail] = useState('');
   const [favThumbnail, setFavThumbnail] = useState('');
 
-  useEffect(() => {
+  useEffect(() => { // GET_COMPANY_INFO
     ApolloClient.query({
       query: companyInfoQuery.GET_COMPANY_INFO,
       context: {
@@ -58,13 +80,23 @@ export default function companyInfo() {
         setFavThumbnail(renderImage(process.env.REACT_APP_TENANTID, data?.data?.fav_icon, 'fav', '', true));
 
         setEmailData(data?.data?.company_emails.map((item) => {
-          return {...item, ...{key: new Date().getTime() + Math.floor(Math.random() * 900000)}}
+          return { ...item, ...{ key: new Date().getTime() + Math.floor(Math.random() * 900000) } }
         }))
         setPhoneData(data?.data?.company_phones.map((item) => {
-          return {...item, ...{key: new Date().getTime() + Math.floor(Math.random() * 900000)}}
+          return { ...item, ...{ key: new Date().getTime() + Math.floor(Math.random() * 900000) } }
         }))
         setSocialData(data?.data?.company_socials.map((item) => {
-          return {...item, ...{key: new Date().getTime() + Math.floor(Math.random() * 900000)}}
+          return { ...item, ...{ key: new Date().getTime() + Math.floor(Math.random() * 900000) } }
+        }))
+        setBillingData(data?.data?.billingAddresses.map(add => {
+          const { updatedAt, createdAt, __typename, type, isDefault, ...rest } = add
+          if (isDefault) setDefaultBilling(add.id)
+          return { ...rest, isDefault: false, isNew: false, parent_id: 3 }
+        }))
+        setShippingData(data?.data?.shippingAddresses.map(add => {
+          const { updatedAt, createdAt, __typename, type, isDefault, ...rest } = add
+          if (isDefault) setDefaultShipping(add.id)
+          return { ...rest, isDefault: false, isNew: false, parent_id: 3 }
         }))
       })
       .catch(err => {
@@ -101,36 +133,58 @@ export default function companyInfo() {
       }
     });
 
-    if (check_point) {
+    billingData.forEach(val => {
+      const { id, parent_id, isDefault, ...rest } = val
+      if (check_point && Object.values(rest).some(x => x === null || x === '')) {
+        toast.info('Please Provide All Field Properly In Billing Address Tab..');
+        check_point = false;
+        return;
+      }
+    });
+    shippingData.forEach(val => {
+      const { id, parent_id, isDefault, ...rest } = val
+      if (check_point && Object.values(rest).some(x => x === null || x === '')) {
+        toast.info('Please Provide All Field Properly In Shipping Address Tab..');
+        check_point = false;
+        return;
+      }
+    });
+
+
+
+
+    // return;
+
+    if (check_point) { // company Info
       setIsLoading(true);
       let data;
       let phoneDataNew = [];
       let emailDataNew = [];
       let socialDataNew = [];
       phoneData.forEach(val => {
-        if(val.id){
+        if (val.id) {
           phoneDataNew.push({
             id: val.id,
             phone: val.phone,
             type: val.type
           })
-        }else{
+        } else {
           phoneDataNew.push({
             phone: val.phone,
             type: val.type
           })
         }
-       
+
       })
 
       emailData.forEach(val => {
-        if(val.id){
+        if (val.id) {
           emailDataNew.push({
             id: val.id,
             email: val.email,
             type: val.type
           })
-        }else{
+        } else {
           emailDataNew.push({
             email: val.email,
             type: val.type
@@ -139,20 +193,20 @@ export default function companyInfo() {
       })
 
       socialData.forEach(val => {
-        if(val.id){
+        if (val.id) {
           socialDataNew.push({
             id: val.id,
             social: val.social,
             type: val.type
           })
-        }else{
+        } else {
           socialDataNew.push({
             social: val.social,
             type: val.type
           })
         }
       })
-      data = { ...values, phone: phoneDataNew, email: emailDataNew, social: socialDataNew, ...(image && {logo: image}), ...(dark_image && {dark_logo: dark_image}), ...(fav && {fav_icon: fav}) }
+      data = { ...values, phone: phoneDataNew, email: emailDataNew, social: socialDataNew, ...(image && { logo: image }), ...(dark_image && { dark_logo: dark_image }), ...(fav && { fav_icon: fav }) }
       apolloUploadClient
         .mutate({
           mutation: companyInfoQuery.COMPANY_INFO,
@@ -165,7 +219,7 @@ export default function companyInfo() {
           },
         })
         .then(res => {
-          if(res?.data?.companyInfo?.status){
+          if (res?.data?.companyInfo?.status) {
             setIsLoading(false)
             toast.success("Company Info Updated Successfully!");
           }
@@ -174,6 +228,132 @@ export default function companyInfo() {
           toast.error('Something Went wrong!!');
         });
     }
+
+    if (check_point && billingData.length) { //billing
+      let variables;
+      let type = "add";
+
+      setIsLoading(true);
+      if (!initailData.data.billingAddresses.length) { // add billing
+        variables = {
+          data: {
+            addresses: billingData.map(add => {
+              const { id, ...rest } = add
+              return id === defaultBilling ? { ...rest, isDefault: true } : rest
+            })
+          }
+        }
+      } else { // update billing
+        type = "update"
+        variables = {
+          data: {
+            ref_id: 3,
+            type: "billing",
+            addresses: billingData.map(add => {
+              const { id, isNew, ...rest } = add
+              const addresses = id === defaultBilling
+                ? { ...rest, isDefault: true }
+                : rest
+              if (isNew === undefined) {
+                addresses.isNew = true
+              } else {
+                addresses.isNew = false
+                addresses.id = id
+              }
+
+              return addresses
+            })
+          }
+        }
+
+      }
+
+      // return
+      apolloClient
+        .mutate({
+          mutation: type === "add" ? companyInfoQuery.ADD_COMPANY_BILLING_ADDRESS : companyInfoQuery.UPDATE_COMPANY_ADDRESS,
+          variables,
+          context: {
+            headers: {
+              TENANTID: process.env.REACT_APP_TENANTID,
+              Authorization: token,
+            },
+          },
+        })
+        .then(res => {
+          const data = type === "add" ? res?.data?.addCompanyBillingAddress : res?.data?.updateCompanyAddress
+          if (!data.status) return toast.error(data.message)
+          toast.success(data.message)
+        }).catch(err => {
+          console.log("error on billing")
+        }).finally(() => {
+          setIsLoading(false)
+        })
+
+    }
+
+    if (check_point && shippingData.length) { //shipping
+      let variables;
+      let type = "add";
+      setIsLoading(true)
+
+      if (!initailData.data.shippingAddresses.length) { // add shipping
+        variables = {
+          data: {
+            addresses: shippingData.map(add => {
+              const { id, ...rest } = add
+              return id === defaultShipping ? { ...rest, isDefault: true } : rest
+            })
+          }
+        }
+      } else { // update shipping
+        type = "update"
+        variables = {
+          data: {
+            ref_id: 3,
+            type: "shipping",
+            addresses: shippingData.map(add => {
+              const { id, isNew, ...rest } = add
+              const addresses = id === defaultShipping ? { ...rest, isDefault: true } : rest
+              if (isNew === undefined) {
+                addresses.isNew = true
+              } else {
+                addresses.isNew = false
+                addresses.id = id
+              }
+
+              return addresses
+            })
+          }
+        }
+
+      }
+
+      // return
+      apolloClient
+        .mutate({
+          mutation: type === "add" ? companyInfoQuery.ADD_COMPANY_SHIPPING_ADDRESS : companyInfoQuery.UPDATE_COMPANY_ADDRESS,
+          variables,
+          context: {
+            headers: {
+              TENANTID: process.env.REACT_APP_TENANTID,
+              Authorization: token,
+            },
+          },
+        })
+        .then(res => {
+          const data = type === "add" ? res.data.addCompanyShippingAddress : 'update'
+          if (!data.status) return toast.error(data.message)
+          toast.success(data.message)
+        }).catch(err => {
+          console.log("error on billing")
+        }).finally(() => {
+          setIsLoading(false)
+        })
+
+    }
+
+
   };
 
   const EmailColumn = [
@@ -279,20 +459,20 @@ export default function companyInfo() {
     return false;
   };
 
-    // Assign Image
-    const beforeDarkImageUpload = file => {
-      const isLt2M = file.size / 1024 / 1024 < 2;
-      if (!isLt2M) toast.error('Image must smaller than 2MB!');
-  
-      if (isLt2M) {
-        setDarkImage(file);
-        setDarkThumbnail(URL.createObjectURL(file));
-      }
-  
-      return false;
-    };
+  // Assign Image
+  const beforeDarkImageUpload = file => {
+    const isLt2M = file.size / 1024 / 1024 < 2;
+    if (!isLt2M) toast.error('Image must smaller than 2MB!');
 
-      // Assign Image
+    if (isLt2M) {
+      setDarkImage(file);
+      setDarkThumbnail(URL.createObjectURL(file));
+    }
+
+    return false;
+  };
+
+  // Assign Image
   const beforeFavUpload = file => {
     const isLt2M = file.size / 1024 / 1024 < 0.1;
     if (!isLt2M) toast.error('Image must smaller than 100KB!');
@@ -509,6 +689,24 @@ export default function companyInfo() {
                         rowKey={'social'}
                         size="small"
                         dataSource={socialData}
+                      />
+                    </Tabs.TabPane>
+                    <Tabs.TabPane tab="Billing Addresses" key="billing">
+                      <AddressTable
+                        initialData={initialAddressData}
+                        addresses={billingData}
+                        setAddress={setBillingData}
+                        defaultAddressId={defaultBilling}
+                        setDefaultAddressId={setDefaultBilling}
+                      />
+                    </Tabs.TabPane>
+                    <Tabs.TabPane tab="Shipping Addresses" key="Shipping">
+                      <AddressTable
+                        initialData={initialAddressData}
+                        addresses={shippingData}
+                        setAddress={setShippingData}
+                        defaultAddressId={defaultShipping}
+                        setDefaultAddressId={setDefaultShipping}
                       />
                     </Tabs.TabPane>
                   </Tabs>

@@ -80,7 +80,8 @@ const ViewOrder = () => {
     const token = useSelector(state => state.auth.token);
     const [singleOrder, setSingleOrder] = useState({ data: {}, isLoading: true });
     const [subTotal, setSubTotal] = useState(0)
-    useEffect(() => {
+
+    useEffect(() => { // get Single Order
         apolloClient
             .query({
                 query: orderQuery.GET_SINGLE_ORDER_ADMIN,
