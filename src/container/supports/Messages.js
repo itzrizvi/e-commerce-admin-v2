@@ -56,23 +56,29 @@ const Messages = () => {
             title: 'Message',
             dataIndex: 'message',
             key: 'message',
-            // width: 200,
+            // width: 300,
             ellipsis: true,
+            render: val => <p
+                style={{
+                    maxWidth: "250px",
+                    whiteSpace: "normal"
+                }}
+            >{val}</p>,
             sorter: (a, b) => a.message.toUpperCase() > b.message.toUpperCase() ? 1 : -1,
         },
         {
-            title: 'Action',
-            dataIndex: 'action',
+            title: 'View',
+            dataIndex: 'id',
             width: 70,
             align: 'right',
-            render: (text, record) => (
+            render: (val, record) => (
                 <>
-                    {/* <Link to={`/admin/customers/add-group?id=${record.id}`}> */}
-                    <FontAwesome name="eye" style={{ margin: ".5em 1em" }} />
-                    {/* </Link> */}
+                    <Link to={`/admin/supports/message?id=${val}`}>
+                        <FontAwesome name="eye" style={{ margin: ".5em 1em" }} />
+                    </Link>
                 </>
             ),
-            key: 'last_name',
+            key: 'id',
         },
     ]
 
@@ -130,6 +136,7 @@ const Messages = () => {
 
                                     <span className={"psp_list"} >
                                         <Table
+                                            scroll={{ x: "max-content" }}
                                             className="table-responsive"
                                             columns={columns}
                                             rowKey={'id'}

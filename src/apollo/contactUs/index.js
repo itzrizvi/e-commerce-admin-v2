@@ -1,7 +1,7 @@
 import { gql } from "@apollo/client";
 
 export const contactUsQueries = {
-    GET_CONTACT_US_MSG_LIST: gql`
+  GET_CONTACT_US_MSG_LIST: gql`
     query getContactUsMsgList {
         getContactUsMsgList{
           message
@@ -23,5 +23,25 @@ export const contactUsQueries = {
           }
         }
       }
+    `,
+  GET_SINGLE_CONTACT_US_MSG: gql`
+    query getSingleContactUsMsg($query: GetSingleContactMessageInput) {
+      getSingleContactUsMsg(query: $query) {
+        message
+        status
+        data {
+          id
+          name
+          email
+          phone
+          subject
+          message
+          images {
+            id
+            image
+          }
+        }
+      }
+    }
     `,
 }

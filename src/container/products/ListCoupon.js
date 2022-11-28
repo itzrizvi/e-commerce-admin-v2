@@ -244,9 +244,9 @@ const ListCoupon = () => {
                                         <Table
                                             scroll={{ x: "max-content" }}
                                             className="table-responsive"
+                                            size="small"
                                             columns={columns}
                                             rowKey={'id'}
-                                            size="small"
                                             dataSource={searchText ? filteredCoupons : coupons.data}
                                             rowClassName={(record, index) => (index % 2 == 0 ? "" : "altTableClass")}
                                             // pagination={false}

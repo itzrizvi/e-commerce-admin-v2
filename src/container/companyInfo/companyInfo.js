@@ -650,6 +650,7 @@ export default function companyInfo() {
                       </div>
                       <Table
                         className="table-responsive"
+                        scroll={{ x: "max-content" }}
                         columns={EmailColumn}
                         pagination={false}
                         rowKey={'key'}
@@ -667,6 +668,7 @@ export default function companyInfo() {
                         </Button>
                       </div>
                       <Table
+                        scroll={{ x: "max-content" }}
                         className="table-responsive"
                         columns={PhoneColumn}
                         pagination={false}
