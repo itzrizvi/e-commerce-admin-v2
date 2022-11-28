@@ -402,7 +402,7 @@ export default function companyInfo() {
                               onError={errorImageSrc}
                               alt="image"
                               style={{
-                                width: '100%',
+                                width: '80%',
                               }}
                             />
                           ) : (
@@ -425,7 +425,7 @@ export default function companyInfo() {
                               onError={errorImageSrc}
                               alt="image"
                               style={{
-                                width: '100%',
+                                width: '80%',
                               }}
                             />
                           ) : (
@@ -448,7 +448,7 @@ export default function companyInfo() {
                               onError={errorImageSrc}
                               alt="image"
                               style={{
-                                width: '100%',
+                                height: '60%',
                               }}
                             />
                           ) : (

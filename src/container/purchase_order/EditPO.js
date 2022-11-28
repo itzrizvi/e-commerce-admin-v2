@@ -26,6 +26,11 @@ const EditPO = () => {
   const [billingAddresses, setBillingAddresses] = useState([]);
   const [shippingAddresses, setShippingAddresses] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [orderInput, setOrderInput] = useState(false);
+  const [orderList, setOrderList] = useState([]);
+  const [orderData, setOrderData] = useState([]);
+  const [selectedOrder, setSelectedOrder] = useState('');
+  const [selectedType, setSelectedType] = useState('');
 
   // ============+ for product START +====================
   const initialData = {
@@ -38,6 +43,41 @@ const EditPO = () => {
   };
   const [products, setProducts] = useState([]);
   const [productOption, setProductOption] = useState([]);
+
+
+  
+  // Get Order List with Address
+  useEffect(() => {
+    apolloClient
+      .query({
+        query: poQuery.GET_ORDER_LIST,
+        context: {
+          headers: {
+            TENANTID: process.env.REACT_APP_TENANTID,
+            Authorization: token,
+          },
+        },
+      })
+      .then(res => {
+        const data = res?.data?.getOrderlistAdmin;
+        if (!data?.status) return;
+        setOrderData(data?.data);
+        const order_data = data?.data
+          .filter(item => {
+            const item_order_slug = item.orderStatus.slug;
+            if (item_order_slug === 'pending' || item_order_slug === 'in-progress') return true;
+            else return false;
+          })
+          .map(item => {
+            return {
+              value: item.id,
+              label: 'Order No: ' + item.id,
+            };
+          });
+        setOrderList(order_data);
+      });
+  }, []);
+
   // ============+ for product END +====================
 
   // LOAD Vendor List
@@ -276,6 +316,29 @@ const EditPO = () => {
       });
   };
 
+  const handleTypeChange = type => {
+    form.setFieldsValue({
+      vendor_id: '',
+    });
+    setSelectedOrder('');
+    setSelectedType(type);
+    setBillingAddresses([]);
+    setShippingAddresses([]);
+    if (type === 'default') {
+      setOrderInput(false);
+    } else if (type === 'drop-shipping') {
+      setOrderInput(true);
+    }
+  };
+
+  const chageOrderIdHandler = val => {
+    setSelectedOrder(val);
+    setBillingAddresses([]);
+    setShippingAddresses([]);
+    form.setFieldsValue({
+      vendor_id: '',
+    });
+  };
   return (
     <>
       <PageHeader title={`Manage Purchase Order | Edit Purchase Order `} />
@@ -298,6 +361,45 @@ const EditPO = () => {
                 >
                   <Tabs>
                     <Tabs.TabPane tab="Vendor Info" key="vendor">
+                      <Form.Item
+                        initialvalues="default"
+                        rules={[{ required: true, message: 'Please Select Type' }]}
+                        // name="type"
+                        label="Type"
+                      >
+                        <Select
+                          size="middle"
+                          placeholder="Select Type"
+                          defaultValue="default"
+                          onChange={handleTypeChange}
+                          style={{ width: '100%' }}
+                          optionLabelProp="label"
+                        >
+                          <Select.Option key="default" value="default" label="Default">
+                            <div className="demo-option-label-item">Default</div>
+                          </Select.Option>
+                          <Select.Option key="drop-shipping" value="drop-shipping" label="Drop Shipping">
+                            <div className="demo-option-label-item">Drop Shipping</div>
+                          </Select.Option>
+                        </Select>
+                      </Form.Item>
+                      {orderInput && (
+                        <Form.Item
+                          initialvalues=""
+                          rules={[{ required: true, message: 'Please Select Order' }]}
+                          name="order_id"
+                          label="Order"
+                        >
+                          <Select
+                            size="middle"
+                            showSearch
+                            placeholder="Select a order"
+                            style={{ width: '100%' }}
+                            options={orderList}
+                            onChange={e => chageOrderIdHandler(e)}
+                          />
+                        </Form.Item>
+                      )}
                       <Form.Item
                         rules={[{ required: true, message: 'Please Select Vendor' }]}
                         name="vendor_id"

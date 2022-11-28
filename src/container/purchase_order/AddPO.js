@@ -19,10 +19,18 @@ const AddPO = () => {
   const history = useHistory();
   const token = useSelector(state => state.auth.token);
   const [form] = Form.useForm();
+  const { search } = useLocation();
+  const params = queryString.parse(search);
   const [vendors, setVendors] = useState({ data: [], isLoading: true });
   const [billingAddresses, setBillingAddresses] = useState([]);
   const [shippingAddresses, setShippingAddresses] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [orderInput, setOrderInput] = useState(false);
+  const [companyBillingAddress, setCompanyBillingAddress] = useState([]);
+  const [orderList, setOrderList] = useState([]);
+  const [orderData, setOrderData] = useState([]);
+  const [selectedOrder, setSelectedOrder] = useState('');
+  const [selectedType, setSelectedType] = useState('');
 
   // ============+ for product START +====================
   const initialData = {
@@ -35,6 +43,72 @@ const AddPO = () => {
   const [products, setProducts] = useState([initialData]);
   const [productOption, setProductOption] = useState([]);
   // ============+ for product END +====================
+
+  let check_post = true;
+  useEffect(() => {
+    if (!params || !params.order_id) return;
+    if (check_post) {
+      check_post = false;
+      setSelectedType('drop-shipping');
+      setSelectedOrder(parseInt(params.order_id));
+      setOrderInput(true);
+      form.setFieldsValue({
+        type: 'drop-shipping',
+        order_id: parseInt(params.order_id),
+      });
+    }
+  }, []);
+
+  // Get Company Billing Address
+  useEffect(() => {
+    apolloClient
+      .query({
+        query: poQuery.GET_COMPANY_BILLING_ADDRESS,
+        context: {
+          headers: {
+            TENANTID: process.env.REACT_APP_TENANTID,
+            Authorization: token,
+          },
+        },
+      })
+      .then(res => {
+        const data = res?.data?.getCompanyInfo;
+        if (!data?.status) return;
+        setCompanyBillingAddress(data?.data?.billingAddresses);
+      });
+  }, []);
+
+  // Get Order List with Address
+  useEffect(() => {
+    apolloClient
+      .query({
+        query: poQuery.GET_ORDER_LIST,
+        context: {
+          headers: {
+            TENANTID: process.env.REACT_APP_TENANTID,
+            Authorization: token,
+          },
+        },
+      })
+      .then(res => {
+        const data = res?.data?.getOrderlistAdmin;
+        if (!data?.status) return;
+        setOrderData(data?.data);
+        const order_data = data?.data
+          .filter(item => {
+            const item_order_slug = item.orderStatus.slug;
+            if (item_order_slug === 'pending' || item_order_slug === 'in-progress') return true;
+            else return false;
+          })
+          .map(item => {
+            return {
+              value: item.id,
+              label: 'Order No: ' + item.id,
+            };
+          });
+        setOrderList(order_data);
+      });
+  }, []);
 
   // LOAD Vendor List
   useEffect(() => {
@@ -98,7 +172,7 @@ const AddPO = () => {
       const { key, ...newItem } = item;
       return newItem;
     });
-    const variables = { ...values, products: newProduct, tax_amount: parseFloat(values.tax_amount) };
+    const variables = { ...values, products: newProduct, tax_amount: parseFloat(values.tax_amount), order_id: parseInt(values.order_id) };
 
     // ADD NEW Vendor
     setIsLoading(true);
@@ -136,7 +210,8 @@ const AddPO = () => {
       .catch(err => {
         console.log('got error on add vendor', err);
         return toast.error('Something Went wrong !!');
-      });
+      })
+      .finally(() => setIsLoading(true));
   };
 
   const handleVendorChange = e => {
@@ -159,12 +234,53 @@ const AddPO = () => {
         if (!data?.status) return;
         let new_billing = [];
         let new_shipping = [];
-        data?.data?.addresses.forEach(item => {
-          if (item.type === 'billing') new_billing.push(item);
-          else if (item.type === 'shipping') new_shipping.push(item);
-        });
-        setBillingAddresses(new_billing);
-        setShippingAddresses(new_shipping);
+        if (selectedType === 'drop-shipping') {
+          apolloClient
+            .query({
+              query: poQuery.GET_COMPANY_BILLING,
+              context: {
+                headers: {
+                  TENANTID: process.env.REACT_APP_TENANTID,
+                  Authorization: token,
+                },
+              },
+            })
+            .then(res => {
+              const data = res?.data?.getCompanyInfo;
+              if (!data?.status) return;
+              setBillingAddresses(data?.data?.billingAddresses);
+            });
+          const get_actual_data = orderData.filter(item => item.id == selectedOrder);
+          const customer_id = get_actual_data[0]?.customer.id;
+          apolloClient
+            .query({
+              query: poQuery.GET_ADDRESS_BY_CUSTOMER,
+              variables: {
+                query: {
+                  customer_id,
+                },
+              },
+              context: {
+                headers: {
+                  TENANTID: process.env.REACT_APP_TENANTID,
+                  Authorization: token,
+                },
+              },
+            })
+            .then(res => {
+              const data = res?.data?.getAddressListByCustomerID;
+              if (!data?.status) return;
+              const shipping_address = data?.data.filter(item => item.type === 'shipping');
+              setShippingAddresses(shipping_address);
+            });
+        } else {
+          data?.data?.addresses.forEach(item => {
+            if (item.type === 'billing') new_billing.push(item);
+            else if (item.type === 'shipping') new_shipping.push(item);
+          });
+          setBillingAddresses(new_billing);
+          setShippingAddresses(new_shipping);
+        }
       })
       .catch(err => {
         console.log(err);
@@ -174,6 +290,30 @@ const AddPO = () => {
       });
   };
 
+  const handleTypeChange = type => {
+    form.setFieldsValue({
+      vendor_id: '',
+    });
+    setSelectedOrder('');
+    setSelectedType(type);
+    setBillingAddresses([]);
+    setShippingAddresses([]);
+    if (type === 'default') {
+      setOrderInput(false);
+    } else if (type === 'drop-shipping') {
+      setOrderInput(true);
+    }
+  };
+
+  const chageOrderIdHandler = val => {
+    setSelectedOrder(val);
+    setBillingAddresses([]);
+    setShippingAddresses([]);
+    form.setFieldsValue({
+      vendor_id: '',
+    });
+  };
+
   return (
     <>
       <PageHeader title="Add Purchase Order" />
@@ -181,7 +321,7 @@ const AddPO = () => {
         <Row gutter={25}>
           <Col sm={24} xs={24}>
             <Cards headless>
-              {vendors.isLoading ? (
+              {(vendors.isLoading && !orderInput) || (vendors.isLoading && params?.order_id) ? (
                 <div div className="spin">
                   <Spin />
                 </div>
@@ -196,6 +336,46 @@ const AddPO = () => {
                 >
                   <Tabs>
                     <Tabs.TabPane tab="Vendor Info" key="vendor">
+                      <Form.Item
+                        initialvalues="default"
+                        rules={[{ required: true, message: 'Please Select Type' }]}
+                        // name="type"
+                        label="Type"
+                      >
+                        <Select
+                          size="middle"
+                          placeholder="Select Type"
+                          defaultValue="default"
+                          onChange={handleTypeChange}
+                          style={{ width: '100%' }}
+                          optionLabelProp="label"
+                        >
+                          <Select.Option key="default" value="default" label="Default">
+                            <div className="demo-option-label-item">Default</div>
+                          </Select.Option>
+                          <Select.Option key="drop-shipping" value="drop-shipping" label="Drop Shipping">
+                            <div className="demo-option-label-item">Drop Shipping</div>
+                          </Select.Option>
+                        </Select>
+                      </Form.Item>
+                      {orderInput && (
+                        <Form.Item
+                          initialvalues=""
+                          rules={[{ required: true, message: 'Please Select Order' }]}
+                          name="order_id"
+                          label="Order"
+                        >
+                          <Select
+                            size="middle"
+                            showSearch
+                            placeholder="Select a order"
+                            style={{ width: '100%' }}
+                            options={orderList}
+                            onChange={e => chageOrderIdHandler(e)}
+                          />
+                        </Form.Item>
+                      )}
+
                       <Form.Item
                         rules={[{ required: true, message: 'Please Select Vendor' }]}
                         name="vendor_id"
@@ -220,6 +400,7 @@ const AddPO = () => {
                           })}
                         </Select>
                       </Form.Item>
+
                       {billingAddresses.length > 0 && (
                         <Form.Item
                           rules={[{ required: true, message: 'Please Select Billing Address' }]}
@@ -229,7 +410,7 @@ const AddPO = () => {
                           <Radio.Group style={{ width: '100%', padding: 10 }}>
                             <Row gutter={25}>
                               {billingAddresses.map(item => (
-                                <Col xs={24} md={12} lg={12}>
+                                <Col key={item.id} xs={24} md={12} lg={12}>
                                   <Radio
                                     style={{
                                       width: '100%',
@@ -286,7 +467,7 @@ const AddPO = () => {
                           <Radio.Group style={{ width: '100%', padding: 10 }}>
                             <Row gutter={25}>
                               {shippingAddresses.map(item => (
-                                <Col xs={24} md={12} lg={12}>
+                                <Col key={item.id} xs={24} md={12} lg={12}>
                                   <Radio
                                     style={{
                                       width: '100%',
