@@ -120,7 +120,7 @@ const Messages = () => {
     const onChangeSearch = e => {
         const value = e.target.value
         setSearchText(value)
-        setFilteredMessages(messages.data.filter(group => (group?.customer_group_name + group?.customergroup_description + group.customergroup_sortorder).toLowerCase().includes(value.toLowerCase())))
+        setFilteredMessages(messages.data.filter(mess => (mess?.email + mess?.message + mess?.name + mess?.phone + mess?.subject).toLowerCase().includes(value.toLowerCase())))
     }
 
 
