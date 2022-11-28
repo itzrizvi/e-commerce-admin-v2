@@ -39,6 +39,21 @@
 					"label": "--setting menue"
 				}
 			]
+		},
+		{
+			"path": "src/container/orders/ViewOrder.js",
+			"bookmarks": [
+				{
+					"line": 204,
+					"column": 56,
+					"label": "-222"
+				},
+				{
+					"line": 265,
+					"column": 52,
+					"label": "-1111"
+				}
+			]
 		}
 	]
 }
