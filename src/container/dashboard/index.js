@@ -31,13 +31,13 @@ const Dashboard = () => {
 			title: 'ID',
 			dataIndex: 'id',
 			key: 'id',
-			// sorter: (a, b) => a.id.toUpperCase() > b.id.toUpperCase() ? 1 : -1,
+			sorter: (a, b) => (a.id > b.id) ? 1 : -1,
 		},
 		{
 			title: 'Name',
 			dataIndex: 'name',
 			key: 'name',
-			render: val => <b>{val}</b>,
+			// render: val => <b>{val}</b>,
 			sorter: (a, b) => a.name.toUpperCase() > b.name.toUpperCase() ? 1 : -1,
 		},
 		{
