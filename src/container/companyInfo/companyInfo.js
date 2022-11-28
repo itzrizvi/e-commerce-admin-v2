@@ -229,7 +229,7 @@ export default function companyInfo() {
         });
     }
 
-    if (check_point && billingData.length) { //billing
+    if (check_point) { //billing
       let variables;
       let type = "add";
 
@@ -268,6 +268,7 @@ export default function companyInfo() {
 
       }
 
+      if (!billingData.length && type === 'add') return
       // return
       apolloClient
         .mutate({
@@ -292,7 +293,7 @@ export default function companyInfo() {
 
     }
 
-    if (check_point && shippingData.length) { //shipping
+    if (check_point) { //shipping
       let variables;
       let type = "add";
       setIsLoading(true)
@@ -329,6 +330,7 @@ export default function companyInfo() {
 
       }
 
+      if (!shippingData.length && type === 'add') return
       // return
       apolloClient
         .mutate({
@@ -650,7 +652,7 @@ export default function companyInfo() {
                         className="table-responsive"
                         columns={EmailColumn}
                         pagination={false}
-                        rowKey={'email'}
+                        rowKey={'key'}
                         size="small"
                         dataSource={emailData}
                       />

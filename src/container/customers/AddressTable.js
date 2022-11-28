@@ -21,7 +21,7 @@ const AddressTable = ({ initialData, addresses, setAddresses, defaultAddressId, 
             title: 'Email',
             dataIndex: 'email',
             key: 'email ',
-            render: (text, record) => <Input defaultValue={record.email} type='text' placeholder="email" onChange={(e) => record.email = e.target.value} />
+            render: (text, record) => <Input defaultValue={record.email} type='email' placeholder="email" onChange={(e) => record.email = e.target.value} />
         },
         {
             title: 'phone',
@@ -33,7 +33,7 @@ const AddressTable = ({ initialData, addresses, setAddresses, defaultAddressId, 
             title: 'fax',
             dataIndex: 'fax',
             key: 'fax ',
-            render: (text, record) => <Input defaultValue={record.fax} type='text' placeholder="fax" onChange={(e) => record.fax = e.target.value} />
+            render: (text, record) => <Input defaultValue={record.fax} type='number' placeholder="fax" onChange={(e) => record.fax = e.target.value} />
         },
         {
             title: 'Country',
@@ -57,7 +57,7 @@ const AddressTable = ({ initialData, addresses, setAddresses, defaultAddressId, 
             title: 'Zip Code',
             dataIndex: 'zip_code',
             key: 'zip_code',
-            render: (text, record) => <Input defaultValue={text} type='text' placeholder="Zip Code" onChange={(e) => record.zip_code = e.target.value} />
+            render: (text, record) => <Input defaultValue={text} type='number' placeholder="Zip Code" onChange={(e) => record.zip_code = e.target.value} />
         },
         {
             title: 'Fax',
