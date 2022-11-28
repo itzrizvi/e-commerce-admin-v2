@@ -27,15 +27,23 @@ const Messages = () => {
 
     const columns = [
         {
+            title: 'ID',
+            dataIndex: 'id',
+            key: 'id',
+            // sorter: (a, b) => a.id.toUpperCase() > b.id.toUpperCase() ? 1 : -1,
+        },
+        {
             title: 'Name',
             dataIndex: 'name',
             key: 'name',
+            render: val => <b>{val}</b>,
             sorter: (a, b) => a.name.toUpperCase() > b.name.toUpperCase() ? 1 : -1,
         },
         {
             title: 'Email',
             dataIndex: 'email',
             key: 'email',
+            render: val => <a href={`tel:${val}`} >{val}</a>,
             sorter: (a, b) => a.email.toUpperCase() > b.email.toUpperCase() ? 1 : -1,
         },
         {
@@ -145,7 +153,7 @@ const Messages = () => {
                                             rowClassName={(record, index) => (index % 2 == 0 ? "" : "altTableClass")}
                                             // pagination={false}
                                             pagination={{
-                                                defaultPageSize: config.CUSTOMER_GROUPS_PER_PAGE,
+                                                defaultPageSize: config.CONTACT_US_MESSAGE_PER_PAGE,
                                                 total: searchText ? filteredMessages.length : messages.data.length,
                                                 showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`,
                                             }}

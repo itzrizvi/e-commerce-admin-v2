@@ -44,4 +44,26 @@ export const contactUsQueries = {
       }
     }
     `,
+  GET_CONTACT_US_UNREAD_MSG_LIST: gql`
+    query getContactUsUnreadMsgList {
+      getContactUsUnreadMsgList{
+        message
+        status
+        data {
+          id
+          name
+          email
+          phone
+          subject
+          message
+          isRead
+          images {
+            id
+            image
+          }
+        }
+      }
+    }
+    
+    `,
 }
