@@ -41,8 +41,8 @@ const ResetPassword = () => {
         const data = res?.data?.setPassword
         if(data.status){
           toast.success(data.message)
+          history.push("/");
           setTimeout(() => {
-            history.push("/");
             window.location.reload();
           }, 2000);
         }else{

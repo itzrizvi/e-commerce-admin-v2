@@ -56,18 +56,37 @@ const ListPO = () => {
             title: 'PO ID',
             dataIndex: 'po_id',
             key: 'po_id',
+            width: 120,
             sorter: (a, b) => a.po_id.toUpperCase() > b.po_id.toUpperCase() ? 1 : -1,
+        },
+        {
+            title: 'Order ID',
+            dataIndex: 'order_id',
+            key: 'order_id',
+            width: 150,
+            ellipsis: true,
+            sorter: (a, b) => a.order_id.toUpperCase() > b.order_id.toUpperCase() ? 1 : -1,
+            render: (value) => value ?? 'Order ID Not Found '
+        },
+        {
+            title: 'Type',
+            dataIndex: 'type',
+            key: 'type',
+            width: 150,
+            sorter: (a, b) => a.phone_number.toUpperCase() > b.phone_number.toUpperCase() ? 1 : -1,
         },
         {
             title: 'Total Amount',
             dataIndex: 'grandTotal_price',
             key: 'grandTotal_price',
+            width: 120,
             sorter: (a, b) => parseFloat(a.grandTotal_price) > parseFloat(b.grandTotal_price),
         },
         {
             title: 'Order Via',
             dataIndex: 'order_placed_via',
             key: 'order_placed_via',
+            width: 120,
             sorter: (a, b) => a.phone_number.toUpperCase() > b.phone_number.toUpperCase() ? 1 : -1,
             render: (value) => value.toUpperCase()
         },
@@ -78,6 +97,7 @@ const ListPO = () => {
             width: 250,
             ellipsis: true,
             sorter: (a, b) => a.comment.toUpperCase() > b.comment.toUpperCase() ? 1 : -1,
+            render: (value) => value ?? 'No Comment Found!'
         },
         {
             title: 'Status',

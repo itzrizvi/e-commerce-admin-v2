@@ -14,6 +14,7 @@ const Products = ({ initialData, products, setProducts, productOption }) => {
           defaultValue={record.id}
           style={{ width: 350 }}
           options={productOption}
+          placeholder={"Please select product"}
           onChange={(e) => record.id = e}
         />
       ),

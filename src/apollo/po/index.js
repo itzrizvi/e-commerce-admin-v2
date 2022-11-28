@@ -119,4 +119,121 @@ export const poQuery = {
       }
     }
   `,
+  GET_COMPANY_BILLING_ADDRESS: gql`
+    query getCompanyInfo {
+      getCompanyInfo {
+        message
+        status
+        tenant_id
+        data {
+          id
+          billingAddresses {
+            id
+            address1
+            address2
+            phone
+            fax
+            email
+            city
+            state
+            zip_code
+            country
+            type
+            status
+            isDefault
+            updatedAt
+            createdAt
+          }
+          createdAt
+          updatedAt
+        }
+      }
+    }
+  `,
+  GET_ORDER_LIST: gql`
+    query getOrderlistAdmin {
+      getOrderlistAdmin {
+        message
+        status
+        data {
+          id
+          orderStatus {
+            name
+            slug
+          }
+          customer {
+            id
+            addresses {
+              id
+              address1
+              address2
+              phone
+              fax
+              email
+              city
+              state
+              zip_code
+              country
+              type
+              status
+              isDefault
+            }
+          }
+        }
+      }
+    }
+  `,
+  GET_COMPANY_BILLING: gql`
+    query getCompanyInfo {
+      getCompanyInfo {
+        message
+        status
+        data {
+          billingAddresses {
+            id
+            address1
+            address2
+            phone
+            fax
+            email
+            city
+            state
+            zip_code
+            country
+            type
+            status
+            isDefault
+            updatedAt
+            createdAt
+          }
+        }
+      }
+    }
+  `,
+  GET_ADDRESS_BY_CUSTOMER: gql`
+    query getAddressListByCustomerID($query: GetAdressListByCustomerIDInput){
+      getAddressListByCustomerID(query: $query) {
+        message
+        status
+        shippingDefaultID
+        data {
+          id
+          ref_id
+          ref_model
+          address1
+          address2
+          phone
+          fax
+          email
+          city
+          state
+          zip_code
+          country
+          type
+          status
+          tenant_id
+        }
+      }
+    }
+  `,
 };

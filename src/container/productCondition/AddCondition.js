@@ -22,7 +22,8 @@ const AddCondition = () => {
   //Submit Form
   const handleSubmit = values => {
     setLoading(true);
-    apolloClient.mutate({
+    apolloClient
+      .mutate({
         mutation: productConditionQuery.CONDITION_ADD,
         variables: { name: values.name },
         refetchQueries: [
@@ -35,7 +36,7 @@ const AddCondition = () => {
               },
             },
           },
-          'getAllProductCondition',
+          ['getAllProductCondition'],
         ],
         context: {
           headers: {
@@ -47,9 +48,10 @@ const AddCondition = () => {
       .then(res => {
         const data = res?.data?.addProductCondition;
         if (!data?.status) return toast.error('Something Went wrong !!');
-        history.push('/admin/product-condition/list');
+        setTimeout(() => {
+          history.push('/admin/product-condition/list');
+        }, 1000);
         toast.success(data?.message);
-        window.location.reload();
       })
       .catch(err => {
         toast.error('Something Went wrong !!');

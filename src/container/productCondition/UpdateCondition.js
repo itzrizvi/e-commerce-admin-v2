@@ -60,31 +60,32 @@ const UpdateCondition = () => {
       .mutate({
         mutation: productConditionQuery.CONDITION_UPDATE,
         variables: { data: { name: values.name, id: parseInt(params?.id) } },
-          refetchQueries: [
-            {
-              query: productConditionQuery.GET_ALL_CONDITION,
-              context: {
-                headers: {
-                  TENANTID: process.env.REACT_APP_TENANTID,
-                  Authorization: token,
-                },
+        refetchQueries: [
+          {
+            query: productConditionQuery.GET_ALL_CONDITION,
+            context: {
+              headers: {
+                TENANTID: process.env.REACT_APP_TENANTID,
+                Authorization: token,
               },
             },
-            'getAllProductCondition',
-          ],
-          context: {
-            headers: {
-              TENANTID: process.env.REACT_APP_TENANTID,
-              Authorization: token,
-            },
           },
+          ['getAllProductCondition'],
+        ],
+        context: {
+          headers: {
+            TENANTID: process.env.REACT_APP_TENANTID,
+            Authorization: token,
+          },
+        },
       })
       .then(res => {
         const data = res?.data?.updateProductCondition;
         if (!data?.status) return toast.error('Something Went wrong !!');
-        history.push('/admin/product-condition/list');
+        setTimeout(() => {
+          history.push('/admin/product-condition/list');
+        }, 1000);
         toast.success(data?.message);
-        window.location.reload();
       })
       .catch(err => {
         toast.error('Something Went wrong !!');
@@ -94,7 +95,11 @@ const UpdateCondition = () => {
 
   return (
     <>
-      <PageHeader title={ `Manage Product Condition | Edit Product Condition ${condition?.data?.name ? `(${condition?.data?.name})` : ""}` } />
+      <PageHeader
+        title={`Manage Product Condition | Edit Product Condition ${
+          condition?.data?.name ? `(${condition?.data?.name})` : ''
+        }`}
+      />
 
       <Main>
         <Row gutter={25}>

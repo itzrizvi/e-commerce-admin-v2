@@ -100,6 +100,7 @@ const AddBanner = () => {
             headers: {
               TENANTID: process.env.REACT_APP_TENANTID,
               Authorization: token,
+              'Apollo-Require-Preflight': 'true',
             },
           },
           refetchQueries: [
@@ -112,7 +113,7 @@ const AddBanner = () => {
                 },
               },
             },
-            'getAllBanners',
+            ['getAllBanners'],
           ],
         })
         .then(res => {
@@ -144,7 +145,13 @@ const AddBanner = () => {
                   },
                 })
                 .then(res => {
-                  // console.log(res);
+                  if (bannerData.length === index + 1) {
+                    setIsLoading(false);
+                    toast.success('Banner Updated Successfully!');
+                    setTimeout(() => {
+                      history.push('/admin/banner/list');
+                    }, 1000);
+                  }
                 })
                 .catch(err => {
                   toast.error('Something Went wrong!!');
@@ -195,10 +202,9 @@ const AddBanner = () => {
                   if (bannerData.length === index + 1) {
                     setIsLoading(false);
                     toast.success('Banner Updated Successfully!');
-                    history.push('/admin/banner/list');
                     setTimeout(() => {
-                      window.location.reload();
-                    }, 2000);
+                      history.push('/admin/banner/list');
+                    }, 1000);
                   }
                 })
                 .catch(err => {
@@ -256,7 +262,12 @@ const AddBanner = () => {
       key: 'title',
       width: 200,
       render: (text, record) => (
-        <Input type="text" defaultValue={record.title} placeholder="Title" onChange={e => (record.title = e.target.value)} />
+        <Input
+          type="text"
+          defaultValue={record.title}
+          placeholder="Title"
+          onChange={e => (record.title = e.target.value)}
+        />
       ),
     },
     {
@@ -265,7 +276,12 @@ const AddBanner = () => {
       key: 'sub_title',
       width: 200,
       render: (text, record) => (
-        <Input type="text" defaultValue={record.sub_title} placeholder="Sub Title" onChange={e => (record.sub_title = e.target.value)} />
+        <Input
+          type="text"
+          defaultValue={record.sub_title}
+          placeholder="Sub Title"
+          onChange={e => (record.sub_title = e.target.value)}
+        />
       ),
     },
     {
@@ -273,7 +289,14 @@ const AddBanner = () => {
       dataIndex: 'link',
       key: 'link',
       width: 200,
-      render: (text, record) => <Input defaultValue={record.link} type="text" placeholder="Link" onChange={e => (record.link = e.target.value)} />,
+      render: (text, record) => (
+        <Input
+          defaultValue={record.link}
+          type="text"
+          placeholder="Link"
+          onChange={e => (record.link = e.target.value)}
+        />
+      ),
     },
     {
       title: 'Button Text',
@@ -281,7 +304,12 @@ const AddBanner = () => {
       key: 'button_text',
       width: 200,
       render: (text, record) => (
-        <Input type="text" placeholder="Button Text" defaultValue={record.button_text} onChange={e => (record.button_text = e.target.value)} />
+        <Input
+          type="text"
+          placeholder="Button Text"
+          defaultValue={record.button_text}
+          onChange={e => (record.button_text = e.target.value)}
+        />
       ),
     },
     {
@@ -290,7 +318,12 @@ const AddBanner = () => {
       key: 'price',
       width: 100,
       render: (text, record) => (
-        <Input type="text" defaultValue={record.price} placeholder="Price" onChange={e => (record.price = e.target.value)} />
+        <Input
+          type="number"
+          defaultValue={record.price}
+          placeholder="Price"
+          onChange={e => (record.price = e.target.value)}
+        />
       ),
     },
     {
@@ -299,7 +332,12 @@ const AddBanner = () => {
       key: 'sale_price',
       width: 100,
       render: (text, record) => (
-        <Input type="text" defaultValue={record.sale_price} placeholder="Sale Price" onChange={e => (record.sale_price = e.target.value)} />
+        <Input
+          type="number"
+          defaultValue={record.sale_price}
+          placeholder="Sale Price"
+          onChange={e => (record.sale_price = e.target.value)}
+        />
       ),
     },
     {
@@ -346,7 +384,12 @@ const AddBanner = () => {
       width: 150,
       ellipsis: true,
       render: (text, record) => (
-        <Input type="text" defaultValue={record.option_1} placeholder="Optional One" onChange={e => (record.option_1 = e.target.value)} />
+        <Input
+          type="text"
+          defaultValue={record.option_1}
+          placeholder="Optional One"
+          onChange={e => (record.option_1 = e.target.value)}
+        />
       ),
     },
     {
@@ -356,7 +399,12 @@ const AddBanner = () => {
       width: 150,
       ellipsis: true,
       render: (text, record) => (
-        <Input type="text" placeholder="Optional Two" defaultValue={record.option_2} onChange={e => (record.option_2 = e.target.value)} />
+        <Input
+          type="text"
+          placeholder="Optional Two"
+          defaultValue={record.option_2}
+          onChange={e => (record.option_2 = e.target.value)}
+        />
       ),
     },
     {
@@ -365,7 +413,12 @@ const AddBanner = () => {
       key: 'sort_order',
       width: 80,
       render: (text, record) => (
-        <Input type="number" defaultValue={record.sort_order} placeholder="Sort Order" onChange={e => (record.sort_order = parseInt(e.target.value))} />
+        <Input
+          type="number"
+          defaultValue={record.sort_order}
+          placeholder="Sort Order"
+          onChange={e => (record.sort_order = parseInt(e.target.value))}
+        />
       ),
     },
     {

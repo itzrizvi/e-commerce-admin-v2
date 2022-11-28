@@ -64,6 +64,7 @@ const AddBanner = () => {
             headers: {
               TENANTID: process.env.REACT_APP_TENANTID,
               Authorization: token,
+              'Apollo-Require-Preflight': 'true',
             },
           },
           refetchQueries: [
@@ -76,7 +77,7 @@ const AddBanner = () => {
                 },
               },
             },
-            'getAllBanners',
+            ['getAllBanners'],
           ],
         })
         .then(res => {
@@ -84,7 +85,6 @@ const AddBanner = () => {
           if (!data?.status) return toast.error('Something Went wrong !');
           const banner_id = data?.data?.id;
           bannerData.forEach((val, index) => {
-            console.log(val);
             apolloUploadClient
               .mutate({
                 mutation: bannerQuery.BANNER_ITEM_ADD,
@@ -112,12 +112,11 @@ const AddBanner = () => {
               })
               .then(_ => {
                 if (bannerData.length === index + 1) {
-                  history.push('/admin/banner/list');
+                  setTimeout(() => {
+                    history.push('/admin/banner/list');
+                  }, 1000);
                   setIsLoading(false);
                   toast.success('Banner Added Successfully!');
-                  setTimeout(() => {
-                    window.location.reload();
-                  }, 1000);
                 }
               })
               .catch(err => {
@@ -204,7 +203,7 @@ const AddBanner = () => {
       key: 'price',
       width: 100,
       render: (text, record) => (
-        <Input type="text" placeholder="Price" onChange={e => (record.price = e.target.value)} />
+        <Input type="number" placeholder="Price" onChange={e => (record.price = e.target.value)} />
       ),
     },
     {
@@ -213,11 +212,7 @@ const AddBanner = () => {
       key: 'sale_price',
       width: 100,
       render: (text, record) => (
-        <Input
-          type="text"
-          placeholder="Sale Price"
-          onChange={e => (record.sale_price = e.target.value)}
-        />
+        <Input type="number" placeholder="Sale Price" onChange={e => (record.sale_price = e.target.value)} />
       ),
     },
     {

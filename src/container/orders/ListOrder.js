@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Col, Spin, Input, Table, Switch } from 'antd';
+import { Row, Col, Spin, Input, Table, Switch, Tooltip  } from 'antd';
 import FeatherIcon from 'feather-icons-react';
 import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
@@ -42,15 +42,15 @@ const ListOrder = () => {
         // var order_data = [];
         var order_data = data.data.map(item => {
           const { customer, id, createdAt, orderStatus, payment, total } = item;
-          return ({
+          return {
             id,
             customer_name: customer.first_name + ' ' + customer.last_name,
             customer_email: customer.email,
             createdAt,
             orderStatus: orderStatus.name,
-            payment_name: payment?.name ?? "No Payment Method",
+            payment_name: payment?.name ?? 'No Payment Method',
             total,
-          });
+          };
         });
 
         setOrders(s => ({ ...s, data: order_data, error: '' }));
@@ -92,7 +92,7 @@ const ListOrder = () => {
       title: 'Total Amount',
       dataIndex: 'total',
       key: 'total',
-      align: "center",
+      align: 'center',
       width: 120,
       render: val => `$${val}`,
       sorter: (a, b) => (a.total > b.total ? 1 : -1),
@@ -101,16 +101,20 @@ const ListOrder = () => {
       title: 'Status',
       dataIndex: 'orderStatus',
       key: 'orderStatus',
-      align: "center",
+      align: 'center',
       width: 150,
-      render: (val) => (<span
-        style={{
-          borderRadius: "4em",
-          padding: ".5em 1.5em",
-          color: val === "Pending" ? '#feaf00' : (val === "Completed" ? '#2fb083' : ''),
-          background: val === "Pending" ? '#fef6e6' : (val === "Completed" ? '#ebf9f4' : '')
-        }}
-      >{val}</span>),
+      render: val => (
+        <span
+          style={{
+            borderRadius: '4em',
+            padding: '.5em 1.5em',
+            color: val === 'Pending' ? '#feaf00' : val === 'Completed' ? '#2fb083' : '',
+            background: val === 'Pending' ? '#fef6e6' : val === 'Completed' ? '#ebf9f4' : '',
+          }}
+        >
+          {val}
+        </span>
+      ),
       sorter: (a, b) => (a.orderStatus.toUpperCase() > b.orderStatus.toUpperCase() ? 1 : -1),
     },
     {
@@ -150,17 +154,21 @@ const ListOrder = () => {
     {
       title: 'Action',
       dataIndex: 'action',
-      width: 70,
-      align: 'right',
-      key: 'last_name',
+      width: 140,
+      align: 'center',
+      key: 'createdAt',
       render: (text, record) => (
         <>
-          {/* <Link to={`/admin/order/add?id=${text}`}> */}
-          <Link to={`/admin/order/add`}>
-            {/* <Button size="default" type="white" title='Edit'> */}
-            <FontAwesome name="edit" style={{ margin: '.5em 1em' }} />
-            {/* </Button> */}
+          <Tooltip placement="topLeft" title="Edit Order" color="cyan">
+            <Link to={`/admin/order/add`}>
+              <FontAwesome name="edit" style={{ margin: '.5em 1em' }} />
+            </Link>
+          </Tooltip>
+          <Tooltip placement="topLeft" title="Make Purchase Order" color="cyan">
+          <Link to={`/admin/po/add?order_id=${record.id}`}>
+            <FontAwesome name="cart-plus" style={{ margin: '.5em 1em' }} />
           </Link>
+          </Tooltip>
         </>
       ),
     },
