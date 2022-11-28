@@ -76,11 +76,11 @@ const ViewSingleMessage = () => {
                                             </tr>
                                             <tr>
                                                 <td><b>Email :</b></td>
-                                                <td>{singleMessage?.data?.name}</td>
+                                                <td><a href={`mailto:${singleMessage?.data?.email}`} >{singleMessage?.data?.email}</a></td>
                                             </tr>
                                             <tr>
                                                 <td><b>Phone :</b></td>
-                                                <td>{singleMessage?.data?.phone}</td>
+                                                <td><a href={`tel:${singleMessage?.data?.phone}`} >{singleMessage?.data?.phone}</a></td>
                                             </tr>
                                             <br />
                                             <tr>
