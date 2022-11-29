@@ -13,6 +13,7 @@ import { ellipsis, viewPermission } from '../../utility/utility';
 import Products from './Products';
 import { useSelector } from 'react-redux';
 const { TextArea } = Input;
+import { orderQuery } from '../../apollo/order';
 
 const AddPO = () => {
   viewPermission('purchase-order');
@@ -49,13 +50,49 @@ const AddPO = () => {
     if (!params || !params.order_id) return;
     if (check_post) {
       check_post = false;
-      setSelectedType('drop-shipping');
+      setSelectedType('drop_shipping');
       setSelectedOrder(parseInt(params.order_id));
       setOrderInput(true);
       form.setFieldsValue({
-        type: 'drop-shipping',
+        type: 'drop_shipping',
         order_id: parseInt(params.order_id),
       });
+
+      /* ------------------------- Get Single View Order ------------------------ */
+      apolloClient
+        .query({
+          query: orderQuery.GET_SINGLE_ORDER_ADMIN,
+          variables: {
+            query: {
+              order_id: parseInt(params.order_id),
+            },
+          },
+          context: {
+            headers: {
+              TENANTID: process.env.REACT_APP_TENANTID,
+              Authorization: token,
+            },
+          },
+        })
+        .then(res => {
+          const data = res.data.getSingleOrderAdmin;
+          if (!data.status) return;
+          const prods = data.data?.orderitems?.map(item => {
+            const {
+              quantity,
+              price,
+              product: { prod_name, id },
+            } = item;
+            return {
+              key: new Date().getTime() + Math.floor(Math.random() * 10) + 1,
+              id,
+              price,
+              quantity,
+              recieved_quantity: 0,
+            };
+          });
+          setProducts(prods);
+        });
     }
   }, []);
 
@@ -167,12 +204,17 @@ const AddPO = () => {
       const checkFalse = !(id && price && quantity && recieved_quantity !== '');
       return checkFalse;
     });
-    if (notValidate?.id) return toast.warning('Please Fill Products All of Data!');
+    if (notValidate) return toast.warning('Please Fill Products All of Data!');
     const newProduct = products.map(item => {
       const { key, ...newItem } = item;
       return newItem;
     });
-    const variables = { ...values, products: newProduct, tax_amount: parseFloat(values.tax_amount), order_id: parseInt(values.order_id) };
+    const variables = {
+      ...values,
+      products: newProduct,
+      tax_amount: parseFloat(values.tax_amount),
+      order_id: parseInt(values.order_id),
+    };
 
     // ADD NEW Vendor
     setIsLoading(true);
@@ -234,7 +276,7 @@ const AddPO = () => {
         if (!data?.status) return;
         let new_billing = [];
         let new_shipping = [];
-        if (selectedType === 'drop-shipping') {
+        if (selectedType === 'drop_shipping') {
           apolloClient
             .query({
               query: poQuery.GET_COMPANY_BILLING,
@@ -300,7 +342,7 @@ const AddPO = () => {
     setShippingAddresses([]);
     if (type === 'default') {
       setOrderInput(false);
-    } else if (type === 'drop-shipping') {
+    } else if (type === 'drop_shipping') {
       setOrderInput(true);
     }
   };
@@ -339,7 +381,7 @@ const AddPO = () => {
                       <Form.Item
                         initialvalues="default"
                         rules={[{ required: true, message: 'Please Select Type' }]}
-                        // name="type"
+                        name="type"
                         label="Type"
                       >
                         <Select
@@ -353,7 +395,7 @@ const AddPO = () => {
                           <Select.Option key="default" value="default" label="Default">
                             <div className="demo-option-label-item">Default</div>
                           </Select.Option>
-                          <Select.Option key="drop-shipping" value="drop-shipping" label="Drop Shipping">
+                          <Select.Option key="drop_shipping" value="drop_shipping" label="Drop Shipping">
                             <div className="demo-option-label-item">Drop Shipping</div>
                           </Select.Option>
                         </Select>
@@ -575,55 +617,6 @@ const AddPO = () => {
                         name="tax_amount"
                       >
                         <Input placeholder="Enter Tax Amount" type="number" />
-                      </Form.Item>
-
-                      <Form.Item
-                        rules={[{ required: true, message: 'Please Select Order Placed Via' }]}
-                        name="order_placed_via"
-                        label="Order Placed Via"
-                      >
-                        <Select
-                          size="middle"
-                          placeholder="Select Order Placed Via"
-                          initialvalues=""
-                          style={{ width: '100%' }}
-                          optionLabelProp="label"
-                        >
-                          <Select.Option key="email" value="email" label="Email">
-                            <div className="demo-option-label-item">Email</div>
-                          </Select.Option>
-
-                          <Select.Option key="phone" value="phone" label="Phone">
-                            <div className="demo-option-label-item">Phone</div>
-                          </Select.Option>
-                        </Select>
-                      </Form.Item>
-
-                      <Form.Item
-                        rules={[{ required: true, message: 'Please Select Status' }]}
-                        name="status"
-                        label="Status"
-                      >
-                        <Select
-                          size="middle"
-                          placeholder="Select Status"
-                          initialvalues=""
-                          style={{ width: '100%' }}
-                          optionLabelProp="label"
-                        >
-                          <Select.Option key="new" value="new" label="New">
-                            <div className="demo-option-label-item">New</div>
-                          </Select.Option>
-                          <Select.Option key="submitted" value="submitted" label="Submitted">
-                            <div className="demo-option-label-item">Submitted</div>
-                          </Select.Option>
-                          <Select.Option key="partially_received" value="partially_received" label="Partially Received">
-                            <div className="demo-option-label-item">Partially Received</div>
-                          </Select.Option>
-                          <Select.Option key="received" value="received" label="Received">
-                            <div className="demo-option-label-item">Received</div>
-                          </Select.Option>
-                        </Select>
                       </Form.Item>
                       <Form.Item name="comment" label="Comment">
                         <TextArea rows={4} placeholder="Enter Comment" />

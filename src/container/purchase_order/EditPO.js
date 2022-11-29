@@ -44,8 +44,6 @@ const EditPO = () => {
   const [products, setProducts] = useState([]);
   const [productOption, setProductOption] = useState([]);
 
-
-  
   // Get Order List with Address
   useEffect(() => {
     apolloClient
@@ -146,9 +144,16 @@ const EditPO = () => {
         const data = res?.data?.getSinglePurchaseOrder;
         if (!data.status) return;
         setSinglePO({ data: data?.data, loading: false, message: data?.message });
+        setSelectedType(data?.data?.type);
+        const po_order_type = data?.data?.type;
+        if (data?.data?.type === 'drop_shipping') {
+          setSelectedOrder(parseInt(data?.data?.order_id));
+          setOrderInput(true);
+          var po_selected_order = parseInt(data?.data?.order_id);
+        }
         form.setFieldsValue({
+          type: data?.data?.type,
           comment: data?.data?.comment,
-          order_placed_via: data?.data?.order_placed_via,
           shipping_method_id: data?.data?.shipping_method_id,
           payment_method_id: data?.data?.paymentmethod?.id,
           status: data?.data?.status,
@@ -156,6 +161,7 @@ const EditPO = () => {
           vendor_id: data?.data?.vendor?.id,
           vendor_billing_id: data?.data?.vendorBillingAddress?.id,
           vendor_shipping_id: data?.data?.vendorShippingAddress?.id,
+          order_id: parseInt(data?.data?.order_id),
         });
         let new_product_list = [];
         new_product_list = data?.data?.poProductlist?.map(item => {
@@ -188,12 +194,55 @@ const EditPO = () => {
             if (!data?.status) return;
             let new_billing = [];
             let new_shipping = [];
-            data?.data?.addresses.forEach(item => {
-              if (item.type === 'billing') new_billing.push(item);
-              else if (item.type === 'shipping') new_shipping.push(item);
-            });
-            setBillingAddresses(new_billing);
-            setShippingAddresses(new_shipping);
+            if (po_order_type === 'drop_shipping') {
+              apolloClient
+                .query({
+                  query: poQuery.GET_COMPANY_BILLING,
+                  context: {
+                    headers: {
+                      TENANTID: process.env.REACT_APP_TENANTID,
+                      Authorization: token,
+                    },
+                  },
+                })
+                .then(res => {
+                  const data = res?.data?.getCompanyInfo;
+                  if (!data?.status) return;
+                  setBillingAddresses(data?.data?.billingAddresses);
+                });
+              if (orderData.length > 0) {
+                const get_actual_data = orderData.filter(item => item.id === po_selected_order);
+                const customer_id = parseInt(get_actual_data[0]?.customer.id);
+                apolloClient
+                  .query({
+                    query: poQuery.GET_ADDRESS_BY_CUSTOMER,
+                    variables: {
+                      query: {
+                        customer_id,
+                      },
+                    },
+                    context: {
+                      headers: {
+                        TENANTID: process.env.REACT_APP_TENANTID,
+                        Authorization: token,
+                      },
+                    },
+                  })
+                  .then(res => {
+                    const data = res?.data?.getAddressListByCustomerID;
+                    if (!data?.status) return;
+                    const shipping_address = data?.data.filter(item => item.type === 'shipping');
+                    setShippingAddresses(shipping_address);
+                  });
+              }
+            } else {
+              data?.data?.addresses.forEach(item => {
+                if (item.type === 'billing') new_billing.push(item);
+                else if (item.type === 'shipping') new_shipping.push(item);
+              });
+              setBillingAddresses(new_billing);
+              setShippingAddresses(new_shipping);
+            }
           })
           .catch(err => {
             console.log(err);
@@ -207,7 +256,7 @@ const EditPO = () => {
       .finally(() => {
         setSinglePO(s => ({ ...s, isLoading: false }));
       });
-  }, []);
+  }, [orderData]);
   /* ------------------------- Get Single PO Order End ------------------------ */
 
   const handleSubmit = values => {
@@ -216,9 +265,11 @@ const EditPO = () => {
     const notValidate = products.find(item => {
       const { id, price, quantity, recieved_quantity } = item;
       const checkFalse = !(id && price && quantity && recieved_quantity !== '');
+      console.log("🚀 ~ file: EditPO.js ~ line 271 ~ notValidate ~ checkFalse", checkFalse)
       return checkFalse;
     });
-    if (notValidate?.id) return toast.warning('Please Fill Products All of Data!');
+    console.log("🚀 ~ file: EditPO.js ~ line 272 ~ notValidate ~ notValidate", notValidate)
+    if (notValidate?.key) return toast.warning('Please Fill Products All of Data!');
     const newProduct = products.map(item => {
       const { key, ...newItem } = item;
       return newItem;
@@ -326,7 +377,7 @@ const EditPO = () => {
     setShippingAddresses([]);
     if (type === 'default') {
       setOrderInput(false);
-    } else if (type === 'drop-shipping') {
+    } else if (type === 'drop_shipping') {
       setOrderInput(true);
     }
   };
@@ -361,16 +412,10 @@ const EditPO = () => {
                 >
                   <Tabs>
                     <Tabs.TabPane tab="Vendor Info" key="vendor">
-                      <Form.Item
-                        initialvalues="default"
-                        rules={[{ required: true, message: 'Please Select Type' }]}
-                        // name="type"
-                        label="Type"
-                      >
+                      <Form.Item rules={[{ required: true, message: 'Please Select Type' }]} name="type" label="Type">
                         <Select
                           size="middle"
                           placeholder="Select Type"
-                          defaultValue="default"
                           onChange={handleTypeChange}
                           style={{ width: '100%' }}
                           optionLabelProp="label"
@@ -378,7 +423,7 @@ const EditPO = () => {
                           <Select.Option key="default" value="default" label="Default">
                             <div className="demo-option-label-item">Default</div>
                           </Select.Option>
-                          <Select.Option key="drop-shipping" value="drop-shipping" label="Drop Shipping">
+                          <Select.Option key="drop_shipping" value="drop_shipping" label="Drop Shipping">
                             <div className="demo-option-label-item">Drop Shipping</div>
                           </Select.Option>
                         </Select>
@@ -408,7 +453,6 @@ const EditPO = () => {
                         <Select
                           size="middle"
                           placeholder="Select Vendor"
-                          initialvalues=""
                           onChange={handleVendorChange}
                           style={{ width: '100%' }}
                           optionLabelProp="label"
@@ -598,55 +642,6 @@ const EditPO = () => {
                         name="tax_amount"
                       >
                         <Input placeholder="Enter Tax Amount" type="number" />
-                      </Form.Item>
-
-                      <Form.Item
-                        rules={[{ required: true, message: 'Please Select Order Placed Via' }]}
-                        name="order_placed_via"
-                        label="Order Placed Via"
-                      >
-                        <Select
-                          size="middle"
-                          placeholder="Select Order Placed Via"
-                          initialvalues=""
-                          style={{ width: '100%' }}
-                          optionLabelProp="label"
-                        >
-                          <Select.Option key="email" value="email" label="Email">
-                            <div className="demo-option-label-item">Email</div>
-                          </Select.Option>
-
-                          <Select.Option key="phone" value="phone" label="Phone">
-                            <div className="demo-option-label-item">Phone</div>
-                          </Select.Option>
-                        </Select>
-                      </Form.Item>
-
-                      <Form.Item
-                        rules={[{ required: true, message: 'Please Select Status' }]}
-                        name="status"
-                        label="Status"
-                      >
-                        <Select
-                          size="middle"
-                          placeholder="Select Status"
-                          initialvalues=""
-                          style={{ width: '100%' }}
-                          optionLabelProp="label"
-                        >
-                          <Select.Option key="new" value="new" label="New">
-                            <div className="demo-option-label-item">New</div>
-                          </Select.Option>
-                          <Select.Option key="submitted" value="submitted" label="Submitted">
-                            <div className="demo-option-label-item">Submitted</div>
-                          </Select.Option>
-                          <Select.Option key="partially_received" value="partially_received" label="Partially Received">
-                            <div className="demo-option-label-item">Partially Received</div>
-                          </Select.Option>
-                          <Select.Option key="received" value="received" label="Received">
-                            <div className="demo-option-label-item">Received</div>
-                          </Select.Option>
-                        </Select>
                       </Form.Item>
                       <Form.Item name="comment" label="Comment">
                         <TextArea rows={4} placeholder="Enter Comment" />
