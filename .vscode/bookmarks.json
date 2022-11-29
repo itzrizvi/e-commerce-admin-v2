@@ -4,7 +4,7 @@
 			"path": "src/routes/admin/index.js",
 			"bookmarks": [
 				{
-					"line": 29,
+					"line": 30,
 					"column": 13,
 					"label": "-index routes"
 				}
@@ -17,16 +17,6 @@
 					"line": 54,
 					"column": 67,
 					"label": "-side menue"
-				}
-			]
-		},
-		{
-			"path": "src/redux/authentication/actionCreator.js",
-			"bookmarks": [
-				{
-					"line": 12,
-					"column": 6,
-					"label": "-loginA-Creator"
 				}
 			]
 		},
@@ -51,27 +41,17 @@
 			]
 		},
 		{
-			"path": "src/components/utilities/auth-info/info.js",
+			"path": "src/container/orders/ViewOrder.js",
 			"bookmarks": [
 				{
-					"line": 25,
-					"column": 23,
-					"label": "--log out--"
-				}
-			]
-		},
-		{
-			"path": "src/utility/invoice/invoice1.js",
-			"bookmarks": [
-				{
-					"line": 79,
-					"column": 20,
-					"label": "-2"
+					"line": 204,
+					"column": 56,
+					"label": "-222"
 				},
 				{
-					"line": 330,
-					"column": 43,
-					"label": "-1"
+					"line": 265,
+					"column": 52,
+					"label": "-1111"
 				}
 			]
 		}

@@ -80,7 +80,8 @@ const ViewOrder = () => {
     const token = useSelector(state => state.auth.token);
     const [singleOrder, setSingleOrder] = useState({ data: {}, isLoading: true });
     const [subTotal, setSubTotal] = useState(0)
-    useEffect(() => {
+
+    useEffect(() => { // get Single Order
         apolloClient
             .query({
                 query: orderQuery.GET_SINGLE_ORDER_ADMIN,
@@ -136,14 +137,50 @@ const ViewOrder = () => {
                                 </div>
                             ) : (
                                 <>
+                                    <div style={{
+                                        display: 'flex',
+                                        justifyContent: 'space-between'
+                                    }}>
+                                        <div>
+                                            <p><b>Customer ID: </b>{singleOrder.data.id}</p>
+                                            <p><b>Customer Name: </b>
+                                                {singleOrder?.data?.customer?.first_name} {singleOrder?.data?.customer?.last_name}</p>
+                                            <p><b>Email: </b> {singleOrder?.data?.customer?.email} </p>
+                                        </div>
+                                        <PDFDownloadLink
+                                            document={
+                                                <Invoice1 invoice={
+                                                    {
+                                                        id: singleOrder.data?.id,
+                                                        date: "January 13, 2022",
+                                                        subTotal: subTotal,
+                                                        shippingCost: singleOrder.data?.shipping_cost,
+                                                        tax: singleOrder.data?.tax_amount,
+                                                        discount: singleOrder.data?.discount_amount,
+                                                        total: subTotal + singleOrder.data?.shipping_cost + singleOrder.data?.tax_amount - singleOrder.data?.discount_amount,
+                                                        note: "Free Shipping with 30 days money-back guarantee"
+                                                    }
+                                                }
+                                                    billing={singleOrder?.data?.payment?.billingAddress}
+                                                    product={singleOrder.data?.orderitems}
+                                                />
+                                            }
+                                            fileName={`PrimeServerParts#IN_${singleOrder.data?.id}`}
+                                        >
+                                            {({ loading }) => (loading
+                                                ? <Button size="small" title="Add Manufacture" type="primary">
+                                                    Generating Invoice
+                                                </Button>
+                                                : <Button size="small" title="Add Manufacture" type="primary">
+                                                    Download Invoice
+                                                </Button>
 
-                                    <div>
-                                        <p><b>Customer ID: </b>{singleOrder.data.id}</p>
-                                        <p><b>Customer Name: </b>
-                                            {singleOrder?.data?.customer?.first_name} {singleOrder?.data?.customer?.last_name}</p>
-                                        <p><b>Email: </b> {singleOrder?.data?.customer?.email} </p>
+                                            )}
+                                        </PDFDownloadLink>
+
+
                                     </div>
-                                    <br /><br />
+                                    <br /><br /><br /><br />
                                     <div className={"productTable"} >
                                         <Table
                                             columns={column}
@@ -167,8 +204,9 @@ const ViewOrder = () => {
                                             <p><b>SUBTOTAL</b>${subTotal}</p>
                                             <p><b>Shipping Cost</b>${singleOrder.data?.shipping_cost}</p>
                                             <p><b>TAX</b>${singleOrder.data?.tax_amount}</p>
+                                            <p><b>DISCOUNT</b>${singleOrder.data?.discount_amount}</p>
                                             <p><b>TOTAL</b><b>$
-                                                {subTotal + singleOrder.data?.shipping_cost + singleOrder.data?.tax_amount}
+                                                {subTotal + singleOrder.data?.shipping_cost + singleOrder.data?.tax_amount - singleOrder.data?.discount_amount}
                                             </b></p>
                                         </div>
                                     </div>
@@ -208,21 +246,32 @@ const ViewOrder = () => {
                         </Cards>
                     </Col>
                     <Col sm={24} xs={24}>
-                        {/* <Invoice /> */}
-                        <PDFDownloadLink document={<Invoice1 />}>
-                            {({ loading }) => (loading
-                                ? <button>Loading....</button>
-                                : <button>Download</button>
 
-                            )}
-                        </PDFDownloadLink>
+                        {/* disabled: Preview pdf */}
 
-                        {/* <PDFViewer
+                        {/* {!singleOrder.isLoading && <PDFViewer
                             style={{
                                 height: '1000px',
                                 width: '1500px'
                             }}
-                        ><Invoice1 /></PDFViewer> */}
+                        >
+                            <Invoice1
+                                invoice={
+                                    {
+                                        id: singleOrder.data?.id,
+                                        date: "January 13, 2022",
+                                        subTotal: subTotal,
+                                        shippingCost: singleOrder.data?.shipping_cost,
+                                        tax: singleOrder.data?.tax_amount,
+                                        discount: singleOrder.data?.discount_amount,
+                                        total: subTotal + singleOrder.data?.shipping_cost + singleOrder.data?.tax_amount - singleOrder.data?.discount_amount,
+                                        note: "Free Shipping with 30 days money-back guarantee"
+                                    }
+                                }
+                                billing={singleOrder?.data?.payment?.billingAddress}
+                                product={singleOrder.data?.orderitems}
+                            />
+                        </PDFViewer>} */}
 
                     </Col>
                 </Row>

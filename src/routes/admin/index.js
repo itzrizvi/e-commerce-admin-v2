@@ -20,6 +20,7 @@ import ProductCondition from './product_condition';
 import ProductAvailabilityStatus from './product_availability_status';
 import CompanyInfo from '../../container/companyInfo/companyInfo';
 import NotFound403 from '../../container/noFound/403';
+import SupportsRoutes from './supports';
 
 const Admin = () => {
   const { path } = useRouteMatch();
@@ -44,6 +45,7 @@ const Admin = () => {
         <Route path={`${path}/categories`} component={Categories} />
         <Route path={`${path}/attributes`} component={Attributes} />
         <Route path={`${path}/customers`} component={Customers} />
+        <Route path={`${path}/supports`} component={SupportsRoutes} />
         <Route path={`${path}/banner`} component={Banner} />
         <Route path={`${path}/order`} component={Order} />
         <Route path={`${path}/vendor`} component={Vendors} />

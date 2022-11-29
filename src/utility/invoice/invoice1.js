@@ -70,69 +70,7 @@ const style = StyleSheet.create({
 
 })
 
-const Invoice1 = () => {
-
-    const invoice = {
-        id: "1002",
-        date: "January 13, 2022",
-        subTotal: 2342,
-        shippingCost: 2342,
-        tax: 2342,
-        discount: 0,
-        note: "Free Shipping with 30 days money-back guarantee"
-    }
-
-
-
-    const billing = {
-        id: 10001,
-        name: "Denial Brine",
-        email: "denialbrine@gmail.com",
-        address1: "Address One",
-        address2: "Address Two",
-        phone: "0655",
-        fax: "ssaa@fjagjf.com",
-        email: "test2@gmail.com",
-        city: "Test City",
-        state: "State",
-        zip_code: "1207",
-        country: "United State",
-        type: "shipping",
-    }
-    const shipping = { ...billing }
-
-    const product = [
-        {
-            id: 33,
-            order_id: 5,
-            price: 50,
-            quantity: 5,
-            product: {
-                id: 10002,
-                prod_name: "SSD 2"
-            }
-        },
-        {
-            id: 34,
-            order_id: 5,
-            price: 40,
-            quantity: 4,
-            product: {
-                id: 10003,
-                prod_name: "SSD 3"
-            }
-        },
-        {
-            id: 35,
-            order_id: 5,
-            price: 50,
-            quantity: 4,
-            product: {
-                id: 10001,
-                prod_name: "SSD 11"
-            }
-        }
-    ]
+const Invoice1 = ({ invoice, billing, product }) => {
 
     return (
         <Document>
@@ -210,7 +148,7 @@ const Invoice1 = () => {
                             style={[style.invoice]}
                         >
                             <Text style={[style.invoiceTitle]}>INVOICE #</Text>
-                            <Text style={style.invoiceValue}>{invoice.id}</Text>
+                            <Text style={style.invoiceValue}>IN-{invoice.id}</Text>
                         </View>
                         <View
                             style={[style.invoice]}

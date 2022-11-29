@@ -3,21 +3,8 @@ import React from 'react';
 import { useState } from 'react';
 import FeatherIcon from 'feather-icons-react';
 
-// const BillingAdderess = ({ initialData1, billingAddresses, setBillingAddresses }) => {
-const BillingAdderess = () => {
-    const initialData1 = {
-        id: new Date().getTime(),
-        address1: "",
-        address1: "",
-        country: "",
-        city: "",
-        state: "",
-        zip_code: "",
-        // email: "",
-        fax: "",
-        // phone: "",
-    }
-    const [billingAddresses, setBillingAddresses] = useState([initialData1])
+// const BillingAdderess = ({ initialData, billingAddresses, setBillingAddresses }) => {
+const BillingAdderess = ({ initialData, billingAddress, setBillingAddress }) => {
     const column = [
         {
             title: 'Address 1',
@@ -83,11 +70,11 @@ const BillingAdderess = () => {
 
     // Adding new row on table
     const addNewRow = () => {
-        setBillingAddresses(prevState => [...prevState, { ...initialData1, id: new Date().getTime() }])
+        setBillingAddress(prevState => [...prevState, { ...initialData, id: new Date().getTime() }])
     }
 
     const removeRow = (id) => {
-        setBillingAddresses(prevState => {
+        setBillingAddress(prevState => {
             return prevState.filter((item) => item.id !== id)
         })
     }
@@ -100,7 +87,7 @@ const BillingAdderess = () => {
                 pagination={false}
                 rowKey={'id'}
                 size="small"
-                dataSource={billingAddresses}
+                dataSource={billingAddress}
             />
             <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '10px', marginBottom: '10px' }}>
                 <Button title="Add Address" htmlType="button" type="primary" onClick={addNewRow} style={{ marginRight: ".5em" }}>
