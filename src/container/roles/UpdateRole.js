@@ -297,8 +297,9 @@ const UpdateRole = () => {
                           {isLoading ? 'Processing' : 'Save'}
                         </Button>
                         <Button
-                          type="white"
-                          size="large"
+                          style={{ marginLeft: 10 }}
+                          type="light"
+                          size="default"
                           onClick={() => {
                             history.push('/admin/roles/list');
                           }}

@@ -82,7 +82,7 @@ const Password = () => {
                       Change Password
                     </Button>
                     &nbsp; &nbsp;
-                    <Button size="default" onClick={handleCancel} type="light">
+                    <Button style={{ marginLeft: 10 }} type="light" size="default" onClick={handleCancel} >
                       Cancel
                     </Button>
                   </div>

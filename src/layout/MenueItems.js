@@ -35,9 +35,10 @@ const MenuItems = ({ darkMode, toggleCollapsed, topMenu }) => {
       defaultSelectedKeys={
         !topMenu
           ? [
-            `${mainPathSplit.length === 1 ? 'home' : mainPathSplit.length === 2 ? mainPathSplit[1] : mainPathSplit[2]
-            }`,
-          ]
+              `${
+                mainPathSplit.length === 1 ? 'home' : mainPathSplit.length === 2 ? mainPathSplit[1] : mainPathSplit[2]
+              }`,
+            ]
           : []
       }
       defaultOpenKeys={!topMenu ? [`${mainPathSplit.length > 2 ? mainPathSplit[1] : 'dashboard'}`] : []}
@@ -87,59 +88,59 @@ const MenuItems = ({ darkMode, toggleCollapsed, topMenu }) => {
         menuPermission('product') ||
         menuPermission('product-availability-status') ||
         menuPermission('product-condition')) && (
-          <SubMenu key="products" icon={!topMenu && <FeatherIcon icon="shopping-cart" />} title="Products">
-            {menuPermission('coupon') && (
-              <Menu.Item key="listCoupon">
-                <NavLink onClick={toggleCollapsed} to={`${path}/products/coupon`}>
-                  Coupons
-                </NavLink>
-              </Menu.Item>
-            )}
-            {menuPermission('attribute') && (
-              <Menu.Item key="listAttribute">
-                <NavLink onClick={toggleCollapsed} to={`${path}/attributes/list`}>
-                  Attributes
-                </NavLink>
-              </Menu.Item>
-            )}
-            {menuPermission('attribute-group') && (
-              <Menu.Item key="listAttributegroup">
-                <NavLink onClick={toggleCollapsed} to={`${path}/attributes/list-group`}>
-                  Attribute Groups
-                </NavLink>
-              </Menu.Item>
-            )}
-            {menuPermission('category') && (
-              <Menu.Item key="listCategory">
-                <NavLink onClick={toggleCollapsed} to={`${path}/categories/list`}>
-                  Category
-                </NavLink>
-              </Menu.Item>
-            )}
-            {menuPermission('product') && (
-              <Menu.Item key="products_list">
-                <NavLink onClick={toggleCollapsed} to={`${path}/products/list`}>
-                  Products
-                </NavLink>
-              </Menu.Item>
-            )}
+        <SubMenu key="products" icon={!topMenu && <FeatherIcon icon="shopping-cart" />} title="Products">
+          {menuPermission('coupon') && (
+            <Menu.Item key="listCoupon">
+              <NavLink onClick={toggleCollapsed} to={`${path}/products/coupon`}>
+                Coupons
+              </NavLink>
+            </Menu.Item>
+          )}
+          {menuPermission('attribute') && (
+            <Menu.Item key="listAttribute">
+              <NavLink onClick={toggleCollapsed} to={`${path}/attributes/list`}>
+                Attributes
+              </NavLink>
+            </Menu.Item>
+          )}
+          {menuPermission('attribute-group') && (
+            <Menu.Item key="listAttributegroup">
+              <NavLink onClick={toggleCollapsed} to={`${path}/attributes/list-group`}>
+                Attribute Groups
+              </NavLink>
+            </Menu.Item>
+          )}
+          {menuPermission('category') && (
+            <Menu.Item key="listCategory">
+              <NavLink onClick={toggleCollapsed} to={`${path}/categories/list`}>
+                Category
+              </NavLink>
+            </Menu.Item>
+          )}
+          {menuPermission('product') && (
+            <Menu.Item key="products_list">
+              <NavLink onClick={toggleCollapsed} to={`${path}/products/list`}>
+                Products
+              </NavLink>
+            </Menu.Item>
+          )}
 
-            {menuPermission('product-condition') && (
-              <Menu.Item key="product_condition">
-                <NavLink onClick={toggleCollapsed} to={`${path}/product-condition/list`}>
-                  Product Conditions
-                </NavLink>
-              </Menu.Item>
-            )}
-            {menuPermission('product-availability-status') && (
-              <Menu.Item key="product-availability-status">
-                <NavLink onClick={toggleCollapsed} to={`${path}/product-availability-status/list`}>
-                  Product Availability Statuses
-                </NavLink>
-              </Menu.Item>
-            )}
-          </SubMenu>
-        )}
+          {menuPermission('product-condition') && (
+            <Menu.Item key="product_condition">
+              <NavLink onClick={toggleCollapsed} to={`${path}/product-condition/list`}>
+                Product Conditions
+              </NavLink>
+            </Menu.Item>
+          )}
+          {menuPermission('product-availability-status') && (
+            <Menu.Item key="product-availability-status">
+              <NavLink onClick={toggleCollapsed} to={`${path}/product-availability-status/list`}>
+                Product Availability Statuses
+              </NavLink>
+            </Menu.Item>
+          )}
+        </SubMenu>
+      )}
 
       {(menuPermission('customer') || menuPermission('customer-group')) && (
         <SubMenu key="customers" icon={!topMenu && <FeatherIcon icon="user" />} title="Customers">
@@ -205,6 +206,16 @@ const MenuItems = ({ darkMode, toggleCollapsed, topMenu }) => {
           <Menu.Item key="purchase-order">
             <NavLink onClick={toggleCollapsed} to={`${path}/po/list`}>
               Purchase Order
+            </NavLink>
+          </Menu.Item>
+        </SubMenu>
+      )}
+
+      {menuPermission('receiving-product') && (
+        <SubMenu key="receiving-product" icon={!topMenu && <FeatherIcon icon="anchor" />} title="Receiving Product">
+          <Menu.Item key="receiving-product">
+            <NavLink onClick={toggleCollapsed} to={`${path}/rp/list`}>
+              Receiving Product
             </NavLink>
           </Menu.Item>
         </SubMenu>

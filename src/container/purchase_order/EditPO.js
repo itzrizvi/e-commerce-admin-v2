@@ -143,7 +143,7 @@ const EditPO = () => {
       .then(res => {
         const data = res?.data?.getSinglePurchaseOrder;
         if (!data.status) return;
-        setSinglePO({ data: data?.data, loading: false, message: data?.message });
+        setSinglePO({ data: data?.data, isLoading: false, message: data?.message });
         setSelectedType(data?.data?.type);
         const po_order_type = data?.data?.type;
         if (data?.data?.type === 'drop_shipping') {
@@ -251,7 +251,7 @@ const EditPO = () => {
       })
       .catch(err => {
         console.log(err);
-        setSinglePO({ data: {}, loading: false, error: 'Something went worng' });
+        setSinglePO({ data: {}, isLoading: false, error: 'Something went worng' });
       })
       .finally(() => {
         setSinglePO(s => ({ ...s, isLoading: false }));
@@ -265,10 +265,8 @@ const EditPO = () => {
     const notValidate = products.find(item => {
       const { id, price, quantity, recieved_quantity } = item;
       const checkFalse = !(id && price && quantity && recieved_quantity !== '');
-      console.log("🚀 ~ file: EditPO.js ~ line 271 ~ notValidate ~ checkFalse", checkFalse)
       return checkFalse;
     });
-    console.log("🚀 ~ file: EditPO.js ~ line 272 ~ notValidate ~ notValidate", notValidate)
     if (notValidate?.key) return toast.warning('Please Fill Products All of Data!');
     const newProduct = products.map(item => {
       const { key, ...newItem } = item;
@@ -281,7 +279,6 @@ const EditPO = () => {
       id: singlePO.data.id,
       po_id: singlePO.data.po_id,
     };
-    console.log('🚀 ~ file: EditPO.js ~ line 190 ~ handleSubmit ~ singlePO.id', singlePO);
 
     // ADD NEW Vendor
     setIsLoading(true);
@@ -664,7 +661,7 @@ const EditPO = () => {
                         {isLoading ? 'Processing' : 'Save'}
                       </Button>
                       <Link to="/admin/po/list">
-                        <Button type="white" size="large">
+                        <Button style={{ marginLeft: 10 }} type="light" size="default">
                           Cancel
                         </Button>
                       </Link>

@@ -146,7 +146,7 @@ const Profile = () => {
                 </Button>
                 &nbsp; &nbsp;
                 <Link to="/admin" >
-                  <Button size="default" type="light">
+                  <Button style={{ marginLeft: 10 }} type="light" size="default">
                     Cancel
                   </Button>
                 </Link>

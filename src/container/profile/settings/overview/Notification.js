@@ -175,7 +175,7 @@ const Notification = () => {
             Update Email Notifications
           </Button>
           &nbsp; &nbsp;
-          <Button size="default" type="light">
+          <Button style={{ marginLeft: 10 }} type="light" size="default">
             Cancel
           </Button>
         </div>

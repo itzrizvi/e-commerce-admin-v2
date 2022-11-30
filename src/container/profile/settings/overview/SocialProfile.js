@@ -125,7 +125,7 @@ const SocialProfile = () => {
                     Update Social Profile
                   </Button>
                   &nbsp; &nbsp;
-                  <Button size="default" onClick={handleCancel} type="light">
+                  <Button onClick={handleCancel} style={{ marginLeft: 10 }} type="light" size="default">
                     Cancel
                   </Button>
                 </div>

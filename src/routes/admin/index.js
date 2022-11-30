@@ -16,6 +16,7 @@ import Banner from './banner';
 import Order from './order';
 import Vendors from './vendors';
 import PORoutes from './purchase_order';
+import RPRoutes from './receiving_product';
 import ProductCondition from './product_condition';
 import ProductAvailabilityStatus from './product_availability_status';
 import CompanyInfo from '../../container/companyInfo/companyInfo';
@@ -53,6 +54,7 @@ const Admin = () => {
         <Route path={`${path}/product-availability-status`} component={ProductAvailabilityStatus} />
         <Route path={`${path}/company-info`} component={CompanyInfo} />
         <Route path={`${path}/po`} component={PORoutes} />
+        <Route path={`${path}/rp`} component={RPRoutes} />
         <Route path={`${path}/403`} component={NotFound403} />
       </Suspense>
     </Switch>

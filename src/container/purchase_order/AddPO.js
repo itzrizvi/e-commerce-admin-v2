@@ -639,7 +639,7 @@ const AddPO = () => {
                         {isLoading ? 'Processing' : 'Save'}
                       </Button>
                       <Link to="/admin/po/list">
-                        <Button type="white" size="large">
+                        <Button style={{ marginLeft: 10 }} type="light" size="default">
                           Cancel
                         </Button>
                       </Link>

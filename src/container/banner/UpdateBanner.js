@@ -113,10 +113,28 @@ const AddBanner = () => {
                 },
               },
             },
-            ['getAllBanners'],
+            {
+              query: bannerQuery.GET_SINGLE_BANNER,
+              variables: {
+                banner_id: parseInt(params?.id),
+              },
+              context: {
+                headers: {
+                  TENANTID: process.env.REACT_APP_TENANTID,
+                  Authorization: token,
+                },
+              },
+            }
           ],
         })
         .then(res => {
+          if (bannerData.length === 0) {
+            setIsLoading(false);
+            toast.success('Banner Updated Successfully!');
+            setTimeout(() => {
+              history.push('/admin/banner/list');
+            }, 1000);
+          }
           bannerData.forEach((val, index) => {
             if (val?.isNew) {
               apolloUploadClient
