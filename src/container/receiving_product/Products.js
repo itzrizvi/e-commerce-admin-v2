@@ -72,31 +72,8 @@ const Products = ({ initialData, products, setProducts }) => {
           onChange={(e) => record.serials = e}
         />
       ),
-    },
-    {
-      title: 'Action',
-      dataIndex: 'action',
-      key: 'action',
-      width: 120,
-      render: (text, record) => (
-        <Button size="" title="Remove" type="danger" onClick={() => removeRow(record.key)}>
-          <FeatherIcon icon="minus" />
-        </Button>
-      ),
-    },
+    }
   ];
-
-  // Adding new row on table
-  const addNewRow = () => {
-    const key = new Date().getTime();
-    setProducts(prevState => [...prevState, { ...initialData, key }]);
-  };
-
-  const removeRow = key => {
-    setProducts(prevState => {
-      return prevState.filter(item => item.key !== key);
-    });
-  };
 
   return (
     <div>
@@ -108,17 +85,6 @@ const Products = ({ initialData, products, setProducts }) => {
         size="small"
         dataSource={products}
       />
-      <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '10px', marginBottom: '10px' }}>
-        <Button
-          title="Add Product"
-          htmlType="button"
-          type="primary"
-          onClick={addNewRow}
-          style={{ marginRight: '.5em' }}
-        >
-          <FeatherIcon icon="plus" />
-        </Button>
-      </div>
     </div>
   );
 };

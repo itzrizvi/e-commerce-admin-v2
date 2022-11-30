@@ -39,11 +39,27 @@ const ListRP = () => {
             Authorization: token,
           },
         },
+        refetchQueries: [
+          {
+            query: receivingProductQuery.GET_SINGLE_RECEIVING_PRODUCT,
+            variables: {
+              query: {
+                id,
+              },
+            },
+            context: {
+              headers: {
+                TENANTID: process.env.REACT_APP_TENANTID,
+                Authorization: token,
+              },
+            },
+          },
+        ],
       })
       .then(res => {
         const data = res?.data?.updateReceiving;
         if (!data.status) return toast.error(data.message);
-        toast.success("Status Updated successfully");
+        toast.success('Status Updated successfully');
       })
       .catch(err => {
         console.log('got error on updateStatus', err);

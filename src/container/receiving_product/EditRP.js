@@ -79,6 +79,7 @@ const EditRP = () => {
               };
             }),
             prod_thumbnail: item.product.prod_thumbnail,
+            key: item.id
           };
         });
         setProducts(prod_list);
@@ -109,7 +110,7 @@ const EditRP = () => {
       return {
         prod_id,
         quantity,
-        recieved_quantity: parseInt(recieved_quantity),
+        received_quantity: parseInt(recieved_quantity),
         is_serial,
         serials,
       };
@@ -131,6 +132,31 @@ const EditRP = () => {
             Authorization: token,
           },
         },
+        refetchQueries: [
+          {
+            query: receivingProductQuery.GET_SINGLE_RECEIVING_PRODUCT,
+            variables: {
+              query: {
+                id: parseInt(params?.id),
+              },
+            },
+            context: {
+              headers: {
+                TENANTID: process.env.REACT_APP_TENANTID,
+                Authorization: token,
+              },
+            },
+          },
+          {
+            query: receivingProductQuery.GET_ALL_RP,
+            context: {
+              headers: {
+                TENANTID: process.env.REACT_APP_TENANTID,
+                Authorization: token,
+              },
+            },
+          },
+        ],
       })
       .then(res => {
         const data = res?.data?.updateReceiving;

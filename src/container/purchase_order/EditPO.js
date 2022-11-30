@@ -147,10 +147,10 @@ const EditPO = () => {
         setSelectedType(data?.data?.type);
         const po_order_type = data?.data?.type;
         if (data?.data?.type === 'drop_shipping') {
-          setSelectedOrder(parseInt(data?.data?.order_id));
           setOrderInput(true);
           var po_selected_order = parseInt(data?.data?.order_id);
         }
+        setSelectedOrder(parseInt(data?.data?.order_id));
         form.setFieldsValue({
           type: data?.data?.type,
           comment: data?.data?.comment,
@@ -302,7 +302,20 @@ const EditPO = () => {
               },
             },
           },
-          ['getPurchaseOrderList'],
+          {
+            query: poQuery.GET_SINGLE_PO,
+            variables: {
+              query: {
+                id: parseInt(params?.id),
+              },
+            },
+            context: {
+              headers: {
+                TENANTID: process.env.REACT_APP_TENANTID,
+                Authorization: token,
+              },
+            },
+          },
         ],
       })
       .then(res => {
@@ -321,54 +334,104 @@ const EditPO = () => {
 
   const handleVendorChange = e => {
     setSinglePO(s => ({ ...s, isLoading: true }));
-    if (singlePO?.data?.vendor?.id === e) {
-      form.setFieldsValue({
-        vendor_billing_id: singlePO?.data?.vendorBillingAddress?.id,
-        vendor_shipping_id: singlePO?.data?.vendorShippingAddress?.id,
-      });
-    } else {
-      form.setFieldsValue({
-        vendor_billing_id: '',
-        vendor_shipping_id: '',
-      });
-    }
-
-    apolloClient
-      .query({
-        query: vendorQuery.GET_SINGLE_VENDOR,
-        variables: {
-          query: { id: e },
-        },
-        context: {
-          headers: {
-            TENANTID: process.env.REACT_APP_TENANTID,
-            Authorization: token,
+    if (selectedType === 'drop_shipping') {
+      apolloClient
+        .query({
+          query: poQuery.GET_COMPANY_BILLING,
+          context: {
+            headers: {
+              TENANTID: process.env.REACT_APP_TENANTID,
+              Authorization: token,
+            },
           },
-        },
-      })
-      .then(res => {
-        const data = res?.data?.getSingleVendor;
-        if (!data?.status) return;
-        let new_billing = [];
-        let new_shipping = [];
-        data?.data?.addresses.forEach(item => {
-          if (item.type === 'billing') new_billing.push(item);
-          else if (item.type === 'shipping') new_shipping.push(item);
+        })
+        .then(res => {
+          const data = res?.data?.getCompanyInfo;
+          if (!data?.status) return;
+          setBillingAddresses(data?.data?.billingAddresses);
+        })
+        .finally(() => {
+          setSinglePO(s => ({ ...s, isLoading: false }));
         });
-        setBillingAddresses(new_billing);
-        setShippingAddresses(new_shipping);
-        setSinglePO(s => ({ ...s, isLoading: false }));
-      })
-      .catch(err => {
-        console.log(err);
-      });
+      if (orderData.length > 0) {
+        setSinglePO(s => ({ ...s, isLoading: true }));
+        const get_actual_data = orderData.filter(item => item.id === selectedOrder);
+        const customer_id = parseInt(get_actual_data[0]?.customer.id);
+        apolloClient
+          .query({
+            query: poQuery.GET_ADDRESS_BY_CUSTOMER,
+            variables: {
+              query: {
+                customer_id,
+              },
+            },
+            context: {
+              headers: {
+                TENANTID: process.env.REACT_APP_TENANTID,
+                Authorization: token,
+              },
+            },
+          })
+          .then(res => {
+            const data = res?.data?.getAddressListByCustomerID;
+            if (!data?.status) return;
+            const shipping_address = data?.data.filter(item => item.type === 'shipping');
+            setShippingAddresses(shipping_address);
+          })
+          .finally(() => {
+            setSinglePO(s => ({ ...s, isLoading: false }));
+          });
+      }
+    } else {
+      if (singlePO?.data?.vendor?.id === e) {
+        form.setFieldsValue({
+          vendor_billing_id: singlePO?.data?.vendorBillingAddress?.id,
+          vendor_shipping_id: singlePO?.data?.vendorShippingAddress?.id,
+        });
+      } else {
+        form.setFieldsValue({
+          vendor_billing_id: '',
+          vendor_shipping_id: '',
+        });
+      }
+
+      apolloClient
+        .query({
+          query: vendorQuery.GET_SINGLE_VENDOR,
+          variables: {
+            query: { id: e },
+          },
+          context: {
+            headers: {
+              TENANTID: process.env.REACT_APP_TENANTID,
+              Authorization: token,
+            },
+          },
+        })
+        .then(res => {
+          const data = res?.data?.getSingleVendor;
+          if (!data?.status) return;
+          let new_billing = [];
+          let new_shipping = [];
+          data?.data?.addresses.forEach(item => {
+            if (item.type === 'billing') new_billing.push(item);
+            else if (item.type === 'shipping') new_shipping.push(item);
+          });
+          setBillingAddresses(new_billing);
+          setShippingAddresses(new_shipping);
+          setSinglePO(s => ({ ...s, isLoading: false }));
+        })
+        .catch(err => {
+          console.log(err);
+        });
+    }
   };
 
   const handleTypeChange = type => {
     form.setFieldsValue({
-      vendor_id: '',
+      vendor_id: ''
     });
-    setSelectedOrder('');
+
     setSelectedType(type);
     setBillingAddresses([]);
     setShippingAddresses([]);
@@ -427,7 +490,6 @@ const EditPO = () => {
                       </Form.Item>
                       {orderInput && (
                         <Form.Item
-                          initialvalues=""
                           rules={[{ required: true, message: 'Please Select Order' }]}
                           name="order_id"
                           label="Order"
