@@ -332,6 +332,7 @@ export const productQuery = {
           prod_thumbnail
           prod_sale_price
           prod_regular_price
+          is_serial
           prod_outofstock_status
           category {
             id
@@ -643,6 +644,15 @@ export const productMutation = {
   UPDATE_PRODUCT: gql`
     mutation updateProduct($data: UpdateProductInput) {
       updateProduct(data: $data) {
+        message
+        status
+        tenant_id
+      }
+    }
+  `,
+  PRODUCT_IS_SERIAL_STATUS_CHANGE: gql`
+    mutation changeProductIsSerial($data: ChangeProductIsSerialInput) {
+      changeProductIsSerial(data: $data) {
         message
         status
         tenant_id
@@ -996,7 +1006,6 @@ export const customerMutation = {
       }
     }
   `,
-
 };
 
 export const couponQuery = {

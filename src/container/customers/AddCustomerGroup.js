@@ -233,7 +233,7 @@ const AddCustomerGroup = () => {
                         {isLoading ? 'Processing' : 'Save'}
                       </Button>
                       <Link to="/admin/customers/group">
-                        <Button type="white" size="large">
+                        <Button style={{ marginLeft: 10 }} type="light" size="default">
                           Cancel
                         </Button>
                       </Link>

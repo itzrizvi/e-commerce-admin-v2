@@ -90,7 +90,7 @@ const Account = () => {
                             Save Change
                           </Button>
                           &nbsp; &nbsp;
-                          <Button size="default" onClick={handleCancel} type="light">
+                          <Button style={{ marginLeft: 10 }} type="light" size="default" onClick={handleCancel}>
                             Cancel
                           </Button>
                         </div>

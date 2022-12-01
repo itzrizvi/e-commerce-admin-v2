@@ -446,14 +446,7 @@ const AddCategory = () => {
                         {isLoading ? 'Processing' : 'Save'}
                       </Button>
                       <Link to="/admin/categories/list">
-                        <Button
-                          // className="btn-cancel"
-                          type="white"
-                          size="large"
-                          // onClick={() => {
-                          //     return form.resetFields();
-                          // }}
-                        >
+                        <Button style={{ marginLeft: 10 }} type="light" size="default">
                           Cancel
                         </Button>
                       </Link>

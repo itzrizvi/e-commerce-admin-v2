@@ -9,9 +9,9 @@ export const poQuery = {
         data {
           id
           po_id
+          order_id
+          type
           grandTotal_price
-          order_placed_via
-          status
           comment
         }
       }
@@ -41,10 +41,10 @@ export const poQuery = {
         data {
           id
           po_id
+          order_id
+          type
           grandTotal_price
           tax_amount
-          order_placed_via
-          status
           comment
           shipping_method_id
           vendor {

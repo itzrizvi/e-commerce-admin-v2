@@ -14,8 +14,8 @@ const Products = ({ initialData, products, setProducts, productOption }) => {
           defaultValue={record.id}
           style={{ width: 350 }}
           options={productOption}
-          placeholder={"Please select product"}
-          onChange={(e) => record.id = e}
+          placeholder={'Please select product'}
+          onChange={e => (record.id = e)}
         />
       ),
     },
@@ -23,26 +23,29 @@ const Products = ({ initialData, products, setProducts, productOption }) => {
       title: 'Price',
       dataIndex: 'price',
       key: 'price',
-      render: (text, record) => <Input defaultValue={text} type="number" placeholder="Price" onChange={(e) => record.price = e.target.value} />,
+      render: (text, record) => (
+        <Input defaultValue={text} type="number" placeholder="Price" onChange={e => (record.price = e.target.value)} />
+      ),
     },
     {
       title: 'Quantity',
       dataIndex: 'quantity',
       key: 'quantity',
-      render: (text, record) => <Input defaultValue={text} type="number" placeholder="Quantity" onChange={(e) => record.quantity = e.target.value} />,
-    },
-    {
-      title: 'Received Quantity',
-      dataIndex: 'received_quantity',
-      key: 'received_quantity',
-      render: (text, record) => <Input defaultValue={record.recieved_quantity ?? 0} type="number" placeholder="Received Quantity" onChange={(e) => record.recieved_quantity = e.target.value} />,
+      render: (text, record) => (
+        <Input
+          defaultValue={text}
+          type="number"
+          placeholder="Quantity"
+          onChange={e => (record.quantity = e.target.value)}
+        />
+      ),
     },
     {
       title: 'Action',
       dataIndex: 'action',
       key: 'action',
       render: (text, record) => (
-        <Button size="" title="Remove" type="danger" onClick={() => removeRow(record.id)}>
+        <Button size="" title="Remove" type="danger" onClick={() => removeRow(record.key)}>
           <FeatherIcon icon="minus" />
         </Button>
       ),
@@ -50,13 +53,14 @@ const Products = ({ initialData, products, setProducts, productOption }) => {
   ];
 
   // Adding new row on table
-  const addNewRow = id => {
-    setProducts(prevState => [...prevState, { ...initialData, id }]);
+  const addNewRow = () => {
+    const key = new Date().getTime();
+    setProducts(prevState => [...prevState, { ...initialData, key }]);
   };
 
-  const removeRow = id => {
+  const removeRow = key => {
     setProducts(prevState => {
-      return prevState.filter(item => item.id !== id);
+      return prevState.filter(item => item.key !== key);
     });
   };
 

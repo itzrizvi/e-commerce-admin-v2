@@ -76,14 +76,20 @@ const AddBanner = () => {
                   Authorization: token,
                 },
               },
-            },
-            ['getAllBanners'],
+            }
           ],
         })
         .then(res => {
           const data = res?.data?.addBanner;
           if (!data?.status) return toast.error('Something Went wrong !');
           const banner_id = data?.data?.id;
+          if (bannerData.length === 0) {
+            setTimeout(() => {
+              history.push('/admin/banner/list');
+            }, 1000);
+            toast.success('Banner Added Successfully!');
+            setIsLoading(false);
+          }
           bannerData.forEach((val, index) => {
             apolloUploadClient
               .mutate({
@@ -115,8 +121,8 @@ const AddBanner = () => {
                   setTimeout(() => {
                     history.push('/admin/banner/list');
                   }, 1000);
-                  setIsLoading(false);
                   toast.success('Banner Added Successfully!');
+                  setIsLoading(false);
                 }
               })
               .catch(err => {
