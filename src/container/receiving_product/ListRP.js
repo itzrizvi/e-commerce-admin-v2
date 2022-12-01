@@ -68,11 +68,25 @@ const ListRP = () => {
 
   const columns = [
     {
+      title: 'ID',
+      dataIndex: 'id',
+      key: 'id',
+      width: 100,
+      sorter: (a, b) => (a.po_id.toUpperCase() > b.po_id.toUpperCase() ? 1 : -1),
+    },
+    {
       title: 'PO ID',
       dataIndex: 'po_id',
       key: 'po_id',
       width: 100,
       sorter: (a, b) => (a.po_id.toUpperCase() > b.po_id.toUpperCase() ? 1 : -1),
+      render: (value, record) => {
+        return (
+          <Link to={`/admin/po/edit?id=`}>
+            {value}
+          </Link>
+        )
+      }
     },
     {
       title: 'Status',

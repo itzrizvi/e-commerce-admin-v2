@@ -73,7 +73,7 @@ const RelatedProducts = ({ products, selectedRelatedProducts, setSelectedRelated
                         {
                             label: item.prod_name,
                             value: item.prod_name,
-                            uid: item.prod_uuid,
+                            uid: item.prod_id,
                             name: item.prod_name,
                             sku: item.prod_sku,
                         }

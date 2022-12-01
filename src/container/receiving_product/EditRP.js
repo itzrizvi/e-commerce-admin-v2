@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Col, Form, Input, Spin, Tabs, Select, Radio } from 'antd';
+import { Row, Col, Form, Input, Spin, Tabs, Select, Radio, Table } from 'antd';
 import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
 import { Cards } from '../../components/cards/frame/cards-frame';
@@ -13,6 +13,7 @@ import { ellipsis, viewPermission } from '../../utility/utility';
 import Products from './Products';
 import { useSelector } from 'react-redux';
 import { receivingProductQuery } from './../../apollo/receiving_product/index';
+import ExapndableProduct from './ExapndableProduct';
 const { TextArea } = Input;
 
 const EditRP = () => {
@@ -25,6 +26,7 @@ const EditRP = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [singleRP, setSingleRP] = useState({ data: [], isLoading: true });
   const [products, setProducts] = useState([]);
+  const [historyData, setHistoryData] = useState([]);
 
   // ============+ for product START +====================
   const initialData = {
@@ -79,7 +81,7 @@ const EditRP = () => {
               };
             }),
             prod_thumbnail: item.product.prod_thumbnail,
-            key: item.id
+            key: item.id,
           };
         });
         setProducts(prod_list);
@@ -93,6 +95,27 @@ const EditRP = () => {
       })
       .finally(() => {
         setSingleRP(s => ({ ...s, isLoading: false }));
+      });
+
+    apolloClient
+      .query({
+        query: receivingProductQuery.GET_HISTORY,
+        variables: {
+          query: {
+            receiving_id: parseInt(params?.id),
+          },
+        },
+        context: {
+          headers: {
+            TENANTID: process.env.REACT_APP_TENANTID,
+            Authorization: token,
+          },
+        },
+      })
+      .then(res => {
+        const data = res?.data?.getReceivingHistory;
+        if (!data?.status) return;
+        setHistoryData(data?.data);
       });
   }, []);
   /* ------------------------- Get Single PO Order End ------------------------ */
@@ -170,6 +193,37 @@ const EditRP = () => {
         console.log('got error on updateStatus', err);
       });
   };
+
+  const historyColumns = [
+    {
+      title: 'Receiving ID',
+      dataIndex: 'receiving_id',
+      key: 'receiving_id',
+      width: 100
+    },
+    {
+      title: 'Type',
+      dataIndex: 'status',
+      key: 'status',
+      width: 100,
+      render: value => value?.toUpperCase()
+    },
+    {
+      title: 'Email',
+      dataIndex: ['activity_by', 'email'],
+      key: 'email',
+      width: 150,
+      ellipsis: true,
+      render: (value) => <p>{value}</p>,
+    },
+    {
+      title: 'Status',
+      dataIndex: ['data', 'status'],
+      key: 'status',
+      width: 100,
+      render: value => value?.toUpperCase()
+    },
+  ];
 
   return (
     <>
@@ -249,7 +303,20 @@ const EditRP = () => {
                     </Form>
                   </Tabs.TabPane>
                   <Tabs.TabPane tab="History" key="history">
-                    History
+                    <Table
+                      rowKey="id"
+                      columns={historyColumns}
+                      expandable={{
+                        expandedRowRender: record => <ExapndableProduct {...record.data} />,
+                        rowExpandable: record => record.data.products.length > 0,
+                      }}
+                      dataSource={historyData}
+                      pagination={{
+                        defaultPageSize: 10,
+                        total: historyData.length,
+                        showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`,
+                      }}
+                    />
                   </Tabs.TabPane>
                 </Tabs>
               )}

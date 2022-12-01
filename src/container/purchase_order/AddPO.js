@@ -253,7 +253,7 @@ const AddPO = () => {
         console.log('got error on add vendor', err);
         return toast.error('Something Went wrong !!');
       })
-      .finally(() => setIsLoading(true));
+      .finally(() => setIsLoading(false));
   };
 
   const handleVendorChange = e => {

@@ -67,4 +67,39 @@ export const receivingProductQuery = {
       }
     }
   `,
+  GET_HISTORY: gql`
+    query getReceivingHistory($query: GetReceivingHistoryInput) {
+      getReceivingHistory(query: $query) {
+        message
+        status
+        data {
+          id
+          data {
+            products {
+              product {
+                id
+                prod_name
+                prod_sku
+                prod_partnum
+              }
+              quantity
+              recieved_quantity
+              serials
+            }
+            status
+          }
+          receiving_id
+          status
+          activity_by {
+            id
+            email
+            roles {
+              id
+              role
+            }
+          }
+        }
+      }
+    }
+  `,
 };

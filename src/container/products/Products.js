@@ -8,13 +8,14 @@ import { Button } from '../../components/buttons/buttons';
 import { SearchOutlined } from '@ant-design/icons';
 import { Link } from 'react-router-dom';
 import { viewPermission } from '../../utility/utility';
-import apolloClient, { productQuery, utilityQuery } from '../../utility/apollo';
+import apolloClient, { productQuery, utilityQuery, productMutation } from '../../utility/apollo';
 import FontAwesome from 'react-fontawesome';
 import Cookies from 'js-cookie';
 import config from '../../config/config';
 import { errorImageSrc, renderImage } from '../../utility/images';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
 import { gql } from '@apollo/client';
+import { toast } from 'react-toastify';
 const { RangePicker } = DatePicker;
 
 const Products = () => {
@@ -169,14 +170,10 @@ const Products = () => {
   }, []);
 
   const handleStatusChange = (record, checked) => {
-    return;
-    const variables = { data: { id: record.id, attribute_status: checked } };
-    console.log(variables);
-    // return;
     apolloClient
       .mutate({
-        mutation: attributeMutation.UPDATE_ATTRIBUTE,
-        variables,
+        mutation: productMutation.UPDATE_PRODUCT,
+        variables: { data: { prod_id: record.id, prod_status: checked } },
         context: {
           headers: {
             TENANTID: process.env.REACT_APP_TENANTID,
@@ -185,17 +182,36 @@ const Products = () => {
         },
       })
       .then(res => {
-        const data = res?.data?.updateAttribute;
+        const data = res?.data?.updateProduct;
         if (!data.status) return toast.error(data.message);
-        toast.success(`${record.attribute_name} attribute status updated.`);
+        toast.success(`${record.prod_sku} status updated.`);
       })
       .catch(err => {
-        console.log('got error on addPermission', err);
         return toast.error('Something Went wrong !!');
       });
   };
 
-  const handleIsSerialChange = () => {};
+  const handleIsSerialChange = (record, checked) => {
+    apolloClient
+      .mutate({
+        mutation: productMutation.PRODUCT_IS_SERIAL_STATUS_CHANGE,
+        variables: { data: { id: record.id, is_serial: checked } },
+        context: {
+          headers: {
+            TENANTID: process.env.REACT_APP_TENANTID,
+            Authorization: Cookies.get('psp_t'),
+          },
+        },
+      })
+      .then(res => {
+        const data = res?.data?.changeProductIsSerial;
+        if (!data.status) return toast.error(data.message);
+        toast.success(`${record.prod_sku} serial status updated.`);
+      })
+      .catch(err => {
+        return toast.error('Something Went wrong !!');
+      });
+  };
 
   const columns = [
     {
@@ -435,7 +451,7 @@ const Products = () => {
                           Category: <br />
                           <Select
                             style={{ width: '100%' }}
-                            placeholder={categories.isLoading ? 'Loading..' : 'select category'}
+                            placeholder={categories.isLoading ? 'Loading..' : 'Select category'}
                             size="middle"
                             mode="multiple"
                             optionFilterProp="label"
@@ -485,7 +501,7 @@ const Products = () => {
                           Attributes: <br />
                           <Select
                             style={{ width: '100%' }}
-                            placeholder={attributes.isLoading ? 'Loading..' : 'select Attribute'}
+                            placeholder={attributes.isLoading ? 'Loading..' : 'Select Attribute'}
                             size="middle"
                             mode="multiple"
                             onChange={value => setFilterDate(s => ({ ...s, attributes: value }))}
