@@ -14,6 +14,7 @@ import Products from './Products';
 import { useSelector } from 'react-redux';
 import { receivingProductQuery } from './../../apollo/receiving_product/index';
 import ExapndableProduct from './ExapndableProduct';
+import Moment from 'react-moment';
 const { TextArea } = Input;
 
 const EditRP = () => {
@@ -199,14 +200,14 @@ const EditRP = () => {
       title: 'Receiving ID',
       dataIndex: 'receiving_id',
       key: 'receiving_id',
-      width: 100
+      width: 100,
     },
     {
       title: 'Type',
       dataIndex: 'status',
       key: 'status',
       width: 100,
-      render: value => value?.toUpperCase()
+      render: value => value?.toUpperCase(),
     },
     {
       title: 'Email',
@@ -214,14 +215,24 @@ const EditRP = () => {
       key: 'email',
       width: 150,
       ellipsis: true,
-      render: (value) => <p>{value}</p>,
+      render: value => <p>{value}</p>,
     },
     {
       title: 'Status',
       dataIndex: ['data', 'status'],
       key: 'status',
       width: 100,
-      render: value => value?.toUpperCase()
+      render: value => value?.toUpperCase(),
+    },
+    {
+      title: 'Date',
+      dataIndex: 'createdAt',
+      key: 'createdAt',
+      align: 'center',
+      width: 200,
+      render: (text, record) => (
+        <span className={'status-text'}>{<Moment format="DD MMMM YYYY hh:mm A">{parseInt(text)}</Moment>}</span>
+      ),
     },
   ];
 

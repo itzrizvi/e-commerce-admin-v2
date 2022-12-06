@@ -81,6 +81,7 @@ const MenuItems = ({ darkMode, toggleCollapsed, topMenu }) => {
         </SubMenu>
       )}
       {(menuPermission('product') ||
+        menuPermission('quote') ||
         menuPermission('coupon') ||
         menuPermission('attribute') ||
         menuPermission('attribute-group') ||
@@ -89,6 +90,13 @@ const MenuItems = ({ darkMode, toggleCollapsed, topMenu }) => {
         menuPermission('product-availability-status') ||
         menuPermission('product-condition')) && (
         <SubMenu key="products" icon={!topMenu && <FeatherIcon icon="shopping-cart" />} title="Products">
+          {menuPermission('quote') && (
+            <Menu.Item key="listQuote">
+              <NavLink onClick={toggleCollapsed} to={`${path}/products/quote`}>
+                Quote
+              </NavLink>
+            </Menu.Item>
+          )}
           {menuPermission('coupon') && (
             <Menu.Item key="listCoupon">
               <NavLink onClick={toggleCollapsed} to={`${path}/products/coupon`}>

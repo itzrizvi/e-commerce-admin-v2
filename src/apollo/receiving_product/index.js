@@ -90,6 +90,7 @@ export const receivingProductQuery = {
           }
           receiving_id
           status
+          createdAt
           activity_by {
             id
             email

@@ -28,7 +28,7 @@ export default function ExapndableProduct({ products }) {
       key: 'serials',
       width: 300,
       render: value => value.length > 0 ? <p>{value.toString()}</p> : <p>No Serial Found!</p>,
-    }
+    },
   ];
   return (
     <>
