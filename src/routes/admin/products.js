@@ -17,8 +17,8 @@ const ProductRoutes = () => {
       <Route path={`${path}/add`} component={AddProduct} />
       <Route path={`${path}/coupon`} component={ListCoupon} />
       <Route path={`${path}/add-coupon`} component={AddCoupon} />
+      <Route path={`${path}/quote/edit/:id`} component={EditQuote} />
       <Route path={`${path}/quote`} component={QuoteList} />
-      <Route path={`${path}/quote/edit`} component={EditQuote} />
       <Route path={`${path}/view`} component={ProdDetails} />
     </Switch>
   );

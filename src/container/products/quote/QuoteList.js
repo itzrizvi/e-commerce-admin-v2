@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { SearchOutlined } from '@ant-design/icons';
-import { Row, Col, Spin, Input, Table, Switch } from 'antd';
+import { Row, Col, Spin, Input, Table } from 'antd';
 import { PageHeader } from '../../../components/page-headers/page-headers';
 import { Main } from '../../styled';
 import { Cards } from '../../../components/cards/frame/cards-frame';
@@ -10,7 +10,6 @@ import apolloClient from '../../../apollo';
 import { quoteQuery } from '../../../apollo/quote';
 import { useSelector } from 'react-redux';
 import Moment from 'react-moment';
-import { toast } from 'react-toastify';
 import { viewPermission } from '../../../utility/utility';
 import config from '../../../config/config';
 
@@ -86,12 +85,17 @@ const QuoteList = () => {
           value: "in_progress",
         },
         {
+          text: 'Save',
+          value: "save",
+        },
+        {
           text: 'Submitted',
           value: "submitted",
         },
       ],
       onFilter: (value, record) => record.status === value,
       sorter: (a, b) => a.status - b.status,
+      render: (text) => text.toUpperCase() 
     },
     {
       title: 'Note',
@@ -119,11 +123,8 @@ const QuoteList = () => {
       width: 100,
       render: (text, record) => (
         <>
-          <Link to={`/admin/quote/edit?id=${record.id}`} style={{ margin: '.5em' }} >
+          <Link to={`/admin/products/quote/edit/${record.id}`} style={{ margin: '.5em' }} >
             <FontAwesome name="edit" />
-          </Link>
-          <Link to={`/admin/quote/view?id=${record.id}`} style={{ margin: '.5em' }} >
-            <FontAwesome name="eye" />
           </Link>
         </>
       ),
