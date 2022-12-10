@@ -22,50 +22,6 @@ const ListRP = () => {
   const [searchText, setSearchText] = useState('');
   const token = useSelector(state => state.auth.token);
 
-  const handleStatusChange = (id, checked) => {
-    const variables = {
-      data: {
-        id: id,
-        status: checked,
-      },
-    };
-    apolloClient
-      .mutate({
-        mutation: receivingProductQuery.UPDATE_RO,
-        variables,
-        context: {
-          headers: {
-            TENANTID: process.env.REACT_APP_TENANTID,
-            Authorization: token,
-          },
-        },
-        refetchQueries: [
-          {
-            query: receivingProductQuery.GET_SINGLE_RECEIVING_PRODUCT,
-            variables: {
-              query: {
-                id,
-              },
-            },
-            context: {
-              headers: {
-                TENANTID: process.env.REACT_APP_TENANTID,
-                Authorization: token,
-              },
-            },
-          },
-        ],
-      })
-      .then(res => {
-        const data = res?.data?.updateReceiving;
-        if (!data.status) return toast.error(data.message);
-        toast.success('Status Updated successfully');
-      })
-      .catch(err => {
-        console.log('got error on updateStatus', err);
-      });
-  };
-
   const columns = [
     {
       title: 'ID',
@@ -81,12 +37,32 @@ const ListRP = () => {
       width: 100,
       sorter: (a, b) => (a.po_id.toUpperCase() > b.po_id.toUpperCase() ? 1 : -1),
       render: (value, record) => {
-        return (
-          <Link to={`/admin/po/edit?id=`}>
-            {value}
-          </Link>
-        )
-      }
+        return <Link to={`/admin/po/edit?id=`}>{value}</Link>;
+      },
+    },
+    {
+      title: 'Contact Person',
+      dataIndex: [ 'vendor', 'contact_person'],
+      key: 'contact_person',
+      width: 150,
+      ellipsis: true,
+      sorter: (a, b) => (a.contact_person.toUpperCase() > b.contact_person.toUpperCase() ? 1 : -1),
+    },
+    {
+      title: 'Company Name',
+      dataIndex: ['vendor', 'company_name'],
+      key: 'company_name',
+      width: 150,
+      ellipsis: true,
+      sorter: (a, b) => (a.company_name.toUpperCase() > b.company_name.toUpperCase() ? 1 : -1),
+    },
+    {
+      title: 'Email',
+      dataIndex: ['vendor', 'email'],
+      key: 'email',
+      width: 150,
+      ellipsis: true,
+      sorter: (a, b) => (a.email.toUpperCase() > b.email.toUpperCase() ? 1 : -1),
     },
     {
       title: 'Status',
@@ -122,40 +98,7 @@ const ListRP = () => {
         },
       ],
       onFilter: (value, record) => record.status === value,
-      render: (value, record) => (
-        <Select
-          size="middle"
-          defaultValue={value}
-          onChange={checked => handleStatusChange(record.id, checked)}
-          style={{ width: 180 }}
-          options={[
-            {
-              value: 'new',
-              label: 'New',
-            },
-            {
-              value: 'submitted',
-              label: 'Submitted',
-            },
-            {
-              value: 'partially_received',
-              label: 'Partially Received',
-            },
-            {
-              value: 'partially_closed',
-              label: 'Partially Closed',
-            },
-            {
-              value: 'received',
-              label: 'Received',
-            },
-            {
-              value: 'canceled',
-              label: 'Canceled',
-            },
-          ]}
-        />
-      ),
+      render: (value) => value.toUpperCase(),
     },
     {
       title: 'Total Amount',
@@ -212,7 +155,7 @@ const ListRP = () => {
             total_amount: item?.purchaseOrder.grandTotal_price,
             po_id: item?.purchaseOrder.po_id,
             type: item?.purchaseOrder.type,
-            vendor: item?.purchaseOrder?.vendor.company_name,
+            vendor: item?.purchaseOrder?.vendor,
           };
         });
         setRP(s => ({ ...s, data: mod_data, error: '' }));
@@ -230,7 +173,7 @@ const ListRP = () => {
     setSearchText(value);
     setFilteredRP(
       rp.data.filter(rp =>
-        (rp.id + rp.po_id + rp.status + rp.total_amount + rp.type + rp.vendor)
+        (rp.id + rp.po_id + rp.status + rp.total_amount + rp.type + rp.vendor + rp.vendor.contact_person + rp.vendor.company_name + rp.vendor.email)
           .toLowerCase()
           .includes(value.toLowerCase()),
       ),
@@ -263,12 +206,11 @@ const ListRP = () => {
                       columns={columns}
                       rowKey={'id'}
                       size="small"
-                      dataSource={searchText ? filteredPO : rp.data}
+                      dataSource={searchText ? filteredRP : rp.data}
                       rowClassName={(record, index) => (index % 2 == 0 ? '' : 'altTableClass')}
-                      // pagination={false}
                       pagination={{
                         defaultPageSize: config.PO_PER_PAGE,
-                        total: searchText ? filteredPO.length : rp.data.length,
+                        total: searchText ? filteredRP.length : rp.data.length,
                         showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`,
                       }}
                     />

@@ -72,6 +72,8 @@ const EditRP = () => {
             totalPrice: item.totalPrice,
             prod_id: item.product.id,
             prod_sku: item.product.prod_sku,
+            prod_partnum: item.product.prod_partnum,
+            prod_short_desc: item.product.prod_short_desc,
             is_serial: item.product.is_serial,
             prod_name: item.product.prod_name,
             serials: item.serials.map(ser => ser.serial),
@@ -291,7 +293,7 @@ const EditRP = () => {
                         </Select>
                       </Form.Item>
 
-                      <Products {...{ initialData, products, setProducts }} />
+                      <Products {...{ products }} />
 
                       <div
                         style={{

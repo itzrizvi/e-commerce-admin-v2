@@ -18,6 +18,8 @@ export const receivingProductQuery = {
             vendor {
               id
               company_name
+              contact_person
+              email
             }
           }
         }
@@ -59,6 +61,8 @@ export const receivingProductQuery = {
               id
               prod_name
               prod_sku
+              prod_partnum
+              prod_short_desc
               prod_thumbnail
               is_serial
             }
@@ -79,6 +83,7 @@ export const receivingProductQuery = {
               product {
                 id
                 prod_name
+                prod_short_desc
                 prod_sku
                 prod_partnum
               }
