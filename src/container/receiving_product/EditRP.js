@@ -128,6 +128,8 @@ const EditRP = () => {
       if (i.is_serial) {
         if (i.serials.length !== parseInt(i.recieved_quantity)) {
           return toast.error(`${i.prod_sku} Serial Is Missing!`);
+        }else if (i.serials.length > i.remaining_quantity){
+          return toast.error(`${i.prod_sku} Serial Can Not Cross The Remaining Quantity!`);
         }
       }
     }

@@ -1170,6 +1170,7 @@ export const vendorQuery = {
             zip_code
             country
             status
+            isDefault
             updatedAt
             createdAt
             type
@@ -1191,11 +1192,10 @@ export const vendorMutation = {
     }
   `,
   ADD_VENDOR_BILLING_ADDRESS: gql`
-    mutation addVendorBillingAddress($data: Address) {
-      addVendorBillingAddress(data: $data) {
+    mutation addVendorShippingAddress($data: AddVendorShippingAddressInput) {
+      addVendorShippingAddress(data: $data) {
         message
         status
-        tenant_id
       }
     }
   `,
@@ -1204,7 +1204,6 @@ export const vendorMutation = {
       addVendorShippingAddress(data: $data) {
         message
         status
-        tenant_id
       }
     }
   `,
@@ -1217,11 +1216,10 @@ export const vendorMutation = {
     }
   `,
   UPDATE_VENDOR_ADDRESS: gql`
-    mutation updateVendorAddress($data: UpdateAddress) {
+    mutation updateVendorAddress($data: UpdateVendorAddressInput) {
       updateVendorAddress(data: $data) {
         message
         status
-        tenant_id
       }
     }
   `,

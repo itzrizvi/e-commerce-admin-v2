@@ -25,9 +25,10 @@ export default function companyInfo() {
   const [emailData, setEmailData] = useState([]);
   const [phoneData, setPhoneData] = useState([]);
   const [socialData, setSocialData] = useState([]);
+  const [companyInfoId, SetCompanyInfoId] = useState(null)
   const initialAddressData = {
     id: new Date().getTime(),
-    parent_id: 3,
+    parent_id: "",
     address1: "",
     address2: "",
     country: "",
@@ -70,6 +71,7 @@ export default function companyInfo() {
         if (!data?.status) return;
 
         setInitialData(s => ({ ...s, data: res?.data?.getCompanyInfo?.data, error: '' }));
+        SetCompanyInfoId(data?.data?.id)
         form.setFieldsValue({
           name: data?.data?.name,
           contact_address: data?.data?.contact_address,
@@ -91,12 +93,12 @@ export default function companyInfo() {
         setBillingData(data?.data?.billingAddresses.map(add => {
           const { updatedAt, createdAt, __typename, type, isDefault, ...rest } = add
           if (isDefault) setDefaultBilling(add.id)
-          return { ...rest, isDefault: false, isNew: false, parent_id: 3 }
+          return { ...rest, isDefault: false, isNew: false, parent_id: data?.data?.id }
         }))
         setShippingData(data?.data?.shippingAddresses.map(add => {
           const { updatedAt, createdAt, __typename, type, isDefault, ...rest } = add
           if (isDefault) setDefaultShipping(add.id)
-          return { ...rest, isDefault: false, isNew: false, parent_id: 3 }
+          return { ...rest, isDefault: false, isNew: false, parent_id: data?.data?.id }
         }))
       })
       .catch(err => {
@@ -247,7 +249,7 @@ export default function companyInfo() {
         type = "update"
         variables = {
           data: {
-            ref_id: 3,
+            ref_id: parseInt(companyInfoId),
             type: "billing",
             addresses: billingData.map(add => {
               const { id, isNew, ...rest } = add
@@ -311,7 +313,7 @@ export default function companyInfo() {
         type = "update"
         variables = {
           data: {
-            ref_id: 3,
+            ref_id: parseInt(companyInfoId),
             type: "shipping",
             addresses: shippingData.map(add => {
               const { id, isNew, ...rest } = add

@@ -70,7 +70,6 @@ const AddressTable = ({ initialData, addresses, setAddress, defaultAddressId, se
                 <Checkbox
                     checked={defaultAddressId === val ? true : false}
                     onChange={e => {
-                        console.log(e.target.checked)
                         if (e.target.checked) setDefaultAddressId(val)
                         else setDefaultAddressId(null)
                     }} />

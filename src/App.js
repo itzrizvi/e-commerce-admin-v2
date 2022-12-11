@@ -20,6 +20,7 @@ import './config/customTable.css'
 import AuthVerify from './utility/auth_verify';
 import ResetPassword from './container/profile/authentication/overview/ResetPassword';
 import NotFound404 from './container/noFound/404';
+import Pool from './components/pool/Pool';
 
 const { theme } = config;
 
@@ -49,6 +50,7 @@ const ProviderConfig = () => {
         <ApolloProvider client={apolloClient} >
           <Router basename={process.env.PUBLIC_URL}>
             <AuthVerify />
+            <Pool/>
             {
               path.split("/")[1] === "reset-password" ? <Route exact path="/reset-password/:codeHashed" component={ResetPassword} /> :
               !isLoggedIn ? <Route path="/" component={Auth} /> : <ProtectedRoute path="/admin" component={Admin} />}

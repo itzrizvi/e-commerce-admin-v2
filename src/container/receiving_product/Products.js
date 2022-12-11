@@ -37,6 +37,12 @@ const Products = ({ products }) => {
       width: 150,
     },
     {
+      title: 'Remaining Quantity',
+      dataIndex: 'remaining_quantity',
+      key: 'remaining_quantity',
+      width: 150,
+    },
+    {
       title: 'Receiving Amount',
       dataIndex: 'receiving_amount',
       key: 'receiving_amount',
@@ -46,7 +52,7 @@ const Products = ({ products }) => {
           min="0"
           type="number"
           placeholder="Receiving Amount"
-          onChange={e => (record.receiving_quantity = e.target.value)}
+          onChange={e => (record.recieved_quantity = e.target.value)}
         />
       ),
     },

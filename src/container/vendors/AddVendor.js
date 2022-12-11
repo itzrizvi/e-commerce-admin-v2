@@ -6,7 +6,7 @@ import { Cards } from '../../components/cards/frame/cards-frame';
 import { Button } from '../../components/buttons/buttons';
 import { Link, useHistory, useLocation } from 'react-router-dom';
 import queryString from 'query-string';
-import apolloClient, { customerMutation, customerQuery, vendorMutation, vendorQuery } from '../../utility/apollo';
+import apolloClient, { vendorMutation, vendorQuery } from '../../utility/apollo';
 import Cookies from 'js-cookie';
 import { toast } from 'react-toastify';
 import { viewPermission } from '../../utility/utility';
@@ -23,14 +23,20 @@ const AddVendor = () => {
   const [singleVendor, setSingleVendor] = useState({ data: [], isLoading: true });
   const [status, setStatus] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
+  const [defaultBilling, setDefaultBilling] = useState(null);
+  const [defaultShipping, setDefaultShipping] = useState(null);
   const [form] = Form.useForm();
   const maxLength = 30;
+  const [operation, setOperation] = useState(false);
+  const [vendor_id, setVendorId] = useState(null);
+  const [isError, setIsError] = useState(false);
 
   // ============+ for billing START +====================
-  const initialData1 = {
+  const initialAddressData = {
     id: new Date().getTime(),
+    parent_id: '',
     address1: '',
-    address1: '',
+    address2: '',
     country: '',
     city: '',
     state: '',
@@ -39,31 +45,18 @@ const AddVendor = () => {
     fax: '',
     phone: '',
     status: true,
-    // contactPerson: "",
+    isDefault: false,
+    isNew: true,
   };
-  const [billingAddresses, setBillingAddresses] = useState([initialData1]);
+  const [billingAddresses, setBillingAddresses] = useState([initialAddressData]);
   // ============+ for billing END +====================
 
-  // ============+ for billing START +====================
-  const initialData2 = {
-    id: new Date().getTime(),
-    address1: '',
-    address1: '',
-    country: '',
-    city: '',
-    state: '',
-    zip_code: '',
-    email: '',
-    fax: '',
-    phone: '',
-    status: true,
-  };
-  const [shippingAddresses, setShippingAddresses] = useState([initialData2]);
+  const [shippingAddresses, setShippingAddresses] = useState([initialAddressData]);
   // ============+ for billing END +====================
 
   // LOAD SINGLE Vendor
   useEffect(() => {
-    if (!params.id) return;
+    if (!params?.id) return;
 
     apolloClient
       .query({
@@ -79,26 +72,27 @@ const AddVendor = () => {
       .then(res => {
         const data = res?.data?.getSingleVendor;
         if (!data?.status) return;
+        initialAddressData.parent_id = data?.data?.id;
         setSingleVendor(s => ({ ...s, data: data?.data, error: '' }));
 
         let billings = [];
         let shippings = [];
         data?.data?.addresses?.forEach(address => {
+          const { updatedAt, createdAt, __typename, type, isDefault, ...rest } = address;
           const item = {
-            id: address.id,
-            address1: address.address1,
-            address2: address.address2,
-            country: address.country,
-            city: address.city,
-            state: address.state,
-            zip_code: address.zip_code,
-            email: address.email,
-            fax: address.fax,
-            phone: address.phone,
-            status: address.status,
+            isDefault: false,
+            isNew: false,
+            parent_id: data?.data?.id,
+            ...rest,
           };
-          if (address.type === 'billing') return billings.push(item);
-          return shippings.push(item);
+          if (address.type === 'billing') {
+            if (isDefault) setDefaultBilling(address.id);
+            return billings.push(item);
+          } else if (address.type === 'shipping') {
+            if (isDefault) setDefaultShipping(address.id);
+            return shippings.push(item);
+          }
+          return;
         });
         setBillingAddresses(billings);
         setShippingAddresses(shippings);
@@ -109,7 +103,7 @@ const AddVendor = () => {
       .finally(() => {
         setSingleVendor(s => ({ ...s, isLoading: false }));
       });
-  }, []);
+  }, [params?.id]);
 
   const handleSubmit = values => {
     const variables = { ...values, status };
@@ -146,63 +140,13 @@ const AddVendor = () => {
         .then(res => {
           const data = res?.data?.createVendor;
           if (!data.status) return toast.error(data.message);
-
-          // add billing address
-          const parent_id = data.id;
-          billingAddresses.forEach((val, index) => {
-            const { id, ...rest } = val;
-            apolloClient
-              .mutate({
-                mutation: vendorMutation.ADD_VENDOR_BILLING_ADDRESS,
-                variables: { data: { ...rest, parent_id } },
-                context: {
-                  headers: {
-                    TENANTID: process.env.REACT_APP_TENANTID,
-                    Authorization: Cookies.get('psp_t'),
-                  },
-                },
-              })
-              .then(res => {
-                const data = res?.data?.addVendorBillingAddress;
-              })
-              .catch(err => {
-                console.log('error on add billing:\n', res);
-                isLoading(false);
-                return toast.error('Something went wrong');
-              });
-          });
-          // add shipping address
-          shippingAddresses.forEach((val, index) => {
-            const { id, ...rest } = val;
-            apolloClient
-              .mutate({
-                mutation: vendorMutation.ADD_VENDOR_SHIPPING_ADDRESS,
-                variables: { data: { ...rest, parent_id } },
-                context: {
-                  headers: {
-                    TENANTID: process.env.REACT_APP_TENANTID,
-                    Authorization: Cookies.get('psp_t'),
-                  },
-                },
-              })
-              .then(res => {
-                const data = res?.data?.addVendorShippingAddress;
-                if (shippingAddresses.length === index + 1) {
-                  setTimeout(() => {
-                    history.push('/admin/vendor/list');
-                  }, 1000);
-                }
-              })
-              .catch(err => {
-                console.log('error on add billing:\n', res);
-                isLoading(false);
-                return toast.error('Something went wrong');
-              });
-          });
+          setVendorId(parseInt(data.id));
+          setOperation(true);
         })
         .catch(err => {
+          setIsLoading(false);
           console.log('got error on add vendor', err);
-          return toast.error('Something Went wrong !!');
+          setIsError(true);
         });
     }
     // UPDATE vendor
@@ -221,42 +165,81 @@ const AddVendor = () => {
         .then(res => {
           const data = res?.data?.updateVendor;
           if (!data.status) return toast.error(data.message);
-
-          // add shipping address
-          const addresses = [...billingAddresses, ...shippingAddresses];
-          addresses.forEach((val, index) => {
-            // const { __typename, updatedAt, createdAt, type, ...rest } = val
-            apolloClient
-              .mutate({
-                mutation: vendorMutation.UPDATE_VENDOR_ADDRESS,
-                variables: { data: val },
-                context: {
-                  headers: {
-                    TENANTID: process.env.REACT_APP_TENANTID,
-                    Authorization: Cookies.get('psp_t'),
-                  },
-                },
-              })
-              .then(res => {
-                const data = res?.data?.addVendorShippingAddress;
-                if (addresses.length === index + 1) {
-                  setTimeout(() => {
-                    history.push('/admin/vendor/list');
-                  }, 1000);
-                }
-              })
-              .catch(err => {
-                isLoading(false);
-                return toast.error('Something went wrong');
-              });
-          });
+          setVendorId(parseInt(params?.id));
+          setOperation(true);
         })
         .catch(err => {
           console.log('got error on update vendor', err);
-          return toast.error('Something Went wrong !!');
+          setIsError(true);
+        })
+        .finally(() => {
+          setIsLoading(false);
         });
     }
   };
+
+  useEffect(() => {
+    if (operation) {
+      const newBillingAddress = billingAddresses.map(item => {
+        const { parent_id, isNew, id, isDefault, ...rest } = item;
+        return {
+          isDefault: defaultBilling === id,
+          parent_id: vendor_id,
+          isNew,
+          ...rest,
+          ...(!isNew && { id }),
+        };
+      });
+      const newShippingAddress = shippingAddresses.map(item => {
+        const { parent_id, isNew, isDefault, id, ...rest } = item;
+        return {
+          isDefault: defaultShipping === id,
+          parent_id: vendor_id,
+          isNew,
+          ...rest,
+          ...(!isNew && { id }),
+        };
+      });
+
+      ['billing', 'shipping'].forEach(type => {
+        setIsLoading(true);
+        apolloClient
+          .mutate({
+            mutation: vendorMutation.UPDATE_VENDOR_ADDRESS,
+            variables: {
+              data: {
+                ref_id: vendor_id,
+                type,
+                addresses: { ...(type === 'billing' ? newBillingAddress : newShippingAddress) },
+              },
+            },
+            context: {
+              headers: {
+                TENANTID: process.env.REACT_APP_TENANTID,
+                Authorization: Cookies.get('psp_t'),
+              },
+            },
+          })
+          .then(res => {
+            const data = res?.data?.updateVendorAddress;
+            if (!data?.status) return;
+          })
+          .catch(err => {
+            setIsError(true);
+          })
+          .finally(res => {
+            setIsLoading(false);
+            if (type === 'shipping') {
+              if (!isError) {
+                // setTimeout(() => {
+                //   history.push('/admin/vendor/list');
+                // }, [2000]);
+              }
+            }
+          });
+      });
+    }
+  }, [operation]);
 
   return (
     <>
@@ -365,11 +348,15 @@ const AddVendor = () => {
                     </Tabs.TabPane>
 
                     <Tabs.TabPane tab="Billing Address" key="billing_address">
-                      <BillingAdderess {...{ initialData1, billingAddresses, setBillingAddresses }} />
+                      <BillingAdderess
+                        {...{ defaultBilling, initialAddressData, billingAddresses, setBillingAddresses, setDefaultBilling }}
+                      />
                     </Tabs.TabPane>
 
                     <Tabs.TabPane tab="Shipping Address" key="shipping_address">
-                      <ShippingAddress {...{ initialData2, shippingAddresses, setShippingAddresses }} />
+                      <ShippingAddress
+                        {...{ defaultShipping, initialAddressData, shippingAddresses, setShippingAddresses, setDefaultShipping }}
+                      />
                     </Tabs.TabPane>
                   </Tabs>
 
