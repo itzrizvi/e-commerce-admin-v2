@@ -210,7 +210,7 @@ const AddVendor = () => {
               data: {
                 ref_id: vendor_id,
                 type,
-                addresses: { ...(type === 'billing' ? newBillingAddress : newShippingAddress) },
+                addresses: [ ...(type === 'billing' ? newBillingAddress : newShippingAddress) ],
               },
             },
             context: {
@@ -231,9 +231,10 @@ const AddVendor = () => {
             setIsLoading(false);
             if (type === 'shipping') {
               if (!isError) {
-                // setTimeout(() => {
-                //   history.push('/admin/vendor/list');
-                // }, [2000]);
+                toast.success("Vendor Updated Successfully.")
+                setTimeout(() => {
+                  history.push('/admin/vendor/list');
+                }, [2000]);
               }
             }
           });
