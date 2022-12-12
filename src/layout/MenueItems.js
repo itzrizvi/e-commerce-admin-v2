@@ -251,6 +251,29 @@ const MenuItems = ({ darkMode, toggleCollapsed, topMenu }) => {
           )}
         </SubMenu>
       )}
+      {menuPermission('email-template') && (
+        <SubMenu key="email-template" icon={!topMenu && <FeatherIcon icon="at-sign" />} title="Email Template">
+          {menuPermission('email-template') && (
+            <>
+              <Menu.Item key="header/footer">
+                <NavLink onClick={toggleCollapsed} to={`${path}/email/header-footer/list`}>
+                  Header/Footer
+                </NavLink>
+              </Menu.Item>
+              <Menu.Item key="email-template">
+                <NavLink onClick={toggleCollapsed} to={`${path}/email/content/list`}>
+                  Content
+                </NavLink>
+              </Menu.Item>
+              <Menu.Item key="template-list">
+                <NavLink onClick={toggleCollapsed} to={`${path}/email/template/list`}>
+                  Template List
+                </NavLink>
+              </Menu.Item>
+            </>
+          )}
+        </SubMenu>
+      )}
     </Menu>
   );
 };

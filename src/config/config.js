@@ -23,6 +23,7 @@ const config = {
   PO_PER_PAGE: 10,
   QUOTE_PER_PAGE: 10,
   CONTACT_US_MESSAGE_PER_PAGE: 10,
+  EMAIL_TEMPLATE_PER_PAGE: 10,
 };
 
 export default config;

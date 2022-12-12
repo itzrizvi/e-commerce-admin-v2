@@ -2,7 +2,6 @@ const renderImage = (id, image, type, size, noSize = false) => {
     if (!image) return require('../static/img/avatar/NoPath.png');
     if (noSize) return `${process.env.REACT_APP_IMAGE_URL}/${type}/${id}/${image}`
     else return `${process.env.REACT_APP_IMAGE_URL}/${type}/${id}/${size}_${image}`
-    return filename
 }
 
 const errorImageSrc = (e, size = 120) => {

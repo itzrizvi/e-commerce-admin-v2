@@ -22,6 +22,7 @@ import ProductAvailabilityStatus from './product_availability_status';
 import CompanyInfo from '../../container/companyInfo/companyInfo';
 import NotFound403 from '../../container/noFound/403';
 import SupportsRoutes from './supports';
+import EmailRoutes from './email';
 
 const Admin = () => {
   const { path } = useRouteMatch();
@@ -55,6 +56,7 @@ const Admin = () => {
         <Route path={`${path}/company-info`} component={CompanyInfo} />
         <Route path={`${path}/po`} component={PORoutes} />
         <Route path={`${path}/rp`} component={RPRoutes} />
+        <Route path={`${path}/email`} component={EmailRoutes} />
         <Route path={`${path}/403`} component={NotFound403} />
       </Suspense>
     </Switch>

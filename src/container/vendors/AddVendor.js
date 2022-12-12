@@ -77,7 +77,7 @@ const AddVendor = () => {
 
         let billings = [];
         let shippings = [];
-        data?.data?.addresses?.forEach(address => {
+        data?.data?.addresses.forEach(address => {
           const { updatedAt, createdAt, __typename, type, isDefault, ...rest } = address;
           const item = {
             isDefault: false,
@@ -136,6 +136,19 @@ const AddVendor = () => {
               Authorization: Cookies.get('psp_t'),
             },
           },
+          refetchQueries: [
+            {
+              query: vendorQuery.GET_ALL_VENDOR,
+              context: {
+                headers: {
+                  TENANTID: process.env.REACT_APP_TENANTID,
+                  Authorization: Cookies.get('psp_t'),
+                },
+              },
+              fetchPolicy: 'network-only',
+            },
+            ['getAllVendor'],
+          ],
         })
         .then(res => {
           const data = res?.data?.createVendor;
@@ -210,7 +223,7 @@ const AddVendor = () => {
               data: {
                 ref_id: vendor_id,
                 type,
-                addresses: [ ...(type === 'billing' ? newBillingAddress : newShippingAddress) ],
+                addresses: [...(type === 'billing' ? newBillingAddress : newShippingAddress)],
               },
             },
             context: {
@@ -231,7 +244,7 @@ const AddVendor = () => {
             setIsLoading(false);
             if (type === 'shipping') {
               if (!isError) {
-                toast.success("Vendor Updated Successfully.")
+                toast.success('Vendor Updated Successfully.');
                 setTimeout(() => {
                   history.push('/admin/vendor/list');
                 }, [2000]);
@@ -350,13 +363,25 @@ const AddVendor = () => {
 
                     <Tabs.TabPane tab="Billing Address" key="billing_address">
                       <BillingAdderess
-                        {...{ defaultBilling, initialAddressData, billingAddresses, setBillingAddresses, setDefaultBilling }}
+                        {...{
+                          defaultBilling,
+                          initialAddressData,
+                          billingAddresses,
+                          setBillingAddresses,
+                          setDefaultBilling,
+                        }}
                       />
                     </Tabs.TabPane>
 
                     <Tabs.TabPane tab="Shipping Address" key="shipping_address">
                       <ShippingAddress
-                        {...{ defaultShipping, initialAddressData, shippingAddresses, setShippingAddresses, setDefaultShipping }}
+                        {...{
+                          defaultShipping,
+                          initialAddressData,
+                          shippingAddresses,
+                          setShippingAddresses,
+                          setDefaultShipping,
+                        }}
                       />
                     </Tabs.TabPane>
                   </Tabs>
