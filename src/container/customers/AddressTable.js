@@ -47,7 +47,7 @@ const AddressTable = ({ initialData, addresses, setAddresses, defaultAddressId, 
       ),
     },
     {
-      title: 'phone',
+      title: 'Phone',
       dataIndex: 'phone',
       key: 'phone ',
       width: 150,
@@ -61,17 +61,12 @@ const AddressTable = ({ initialData, addresses, setAddresses, defaultAddressId, 
       ),
     },
     {
-      title: 'fax',
+      title: 'Fax',
       dataIndex: 'fax',
-      key: 'fax ',
+      key: 'fax',
       width: 150,
       render: (text, record) => (
-        <Input
-          defaultValue={record.fax}
-          type="number"
-          placeholder="fax"
-          onChange={e => (record.fax = e.target.value)}
-        />
+        <Input defaultValue={text} type="text" placeholder="Fax" onChange={e => (record.fax = e.target.value)} />
       ),
     },
     {
@@ -121,16 +116,6 @@ const AddressTable = ({ initialData, addresses, setAddresses, defaultAddressId, 
       ),
     },
     {
-      title: 'Fax',
-      dataIndex: 'fax',
-      key: 'fax',
-      width: 150,
-      render: (text, record) => (
-        <Input defaultValue={text} type="text" placeholder="Fax" onChange={e => (record.fax = e.target.value)} />
-      ),
-    },
-
-    {
       title: 'Default',
       dataIndex: 'id',
       key: 'id',
@@ -141,7 +126,7 @@ const AddressTable = ({ initialData, addresses, setAddresses, defaultAddressId, 
           checked={defaultAddressId === val ? true : false}
           onChange={e => {
             record.isDefault = e.target.checked;
-            setDefaultAddressId(val)
+            setDefaultAddressId(val);
           }}
         />
       ),
@@ -186,7 +171,7 @@ const AddressTable = ({ initialData, addresses, setAddresses, defaultAddressId, 
       <Table
         className="table-responsive"
         columns={column}
-        rowClassName={(record, index) => (index % 2 == 0 ? "" : "altTableClass")}
+        rowClassName={(record, index) => (index % 2 == 0 ? '' : 'altTableClass')}
         pagination={false}
         rowKey={'id'}
         size="small"

@@ -169,7 +169,7 @@ const AddUser = () => {
 
   return (
     <>
-      <PageHeader title={params.uid ? `Manage User | Edit user (${params.email})` : 'Add Customer'} />
+      <PageHeader title="Add Customer" />
       <Main>
         <Row gutter={25}>
           <Col sm={24} xs={24}>
