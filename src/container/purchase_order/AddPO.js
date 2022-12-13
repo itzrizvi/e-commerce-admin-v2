@@ -14,6 +14,7 @@ import Products from './Products';
 import { useSelector } from 'react-redux';
 const { TextArea } = Input;
 import { orderQuery } from '../../apollo/order';
+import { methodQuery } from '../../apollo/method';
 
 const AddPO = () => {
   viewPermission('purchase-order');
@@ -27,11 +28,14 @@ const AddPO = () => {
   const [shippingAddresses, setShippingAddresses] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [orderInput, setOrderInput] = useState(false);
-  const [companyBillingAddress, setCompanyBillingAddress] = useState([]);
   const [orderList, setOrderList] = useState([]);
   const [orderData, setOrderData] = useState([]);
   const [selectedOrder, setSelectedOrder] = useState('');
   const [selectedType, setSelectedType] = useState('');
+  const [shippingMethod, setShippingMethod] = useState([]);
+  const [paymentMethod, setPaymentMethod] = useState([]);
+  const [selectedShippingMethod, setSelectedShippingMethod] = useState(null);
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(null);
 
   // ============+ for product START +====================
   const initialData = {
@@ -81,7 +85,7 @@ const AddPO = () => {
             const {
               quantity,
               price,
-              product: { prod_name, id },
+              product: { id },
             } = item;
             return {
               key: new Date().getTime() + Math.floor(Math.random() * 10) + 1,
@@ -94,26 +98,7 @@ const AddPO = () => {
           setProducts(prods);
         });
     }
-  }, []);
-
-  // Get Company Billing Address
-  useEffect(() => {
-    apolloClient
-      .query({
-        query: poQuery.GET_COMPANY_BILLING_ADDRESS,
-        context: {
-          headers: {
-            TENANTID: process.env.REACT_APP_TENANTID,
-            Authorization: token,
-          },
-        },
-      })
-      .then(res => {
-        const data = res?.data?.getCompanyInfo;
-        if (!data?.status) return;
-        setCompanyBillingAddress(data?.data?.billingAddresses);
-      });
-  }, []);
+  }, [params?.order_id]);
 
   // Get Order List with Address
   useEffect(() => {
@@ -144,6 +129,46 @@ const AddPO = () => {
             };
           });
         setOrderList(order_data);
+      });
+
+    // Load Shipping Method
+    apolloClient
+      .query({
+        query: methodQuery.GET_SHIPPING_METHOD_LIST,
+        context: {
+          headers: {
+            TENANTID: process.env.REACT_APP_TENANTID,
+          },
+        },
+      })
+      .then(res => {
+        const data = res?.data?.getShippingMethodListPublic;
+        if (!data.status) return;
+        setShippingMethod(data?.data);
+        setSelectedShippingMethod(data?.data?.filter(item => item.isDefault === true)[0]?.id);
+      })
+      .catch(err => {
+        console.log(err);
+      });
+
+    // Load Payment Mathod
+    apolloClient
+      .query({
+        query: methodQuery.GET_PAYMENT_METHOD_LIST,
+        context: {
+          headers: {
+            TENANTID: process.env.REACT_APP_TENANTID,
+          },
+        },
+      })
+      .then(res => {
+        const data = res?.data?.getPaymentMethodListPublic;
+        if (!data.status) return;
+        setPaymentMethod(data?.data);
+        setSelectedPaymentMethod(data?.data?.filter(item => item.isDefault === true)[0]?.id);
+      })
+      .catch(err => {
+        console.log(err);
       });
   }, []);
 
@@ -379,7 +404,7 @@ const AddPO = () => {
                   <Tabs>
                     <Tabs.TabPane tab="Vendor Info" key="vendor">
                       <Form.Item
-                        initialvalues="default"
+                        initialValue="default"
                         rules={[{ required: true, message: 'Please Select Type' }]}
                         name="type"
                         label="Type"
@@ -560,6 +585,7 @@ const AddPO = () => {
 
                     <Tabs.TabPane tab="Other Info" key="other">
                       <Form.Item
+                        initialValue={selectedShippingMethod}
                         rules={[{ required: true, message: 'Please Select Shipping Method' }]}
                         name="shipping_method_id"
                         label="Shipping Method"
@@ -567,25 +593,20 @@ const AddPO = () => {
                         <Select
                           size="middle"
                           placeholder="Select Shipping Method"
-                          initialvalues=""
+                          defaultValue={selectedShippingMethod}
                           style={{ width: '100%' }}
                           optionLabelProp="label"
                         >
-                          <Select.Option key={1} value={1} label="Shipping Method 1">
-                            <div className="demo-option-label-item">Shipping Method 1</div>
-                          </Select.Option>
-
-                          <Select.Option key={2} value={2} label="Shipping Method 2">
-                            <div className="demo-option-label-item">Shipping Method 2</div>
-                          </Select.Option>
-
-                          <Select.Option key={3} value={3} label="Shipping Method 3">
-                            <div className="demo-option-label-item">Shipping Method 3</div>
-                          </Select.Option>
+                          {shippingMethod.map(item => (
+                            <Select.Option key={item.id} value={item.id} label={item.name}>
+                              <div className="demo-option-label-item">{item.name}</div>
+                            </Select.Option>
+                          ))}
                         </Select>
                       </Form.Item>
 
                       <Form.Item
+                        initialValue={selectedPaymentMethod}
                         rules={[{ required: true, message: 'Please Select Payment Method' }]}
                         name="payment_method_id"
                         label="Payment Method"
@@ -593,21 +614,15 @@ const AddPO = () => {
                         <Select
                           size="middle"
                           placeholder="Select Payment Method"
-                          initialvalues=""
+                          defaultValue={selectedPaymentMethod}
                           style={{ width: '100%' }}
                           optionLabelProp="label"
                         >
-                          <Select.Option key={1} value={1} label="Payment Method 1">
-                            <div className="demo-option-label-item">Payment Method 1</div>
-                          </Select.Option>
-
-                          <Select.Option key={2} value={2} label="Payment Method 2">
-                            <div className="demo-option-label-item">Payment Method 2</div>
-                          </Select.Option>
-
-                          <Select.Option key={3} value={3} label="Payment Method 3">
-                            <div className="demo-option-label-item">Payment Method 3</div>
-                          </Select.Option>
+                          {paymentMethod.map(item => (
+                            <Select.Option key={item.id} value={item.id} label={item.name}>
+                              <div className="demo-option-label-item">{item.name}</div>
+                            </Select.Option>
+                          ))}
                         </Select>
                       </Form.Item>
 

@@ -37,7 +37,7 @@ const ListRP = () => {
       width: 100,
       sorter: (a, b) => (a.po_id.toUpperCase() > b.po_id.toUpperCase() ? 1 : -1),
       render: (value, record) => {
-        return <Link to={`/admin/po/edit?id=`}>{value}</Link>;
+        return <Link to={`/admin/po/edit?id=${record?.po_p_id}`}>{value}</Link>;
       },
     },
     {
@@ -101,7 +101,7 @@ const ListRP = () => {
       render: (value) => value.toUpperCase(),
     },
     {
-      title: 'Total Amount',
+      title: 'Amount',
       dataIndex: 'total_amount',
       key: 'total_amount',
       width: 100,
@@ -154,6 +154,7 @@ const ListRP = () => {
             status: item.status,
             total_amount: item?.purchaseOrder.grandTotal_price,
             po_id: item?.purchaseOrder.po_id,
+            po_p_id: item?.purchaseOrder.id,
             type: item?.purchaseOrder.type,
             vendor: item?.purchaseOrder?.vendor,
           };

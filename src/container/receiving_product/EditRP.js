@@ -1,21 +1,18 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Col, Form, Input, Spin, Tabs, Select, Radio, Table } from 'antd';
+import { Row, Col, Form, Spin, Tabs, Select, Table } from 'antd';
 import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
 import { Cards } from '../../components/cards/frame/cards-frame';
 import { Button } from '../../components/buttons/buttons';
 import { Link, useHistory, useLocation } from 'react-router-dom';
 import queryString from 'query-string';
-import apolloClient, { productQuery, vendorQuery } from '../../utility/apollo';
-import { poQuery } from '../../apollo/po';
+import apolloClient from '../../utility/apollo';
 import { toast } from 'react-toastify';
-import { ellipsis, viewPermission } from '../../utility/utility';
+import { viewPermission } from '../../utility/utility';
 import Products from './Products';
 import { useSelector } from 'react-redux';
 import { receivingProductQuery } from './../../apollo/receiving_product/index';
-import ExapndableProduct from './ExapndableProduct';
 import Moment from 'react-moment';
-const { TextArea } = Input;
 
 const EditRP = () => {
   viewPermission('receiving-product');
@@ -26,18 +23,18 @@ const EditRP = () => {
   const [form] = Form.useForm();
   const [isLoading, setIsLoading] = useState(false);
   const [singleRP, setSingleRP] = useState({ data: [], isLoading: true });
-  const [products, setProducts] = useState([]);
+  const [productItem, setProductItem] = useState([]);
   const [historyData, setHistoryData] = useState([]);
 
   // ============+ for product START +====================
-  const initialData = {
-    key: new Date().getTime(),
-    id: '',
-    price: '',
-    quantity: '',
-    recieved_quantity: 0,
-    isNew: true,
-  };
+  // const initialData = {
+  //   key: new Date().getTime(),
+  //   id: '',
+  //   price: '',
+  //   quantity: '',
+  //   recieved_quantity: 0,
+  //   isNew: true,
+  // };
 
   /* ------------------------ Get Single PO Order Start ----------------------- */
   useEffect(() => {
@@ -59,35 +56,10 @@ const EditRP = () => {
       })
       .then(res => {
         const data = res?.data?.getSingleReceivingProduct;
+        console.log("🚀 ~ file: EditRP.js:59 ~ useEffect ~ data", data)
         if (!data.status) return;
         setSingleRP({ data: data?.data, isLoading: false, message: data.message });
-        const prod_list = data?.data?.poProducts.map(item => {
-          return {
-            id: item.id,
-            price: item.price,
-            purchase_order_id: item.purchase_order_id,
-            quantity: item.quantity,
-            recieved_quantity: item.recieved_quantity,
-            remaining_quantity: item.remaining_quantity,
-            totalPrice: item.totalPrice,
-            prod_id: item.product.id,
-            prod_sku: item.product.prod_sku,
-            prod_partnum: item.product.prod_partnum,
-            prod_short_desc: item.product.prod_short_desc,
-            is_serial: item.product.is_serial,
-            prod_name: item.product.prod_name,
-            serials: item.serials.map(ser => ser.serial),
-            serial_options: item.serials.map(ser => {
-              return {
-                value: ser.serial,
-                label: ser.serial,
-              };
-            }),
-            prod_thumbnail: item.product.prod_thumbnail,
-            key: item.id,
-          };
-        });
-        setProducts(prod_list);
+        setProductItem(data?.data?.receivingitems.map(item => ({ ...item, receiving_quantity: 0, new_serials: [] })));
         form.setFieldsValue({
           status: data?.data?.status,
         });
@@ -124,30 +96,27 @@ const EditRP = () => {
   /* ------------------------- Get Single PO Order End ------------------------ */
 
   const handleSubmit = values => {
-    for (let i of products) {
-      if (i.is_serial) {
-        if (i.serials.length !== parseInt(i.recieved_quantity)) {
-          return toast.error(`${i.prod_sku} Serial Is Missing!`);
-        }else if (i.serials.length > i.remaining_quantity){
-          return toast.error(`${i.prod_sku} Serial Can Not Cross The Remaining Quantity!`);
+    for (let i of productItem) {
+      if (i.new_serials.length > 0 || i.product.is_serial) {
+        if (i.new_serials.length !== parseInt(i.receiving_quantity)) {
+          return toast.error(`${i.product.prod_sku} Serial Is Miss Match!`);
+        } else if (i.new_serials.length > i.remaining_quantity) {
+          return toast.error(`${i.product.prod_sku} Serial Can Not Cross The Remaining Quantity!`);
         }
       }
     }
-    const mod_products = products.map(item => {
-      const { prod_id, quantity, recieved_quantity, is_serial, serials } = item;
-      return {
-        prod_id,
-        quantity,
-        received_quantity: parseInt(recieved_quantity),
-        is_serial,
-        serials,
-      };
-    });
+    setIsLoading(true);
     const variables = {
       data: {
         id: parseInt(params?.id),
         status: values.status,
-        receivedProducts: mod_products,
+        receivedProducts: productItem.map(item => ({
+          receiving_item_id: item.id,
+          prod_id: item.product.id,
+          quantity: item.quantity,
+          receiving_quantity: parseInt(item.receiving_quantity),
+          serials: item.new_serials,
+        })),
       },
     };
     apolloClient
@@ -196,37 +165,27 @@ const EditRP = () => {
       })
       .catch(err => {
         console.log('got error on updateStatus', err);
+      })
+      .finally(() => {
+        setIsLoading(false);
       });
   };
 
   const historyColumns = [
     {
-      title: 'Receiving ID',
-      dataIndex: 'receiving_id',
-      key: 'receiving_id',
-      width: 100,
-    },
-    {
-      title: 'Type',
-      dataIndex: 'status',
+      title: 'Status',
+      dataIndex: "status",
       key: 'status',
       width: 100,
       render: value => value?.toUpperCase(),
     },
     {
-      title: 'Email',
-      dataIndex: ['activity_by', 'email'],
-      key: 'email',
+      title: 'Updated By',
+      dataIndex: ['activity_by', 'first_name'],
+      key: 'first_name',
       width: 150,
       ellipsis: true,
       render: value => <p>{value}</p>,
-    },
-    {
-      title: 'Status',
-      dataIndex: ['data', 'status'],
-      key: 'status',
-      width: 100,
-      render: value => value?.toUpperCase(),
     },
     {
       title: 'Date',
@@ -262,6 +221,10 @@ const EditRP = () => {
                       onFinishFailed={errorInfo => console.log('form error info:\n', errorInfo)}
                       labelCol={{ span: 4 }}
                     >
+                      <Form.Item style={{marginBottom: 0}} label="Company Name">{singleRP?.data?.purchaseOrder?.vendor?.company_name}</Form.Item>
+                      <Form.Item style={{marginBottom: 0}} label="Email">{singleRP?.data?.purchaseOrder?.vendor?.email}</Form.Item>
+                      <Form.Item style={{marginBottom: 0}} label="Contact Person">{singleRP?.data?.purchaseOrder?.vendor?.contact_person}</Form.Item>
+                      <Form.Item style={{marginBottom: 0}} label="Phone">{singleRP?.data?.purchaseOrder?.vendor?.phone_number}</Form.Item>
                       <Form.Item
                         rules={[{ required: true, message: 'Please Select Status' }]}
                         name="status"
@@ -295,7 +258,7 @@ const EditRP = () => {
                         </Select>
                       </Form.Item>
 
-                      <Products {...{ products }} />
+                      <Products {...{ products: productItem }} />
 
                       <div
                         style={{
@@ -321,10 +284,6 @@ const EditRP = () => {
                     <Table
                       rowKey="id"
                       columns={historyColumns}
-                      expandable={{
-                        expandedRowRender: record => <ExapndableProduct {...record.data} />,
-                        rowExpandable: record => record.data.products.length > 0,
-                      }}
                       dataSource={historyData}
                       pagination={{
                         defaultPageSize: 10,

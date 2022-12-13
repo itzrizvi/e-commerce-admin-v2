@@ -1,90 +1,102 @@
 import { Input, Select, Table, Tag } from 'antd';
 import React from 'react';
+import ExapndableProduct from './ExapndableProduct';
 
 const Products = ({ products }) => {
   const column = [
     {
       title: 'SKU',
-      dataIndex: 'prod_sku',
+      dataIndex: ['product', 'prod_sku'],
       key: 'prod_sku',
-      width: 180,
+      width: 150,
       ellipsis: true,
+      sorter: (a, b) => (a.product.prod_sku.toUpperCase() > b.product.prod_sku.toUpperCase() ? 1 : -1),
     },
     {
       title: 'Part Number',
-      dataIndex: 'prod_partnum',
+      dataIndex: ['product', 'prod_partnum'],
       key: 'prod_partnum',
-      width: 180,
+      width: 150,
       ellipsis: true,
+      sorter: (a, b) => (a.product.prod_partnum.toUpperCase() > b.product.prod_partnum.toUpperCase() ? 1 : -1),
     },
     {
       title: 'Name',
-      dataIndex: 'prod_name',
+      dataIndex: ['product', 'prod_name'],
       key: 'prod_name',
       width: 200,
       ellipsis: true,
+      sorter: (a, b) => (a.product.prod_name.toUpperCase() > b.product.prod_name.toUpperCase() ? 1 : -1),
     },
     {
       title: 'Quantity',
       dataIndex: 'quantity',
       key: 'quantity',
       width: 100,
+      sorter: (a, b) => parseFloat(a.quantity) > parseFloat(b.quantity),
     },
     {
       title: 'Received Quantity',
-      dataIndex: 'recieved_quantity',
-      key: 'recieved_quantity',
+      dataIndex: 'received_quantity',
+      key: 'received_quantity',
       width: 150,
+      sorter: (a, b) => parseFloat(a.received_quantity) > parseFloat(b.received_quantity),
     },
     {
       title: 'Remaining Quantity',
       dataIndex: 'remaining_quantity',
       key: 'remaining_quantity',
       width: 150,
+      sorter: (a, b) => parseFloat(a.remaining_quantity) > parseFloat(b.remaining_quantity),
     },
     {
       title: 'Receiving Amount',
-      dataIndex: 'receiving_amount',
-      key: 'receiving_amount',
+      dataIndex: 'receiving_quantity',
+      key: 'receiving_quantity',
       width: 150,
       render: (text, record) => (
         <Input
           min="0"
+          defaultValue={text}
           type="number"
           placeholder="Receiving Amount"
-          onChange={e => (record.recieved_quantity = e.target.value)}
+          onChange={e => (record.receiving_quantity = e.target.value)}
         />
       ),
+      sorter: (a, b) => parseFloat(a.receiving_quantity) > parseFloat(b.receiving_quantity),
     },
     {
       title: 'Serial Status',
-      dataIndex: 'is_serial',
+      dataIndex: ['product', 'is_serial'],
       key: 'is_serial',
       width: 150,
-      render: (text, record) => (text ? <Tag color="red" style={{color: '#000'}}>Required</Tag> : <Tag style={{color: '#000'}} color="green">Not Required</Tag>),
+      render: (text, record) =>
+        text ? (
+          <Tag color="red" style={{ color: '#000' }}>
+            Required
+          </Tag>
+        ) : (
+          <Tag style={{ color: '#000' }} color="green">
+            Not Required
+          </Tag>
+        ),
     },
     {
       title: 'Serial Number',
-      dataIndex: 'serial',
-      key: 'serial',
+      dataIndex: 'new_serials',
+      key: 'new_serials',
       width: 500,
       render: (text, record) => (
-        <Select
-          mode="tags"
-          style={{ width: '100%' }}
-          placeholder="Serial"
-          defaultValue={record.serial_options}
-          options={record.serial_options}
-          onChange={e => (record.serials = e)}
-        />
+        <Select mode="tags" style={{ width: '100%' }} placeholder="Serial" onChange={e => (record.new_serials = e)} />
       ),
     },
     {
       title: 'Short Description',
-      dataIndex: 'prod_short_desc',
+      dataIndex: ['product', 'prod_short_desc'],
       key: 'prod_short_desc',
       width: 400,
       ellipsis: true,
+      sorter: (a, b) => (a.product.prod_short_desc.toUpperCase() > b.product.prod_short_desc.toUpperCase() ? 1 : -1),
     },
   ];
 
@@ -94,7 +106,11 @@ const Products = ({ products }) => {
         className="table-responsive"
         columns={column}
         pagination={false}
-        rowKey={'key'}
+        expandable={{
+          expandedRowRender: record => <ExapndableProduct {...{products: record?.receivinghistory}} />,
+          rowExpandable: record => record?.receivinghistory?.length > 0,
+        }}
+        rowKey={'id'}
         size="small"
         dataSource={products}
       />

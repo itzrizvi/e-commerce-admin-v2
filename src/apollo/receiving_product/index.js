@@ -43,28 +43,67 @@ export const receivingProductQuery = {
         data {
           id
           status
-          poProducts {
+          receivingitems {
             id
-            purchase_order_id
+            receiving_id
             quantity
             price
             totalPrice
-            recieved_quantity
+            received_quantity
             remaining_quantity
-            serials {
-              id
-              prod_id
-              serial
-              rec_prod_id
-            }
+            createdAt
+            updatedAt
             product {
               id
               prod_name
+              prod_slug
               prod_sku
               prod_partnum
+              prod_status
+              prod_condition
               prod_short_desc
               prod_thumbnail
+              is_featured
+              is_sale
               is_serial
+              prod_outofstock_status
+              createdAt
+              updatedAt
+            }
+            serials {
+              id
+              prod_id
+              rec_prod_id
+            }
+            receivinghistory {
+              id
+              receiving_id
+              receiving_item_id
+              product_id
+              received_quantity
+              createdAt
+              updatedAt
+              received_by {
+                id
+                first_name
+                last_name
+                email
+              }
+            }
+          }
+          purchaseOrder {
+            id
+            po_id
+            grandTotal_price
+            tax_amount
+            comment
+            shipping_method_id
+            vendor {
+              id
+              contact_person
+              company_name
+              email
+              phone_number
             }
           }
         }
@@ -78,33 +117,26 @@ export const receivingProductQuery = {
         status
         data {
           id
-          data {
-            products {
-              product {
-                id
-                prod_name
-                prod_short_desc
-                prod_sku
-                prod_partnum
-              }
-              quantity
-              recieved_quantity
-              serials
-            }
-            status
-          }
           receiving_id
           status
           createdAt
+          updatedAt
           activity_by {
             id
+            first_name
+            last_name
             email
-            roles {
-              id
-              role
-            }
           }
         }
+      }
+    }
+  `,
+  ADD_RECEIVING_PRODUCT: gql`
+    mutation createReceiving($data: createReceivingInput) {
+      createReceiving(data: $data) {
+        message
+        status
+        tenant_id
       }
     }
   `,

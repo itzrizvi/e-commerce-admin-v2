@@ -1140,7 +1140,7 @@ const EditUser = () => {
                       <Button loading={isLoading} size="default" htmlType="submit" type="primary" raised>
                         {isLoading ? 'Processing' : 'Save'}
                       </Button>
-                      <Link to="/admin/customer/list">
+                      <Link to="/admin/customers/list">
                         <Button style={{ marginLeft: 10 }} type="light" size="default">
                           Cancel
                         </Button>

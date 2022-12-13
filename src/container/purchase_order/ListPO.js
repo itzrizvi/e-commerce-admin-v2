@@ -1,19 +1,20 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Col, Spin, Input, Table, Switch, Select } from 'antd';
+import { Row, Col, Spin, Input, Table, Switch, Select, Tooltip } from 'antd';
 import FeatherIcon from 'feather-icons-react';
 import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
 import { Cards } from '../../components/cards/frame/cards-frame';
 import { Button } from '../../components/buttons/buttons';
-import { Link } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 import FontAwesome from 'react-fontawesome';
 import { SearchOutlined } from '@ant-design/icons';
 import config from '../../config/config';
-import apolloClient, { customerMutation } from '../../utility/apollo';
+import apolloClient from '../../utility/apollo';
 import { toast } from 'react-toastify';
 import { viewPermission } from '../../utility/utility';
 import { useSelector } from 'react-redux';
 import { poQuery } from '../../apollo/po';
+import { receivingProductQuery } from '../../apollo/receiving_product';
 
 const ListPO = () => {
   viewPermission('purchase-order');
@@ -21,6 +22,7 @@ const ListPO = () => {
   const [filteredPO, setFilteredPO] = useState([]);
   const [searchText, setSearchText] = useState('');
   const token = useSelector(state => state.auth.token);
+  const history = useHistory();
 
   const columns = [
     {
@@ -70,8 +72,15 @@ const ListPO = () => {
       align: 'right',
       render: (text, record) => (
         <>
+          <Tooltip placement="topLeft" title="Create Receiving Product">
+            <FontAwesome
+              onClick={() => handleCreateReceivingProduct(record.id)}
+              name="anchor"
+              style={{ margin: '.5em', color: '#ADB4D2', cursor: 'pointer' }}
+            />
+          </Tooltip>
           <Link to={`/admin/po/edit?id=${record.id}`}>
-            <FontAwesome name="edit" style={{ margin: '.5em 1em' }} />
+            <FontAwesome name="edit" style={{ margin: '.5em' }} />
           </Link>
         </>
       ),
@@ -109,11 +118,49 @@ const ListPO = () => {
     setSearchText(value);
     setFilteredPO(
       po.data.filter(po =>
-        (po?.id + po?.comment + po.grandTotal_price + po.po_id + po.status)
-          .toLowerCase()
-          .includes(value.toLowerCase()),
+        (po?.id + po?.comment + po.grandTotal_price + po.po_id + po.status).toLowerCase().includes(value.toLowerCase()),
       ),
     );
+  };
+
+  const handleCreateReceivingProduct = id => {
+    apolloClient
+      .mutate({
+        mutation: receivingProductQuery.ADD_RECEIVING_PRODUCT,
+        variables: {
+          data: {
+            status: 'new',
+            purchaseOrder_id: id,
+          },
+        },
+        context: {
+          headers: {
+            TENANTID: process.env.REACT_APP_TENANTID,
+            Authorization: token,
+          },
+        },
+        refetchQueries: [
+          {
+            query: receivingProductQuery.GET_ALL_RP,
+            context: {
+              headers: {
+                TENANTID: process.env.REACT_APP_TENANTID,
+                Authorization: token,
+              },
+            },
+          },
+          ['getReceivingProductList'],
+        ],
+      })
+      .then(res => {
+        const data = res?.data?.createReceiving;
+        if (!data.status) return toast.error(data.message);
+        toast.success(data.message);
+        history.push(`/admin/rp/edit?id=${data?.id}`);
+      })
+      .catch(err => {
+        console.log('error on adding customer', err);
+      });
   };
 
   return (

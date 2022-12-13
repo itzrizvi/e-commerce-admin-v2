@@ -1,20 +1,19 @@
-import React, { useEffect, useState } from 'react';
-import { Row, Col, Form, Input, Select, Spin, Switch, Checkbox, Typography, Tabs } from 'antd';
+import React, { useState } from 'react';
+import { Row, Col, Form, Input, Switch, Checkbox, Typography, Tabs } from 'antd';
 import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
 import { Cards } from '../../components/cards/frame/cards-frame';
 import { Button } from '../../components/buttons/buttons';
 import { Link, useHistory, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import apolloClient, { authMutation, authQuery } from '../../utility/apollo';
+import apolloClient from '../../utility/apollo';
 import { toast } from 'react-toastify';
 import queryString from 'query-string';
 import { viewPermission } from '../../utility/utility';
-import BillingAdderess from './BillingAdderess';
-import ShippingAddress from './ShippingAddress';
+
 import { customerMutation, customerQuery } from '../../apollo/customer';
 import AddressTable from './AddressTable';
-const { Paragraph, Text } = Typography;
+import { useEffect } from 'react';
 
 const AddUser = () => {
   viewPermission('customer');
@@ -23,10 +22,12 @@ const AddUser = () => {
   const params = queryString.parse(search);
   const maxLength = 30;
   const [userStatus, setUserStatus] = useState(true);
-  const [sendEmail, setSendEmail] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const token = useSelector(state => state.auth.token);
+  const [operation, setOperation] = useState(false);
+  const [user_id, setUserId] = useState(null);
   const [form] = Form.useForm();
+  const [isError, setIsError] = useState(false);
 
   const initialAddress = {
     id: new Date().getTime(),
@@ -48,15 +49,26 @@ const AddUser = () => {
   const [defaultBillingId, setDefaultBillingId] = useState(null);
 
   const handleSubmit = values => {
-    console.log('🚀 ~ file: AddUser.js ~ line 61 ~ handleSubmit ~ values', values);
+    // validate billingAddresses.
+    const notValidate = billingAddress.find(item => {
+      const { id, address1, country, city, state, zip_code, email, fax, phone } = item;
+      const checkFalse = !(id && address1 && country && city && state && zip_code && email && fax && phone);
+      return checkFalse;
+    });
+    if (notValidate?.id) return toast.warning('Enter Billing Address Correctly!');
 
-    // test
-    // 10067
+    // validate shippingAddresses.
+    const notValidate1 = shippingAddress.find(item => {
+      const { id, address1, country, city, state, zip_code, email, fax, phone } = item;
+      const checkFalse = !(id && address1 && country && city && state && zip_code && email && fax && phone);
+      return checkFalse;
+    });
+    if (notValidate1?.id) return toast.warning('Enter Shipping Address Correctly!');
 
     setIsLoading(true);
 
     const variables = {
-      data: { ...values, status: userStatus, send_mail: sendEmail },
+      data: { ...values, status: userStatus, send_mail: true },
     };
     apolloClient
       .mutate({
@@ -77,6 +89,7 @@ const AddUser = () => {
                 Authorization: token,
               },
             },
+            fetchPolicy: 'network-only',
           },
           ['getAllCustomer'],
         ],
@@ -84,65 +97,75 @@ const AddUser = () => {
       .then(res => {
         const data = res?.data?.addCustomer;
         if (!data.status) return toast.error(data.message);
-        toast.success(data.message);
-        history.push('/admin/customers/list');
+        setOperation(true);
+        setUserId(data?.id);
       })
       .catch(err => {
         console.log('error on adding customer', err);
         toast.error(`Something went wrong!!`);
-      })
-      .finally(() => setIsLoading(false));
-
-    let check_point = true;
-
-    // return
-    shippingAddress.forEach(val => {
-      const { id, ...rest } = val;
-      if (check_point && Object.values(rest).some(x => x === null || x === '')) {
-        toast.info('Please Provide All Field Properly In Shipping Address Tab..');
-        check_point = false;
-        return;
-      }
-    });
-    if (!check_point) return;
-
-    return;
-    const parent_id = 10067;
-
-    if (shippingAddress.length) {
-      const variables = {
-        data: shippingAddress.map(add => {
-          const { id, ...rest } = add;
-          return defaultShippingId === id ? { ...rest, isDefault: true, parent_id } : { ...rest, parent_id };
-        }),
-      };
-      console.log('shipping var', variables);
-    }
-
-    return;
-    apolloClient
-      .mutate({
-        mutation: customerMutation.ADD_CUSTOMER_BILLING_ADDRESS,
-        variables,
-        context: {
-          headers: {
-            TENANTID: process.env.REACT_APP_TENANTID,
-            Authorization: token,
-          },
-        },
-      })
-      .then(res => {
-        const data = res?.data?.addCustomerBillingAddress;
-        if (!data.status) return toast.error(data.message);
-        toast.success(data.message);
-        history.push('/admin/customers/list');
-      })
-      .catch(err => {
-        console.log('error on adding customer', err);
-        toast.error(`Something went wrong!!`);
+        setIsError(true);
       })
       .finally(() => setIsLoading(false));
   };
+
+  useEffect(() => {
+    if (operation && user_id) {
+      const newBillingAddress = billingAddress.map(item => {
+        const { parent_id, id, ...rest } = item;
+        return {
+          parent_id: user_id,
+          ...rest,
+        };
+      });
+      const newShippingAddress = shippingAddress.map(item => {
+        const { parent_id, id, ...rest } = item;
+        return {
+          parent_id: user_id,
+          ...rest,
+        };
+      });
+
+      ['billing', 'shipping'].forEach(type => {
+        setIsLoading(true);
+        apolloClient
+          .mutate({
+            mutation:
+              type === 'billing'
+                ? customerMutation.ADD_CUSTOMER_BILLING_ADDRESS
+                : customerMutation.ADD_CUSTOMER_SHIPPING_ADDRESS,
+            variables: {
+              data: {
+                addresses: [...(type === 'billing' ? newBillingAddress : newShippingAddress)],
+              },
+            },
+            context: {
+              headers: {
+                TENANTID: process.env.REACT_APP_TENANTID,
+                Authorization: token,
+              },
+            },
+          })
+          .then(res => {
+            const data = res?.data?.updateVendorAddress;
+            if (!data?.status) return;
+          })
+          .catch(err => {
+            setIsError(true);
+          })
+          .finally(res => {
+            setIsLoading(false);
+            if (type === 'shipping') {
+              if (!isError) {
+                toast.success('User Created Successfully.');
+                setTimeout(() => {
+                  history.push('/admin/customers/list');
+                }, [2000]);
+              }
+            }
+          });
+      });
+    }
+  }, [operation, user_id]);
 
   return (
     <>
@@ -194,14 +217,9 @@ const AddUser = () => {
                     <Form.Item label="User Status">
                       <Switch checked={userStatus} onChange={checked => setUserStatus(checked)} />
                     </Form.Item>
-
-                    <Form.Item label="Send Email">
-                      <Checkbox value={sendEmail} onChange={e => setSendEmail(e.target.checked)}></Checkbox>
-                    </Form.Item>
                   </Tabs.TabPane>
 
                   <Tabs.TabPane tab="Shipping Address" key="sAddress">
-                    {/* <ShippingAddress {...{ initialData, shippingAddress, setShippingAddress }} /> */}
                     <AddressTable
                       initialData={initialAddress}
                       addresses={shippingAddress}
@@ -212,7 +230,6 @@ const AddUser = () => {
                   </Tabs.TabPane>
 
                   <Tabs.TabPane tab="Billing Address" key="bAddress">
-                    {/* <BillingAdderess {...{ initialData, billingAddress, setBillingAddress }} /> */}
                     <AddressTable
                       initialData={initialAddress}
                       addresses={billingAddress}

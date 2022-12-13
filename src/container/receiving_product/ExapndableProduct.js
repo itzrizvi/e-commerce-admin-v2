@@ -1,57 +1,46 @@
 import React from 'react';
-import { Table, PageHeader } from 'antd';
+import { Table } from 'antd';
+import Moment from 'react-moment';
 
 export default function ExapndableProduct({ products }) {
   const productColumns = [
     {
-      title: 'Name',
-      dataIndex: ['product', 'prod_name'],
-      key: 'prod_name',
+      title: 'Received Quantity',
+      dataIndex: 'received_quantity',
+      key: 'received_quantity',
       width: 200,
-      ellipsis: true
+      sorter: (a, b) => parseFloat(a.received_quantity) > parseFloat(b.received_quantity),
     },
     {
-      title: 'SKU',
-      dataIndex: ['product', 'prod_sku'],
-      key: 'prod_sku',
-      width: 150,
+      title: 'Received By',
+      dataIndex: ['received_by', 'first_name'],
+      key: 'first_name',
+      width: 200,
+      sorter: (a, b) => (a.first_name.toUpperCase() > b.first_name.toUpperCase() ? 1 : -1),
     },
     {
-      title: 'Part Number',
-      dataIndex: ['product', 'prod_partnum'],
-      key: 'prod_partnum',
-      width: 150
-    },
-    {
-      title: 'Serials',
-      dataIndex: 'serials',
-      key: 'serials',
-      width: 300,
-      render: value => value.length > 0 ? <p>{value.toString()}</p> : <p>No Serial Found!</p>,
-    },
-    {
-      title: 'Short Description',
-      dataIndex: ['product', 'prod_short_desc'],
-      key: 'prod_short_desc',
-      width: 400,
-      ellipsis: true
+      title: 'Date',
+      dataIndex: 'createdAt',
+      key: 'createdAt',
+      align: 'center',
+      render: (text, record) => (
+        <span className={'status-text'}>{<Moment format="DD MMMM YYYY hh:mm A">{parseInt(text)}</Moment>}</span>
+      ),
     },
   ];
   return (
-    <>
-      <PageHeader title="Product Lists" />
+    <div style={{
+      width: `calc(70vw)`,
+      padding: "30px 0"
+    }}>
       <Table
-        className="table-responsive"
         rowKey="id"
         rowClassName={(record, index) => (index % 2 == 0 ? '' : 'altTableClass')}
         columns={productColumns}
         dataSource={products}
-        pagination={{
-          defaultPageSize: 10,
-          total: products.length,
-          showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`,
-        }}
+        showSorterTooltip={false}
+        pagination={false}
       />
-    </>
+    </div>
   );
 }

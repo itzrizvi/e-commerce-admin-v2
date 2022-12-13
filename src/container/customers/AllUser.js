@@ -88,7 +88,7 @@ const ListUser = () => {
             dataIndex: 'id',
             key: 'id',
             width: 70,
-            render: (text, record) => (<LazyLoadImage effect="blur" width="40" src={renderImage(record.id, record.image, 'user', '128x128')} onError={errorImageSrc} alt={record.id} />)
+            render: (text, record) => (<LazyLoadImage effect="blur" width="40" src={renderImage(record.id, record.image, 'user', '128x128', true)} onError={errorImageSrc} alt={record.id} />)
         },
         {
             title: 'Email',
@@ -162,9 +162,7 @@ const ListUser = () => {
             render: (id, record) => (
                 <>
                     <Link to={`/admin/customers/edit?id=${id}`}>
-                        {/* <Button size="default" type="white" title='Edit'> */}
                         <FontAwesome name="edit" />
-                        {/* </Button> */}
                     </Link>
                 </>
             ),

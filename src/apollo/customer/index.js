@@ -1,7 +1,7 @@
-import { gql } from "@apollo/client"
+import { gql } from '@apollo/client';
 
 export const customerQuery = {
-    GET_ALL_CUSTOMER: gql`
+  GET_ALL_CUSTOMER: gql`
     query {
       getAllCustomer {
         status
@@ -34,26 +34,32 @@ export const customerQuery = {
       }
     }
   `,
-
-}
+};
 
 export const customerMutation = {
-    ADD_CUSTOMER: gql`
-    mutation addCustomer($data:CustomerInput) {
-        addCustomer(data: $data) {
+  ADD_CUSTOMER: gql`
+    mutation addCustomer($data: CustomerInput) {
+      addCustomer(data: $data) {
         message
         status
-        }
-    }
-    `,
-    ADD_CUSTOMER_BILLING_ADDRESS: gql`
-    mutation addCustomerBillingAddress($data:Address) {
-        addCustomerBillingAddress(data:$data) {
-          message
-          status
-          id
-        }
+        id
       }
-    `,
-
-}
+    }
+  `,
+  ADD_CUSTOMER_BILLING_ADDRESS: gql`
+    mutation addCustomerBillingAddress($data: AddCustomerBillingAddressInput) {
+      addCustomerBillingAddress(data: $data) {
+        message
+        status
+      }
+    }
+  `,
+  ADD_CUSTOMER_SHIPPING_ADDRESS: gql`
+    mutation addCustomerShippingAddress($data: AddCustomerShippingAddressInput) {
+      addCustomerShippingAddress(data: $data) {
+        message
+        status
+      }
+    }
+  `,
+};
