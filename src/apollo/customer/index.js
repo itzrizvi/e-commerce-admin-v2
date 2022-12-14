@@ -34,6 +34,32 @@ export const customerQuery = {
       }
     }
   `,
+  GET_RATING_BY_USER_ID: gql`
+    query getRatingsByUserID($query: GetRatingsByUserInput) {
+      getRatingsByUserID(query: $query) {
+        message
+        status
+        data {
+          id
+          rating_description
+          rating
+          createdAt
+          updatedAt
+          product {
+            id
+            prod_name
+            prod_slug
+            prod_short_desc
+            prod_thumbnail
+            prod_sku
+            prod_regular_price
+            prod_sale_price
+            prod_status
+          }
+        }
+      }
+    }
+  `,
 };
 
 export const customerMutation = {
@@ -59,6 +85,23 @@ export const customerMutation = {
       addCustomerShippingAddress(data: $data) {
         message
         status
+      }
+    }
+  `,
+  UPDATE_CUSTOMER: gql`
+    mutation updateCustomer($data: UpdateCustomerInput) {
+      updateCustomer(data: $data) {
+        message
+        status
+      }
+    }
+  `,
+  UPDATE_CUSTOMER_ADDRESSES: gql`
+    mutation updateCustomerAddress($data: UpdateCustomerAddressInput) {
+      updateCustomerAddress(data: $data) {
+        message
+        status
+        tenant_id
       }
     }
   `,

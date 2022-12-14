@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Row, Col, Form, Input, Select, Spin } from 'antd';
+import { Row, Col, Form, Input, Select, Spin, Switch } from 'antd';
 import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
 import { Cards } from '../../components/cards/frame/cards-frame';
@@ -43,10 +43,13 @@ const modules = {
 
 const AddContent = () => {
   viewPermission('email-template');
+  const { TextArea } = Input;
   const history = useHistory();
   const token = useSelector(state => state.auth.token);
   const [isLoading, setIsLoading] = useState(false);
   const [content, setContent] = useState('');
+  const [htmlContent, setHTMLContent] = useState('');
+  const [customHtmlSwitch, setCustomHtmlSwitch] = useState(false);
   const [form] = Form.useForm();
   const [header, setHeader] = useState({ data: [], loading: true, error: '' });
   const [footer, setFooter] = useState({ data: [], loading: true, error: '' });
@@ -54,10 +57,13 @@ const AddContent = () => {
   //Submit Form
   const handleSubmit = values => {
     setIsLoading(true);
+    let customVer;
+    if (customHtmlSwitch) customVer = { layout_type: 'custom', content: htmlContent };
+    else customVer = { layout_type: 'dynamic', content };
     apolloClient
       .mutate({
         mutation: EmailTemplateQuery.CREATE_EMAIL_TEMPLATE,
-        variables: { data: { ...values, content } },
+        variables: { data: { ...values, ...customVer } },
         refetchQueries: [
           {
             query: EmailTemplateQuery.GET_EMAIL_TEMPLATE_CONTENT_LIST,
@@ -105,8 +111,8 @@ const AddContent = () => {
       })
       .then(res => {
         const data = res?.data?.getEmailTempHeaderFooterList;
-        setHeader(s => ({ ...s, data: data?.data?.filter((item) => item.type === 'header' ), error: '' }));
-        setFooter(s => ({ ...s, data: data?.data?.filter((item) => item.type === 'footer' ), error: '' }));
+        setHeader(s => ({ ...s, data: data?.data?.filter(item => item.type === 'header'), error: '' }));
+        setFooter(s => ({ ...s, data: data?.data?.filter(item => item.type === 'footer'), error: '' }));
       })
       .finally(() => {
         setHeader(s => ({ ...s, loading: false }));
@@ -135,7 +141,7 @@ const AddContent = () => {
                   labelCol={{ span: 4 }}
                 >
                   <Form.Item
-                    rules={[{ required: true, max: 100, message: 'Please Enter Email Content Name' }]}
+                    rules={[{ required: true, max: 100, message: 'Please Enter Email Body Name' }]}
                     name="name"
                     label="Name"
                   >
@@ -159,14 +165,28 @@ const AddContent = () => {
                       ))}
                     </Select>
                   </Form.Item>
-                  <Form.Item label="Content" required>
-                    <ReactQuill
-                      theme="snow"
-                      modules={modules}
-                      placeholder="Content goes here..."
-                      onChange={setContent}
-                    />
+                  <Form.Item label="Custom HTML">
+                    <Switch defaultChecked={false} onChange={e => setCustomHtmlSwitch(e)} />
                   </Form.Item>
+                  {!customHtmlSwitch && (
+                    <Form.Item label="Body">
+                      <ReactQuill
+                        theme="snow"
+                        modules={modules}
+                        placeholder="Body content goes here..."
+                        onChange={setContent}
+                      />
+                    </Form.Item>
+                  )}
+
+                  {customHtmlSwitch && (
+                    <Form.Item label="Custom HTML">
+                      <TextArea
+                        onChange={e => setHTMLContent(e.target.value)}
+                        placeholder="Paste your HTML Code Here..."
+                      />
+                    </Form.Item>
+                  )}
 
                   <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
                     <Form.Item>

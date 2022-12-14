@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Row, Col, Form, Input, Select, Spin } from 'antd';
+import { Row, Col, Form, Input, Select, Spin, Switch } from 'antd';
 import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
 import { Cards } from '../../components/cards/frame/cards-frame';
@@ -14,9 +14,9 @@ import 'react-quill/dist/quill.snow.css';
 import { EmailTemplateQuery } from '../../apollo/email';
 import { useEffect } from 'react';
 import ImageResize from 'quill-image-resize-module-react';
-import htmlEditButton from "quill-html-edit-button";
+import htmlEditButton from 'quill-html-edit-button';
 Quill.register('modules/imageResize', ImageResize);
-Quill.register("modules/htmlEditButton", htmlEditButton);
+Quill.register('modules/htmlEditButton', htmlEditButton);
 
 const modules = {
   toolbar: [
@@ -36,29 +36,34 @@ const modules = {
     modules: ['Resize', 'DisplaySize'],
   },
   htmlEditButton: {
-    okText: "Save",
-    msg: "Edit HTML here, when you click \"Save\" the quill editor's contents will be replaced"
-  }
+    okText: 'Save',
+    msg: 'Edit HTML here, when you click "Save" the quill editor\'s contents will be replaced',
+  },
 };
-
 
 const HeaderFooterEdit = () => {
   viewPermission('email-template');
+  const { TextArea } = Input;
   const params = useParams();
   const history = useHistory();
   const token = useSelector(state => state.auth.token);
   const [isLoading, setIsLoading] = useState(false);
   const [content, setContent] = useState('');
+  const [htmlContent, setHTMLContent] = useState('');
+  const [customHtmlSwitch, setCustomHtmlSwitch] = useState(false);
   const [singleHeaderFooter, setSingleHeaderFooter] = useState({ data: {}, loading: true, error: '' });
   const [form] = Form.useForm();
 
   //Submit Form
   const handleSubmit = values => {
     setIsLoading(true);
+    let customVer;
+    if (customHtmlSwitch) customVer = { layout_type: 'custom', content: htmlContent };
+    else customVer = { layout_type: 'dynamic', content };
     apolloClient
       .mutate({
         mutation: EmailTemplateQuery.EMAIL_TEMPLATE_HEADER_FOOTER_UPDATE,
-        variables: { data: { ...values, content, id:  parseInt(params?.id)} },
+        variables: { data: { ...values, id: parseInt(params?.id), ...customVer } },
         refetchQueries: [
           {
             query: EmailTemplateQuery.GET_EMAIL_HEADER_FOOTER_LIST,
@@ -118,7 +123,9 @@ const HeaderFooterEdit = () => {
           name: data?.data?.name,
           type: data?.data?.type,
         });
+        setHTMLContent(data?.data?.content);
         setContent(data?.data?.content);
+        setCustomHtmlSwitch(data?.data?.layout_type === "custom");
       })
       .catch(err => {
         console.log(err);
@@ -169,15 +176,30 @@ const HeaderFooterEdit = () => {
                     </Select>
                   </Form.Item>
 
-                  <Form.Item label="Content" required>
-                    <ReactQuill
-                      theme="snow"
-                      value={content}
-                      modules={modules}
-                      placeholder="Content goes here..."
-                      onChange={setContent}
-                    />
+                  <Form.Item label="Custom HTML">
+                    <Switch checked={customHtmlSwitch} onChange={e => setCustomHtmlSwitch(e)} />
                   </Form.Item>
+                  {!customHtmlSwitch && (
+                    <Form.Item label="Content">
+                      <ReactQuill
+                        theme="snow"
+                        value={content}
+                        modules={modules}
+                        placeholder="Content goes here..."
+                        onChange={setContent}
+                      />
+                    </Form.Item>
+                  )}
+
+                  {customHtmlSwitch && (
+                    <Form.Item label="Custom HTML">
+                      <TextArea
+                        defaultValue={htmlContent}
+                        onChange={e => setHTMLContent(e.target.value)}
+                        placeholder="Paste your HTML Code Here..."
+                      />
+                    </Form.Item>
+                  )}
 
                   <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
                     <Form.Item>

@@ -1,46 +1,22 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Col, Table, Input, Spin, Switch, Typography } from 'antd';
+import { Row, Col, Table, Input, Spin } from 'antd';
 import FeatherIcon from 'feather-icons-react';
 import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
 import { Cards } from '../../components/cards/frame/cards-frame';
 import { SearchOutlined } from '@ant-design/icons';
 import { Button } from '../../components/buttons/buttons';
-import apolloClient, { authMutation, authQuery, customerQuery } from '../../utility/apollo';
-import { useDispatch, useSelector } from 'react-redux';
+import apolloClient, { customerQuery } from '../../utility/apollo';
+import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import FontAwesome from 'react-fontawesome';
-import Cookies from 'js-cookie';
-import { toast } from 'react-toastify';
 import config from '../../config/config';
-import { logOut } from '../../redux/authentication/actionCreator';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
 import { errorImageSrc, renderImage } from '../../utility/images';
 import { viewPermission } from '../../utility/utility';
 
 const ListUser = () => {
     viewPermission('customer');
-    const handleStatusChange = (record, checked) => {
-        const variables = { data: { uid: record.uid, user_status: checked } }
-        apolloClient.mutate({
-            mutation: authMutation.ADMIN_UPDATE,
-            variables,
-            context: {
-                headers: {
-                    TENANTID: process.env.REACT_APP_TENANTID,
-                    Authorization: Cookies.get('psp_t')
-                }
-            }
-        }).then(res => {
-            const status = res?.data?.adminUpdate?.status
-            if (!status) return toast.error(data.message)
-            toast.success(`${record.email} user Status updated successfully.`)
-        }).catch(err => {
-            console.log("🚀 ~ file: AllAdmins.js ~ line 33 ~ handleStatusChange ~ err", err);
-            toast.error(`Something went wrong!!`)
-        })
-
-    }
     const token = useSelector(state => state.auth.token);
     const [searchText, setSearchText] = useState('');
     const [filteredUser, setFilteredUser] = useState([]);
@@ -132,28 +108,6 @@ const ListUser = () => {
             onFilter: (value, record) => record.email_verified === value,
         },
         {
-            title: 'Status',
-            dataIndex: 'status',
-            key: 'status',
-            width: 100,
-            align: 'center',
-            sorter: (a, b) => (a.status === b.status) ? 0 : a.status ? -1 : 1,
-            filters: [
-                {
-                    text: 'Active',
-                    value: true,
-                },
-                {
-                    text: 'Inactive',
-                    value: false,
-                }
-            ],
-            onFilter: (value, record) => record.user_status === value,
-            render: (text, record) => (
-                <Switch defaultChecked={record.user_status} title='Status' onChange={checked => handleStatusChange(record, checked)} />
-            )
-        },
-        {
             title: 'Action',
             dataIndex: 'id',
             key: 'id',
@@ -161,8 +115,11 @@ const ListUser = () => {
             align: 'center',
             render: (id, record) => (
                 <>
-                    <Link to={`/admin/customers/edit?id=${id}`}>
+                    <Link to={`/admin/customers/edit/${id}`} style={{marginRight: "10px"}}>
                         <FontAwesome name="edit" />
+                    </Link>
+                    <Link to={`/admin/customers/view/${id}`}>
+                        <FontAwesome name="eye" />
                     </Link>
                 </>
             ),

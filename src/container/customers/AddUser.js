@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Row, Col, Form, Input, Switch, Checkbox, Typography, Tabs } from 'antd';
+import { Row, Col, Form, Input, Switch, Tabs } from 'antd';
 import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
 import { Cards } from '../../components/cards/frame/cards-frame';
@@ -8,7 +8,6 @@ import { Link, useHistory, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import apolloClient from '../../utility/apollo';
 import { toast } from 'react-toastify';
-import queryString from 'query-string';
 import { viewPermission } from '../../utility/utility';
 
 import { customerMutation, customerQuery } from '../../apollo/customer';
@@ -18,8 +17,6 @@ import { useEffect } from 'react';
 const AddUser = () => {
   viewPermission('customer');
   const history = useHistory();
-  const { search } = useLocation();
-  const params = queryString.parse(search);
   const maxLength = 30;
   const [userStatus, setUserStatus] = useState(true);
   const [isLoading, setIsLoading] = useState(false);

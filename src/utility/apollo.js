@@ -979,9 +979,46 @@ export const customerQuery = {
             country
             type
             status
+            isDefault
             updatedAt
             createdAt
           }
+        }
+      }
+    }
+  `,
+  GET_ALL_ORDER_BY_CUSTOMER_ID: gql`
+    query getOrderListByCustomerID($customer_id: Int!) {
+      getOrderListByCustomerID(query: { customer_id: $customer_id }) {
+        message
+        status
+        data {
+          id
+          paymentmethod {
+            id
+            name
+            slug
+            description
+            status
+          }
+          total
+          po_id
+          po_number
+          sub_total
+          shipping_cost
+          discount_amount
+          tax_amount
+          orderStatus {
+            id
+            name
+            slug
+            description
+            status
+          }
+          productCount
+          tax_exempt
+          createdAt
+          updatedAt
         }
       }
     }

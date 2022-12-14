@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { SearchOutlined } from '@ant-design/icons';
-import { Row, Col, Spin, Input, Table } from 'antd';
+import { Row, Col, Spin, Input, Table, Modal } from 'antd';
 import FeatherIcon from 'feather-icons-react';
 import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
@@ -21,6 +21,8 @@ const ListTemplate = () => {
   const [filteredEmail, setFilteredEmail] = useState([]);
   const [isFilter, setIsFilter] = useState(false);
   const token = useSelector(state => state.auth.token);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalContent, setModalContent] = useState('');
 
   useEffect(() => {
     apolloClient
@@ -45,7 +47,6 @@ const ListTemplate = () => {
       });
   }, []);
 
-
   const columns = [
     {
       title: 'ID',
@@ -62,7 +63,7 @@ const ListTemplate = () => {
       width: 200,
       ellipsis: true,
       sorter: (a, b) => (a.email_template_id.toUpperCase() > b.email_template_id.toUpperCase() ? 1 : -1),
-      render: (text) => text ?? 'Not Used!'
+      render: text => text ?? 'Not Used!',
     },
     {
       title: 'Name',
@@ -101,6 +102,9 @@ const ListTemplate = () => {
           <Link to={`/admin/email/template/edit/${record.id}`}>
             <FontAwesome name="edit" />
           </Link>
+          <Button shape="circle" onClick={() => handlePreview(record.id)}>
+            <FontAwesome name="eye" />
+          </Button>
         </>
       ),
     },
@@ -114,6 +118,36 @@ const ListTemplate = () => {
         (email?.email_template_id + email?.name + email?.slug).toLowerCase().includes(value.toLowerCase()),
       ),
     );
+  };
+
+  const handlePreview = id => {
+    setEmail(s => ({ ...s, loading: true }));
+    apolloClient
+      .query({
+        query: EmailTemplateQuery.GET_EMAIL_TEMPLATE_PREVIEW,
+        variables: {
+          query: {
+            templatelist_id: id,
+          },
+        },
+        context: {
+          headers: {
+            TENANTID: process.env.REACT_APP_TENANTID,
+            Authorization: token,
+          },
+        },
+      })
+      .then(res => {
+        const data = res?.data?.getEmailTemplatePreview;
+        setModalContent(data?.data);
+        setModalOpen(true);
+      })
+      .catch(err => {
+        setEmail(s => ({ ...s, error: 'Something went Wrong.!! ' }));
+      })
+      .finally(() => {
+        setEmail(s => ({ ...s, loading: false }));
+      });
   };
 
   return (
@@ -142,7 +176,11 @@ const ListTemplate = () => {
                 <p>{email.error}</p>
               ) : (
                 <>
-                  <Input placeholder="Search in Email Template..." prefix={<SearchOutlined />} onChange={onChangeSearch} />
+                  <Input
+                    placeholder="Search in Email Template..."
+                    prefix={<SearchOutlined />}
+                    onChange={onChangeSearch}
+                  />
                   <br />
                   <br />
 
@@ -164,6 +202,16 @@ const ListTemplate = () => {
                 </>
               )}
             </Cards>
+            <Modal
+              title="Template Preview"
+              centered
+              open={modalOpen}
+              onOk={() => setModalOpen(false)}
+              onCancel={() => setModalOpen(false)}
+              width={800}
+            >
+              <div dangerouslySetInnerHTML={{ __html: modalContent }}></div>
+            </Modal>
           </Col>
         </Row>
       </Main>

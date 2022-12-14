@@ -36,6 +36,7 @@ export const EmailTemplateQuery = {
           name
           slug
           content
+          layout_type
           type
           createdAt
           updatedAt
@@ -142,6 +143,7 @@ export const EmailTemplateQuery = {
           name
           slug
           content
+          layout_type
           createdAt
           updatedAt
           emailHeader {
@@ -171,7 +173,16 @@ export const EmailTemplateQuery = {
       updateEmailTemplate(data: $data) {
         message
         status
+      }
+    }
+  `,
+  GET_EMAIL_TEMPLATE_PREVIEW: gql`
+    query getEmailTemplatePreview($query: GetEmailTemplatePreviewInput) {
+      getEmailTemplatePreview(query: $query) {
+        message
+        status
         tenant_id
+        data
       }
     }
   `,

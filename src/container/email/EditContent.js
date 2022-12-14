@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Row, Col, Form, Input, Select, Spin } from 'antd';
+import { Row, Col, Form, Input, Select, Spin, Switch } from 'antd';
 import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
 import { Cards } from '../../components/cards/frame/cards-frame';
@@ -43,6 +43,7 @@ const modules = {
 
 const AddContent = () => {
   viewPermission('email-template');
+  const { TextArea } = Input;
   const history = useHistory();
   const params = useParams();
   const token = useSelector(state => state.auth.token);
@@ -51,15 +52,20 @@ const AddContent = () => {
   const [form] = Form.useForm();
   const [header, setHeader] = useState([]);
   const [footer, setFooter] = useState([]);
+  const [htmlContent, setHTMLContent] = useState('');
+  const [customHtmlSwitch, setCustomHtmlSwitch] = useState(false);
   const [singleTemplate, setSingleTemplate] = useState({ data: {}, loading: true, error: '' });
 
   //Submit Form
   const handleSubmit = values => {
     setIsLoading(true);
+    let customVer;
+    if (customHtmlSwitch) customVer = { layout_type: 'custom', content: htmlContent };
+    else customVer = { layout_type: 'dynamic', content };
     apolloClient
       .mutate({
         mutation: EmailTemplateQuery.UPDATE_EMAIL_TEMPLATE_CONTENT,
-        variables: { data: { ...values, content, id: parseInt(params?.id) } },
+        variables: { data: { ...values, ...customVer, id: parseInt(params?.id) } },
         refetchQueries: [
           {
             query: EmailTemplateQuery.GET_EMAIL_TEMPLATE_CONTENT_LIST,
@@ -114,13 +120,15 @@ const AddContent = () => {
       .then(res => {
         const data = res?.data?.getSingleEmailTemplate;
         if (!data.status) return;
-        setContent(data?.data?.content);
         setSingleTemplate({ data: data, loading: false, error: '' });
         form.setFieldsValue({
           name: data?.data?.name,
           header_id: data?.data?.emailHeader?.id,
           footer_id: data?.data?.emailFooter?.id,
         });
+        setHTMLContent(data?.data?.content);
+        setContent(data?.data?.content);
+        setCustomHtmlSwitch(data?.data?.layout_type);
       })
       .catch(err => {
         console.log(err);
@@ -200,15 +208,30 @@ const AddContent = () => {
                       ))}
                     </Select>
                   </Form.Item>
-                  <Form.Item label="Content" required>
-                    <ReactQuill
-                      theme="snow"
-                      modules={modules}
-                      placeholder="Content goes here..."
-                      onChange={setContent}
-                      value={content}
-                    />
+                  <Form.Item label="Custom HTML">
+                    <Switch checked={customHtmlSwitch} onChange={e => setCustomHtmlSwitch(e)} />
                   </Form.Item>
+                  {!customHtmlSwitch && (
+                    <Form.Item label="Body">
+                      <ReactQuill
+                        theme="snow"
+                        value={content}
+                        modules={modules}
+                        placeholder="Content goes here..."
+                        onChange={setContent}
+                      />
+                    </Form.Item>
+                  )}
+
+                  {customHtmlSwitch && (
+                    <Form.Item label="Custom HTML">
+                      <TextArea
+                        defaultValue={htmlContent}
+                        onChange={e => setHTMLContent(e.target.value)}
+                        placeholder="Paste your HTML Code Here..."
+                      />
+                    </Form.Item>
+                  )}
 
                   <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
                     <Form.Item>
