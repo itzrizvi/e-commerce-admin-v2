@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Row, Col, Table, Spin } from 'antd';
+import { Row, Col, Table, Spin, Card } from 'antd';
 import FeatherIcon from 'feather-icons-react';
 import { PageHeader } from '../../components/page-headers/page-headers';
 import { Cards } from '../../components/cards/frame/cards-frame';
@@ -14,10 +14,21 @@ import FontAwesome from 'react-fontawesome';
 import Cookies from 'js-cookie';
 import config from '../../config/config';
 import { Link } from 'react-router-dom';
+import {
+	DollarCircleOutlined,
+	ShoppingCartOutlined,
+	ShoppingOutlined,
+	UsergroupAddOutlined
+} from "@ant-design/icons";
+import CountUp from 'react-countup';
+import { dashboardAnalytics } from '../../apollo/dashboard';
 
 const Dashboard = () => {
 	const user = useSelector(state => state.auth.user);
 	const dispatch = useDispatch();
+	const token = useSelector(state => state.auth.token);
+	const [isLoading, setIsLoading] = useState(true);
+	const [analytics, setAnalytics] = useState({ data: [], loading: true, error: '' });
 	setTimeout(() => {
 		if (!menuPermission('dashboard')) dispatch(logOut());
 	}, 2000);
@@ -112,30 +123,205 @@ const Dashboard = () => {
 			setMessages(s => ({ ...s, isLoading: false }))
 		})
 
-	}, [])
+	}, []);
 
 
+	// GET ANALYTICS DATA
+	useEffect(() => {
+		apolloClient
+			.query({
+				query: dashboardAnalytics.GET_DASHBOARD_ANALYTICS,
+				context: {
+					headers: {
+						TENANTID: process.env.REACT_APP_TENANTID,
+						Authorization: token,
+					},
+				},
+			})
+			.then(res => {
+				const data = res?.data?.getDashboardAnalytics;
+				if (!data?.status) return
+				setAnalytics({ data: data, error: '' });
+			})
+			.finally(() => setIsLoading(false));
+	}, []);
 
+	// Greetings Function
+	const getGreetings = (date) => {
+		var myDate = date;
+		var hrs = myDate.getHours();
+
+		var greet;
+
+		if (hrs < 12)
+			greet = 'Good Morning';
+		else if (hrs >= 12 && hrs <= 17)
+			greet = 'Good Afternoon';
+		else if (hrs >= 17 && hrs <= 24)
+			greet = 'Good Evening';
+
+		return greet;
+	}
+
+	// Styles
+	const styles = {
+		countingColumnStyles: {
+			borderRadius: 0,
+			padding: 0
+		},
+		countingCardStyles: {
+			borderRadius: 0,
+			padding: 0,
+			transition: ".5s",
+			boxShadow: "3px 3px 4px -4px #5f63f2"
+		},
+		cardHeadTextStyles: {
+			textTransform: "uppercase",
+			color: "rgb(0 0 0 / 64%)",
+			marginBottom: 20
+		},
+		cardMainNumberTextStyles: {
+			fontSize: 20,
+			fontWeight: 600
+		},
+		cardNumberTextStyles: {
+			fontSize: 12,
+			color: "rgba(0, 0, 0, 0.64)",
+			fontWeight: 400
+		},
+		iconStyles: {
+			color: "rgb(16 33 21)",
+			fontSize: "22px",
+			backgroundColor: "rgb(95 99 242 / 36%)",
+			padding: "9px",
+			borderRadius: "3px"
+
+		}
+	}
 
 
 
 	return (
 		<>
-			<PageHeader
-				ghost
-				title="Dashboard"
-
-			/>
 			<Main>
 				<Row gutter={25}>
 					<Col lg={24} xs={24}>
-						<Cards headless>
-							{/* <div style={{ minHeight: 'calc(100vh - 320px)' }}> */}
-							<div>
-								<h2>Welcome {user?.first_name} {user?.last_name}</h2>
-							</div>
-						</Cards>
+						<div style={{ marginTop: 10 }}>
+							<h2 style={{ marginBottom: 0 }}>{getGreetings(new Date())}, {user?.first_name} {user?.last_name}</h2>
+							<p>Here's what's happening with your e-commerce today.</p>
+						</div>
+					</Col>
+				</Row>
+				<div className="counting-columns">
+					<Row gutter={{ xs: 8, sm: 16, md: 24, lg: 32 }} style={{ marginBottom: 30, marginTop: 20 }}>
 
+						<Col className="gutter-row" span={6}>
+							{isLoading ? (
+								<div style={{ textAlign: 'center', paddingTop: 64 }}>
+									<Spin tip="processing..." />
+								</div>
+							) : (<Card
+								style={styles.countingCardStyles}
+								bordered={true}
+								hoverable={true}>
+								<h3 style={styles.cardHeadTextStyles}>Total Revenue</h3>
+								<Row gutter={25}>
+									<Col span={18}>
+										<p style={styles.cardMainNumberTextStyles}>$<CountUp duration={2} end={analytics.data.revenueCount} /></p>
+									</Col>
+									<Col span={6}>
+										<DollarCircleOutlined style={styles.iconStyles} />
+									</Col>
+								</Row>
+								<Row gutter={25}>
+									<Col span={24}>
+										<p style={styles.cardNumberTextStyles}>Today Revenue<br /><CountUp duration={2} end={analytics.data.todayRevenue} /></p>
+									</Col>
+								</Row>
+							</Card>)}
+
+						</Col>
+						<Col className="gutter-row" span={6}>
+							{isLoading ? (
+								<div style={{ textAlign: 'center', paddingTop: 64 }}>
+									<Spin tip="processing..." />
+								</div>
+							) : (<Card style={styles.countingCardStyles}
+								bordered={true}
+								hoverable={true}>
+								<h3 style={styles.cardHeadTextStyles}>Total Orders</h3>
+								<Row gutter={25}>
+									<Col span={18}>
+										<p style={styles.cardMainNumberTextStyles}><CountUp duration={2} end={analytics.data.orderCount} /></p>
+									</Col>
+									<Col span={6}>
+										<ShoppingCartOutlined style={styles.iconStyles} />
+									</Col>
+								</Row>
+								<Row gutter={25}>
+									<Col span={12}>
+										<p style={styles.cardNumberTextStyles}>Today Pending<br /><CountUp duration={2} end={analytics.data.todayOrderPendingCount} /></p>
+									</Col>
+									<Col span={12}>
+										<p style={styles.cardNumberTextStyles}>Today Delivered<br /> <CountUp duration={2} end={analytics.data.todayDeliveredOrderCount} /></p>
+									</Col>
+								</Row>
+							</Card>)}
+						</Col>
+						<Col className="gutter-row" span={6}>
+							{isLoading ? (
+								<div style={{ textAlign: 'center', paddingTop: 64 }}>
+									<Spin tip="processing..." />
+								</div>
+							) : (<Card style={styles.countingCardStyles}
+								bordered={true}
+								hoverable={true}>
+								<h3 style={styles.cardHeadTextStyles}>Today Product Sold</h3>
+								<Row gutter={25}>
+									<Col span={18}>
+										<p style={styles.cardMainNumberTextStyles}><CountUp duration={2} end={analytics.data.todayProductSoldCount} /></p>
+									</Col>
+									<Col span={6}>
+										<ShoppingOutlined style={styles.iconStyles} />
+									</Col>
+								</Row>
+								<Row gutter={25}>
+									<Col span={12}>
+										<p style={styles.cardNumberTextStyles}>Today Pending<br /><CountUp duration={2} end={analytics.data.todayProductPendingCount} /></p>
+									</Col>
+								</Row>
+							</Card>)}
+						</Col>
+						<Col className="gutter-row" span={6}>
+							{isLoading ? (
+								<div style={{ textAlign: 'center', paddingTop: 64 }}>
+									<Spin tip="processing..." />
+								</div>
+							) : (<Card style={styles.countingCardStyles}
+								bordered={true}
+								hoverable={true}>
+								<h3 style={styles.cardHeadTextStyles}>Total Customer</h3>
+								<Row gutter={25}>
+									<Col span={18}>
+										<p style={styles.cardMainNumberTextStyles}><CountUp duration={2} end={analytics.data.customerCount} /></p>
+									</Col>
+									<Col span={6}>
+										<UsergroupAddOutlined style={styles.iconStyles} />
+									</Col>
+								</Row>
+								<Row gutter={25}>
+									<Col span={12}>
+										<p style={styles.cardNumberTextStyles}>New Customers<br /> <CountUp duration={2} end={analytics.data.newCustomer} /></p>
+									</Col>
+								</Row>
+							</Card>)}
+						</Col>
+
+
+					</Row>
+				</div>
+				<Row gutter={25}>
+					<Col span={12}>
 						<Cards headless>
 							<h3 style={{ fontWeight: "700", marginBottom: "1em" }}>Unread Messages</h3>
 							{messages.isLoading ?
