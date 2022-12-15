@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Row, Col, Table, Spin, Card } from 'antd';
+import { Row, Col, Table, Spin, Card, Input } from 'antd';
 import FeatherIcon from 'feather-icons-react';
 import { PageHeader } from '../../components/page-headers/page-headers';
 import { Cards } from '../../components/cards/frame/cards-frame';
@@ -18,10 +18,12 @@ import {
 	DollarCircleOutlined,
 	ShoppingCartOutlined,
 	ShoppingOutlined,
-	UsergroupAddOutlined
+	UsergroupAddOutlined,
+	SearchOutlined
 } from "@ant-design/icons";
 import CountUp from 'react-countup';
 import { dashboardAnalytics } from '../../apollo/dashboard';
+import Moment from 'react-moment';
 
 const Dashboard = () => {
 	const user = useSelector(state => state.auth.user);
@@ -101,6 +103,56 @@ const Dashboard = () => {
 			key: 'id',
 		},
 	]
+
+	const recentOrderColumns = [
+		{
+			title: 'Customer Email',
+			dataIndex: ['customer', 'email'],
+			key: 'email',
+			width: 40,
+			ellipsis: true,
+			sorter: (a, b) => (a.email.toUpperCase() > b.email.toUpperCase() ? 1 : -1),
+		},
+		{
+			title: 'Total Amount',
+			dataIndex: 'total',
+			key: 'total',
+			align: 'center',
+			width: 40,
+			render: val => `$${val}`,
+			sorter: (a, b) => (a.total > b.total ? 1 : -1),
+		},
+		{
+			title: 'Status',
+			dataIndex: ['orderStatus', 'name'],
+			key: 'name',
+			align: 'center',
+			width: 40,
+			render: val => (
+				<span
+					style={{
+						borderRadius: '4em',
+						padding: '.5em 1.5em',
+						color: val === 'Pending' ? '#feaf00' : val === 'Delivered' ? '#2fb083' : '',
+						background: val === 'Pending' ? '#fef6e6' : val === 'Delivered' ? '#ebf9f4' : '',
+					}}
+				>
+					{val}
+				</span>
+			),
+			sorter: (a, b) => (a.orderStatus.toUpperCase() > b.orderStatus.toUpperCase() ? 1 : -1),
+		},
+		{
+			title: 'Date',
+			dataIndex: 'createdAt',
+			key: 'createdAt',
+			align: 'center',
+			width: 40,
+			render: (text, record) => (
+				<span className={'status-text'}>{<Moment format="DD-MM-YYYY">{parseInt(text)}</Moment>}</span>
+			),
+		}
+	];
 
 
 	// LOAD Messages
@@ -195,11 +247,8 @@ const Dashboard = () => {
 			backgroundColor: "rgb(95 99 242 / 36%)",
 			padding: "9px",
 			borderRadius: "3px"
-
 		}
 	}
-
-
 
 	return (
 		<>
@@ -255,7 +304,7 @@ const Dashboard = () => {
 										<p style={styles.cardMainNumberTextStyles}><CountUp duration={2} end={analytics.data.orderCount} /></p>
 									</Col>
 									<Col span={6}>
-										<ShoppingCartOutlined style={styles.iconStyles} />
+										<ShoppingOutlined style={styles.iconStyles} />
 									</Col>
 								</Row>
 								<Row gutter={25}>
@@ -282,7 +331,7 @@ const Dashboard = () => {
 										<p style={styles.cardMainNumberTextStyles}><CountUp duration={2} end={analytics.data.todayProductSoldCount} /></p>
 									</Col>
 									<Col span={6}>
-										<ShoppingOutlined style={styles.iconStyles} />
+										<ShoppingCartOutlined style={styles.iconStyles} />
 									</Col>
 								</Row>
 								<Row gutter={25}>
@@ -320,9 +369,37 @@ const Dashboard = () => {
 
 					</Row>
 				</div>
+				<Row gutter={25} style={{ marginBottom: 30, marginTop: 20 }}>
+					<Col sm={12} xs={24}>
+						<Card headless style={styles.countingCardStyles}>
+							<h3 style={{ fontWeight: "700", marginBottom: "1em" }}>Recent Orders</h3>
+							{isLoading ? (
+								<div className="spin">
+									<Spin />
+								</div>
+							) : (
+								<>
+									<Table
+										className="table-responsive"
+										columns={recentOrderColumns}
+										rowKey={'id'}
+										size="small"
+										dataSource={analytics?.data?.recentOrders}
+										rowClassName={(record, index) => (index % 2 == 0 ? '' : 'altTableClass')}
+										pagination={{
+											defaultPageSize: 10,
+											total: analytics.data.recentOrders.length,
+											showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`,
+										}}
+									/>
+								</>
+							)}
+						</Card>
+					</Col>
+				</Row>
 				<Row gutter={25}>
 					<Col span={12}>
-						<Cards headless>
+						<Card headless style={styles.countingCardStyles}>
 							<h3 style={{ fontWeight: "700", marginBottom: "1em" }}>Unread Messages</h3>
 							{messages.isLoading ?
 								<div className="spin">
@@ -347,7 +424,7 @@ const Dashboard = () => {
 										}}
 									/>
 								</>}
-						</Cards>
+						</Card>
 					</Col>
 				</Row>
 			</Main>

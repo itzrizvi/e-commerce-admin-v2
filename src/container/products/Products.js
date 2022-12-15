@@ -103,7 +103,7 @@ const Products = () => {
         });
         setCategories({ data: arrData, isLoading: false });
       })
-      .catch(err => {});
+      .catch(err => { });
 
     // 2.load Arrributes
     apolloClient
@@ -174,6 +174,27 @@ const Products = () => {
       .mutate({
         mutation: productMutation.UPDATE_PRODUCT,
         variables: { data: { prod_id: record.id, prod_status: checked } },
+        context: {
+          headers: {
+            TENANTID: process.env.REACT_APP_TENANTID,
+            Authorization: Cookies.get('psp_t'),
+          },
+        },
+      })
+      .then(res => {
+        const data = res?.data?.updateProduct;
+        if (!data.status) return toast.error(data.message);
+        toast.success(`${record.prod_sku} status updated.`);
+      })
+      .catch(err => {
+        return toast.error('Something Went wrong !!');
+      });
+  };
+  const handleIsSaleStatusChange = (record, checked) => {
+    apolloClient
+      .mutate({
+        mutation: productMutation.UPDATE_PRODUCT,
+        variables: { data: { prod_id: record.id, is_sale: checked } },
         context: {
           headers: {
             TENANTID: process.env.REACT_APP_TENANTID,
@@ -317,6 +338,27 @@ const Products = () => {
       onFilter: (value, record) => record.is_serial === value,
       render: (value, record) => (
         <Switch defaultChecked={value} title="Is Serial" onChange={checked => handleIsSerialChange(record, checked)} />
+      ),
+    },
+    {
+      title: 'Is Sale',
+      dataIndex: 'is_sale',
+      key: 'is_sale',
+      align: 'right',
+      sorter: (a, b) => (a.is_sale === b.is_sale ? 0 : a.is_sale ? -1 : 1),
+      filters: [
+        {
+          text: 'Active',
+          value: true,
+        },
+        {
+          text: 'Inactive',
+          value: false,
+        },
+      ],
+      onFilter: (value, record) => record.is_sale === value,
+      render: (value, record) => (
+        <Switch defaultChecked={value} title="Is Sale" onChange={checked => handleIsSaleStatusChange(record, checked)} />
       ),
     },
     {

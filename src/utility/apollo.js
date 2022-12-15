@@ -333,6 +333,7 @@ export const productQuery = {
           prod_sale_price
           prod_regular_price
           is_serial
+          is_sale
           prod_outofstock_status
           category {
             id
