@@ -187,7 +187,7 @@ const Dashboard = () => {
 		cardNumberTextStyles: {
 			fontSize: 12,
 			color: "rgba(0, 0, 0, 0.64)",
-			fontWeight: 400
+			fontWeight: 500
 		},
 		iconStyles: {
 			color: "rgb(16 33 21)",
