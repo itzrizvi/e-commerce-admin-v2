@@ -341,10 +341,11 @@ const Products = () => {
       ),
     },
     {
-      title: 'Is Sale',
+      title: 'On Sale',
       dataIndex: 'is_sale',
       key: 'is_sale',
       align: 'right',
+      width: 90,
       sorter: (a, b) => (a.is_sale === b.is_sale ? 0 : a.is_sale ? -1 : 1),
       filters: [
         {

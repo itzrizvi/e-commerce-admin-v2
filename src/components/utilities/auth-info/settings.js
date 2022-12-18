@@ -72,11 +72,11 @@ const Settings = () => {
 
   return (
     <div className="settings">
-      <Popover placement="bottomRight" content={content} action="click">
+      {/* <Popover placement="bottomRight" content={content} action="click">
         <Link to="#" className="head-example">
           <FeatherIcon icon="settings" size={20} />
         </Link>
-      </Popover>
+      </Popover> */}
     </div>
   );
 };
