@@ -41,53 +41,43 @@ const Dashboard = () => {
 			title: 'Name',
 			dataIndex: 'name',
 			key: 'name',
-			// render: val => <b>{val}</b>,
+			width: 40,
 			sorter: (a, b) => a.name.toUpperCase() > b.name.toUpperCase() ? 1 : -1,
 		},
 		{
 			title: 'Email',
 			dataIndex: 'email',
 			key: 'email',
-			render: val => <a href={`tel:${val}`} >{val}</a>,
+			ellipsis: true,
+			width: 40,
+			render: val => <a href={`mailto:${val}`} >{val}</a>,
 			sorter: (a, b) => a.email.toUpperCase() > b.email.toUpperCase() ? 1 : -1,
 		},
 		{
 			title: 'Phone',
 			dataIndex: 'phone',
 			key: 'phone',
+			width: 40,
+			render: val => <a href={`tel:${val}`} >{val}</a>,
 			sorter: (a, b) => a.phone.toUpperCase() > b.phone.toUpperCase() ? 1 : -1,
 		},
 		{
 			title: 'Subject',
 			dataIndex: 'subject',
 			key: 'subject',
-			// width: 200,
 			ellipsis: true,
+			width: 40,
 			sorter: (a, b) => a.subject.toUpperCase() > b.subject.toUpperCase() ? 1 : -1,
-		},
-		{
-			title: 'Message',
-			dataIndex: 'message',
-			key: 'message',
-			// width: 300,
-			ellipsis: true,
-			render: val => <p
-				style={{
-					maxWidth: "250px",
-					whiteSpace: "normal"
-				}}
-			>{val}</p>,
-			sorter: (a, b) => a.message.toUpperCase() > b.message.toUpperCase() ? 1 : -1,
 		},
 		{
 			title: 'View',
 			dataIndex: 'id',
-			width: 70,
+			width: 20,
 			align: 'right',
 			render: (val, record) => (
 				<>
 					<Link to={`/admin/supports/message?id=${val}`}>
-						<FontAwesome name="eye" style={{ margin: ".5em 1em" }} />
+						<FontAwesome name="eye" style={{ margin: ".5em 1em", color: "rgb(30, 216, 151)" }} />
 					</Link>
 				</>
 			),
@@ -148,25 +138,62 @@ const Dashboard = () => {
 	const recentPurchaseOrders = [
 		{
 			title: 'PO ID',
-			dataIndex: ['customer', 'email'],
+			dataIndex: ['recentPurchaseOrders', 'po_id'],
+			key: 'po_id',
+			width: 40,
+			ellipsis: true,
+			sorter: (a, b) => (a.po_id.toUpperCase() > b.po_id.toUpperCase() ? 1 : -1),
+		},
+		{
+			title: 'Order ID',
+			dataIndex: ['recentPurchaseOrders', 'order_id'],
+			key: 'order_id',
+			align: 'center',
+			width: 40,
+			render: val => `${val}`,
+			sorter: (a, b) => (a.order_id > b.order_id ? 1 : -1),
+		},
+		{
+			title: 'Type',
+			dataIndex: ['recentPurchaseOrders', 'type'],
+			key: 'type',
+			align: 'center',
+			width: 40,
+			render: val => ({ val }),
+			sorter: (a, b) => (a.type.toUpperCase() > b.type.toUpperCase() ? 1 : -1),
+		},
+		{
+			title: 'Total Amount',
+			dataIndex: ['recentPurchaseOrders', 'grandTotal_price'],
+			key: 'grandTotal_price',
+			align: 'center',
+			width: 40,
+			render: val => `$${val}`,
+			sorter: (a, b) => (a.grandTotal_price > b.grandTotal_price ? 1 : -1),
+		}
+	];
+
+	const recentQuotes = [
+		{
+			title: 'Quoted By',
+			dataIndex: ['recentQuotes', 'quotedby', 'name'],
+			key: 'name',
+			width: 40,
+			ellipsis: true,
+			sorter: (a, b) => (a.name.toUpperCase() > b.name.toUpperCase() ? 1 : -1),
+		},
+		{
+			title: 'Email',
+			dataIndex: ['recentQuotes', 'quotedby', 'email'],
 			key: 'email',
 			width: 40,
 			ellipsis: true,
 			sorter: (a, b) => (a.email.toUpperCase() > b.email.toUpperCase() ? 1 : -1),
 		},
 		{
-			title: 'Order ID',
-			dataIndex: 'total',
-			key: 'total',
-			align: 'center',
-			width: 40,
-			render: val => `$${val}`,
-			sorter: (a, b) => (a.total > b.total ? 1 : -1),
-		},
-		{
-			title: 'Type',
-			dataIndex: ['orderStatus', 'name'],
-			key: 'name',
+			title: 'Status',
+			dataIndex: ['recentQuotes', 'status'],
+			key: 'status',
 			align: 'center',
 			width: 40,
 			render: val => (
@@ -174,18 +201,27 @@ const Dashboard = () => {
 					style={{
 						borderRadius: '4em',
 						padding: '.5em 1.5em',
-						color: val === 'Pending' ? '#feaf00' : val === 'Delivered' ? '#2fb083' : '',
-						background: val === 'Pending' ? '#fef6e6' : val === 'Delivered' ? '#ebf9f4' : '',
+						color: val === 'new' ? '#feaf00' : val === 'submitted' ? '#2fb083' : '',
+						background: val === 'new' ? '#fef6e6' : val === 'submitted' ? '#ebf9f4' : '',
 					}}
 				>
 					{val}
 				</span>
 			),
-			sorter: (a, b) => (a.orderStatus.toUpperCase() > b.orderStatus.toUpperCase() ? 1 : -1),
+			sorter: (a, b) => (a.status.toUpperCase() > b.status.toUpperCase() ? 1 : -1),
 		},
 		{
-			title: 'Total Amount',
-			dataIndex: 'createdAt',
+			title: 'Initial Amount',
+			dataIndex: ['recentQuotes', 'grand_total'],
+			key: 'grand_total',
+			align: 'center',
+			width: 40,
+			render: val => `$${val}`,
+			sorter: (a, b) => (a.grand_total > b.grand_total ? 1 : -1),
+		},
+		{
+			title: 'Date',
+			dataIndex: ['recentQuotes', 'createdAt'],
 			key: 'createdAt',
 			align: 'center',
 			width: 40,
@@ -355,16 +391,20 @@ const Dashboard = () => {
 			overflow: "hidden"
 		},
 		styledButton1: {
-			padding: "0 8px",
-			fontSize: "10px",
+			padding: "5px 8px",
+			fontSize: 10,
 			borderRadius: "0px",
 			backgroundColor: "#FFFFFF",
 			color: "#000",
 			boxShadow: "1px 1px 7px -2px #000000",
 			marginTop: "6px",
-			float: "right",
-			overflow: "hidden",
-			width: "100%"
+			width: "100%",
+			display: "inline-block",
+			whiteSpace: "nowrap",
+			height: "auto"
+		},
+		customeTableStyle: {
+			minHeight: "300px"
 		}
 	}
 
@@ -396,7 +436,7 @@ const Dashboard = () => {
 								<Row gutter={25}>
 									<Col span={18}>
 										<h3 style={styles.cardHeadTextStyles}>Shipped Orders</h3>
-										<p style={styles.cardMainNumberTextStyles}><CountUp duration={2} end={10} /></p>
+										<p style={styles.cardMainNumberTextStyles}><CountUp duration={2} end={analytics?.data?.totalShippedOrder} /></p>
 									</Col>
 									<Col span={6}>
 										<FeatherIcon icon="truck" size={48} style={styles.iconStyles1} />
@@ -405,10 +445,10 @@ const Dashboard = () => {
 
 								<Row gutter={25} style={{ marginTop: 10 }}>
 									<Col xs={12} sm={12} md={12} lg={12} >
-										<p style={styles.cardNumberTextStyles}>Today Shipped:<br /><CountUp style={{ fontSize: 15 }} duration={2} end={5} /></p>
+										<p style={styles.cardNumberTextStyles}>Today Shipped:<br /><CountUp style={{ fontSize: 15 }} duration={2} end={analytics.data.todayShippedOrder} /></p>
 									</Col>
 									<Col xs={12} sm={12} md={12} lg={12}>
-										<p style={styles.cardNumberTextStyles}>In-Progress:<br /><CountUp style={{ fontSize: 15 }} duration={2} end={2} /></p>
+										<p style={styles.cardNumberTextStyles}>In-Progress:<br /><CountUp style={{ fontSize: 15 }} duration={2} end={analytics.data.shippingInProgress} /></p>
 									</Col>
 								</Row>
 							</Card>)}
@@ -434,10 +474,10 @@ const Dashboard = () => {
 
 								<Row gutter={25} style={{ marginTop: 10 }}>
 									<Col span={10}>
-										<p style={styles.cardNumberTextStyles}>New Order<br /><CountUp duration={2} style={{ fontSize: 15 }} end={analytics.data.todayOrderPendingCount} /></p>
+										<p style={styles.cardNumberTextStyles}>New Order<br /><CountUp duration={2} style={{ fontSize: 15 }} end={analytics.data.newOrderCount} /></p>
 									</Col>
 									<Col span={14}>
-										<Button style={styles.styledButton1} type="primary">Manage Today Orders</Button>
+										<Button style={styles.styledButton1} type="primary">Manage <br /> Today Orders</Button>
 									</Col>
 								</Row>
 							</Card>)}
@@ -453,7 +493,7 @@ const Dashboard = () => {
 								<Row gutter={25}>
 									<Col span={18}>
 										<h3 style={styles.cardHeadTextStyles}>Quotes</h3>
-										<p style={styles.cardMainNumberTextStyles}><CountUp duration={2} end={20} /></p>
+										<p style={styles.cardMainNumberTextStyles}><CountUp duration={2} end={analytics.data.totalQuotes} /></p>
 									</Col>
 									<Col span={6}>
 										<SnippetsOutlined style={styles.iconStyles3} />
@@ -462,10 +502,10 @@ const Dashboard = () => {
 
 								<Row gutter={25} style={{ marginTop: 10 }}>
 									<Col span={10}>
-										<p style={styles.cardNumberTextStyles}>New Quotes<br /><CountUp style={{ fontSize: 15 }} duration={2} end={5} /></p>
+										<p style={styles.cardNumberTextStyles}>New Quotes<br /><CountUp style={{ fontSize: 15 }} duration={2} end={analytics.data.todayQuotes} /></p>
 									</Col>
 									<Col span={14}>
-										<Button style={styles.styledButton1} type="primary">Manage New Quotes</Button>
+										<Button style={styles.styledButton1} type="primary">Manage <br /> New Quotes</Button>
 									</Col>
 								</Row>
 							</Card>)}
@@ -481,7 +521,7 @@ const Dashboard = () => {
 								<Row gutter={25}>
 									<Col span={18}>
 										<h3 style={styles.cardHeadTextStyles}>New Customers</h3>
-										<p style={styles.cardMainNumberTextStyles}><CountUp duration={2} end={10} /></p>
+										<p style={styles.cardMainNumberTextStyles}><CountUp duration={2} end={analytics.data.newCustomer} /></p>
 									</Col>
 									<Col span={6}>
 										<UsergroupAddOutlined style={styles.iconStyles4} />
@@ -490,10 +530,10 @@ const Dashboard = () => {
 
 								<Row gutter={25} style={{ marginTop: 10 }}>
 									<Col span={12}>
-										<p style={styles.cardNumberTextStyles}>Total<br /> <CountUp style={{ fontSize: 15 }} duration={2} end={46} /></p>
+										<p style={styles.cardNumberTextStyles}>Total<br /> <CountUp style={{ fontSize: 15 }} duration={2} end={analytics.data.totalCustomer} /></p>
 									</Col>
 									<Col span={12}>
-										<p style={styles.cardNumberTextStyles}>Verified<br /> <CountUp style={{ fontSize: 15 }} duration={2} end={36} /></p>
+										<p style={styles.cardNumberTextStyles}>Verified<br /> <CountUp style={{ fontSize: 15 }} duration={2} end={analytics.data.verifiedCustomer} /></p>
 									</Col>
 								</Row>
 							</Card>)}
@@ -513,6 +553,7 @@ const Dashboard = () => {
 							) : (
 								<>
 									<Table
+										style={styles.customeTableStyle}
 										className="table-responsive"
 										columns={recentOrderColumns}
 										rowKey={'id'}
@@ -520,7 +561,7 @@ const Dashboard = () => {
 										dataSource={analytics?.data?.recentOrders}
 										rowClassName={(record, index) => (index % 2 == 0 ? '' : 'altTableClass')}
 										pagination={{
-											defaultPageSize: 10,
+											defaultPageSize: 5,
 											total: analytics.data.recentOrders.length,
 											showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`,
 										}}
@@ -539,15 +580,16 @@ const Dashboard = () => {
 							) : (
 								<>
 									<Table
+										style={styles.customeTableStyle}
 										className="table-responsive"
 										columns={recentPurchaseOrders}
 										rowKey={'id'}
 										size="small"
-										dataSource={analytics?.data?.recentOrders}
+										dataSource={analytics?.data?.recentPurchaseOrders}
 										rowClassName={(record, index) => (index % 2 == 0 ? '' : 'altTableClass')}
 										pagination={{
-											defaultPageSize: 10,
-											total: analytics.data.recentOrders.length,
+											defaultPageSize: 5,
+											total: analytics.data.recentPurchaseOrders.length,
 											showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`,
 										}}
 									/>
@@ -568,16 +610,15 @@ const Dashboard = () => {
 								<>
 
 									<Table
-										scroll={{ x: "max-content" }}
+										style={styles.customeTableStyle}
 										className="table-responsive"
 										columns={messageColumns}
 										rowKey={'id'}
 										size="small"
 										dataSource={messages.data}
 										rowClassName={(record, index) => (index % 2 == 0 ? "" : "altTableClass")}
-										// pagination={false}
 										pagination={{
-											defaultPageSize: config.CONTACT_US_MESSAGE_PER_PAGE,
+											defaultPageSize: 5,
 											total: messages.data.length,
 											showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`,
 										}}
@@ -595,15 +636,17 @@ const Dashboard = () => {
 							) : (
 								<>
 									<Table
+										style={styles.customeTableStyle}
 										className="table-responsive"
-										columns={recentPurchaseOrders}
+										columns={recentQuotes}
 										rowKey={'id'}
 										size="small"
-										dataSource={analytics?.data?.recentOrders}
+										dataSource={analytics?.data?.recentQuotes}
 										rowClassName={(record, index) => (index % 2 == 0 ? '' : 'altTableClass')}
 										pagination={{
-											defaultPageSize: 10,
-											total: analytics.data.recentOrders.length,
+											style: {},
+											defaultPageSize: 5,
+											total: analytics.data.recentQuotes.length,
 											showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`,
 										}}
 									/>
