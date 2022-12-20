@@ -1,5 +1,20 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Row, Col, Form, Input, Switch, Spin, Select, Card, Table } from 'antd';
+import {
+  Row,
+  Col,
+  Form,
+  Input,
+  Switch,
+  Spin,
+  Select,
+  Card,
+  Table,
+  message,
+  Steps,
+  Avatar,
+  Typography,
+  Radio,
+} from 'antd';
 import FeatherIcon from 'feather-icons-react';
 import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
@@ -7,87 +22,186 @@ import { Cards } from '../../components/cards/frame/cards-frame';
 import { Button } from '../../components/buttons/buttons';
 import { Link, useHistory, useLocation } from 'react-router-dom';
 import queryString from 'query-string';
-import apolloClient, { customerMutation, customerQuery, productQuery } from '../../utility/apollo';
+import apolloClient, { apolloUploadClient, customerMutation, customerQuery, productQuery } from '../../utility/apollo';
 import Cookies from 'js-cookie';
 import { toast } from 'react-toastify';
-import { viewPermission } from '../../utility/utility';
+import { ellipsis, viewPermission } from '../../utility/utility';
+import { errorImageSrc, renderImage } from '../../utility/images';
+import { LazyLoadImage } from 'react-lazy-load-image-component';
+import { productSchema } from '../../apollo/product';
+import { useSelector } from 'react-redux';
 const { TextArea } = Input;
-
+const { Title, Text, Paragraph } = Typography;
+const prod_initial = {
+  id: '',
+  prod_name: '',
+  quantity: 1,
+  price: 0,
+};
 const AddOrder = () => {
-  // viewPermission('customer-group');
+  viewPermission('order');
   const { search } = useLocation();
-  const params = queryString.parse(search);
-  const history = useHistory();
-
-  const [singleCustomerGroup, setSingleCustomerGroup] = useState({ data: [], isLoading: true });
-  const [customergroup_status, setCustomergroup_status] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
+  const token = useSelector(state => state.auth.token);
   const [form] = Form.useForm();
-  const maxLength = 30;
+  const [customerData, setCustomerData] = useState([]);
+  // ===================== new =====================
+  const [selectedCustomer, setSelectedCustomer] = useState({});
+  const [billingAddresses, setBillingAddresses] = useState([]);
+  const [shippingAddresses, setShippingAddresses] = useState([]);
 
-  // LOAD SINGLE CUSTOMER GROUP
-  useEffect(() => {
-    if (!params.id) return;
+  const [selectedProduct, setSelectedProduct] = useState([]);
+  const formRef = useRef();
+  const [productOption, setProductOption] = useState([]);
+  const [lastInitProductId, setLastInitProductId] = useState(null);
+  const [discount, setDiscount] = useState('00.0');
+  const [shippingMethod, setShippingMethod] = useState([]);
+  const [paymentMethod, setPaymentMethod] = useState([]);
+  const [selctedCouponCode, setSelectedCouponCode] = useState(null);
+  const [shippingCost, setShippingCost] = useState(0);
 
-    apolloClient
-      .query({
-        query: customerQuery.GET_SINGLE_CUSTOMER_GROUP,
-        variables: { query: { customer_group_id: parseInt(params.id) } },
+  const handleSubmit = values => {
+    console.log(values);
+    return;
+    apolloUploadClient
+      .mutate({
+        mutation: productSchema.CREATE_ORDER,
+        variables: {
+          data: {
+            customer_id: selectedCustomer?.id,
+            cart_id: 5,
+            tax_exempt: true,
+            payment_id: 1,
+            coupon_id: 10001,
+            order_status_id: 1,
+            billing_address_id: 10000,
+            shipping_address_id: 10001,
+          },
+        },
         context: {
           headers: {
             TENANTID: process.env.REACT_APP_TENANTID,
-            Authorization: Cookies.get('psp_t'),
+            Authorization: token,
           },
         },
       })
       .then(res => {
-        const data = res?.data?.getSingleCustomerGroup;
-
-        if (!data?.status) return;
-        setSingleCustomerGroup(s => ({ ...s, data: data?.data, error: '' }));
+        const data = res?.data?.createOrderByAdmin;
+        if (!data?.status) return toast.error(data?.messsage);
+        console.log(data);
       })
       .catch(err => {
-        setSingleCustomerGroup(s => ({ ...s, error: 'Something went Wrong.!! ' }));
-      })
-      .finally(() => {
-        setSingleCustomerGroup(s => ({ ...s, isLoading: false }));
+        toast.error('Something Went wrong !!');
       });
-  }, []);
-
-  const handleSubmit = values => {
-    console.log('🚀 ~ file: AddOrder.js ~ line 57 ~ handleSubmit ~ values', values);
   };
-
-  // ===================== new =====================
-  const [customers, setCustomers] = useState({ data: [], isLoading: true });
-  const [selectedCustomer, setSelectedCustomer] = useState({});
-  const [billingAddresses, setBillingAddresses] = useState([]);
-  const [shippingAddresses, setShippingAddresses] = useState([]);
-  const [selectedAddress, setSelectedAddress] = useState({ billing: {}, shipping: {} });
-  const [products, setProducts] = useState({ data: [], isLoading: true });
-  const [selectedProduct, setSelectedProduct] = useState([]);
-  const [selected, setSelected] = useState(null); //dummy
-  const formRef = useRef();
 
   const productColumn = [
     {
-      title: 'Product Name',
-      dataIndex: 'name',
-      key: 'name',
-      ellipsis: true,
+      title: 'Product',
+      dataIndex: 'prod_name',
+      key: 'prod_name',
+      width: 400,
+      render: (_, record) => (
+        <Select
+          placeholder="Select Product"
+          options={productOption}
+          defaultValue={record.prod_name}
+          showSearch
+          allowClear
+          optionFilterProp="label"
+          style={{ width: 400 }}
+          onSearch={val => {
+            if (val.length > 3) {
+              apolloClient
+                .query({
+                  query: productSchema.SEARCH_PRODUCT,
+                  variables: {
+                    query: {
+                      searchQuery: val,
+                    },
+                  },
+                  context: {
+                    headers: {
+                      TENANTID: process.env.REACT_APP_TENANTID,
+                    },
+                  },
+                })
+                .then(res => {
+                  const data = res?.data?.getSearchedProducts;
+                  if (!data.status) return;
+                  setProductOption(
+                    data.data.map(product => ({
+                      label: product?.prod_name,
+                      value: product?.id,
+                      ...product,
+                    })),
+                  );
+                });
+            } else {
+              setProductOption([]);
+            }
+          }}
+          onSelect={(_, data) => {
+            for (const item of selectedProduct) {
+              if (item.id === data.id) {
+                setSelectedProduct(prevState => prevState.filter(value => value.id !== lastInitProductId));
+                return toast.info('Duplicate Product Found!');
+              }
+            }
+
+            setSelectedProduct(prevState => [
+              ...prevState.filter(item => item.id !== record.id),
+              ...prevState
+                .filter(item => item.id === record.id)
+                .map(item => ({
+                  ...item,
+                  id: data.id,
+                  price: data.prod_sale_price === 0 ? data.prod_regular_price : data.prod_sale_price,
+                  prod_name: data.prod_name,
+                  quantity: 1,
+                })),
+            ]);
+          }}
+        />
+      ),
+    },
+    {
+      title: 'U. Price',
+      dataIndex: 'price',
+      key: 'price',
+      width: 150,
+      render: (val, record) => `$${val}`,
     },
     {
       title: 'Price',
       dataIndex: 'price',
       key: 'price',
       width: 100,
+      render: (val, record) => `$${parseFloat(val) * record.quantity}`,
     },
     {
       title: 'Quantity',
       dataIndex: 'quantity',
       key: 'quantity',
-      width: 170,
-      render: (val, record) => <Input type="number" defaultValue={val} />,
+      width: 150,
+      render: (val, record) => (
+        <Input
+          min={0}
+          type="number"
+          defaultValue={val}
+          onChange={e => {
+            e.persist();
+            setSelectedProduct(prevState =>
+              prevState.map(item => {
+                if (item.id === record.id) {
+                  return { ...item, quantity: parseInt(e.target.value) };
+                }
+                return item;
+              }),
+            );
+          }}
+        />
+      ),
     },
     {
       title: 'Action',
@@ -98,11 +212,11 @@ const AddOrder = () => {
       render: val => (
         <Button
           size="small"
-          title="Add Order"
+          title="Remove"
           type="primary"
           onClick={() => {
             setSelectedProduct(prevState => {
-              return prevState.filter(value => value.id !== val);
+              return prevState.filter(value => value?.id !== val);
             });
           }}
         >
@@ -113,427 +227,545 @@ const AddOrder = () => {
   ];
 
   useEffect(() => {
-    // load customer list
+    // Load Shipping Method
     apolloClient
       .query({
-        query: customerQuery.GET_ALL_CUSTOMER_FOR_ORDER,
+        query: productSchema.GET_SHIPPING_METHOD_LIST,
         context: {
           headers: {
             TENANTID: process.env.REACT_APP_TENANTID,
-            Authorization: Cookies.get('psp_t'),
           },
         },
       })
       .then(res => {
-        const data = res.data.getAllCustomer;
-        if (!data.status) return toast.error(data.message);
+        const data = res?.data?.getShippingMethodListPublic;
+        if (!data.status) return;
+        setShippingMethod(data?.data);
+      });
 
-        const options = data?.data?.map(item => ({
-          label: item.email,
-          value: item.id,
-          item,
-        }));
-        setCustomers({ data: options, isLoading: false });
-      })
-      .catch(err => {});
-  }, []);
-  useEffect(() => {
-    // load product list
+    // Load Payment Mathod
     apolloClient
       .query({
-        query: productQuery.GET_PRODUCT_LIST,
+        query: productSchema.GET_PAYMENT_METHOD_LIST,
         context: {
           headers: {
             TENANTID: process.env.REACT_APP_TENANTID,
-            Authorization: Cookies.get('psp_t'),
           },
         },
       })
       .then(res => {
-        const data = res.data.getProductList;
-        console.log('🚀 ~ file: AddOrder.js ~ line 162 ~ useEffect ~ data', data);
-        if (!data.status) return toast.error(data.message);
-
-        const options = data?.data?.map(item => ({
-          label: item.prod_name,
-          value: item.id,
-          prod_slug: item.prod_slug,
-          item,
-        }));
-        console.log('🚀 ~ file: AddOrder.js ~ line 113 ~ options ~ options', options);
-        setProducts({ data: options, isLoading: false });
-      })
-      .catch(err => {});
+        const data = res?.data?.getPaymentMethodListPublic;
+        if (!data.status) return;
+        setPaymentMethod(data?.data);
+      });
   }, []);
+
+  /* -------------------------- Step From Data Start -------------------------- */
+  const steps = [
+    {
+      title: 'Customer',
+      percent: 20,
+    },
+    {
+      title: 'Products',
+      percent: 40,
+    },
+    {
+      title: 'Addresses',
+      percent: 60,
+    },
+    {
+      title: 'Payment & Shipping',
+      percent: 80,
+    },
+    {
+      title: 'Coupon',
+      percent: 100,
+    },
+  ];
+
+  const [current, setCurrent] = useState(0);
+  const next = () => {
+    setCurrent(current + 1);
+  };
+  const prev = () => {
+    setCurrent(current - 1);
+  };
+  const items = steps.map(item => ({
+    key: item.title,
+    title: item.title,
+    percent: item.percent,
+  }));
+  /* ---------------------------- tep Form Data end --------------------------- */
+
+  const validateVoucher = voucher => {
+    apolloClient
+      .query({
+        query: productSchema.GET_COUPON_BY_CODE,
+        variables: { query: { coupon_code: voucher } },
+        context: {
+          headers: {
+            TENANTID: process.env.REACT_APP_TENANTID,
+          },
+        },
+      })
+      .then(res => {
+        const data = res?.data?.getSingleCouponByCode;
+        if (data.status) {
+          if (data.data.coupon_type === 'percentage') {
+            setDiscount((total.price / 100) * data.data.coupon_amount);
+            setSelectedCouponCode(voucher);
+          } else {
+            setDiscount(data.data.coupon_amount);
+          }
+          toast.success(data.message);
+        } else {
+          toast.error(data.message);
+        }
+      });
+  };
 
   return (
     <>
-      <PageHeader
-        title={'Add Order'}
-        // title={params.id ? `Add Order | Edit ${singleCustomerGroup.isLoading ? '' : `(${singleCustomerGroup.data.customer_group_name})`}` : "Add Customer Group"}
-      />
+      <PageHeader title={'Add Order'} />
       <Main>
         <Row gutter={25}>
           <Col sm={24} xs={24}>
             <Cards headless>
-              <Row>
-                <Col sm={12} xs={12}>
-                  {params.id && singleCustomerGroup.isLoading ? (
-                    <div div className="spin">
-                      <Spin />
+              <Form
+                ref={formRef}
+                style={{ width: '100%' }}
+                form={form}
+                name="addRole"
+                onFinish={handleSubmit}
+                onFinishFailed={errorInfo => console.log('form error info:\n', errorInfo)}
+                // labelCol={{ span: 4 }}
+                layout="vertical"
+              >
+                <Row style={{ marginBottom: 20 }}>
+                  <Steps current={current} items={items} percent={items[current].percent} />
+                </Row>
+                <Row style={{ marginTop: 40 }}>
+                  <Col span={24}>
+                    <div className="steps-content">
+                      {current === 0 && (
+                        <Row gutter={25}>
+                          <Col md={12} sm={24}>
+                            <Form.Item
+                              rules={[{ required: true, message: 'Please select a customer' }]}
+                              name="customer_group_name"
+                              label="Customer"
+                            >
+                              <Select
+                                placeholder="Select a customer"
+                                options={customerData}
+                                showSearch
+                                allowClear
+                                optionFilterProp="label"
+                                onSelect={(val, data) => {
+                                  setSelectedCustomer(data.item);
+                                  const billing = [];
+                                  const shipping = [];
+                                  data?.item?.addresses?.forEach(addr => {
+                                    if (addr.type === 'billing') billing.push(addr);
+                                    if (addr.type === 'shipping') shipping.push(addr);
+                                  });
+                                  setBillingAddresses(billing);
+                                  setShippingAddresses(shipping);
+                                }}
+                                onSearch={val => {
+                                  if (val.length > 3) {
+                                    apolloClient
+                                      .query({
+                                        query: productSchema.GET_SEARCH_CUSTOMER,
+                                        variables: {
+                                          query: {
+                                            searchQuery: val,
+                                          },
+                                        },
+                                        context: {
+                                          headers: {
+                                            TENANTID: process.env.REACT_APP_TENANTID,
+                                            Authorization: token,
+                                          },
+                                        },
+                                      })
+                                      .then(res => {
+                                        const data = res.data.getSearchedCustomers;
+                                        if (!data.status) return toast.error(data.message);
+                                        const options = data?.data?.map(item => ({
+                                          label: item.email,
+                                          value: item.id,
+                                          item,
+                                        }));
+                                        setCustomerData(options);
+                                      });
+                                  } else {
+                                    setCustomerData([]);
+                                  }
+                                }}
+                              />
+                            </Form.Item>
+                          </Col>
+                          <Col md={12} sm={24}>
+                            <Row gutter={25}>
+                              <Col>
+                                {selectedCustomer?.image ? (
+                                  <Avatar
+                                    size={{ xs: 24, sm: 32, md: 40, lg: 64, xl: 80, xxl: 100 }}
+                                    src={renderImage(selectedCustomer?.id, selectedCustomer?.image, 'user', '', true)}
+                                  >
+                                    <LazyLoadImage
+                                      effect="blur"
+                                      width={100}
+                                      height={100}
+                                      src={renderImage(selectedCustomer?.id, selectedCustomer?.image, 'user', '', true)}
+                                      onError={errorImageSrc}
+                                      alt={selectedCustomer.id}
+                                    />
+                                  </Avatar>
+                                ) : (
+                                  <Avatar
+                                    size={{ xs: 24, sm: 32, md: 40, lg: 64, xl: 80, xxl: 100 }}
+                                    src={'/no-image.png'}
+                                  />
+                                )}
+                              </Col>
+                              <Col>
+                                <Paragraph>
+                                  <Text strong>ID: </Text>
+                                  {selectedCustomer?.id ?? '...'}
+                                </Paragraph>
+                                <Paragraph>
+                                  <Text strong>Name: </Text>
+                                  {selectedCustomer?.first_name
+                                    ? `${selectedCustomer?.first_name} ${selectedCustomer?.last_name}`
+                                    : '...'}
+                                </Paragraph>
+                                <Paragraph>
+                                  <Text strong>Email: </Text>
+                                  {selectedCustomer?.email ?? '...'}
+                                </Paragraph>
+                              </Col>
+                            </Row>
+                          </Col>
+                        </Row>
+                      )}
+                      {current === 1 && (
+                        <Row gutter={25}>
+                          <Col lg={18} xs={24}>
+                            <span className={'psp_list'}>
+                              <Table
+                                columns={productColumn}
+                                dataSource={selectedProduct}
+                                pagination={false}
+                                rowKey="id"
+                                rowClassName={(record, index) => (index % 2 === 0 ? '' : 'altTableClass')}
+                              />
+                              <div
+                                style={{
+                                  display: 'flex',
+                                  justifyContent: 'flex-end',
+                                  marginTop: '10px',
+                                  marginBottom: '10px',
+                                }}
+                              >
+                                <Button
+                                  onClick={() => {
+                                    const new_id = new Date().getTime();
+                                    setLastInitProductId(new_id);
+                                    setSelectedProduct(prevState => [...prevState, { ...prod_initial, id: new_id }]);
+                                    setProductOption([]);
+                                  }}
+                                  size="small"
+                                  title="Add Product"
+                                  htmlType="button"
+                                  type="primary"
+                                >
+                                  <FeatherIcon icon="plus" />
+                                </Button>
+                              </div>
+                            </span>
+                          </Col>
+                          <Col lg={6} xs={24}>
+                            <Paragraph>
+                              <Text strong>Sub Total Price : </Text>$
+                              {selectedProduct.reduce(
+                                (accumulator, item) => accumulator + item.quantity * item.price,
+                                0,
+                              )}
+                            </Paragraph>
+                            <Paragraph>
+                              <Text strong>Product Quantity : </Text>
+                              {selectedProduct.reduce((accumulator, item) => accumulator + item.quantity, 0)}
+                            </Paragraph>
+                          </Col>
+                        </Row>
+                      )}
+                      {current === 2 && (
+                        <Row gutter={25}>
+                          <Col lg={12} sm={24}>
+                            <Form.Item
+                              rules={[{ required: true, message: 'Please Select Shipping Address' }]}
+                              name="order_shipping_id"
+                              label="Shipping Addresses"
+                            >
+                              <Radio.Group
+                                style={{ width: '100%', padding: 10 }}
+                                defaultValue={
+                                  shippingAddresses.filter(item => item.isDefault && item.type === 'shipping')[0]?.id
+                                }
+                              >
+                                <Row gutter={25}>
+                                  {shippingAddresses.map(item => (
+                                    <Col key={item.id} xs={24}>
+                                      <Radio
+                                        style={{
+                                          width: '100%',
+                                          border: '1px solid #f0f0f0',
+                                          fontSize: 12,
+                                          marginBottom: 10,
+                                          padding: 10,
+                                          borderRadius: 5,
+                                        }}
+                                        value={item.id}
+                                      >
+                                        <p>
+                                          <b>Email: </b>
+                                          {item.email}
+                                        </p>
+                                        <p>
+                                          <b>Phone: </b>
+                                          {item.phone}
+                                        </p>
+                                        <p>
+                                          <b>Address 1: </b>
+                                          {item.address1 && ellipsis(item.address1, 35)}
+                                        </p>
+                                        <p>
+                                          <b>Address 2: </b>
+                                          {item.address2 && ellipsis(item.address2, 35)}
+                                        </p>
+                                        <p>
+                                          <b>City: </b>
+                                          {item.city}
+                                        </p>
+                                        <p>
+                                          <b>State: </b>
+                                          {item.state}
+                                        </p>
+                                        <p>
+                                          <b>Zip Code: </b>
+                                          {item.zip_code}
+                                        </p>
+                                      </Radio>
+                                    </Col>
+                                  ))}
+                                </Row>
+                              </Radio.Group>
+                            </Form.Item>
+                          </Col>
+                          <Col lg={12} sm={24}>
+                            <Form.Item
+                              rules={[{ required: true, message: 'Please Select Billing Address' }]}
+                              name="order_billing_id"
+                              label="Billing Addresses"
+                            >
+                              <Radio.Group
+                                style={{ width: '100%', padding: 10 }}
+                                defaultValue={
+                                  billingAddresses.filter(item => item.isDefault && item.type === 'billing')[0]?.id
+                                }
+                              >
+                                <Row gutter={25}>
+                                  {billingAddresses.map(item => (
+                                    <Col key={item.id} xs={24}>
+                                      <Radio
+                                        style={{
+                                          width: '100%',
+                                          border: '1px solid #f0f0f0',
+                                          fontSize: 12,
+                                          marginBottom: 10,
+                                          padding: 10,
+                                          borderRadius: 5,
+                                        }}
+                                        value={item.id}
+                                      >
+                                        <p>
+                                          <b>Email: </b>
+                                          {item.email}
+                                        </p>
+                                        <p>
+                                          <b>Phone: </b>
+                                          {item.phone}
+                                        </p>
+                                        <p>
+                                          <b>Address 1: </b>
+                                          {item.address1 && ellipsis(item.address1, 35)}
+                                        </p>
+                                        <p>
+                                          <b>Address 2: </b>
+                                          {item.address2 && ellipsis(item.address2, 35)}
+                                        </p>
+                                        <p>
+                                          <b>City: </b>
+                                          {item.city}
+                                        </p>
+                                        <p>
+                                          <b>State: </b>
+                                          {item.state}
+                                        </p>
+                                        <p>
+                                          <b>Zip Code: </b>
+                                          {item.zip_code}
+                                        </p>
+                                      </Radio>
+                                    </Col>
+                                  ))}
+                                </Row>
+                              </Radio.Group>
+                            </Form.Item>
+                          </Col>
+                        </Row>
+                      )}
+                      {current === 3 && (
+                        <Row gutter={25}>
+                          <Col lg={12} sm={24}>
+                            <Form.Item
+                              name="payment_method_id"
+                              label="Payment Method"
+                              rules={[{ required: true, message: 'Select Payment Method' }]}
+                            >
+                              <Select
+                                style={{ width: '100%' }}
+                                placeholder="Select Payment Method"
+                                optionLabelProp="label"
+                              >
+                                {paymentMethod?.map(item => (
+                                  <Select.Option key={item.id} value={item.id} label={item.name}>
+                                    <div className="demo-option-label-item">{item.name}</div>
+                                  </Select.Option>
+                                ))}
+                              </Select>
+                            </Form.Item>
+                          </Col>
+                          <Col lg={12} sm={24}>
+                            <Form.Item
+                              name="shipping_method_id"
+                              label="Shipping Method"
+                              rules={[{ required: true, message: 'Select Shipping Method' }]}
+                            >
+                              <Select
+                                style={{ width: '100%' }}
+                                placeholder="Select Shipping Method"
+                                optionLabelProp="label"
+                              >
+                                {shippingMethod?.map(item => (
+                                  <Select.Option key={item.id} value={item.id} label={item.name}>
+                                    <div className="demo-option-label-item">{item.name}</div>
+                                  </Select.Option>
+                                ))}
+                              </Select>
+                            </Form.Item>
+                          </Col>
+                        </Row>
+                      )}
+                      {current === 4 && (
+                        <Row gutter={25}>
+                          <Col lg={18} xs={24}>
+                            <Input.Search
+                              placeholder="Input Voucher Code"
+                              allowClear
+                              enterButton="Search"
+                              size="large"
+                              onSearch={validateVoucher}
+                            />
+                          </Col>
+                          <Col lg={6} xs={24}>
+                            <Paragraph>
+                              <Text strong>Sub Total Price : </Text>$
+                              {selectedProduct.reduce(
+                                (accumulator, item) => accumulator + item.quantity * item.price,
+                                0,
+                              )}
+                            </Paragraph>
+                            <Paragraph>
+                              <Text strong>Product Quantity : </Text>
+                              {selectedProduct.reduce((accumulator, item) => accumulator + item.quantity, 0)}
+                            </Paragraph>
+                            <Paragraph>
+                              <Text strong>Discount : </Text>${discount}
+                            </Paragraph>
+                            <Paragraph>
+                              <Text strong>Shipping Cost : </Text>${shippingCost}
+                            </Paragraph>{' '}
+                            <Paragraph>
+                              <Text strong>Total Price : </Text>$
+                              {selectedProduct.reduce(
+                                (accumulator, item) => accumulator + item.quantity * item.price,
+                                0,
+                              ) +
+                                shippingCost -
+                                discount}
+                            </Paragraph>
+                          </Col>
+                        </Row>
+                      )}
                     </div>
-                  ) : (
-                    <Form
-                      ref={formRef}
-                      style={{ width: '100%' }}
-                      form={form}
-                      name="addRole"
-                      onFinish={handleSubmit}
-                      onFinishFailed={errorInfo => console.log('form error info:\n', errorInfo)}
-                      // labelCol={{ span: 4 }}
-                      layout="vertical"
-                    >
-                      <Form.Item
-                        rules={[{ required: true, message: 'Please select a customer' }]}
-                        name="customer_group_name"
-                        label="Customer"
-                      >
-                        <Select
-                          placeholder={customers.isLoading ? 'Loading....' : 'Select a customer'}
-                          options={customers.data}
-                          showSearch
-                          optionFilterProp="label"
-                          onSelect={(val, data) => {
-                            console.log('🚀 ~ file: AddOrder.js ~ line 160 ~ AddOrder ~ data', data);
-                            setSelectedAddress({ billing: {}, shipping: {} }); //clear address
-                            setSelectedCustomer(data.item);
-                            const billing = [];
-                            const shipping = [];
-                            data?.item?.addresses.forEach(addr => {
-                              if (addr.type === 'billing')
-                                return billing.push({
-                                  label: addr.address1,
-                                  value: addr.id,
-                                  item: addr,
-                                });
-                              if (addr.type === 'shipping')
-                                return shipping.push({
-                                  label: addr.address1,
-                                  value: addr.id,
-                                  item: addr,
-                                });
-                            });
-                            setBillingAddresses(billing);
-                            setShippingAddresses(shipping);
-                          }}
-                        />
-                      </Form.Item>
-
-                      <Form.Item // billing
-                        rules={[{ required: true, message: 'Please select a billing address' }]}
-                        name="billing_address_id"
-                        label="Billing Address"
-                      >
-                        <Select
-                          placeholder={customers.isLoading ? 'Loading...' : 'Select a billing address'}
-                          options={billingAddresses}
-                          onSelect={(val, data) => {
-                            console.log('🚀 ~ file: AddOrder.js ~ line 214 ~ AddOrder ~ data', data);
-                            setSelectedAddress(state => ({ ...state, billing: data.item }));
-                          }}
-                        />
-                      </Form.Item>
-
-                      <Form.Item // shipping
-                        rules={[{ required: true, message: 'Please select a shipping address' }]}
-                        name="shipping_address_id"
-                        label="Shipping Address"
-                      >
-                        <Select
-                          placeholder={customers.isLoading ? 'Loading...' : 'Select a shipping address'}
-                          options={shippingAddresses}
-                          onSelect={(val, data) => {
-                            console.log('🚀 ~ file: AddOrder.js ~ line 229 ~ AddOrder ~ data', data);
-                            setSelectedAddress(state => ({ ...state, shipping: data.item }));
-                          }}
-                        />
-                      </Form.Item>
-
-                      <Form.Item // payment method
-                        rules={[{ required: true, message: 'Please select a payment method' }]}
-                        name="payment_id"
-                        label="Payment Method"
-                      >
-                        <Select
-                          placeholder="Select payment method"
-                          options={[
-                            {
-                              label: 'Method 1',
-                              value: 1,
-                            },
-                            {
-                              label: 'Method 2',
-                              value: 2,
-                            },
-                          ]}
-                        />
-                      </Form.Item>
-
-                      <Form.Item name="ps" label="Products">
-                        <Select
-                          optionFilterProp="label"
-                          placeholder={products.isLoading ? 'Loading....' : 'Select products'}
-                          options={products.data}
-                          showSearch
-                          mode="multiple"
-                          allowClear
-                          onSelect={(val, item) => {
-                            const newProd = {
-                              id: new Date().getTime(),
-                              name: item?.item?.prod_name,
-                              quantity: 1,
-                              price: item?.item?.prod_sale_price
-                                ? item?.item?.prod_sale_price
-                                : item?.item?.prod_regular_price,
-                            };
-                            setSelectedProduct(s => [...s, newProd]);
-                          }}
-                          onChange={val => {
-                            setTimeout(() => {
-                              formRef.current.setFieldsValue({ ps: undefined });
-                            }, 20);
-                          }}
-                        />
-                      </Form.Item>
-                      <span className={'psp_list'}>
-                        <Table
-                          columns={productColumn}
-                          dataSource={selectedProduct}
-                          rowClassName={(record, index) => (index % 2 === 0 ? '' : 'altTableClass')}
-                        />
-                      </span>
-
-                      <div
-                        style={{
-                          display: 'flex',
-                          justifyContent: 'flex-end',
-                          marginTop: '3em',
-                        }}
-                      >
-                        <Form.Item>
-                          <Button loading={isLoading} size="default" htmlType="submit" type="primary" raised>
-                            {isLoading ? 'Processing' : 'Save'}
-                          </Button>
-                          <Link to="/admin/order/list">
-                            <Button style={{ marginLeft: 10 }} type="light" size="default">
-                              Cancel
-                            </Button>
-                          </Link>
-                        </Form.Item>
-                      </div>
-                    </Form>
-                  )}
-                </Col>
-                <Col sm={12} xs={12} style={{ paddingLeft: '3em' }}>
-                  <Card headless>
-                    <h3
-                      style={{
-                        borderBottom: '1px solid #f2f1f1',
-                        paddingBottom: '0.3em',
-                        marginBottom: '0.9em',
-                      }}
-                    >
-                      Preview
-                    </h3>
-                    {selectedCustomer?.id && (
-                      <>
-                        <p
+                  </Col>
+                </Row>
+                <Row style={{ marginTop: 20 }}>
+                  <Col span={24}>
+                    <div className="steps-action" style={{ float: 'right' }}>
+                      <Link to="/admin/order/list">
+                        <Button
+                          type="light"
                           style={{
-                            fontWeight: 500,
+                            margin: '0 8px',
                           }}
+                          onClick={() => prev()}
                         >
-                          Customer Details :
-                        </p>
-
-                        <table
+                          Cancel
+                        </Button>
+                      </Link>
+                      {current > 0 && (
+                        <Button
+                          type="light"
                           style={{
-                            marginLeft: '1em',
+                            margin: '0 8px',
                           }}
+                          onClick={() => prev()}
                         >
-                          <tr>
-                            <td style={{ width: '150px' }}>
-                              <b>Email </b>
-                            </td>
-                            <td>: {selectedCustomer.email}</td>
-                          </tr>
-                          <tr>
-                            <td>
-                              <b>First Name </b>
-                            </td>
-                            <td>: {selectedCustomer.first_name}</td>
-                          </tr>
-                          <tr>
-                            <td>
-                              <b>Last Name:</b>
-                            </td>
-                            <td>: {selectedCustomer.last_name}</td>
-                          </tr>
-                        </table>
-                      </>
-                    )}
-
-                    {selectedAddress?.billing?.id && (
-                      <>
-                        <p
+                          Previous
+                        </Button>
+                      )}
+                      {current < steps.length - 1 && (
+                        <Button
                           style={{
-                            fontWeight: 500,
-                            marginTop: '2em',
-                            // marginBottom: "3px"
+                            margin: '0 8px',
                           }}
+                          type="primary"
+                          onClick={() => next()}
                         >
-                          Billing Address :
-                        </p>
-
-                        <table
+                          Next
+                        </Button>
+                      )}
+                      {current === steps.length - 1 && (
+                        <Button
+                          raised
+                          htmlType="submit"
                           style={{
-                            marginLeft: '1em',
+                            margin: '0 8px',
                           }}
+                          type="primary"
                         >
-                          <tr>
-                            <td style={{ width: '150px' }}>
-                              <b>Address 1</b>
-                            </td>
-                            <td>: {selectedAddress?.billing?.address1}</td>
-                          </tr>
-                          <tr>
-                            <td>
-                              <b>Address 2</b>
-                            </td>
-                            <td>: {selectedAddress?.billing?.address2} </td>
-                          </tr>
-                          <tr>
-                            <td>
-                              <b>Email</b>
-                            </td>
-                            <td>: {selectedAddress?.billing?.email} </td>
-                          </tr>
-                          <tr>
-                            <td>
-                              <b>Phone</b>
-                            </td>
-                            <td>: {selectedAddress?.billing?.phone} </td>
-                          </tr>
-                          <tr>
-                            <td>
-                              <b>Fax</b>
-                            </td>
-                            <td>: {selectedAddress?.billing?.fax} </td>
-                          </tr>
-                          <tr>
-                            <td>
-                              <b>Country</b>
-                            </td>
-                            <td>: {selectedAddress?.billing?.country} </td>
-                          </tr>
-                          <tr>
-                            <td>
-                              <b>City</b>
-                            </td>
-                            <td>: {selectedAddress?.billing?.city} </td>
-                          </tr>
-                          <tr>
-                            <td>
-                              <b>State</b>
-                            </td>
-                            <td>: {selectedAddress?.billing?.state} </td>
-                          </tr>
-                          <tr>
-                            <td>
-                              <b>Zip Code</b>
-                            </td>
-                            <td>: {selectedAddress?.billing?.zip_code} </td>
-                          </tr>
-                        </table>
-                      </>
-                    )}
-
-                    {selectedAddress?.shipping?.id && (
-                      <>
-                        <p
-                          style={{
-                            fontWeight: 500,
-                            marginTop: '2em',
-                            // marginBottom: "3px"
-                          }}
-                        >
-                          Billing Address :
-                        </p>
-
-                        <table
-                          style={{
-                            marginLeft: '1em',
-                          }}
-                        >
-                          <tr>
-                            <td style={{ width: '150px' }}>
-                              <b>Address 1</b>
-                            </td>
-                            <td>: {selectedAddress?.shipping?.address1}</td>
-                          </tr>
-                          <tr>
-                            <td>
-                              <b>Address 2</b>
-                            </td>
-                            <td>: {selectedAddress?.shipping?.address2} </td>
-                          </tr>
-                          <tr>
-                            <td>
-                              <b>Email</b>
-                            </td>
-                            <td>: {selectedAddress?.shipping?.email} </td>
-                          </tr>
-                          <tr>
-                            <td>
-                              <b>Phone</b>
-                            </td>
-                            <td>: {selectedAddress?.shipping?.phone} </td>
-                          </tr>
-                          <tr>
-                            <td>
-                              <b>Fax</b>
-                            </td>
-                            <td>: {selectedAddress?.shipping?.fax} </td>
-                          </tr>
-                          <tr>
-                            <td>
-                              <b>Country</b>
-                            </td>
-                            <td>: {selectedAddress?.shipping?.country} </td>
-                          </tr>
-                          <tr>
-                            <td>
-                              <b>City</b>
-                            </td>
-                            <td>: {selectedAddress?.shipping?.city} </td>
-                          </tr>
-                          <tr>
-                            <td>
-                              <b>State</b>
-                            </td>
-                            <td>: {selectedAddress?.shipping?.state} </td>
-                          </tr>
-                          <tr>
-                            <td>
-                              <b>Zip Code</b>
-                            </td>
-                            <td>: {selectedAddress?.shipping?.zip_code} </td>
-                          </tr>
-                        </table>
-                      </>
-                    )}
-                  </Card>
-                </Col>
-              </Row>
+                          Save
+                        </Button>
+                      )}
+                    </div>
+                  </Col>
+                </Row>
+              </Form>
             </Cards>
           </Col>
         </Row>
