@@ -302,39 +302,58 @@ const Dashboard = () => {
 			borderRadius: 0,
 			padding: 0,
 			transition: ".5s",
-			boxShadow: "3px 3px 4px -4px #5f63f2"
+			boxShadow: "rgb(95 99 242) -2px 0px 21px -7px",
+			border: "1px solid rgb(136, 97, 224)"
 		},
 		countingCardStyles1: {
 			borderRadius: 0,
 			padding: 0,
 			transition: ".5s",
-			boxShadow: "3px 3px 4px -4px #5f63f2",
+			boxShadow: "rgb(95 99 242) -2px 0px 21px -7px",
 			backgroundColor: "#8861E0",
-			minHeight: 200
+			minHeight: 200,
+			backgroundImage: `url(${require("../../static/img/delivery-truck-delivery.png")})`,
+			backgroundRepeat: "no-repeat",
+			backgroundSize: "cover",
+			backgroundPosition: "center",
+			backgroundBlendMode: "multiply"
 		},
 		countingCardStyles2: {
 			borderRadius: 0,
 			padding: 0,
 			transition: ".5s",
-			boxShadow: "3px 3px 4px -4px #5f63f2",
+			boxShadow: "rgb(95 99 242) -2px 0px 21px -7px",
 			backgroundColor: "#1ed897",
-			minHeight: 200
+			minHeight: 200,
+			backgroundImage: `url(${require("../../static/img/shoppingCart.png")})`,
+			backgroundRepeat: "no-repeat",
+			backgroundSize: "cover",
+			backgroundPosition: "center",
 		},
 		countingCardStyles3: {
 			borderRadius: 0,
 			padding: 0,
 			transition: ".5s",
-			boxShadow: "3px 3px 4px -4px #5f63f2",
+			boxShadow: "rgb(95 99 242) -2px 0px 21px -7px",
 			backgroundColor: "#2196f3",
-			minHeight: 200
+			minHeight: 200,
+			backgroundImage: `url(${require("../../static/img/qoute.png")})`,
+			backgroundRepeat: "no-repeat",
+			backgroundSize: "cover",
+			backgroundPosition: "center",
 		},
 		countingCardStyles4: {
 			borderRadius: 0,
 			padding: 0,
 			transition: ".5s",
-			boxShadow: "3px 3px 4px -4px #5f63f2",
+			boxShadow: "rgb(95 99 242) -2px 0px 21px -7px",
 			backgroundColor: "#ffaf02",
-			minHeight: 200
+			minHeight: 200,
+			backgroundImage: `url(${require("../../static/img/e-customer.png")})`,
+			backgroundRepeat: "no-repeat",
+			backgroundSize: "cover",
+			backgroundPosition: "center",
+			backgroundBlendMode: "multiply"
 		},
 		cardHeadTextStyles: {
 			textTransform: "uppercase",
@@ -351,7 +370,7 @@ const Dashboard = () => {
 		cardNumberTextStyles: {
 			fontSize: 13,
 			color: "#FFFFFF",
-			fontWeight: 500,
+			fontWeight: 600,
 			marginBottom: 10,
 		},
 		iconStyles1: {
@@ -545,7 +564,7 @@ const Dashboard = () => {
 				<Row gutter={25} style={{ marginBottom: 0, marginTop: 20 }}>
 					<Col sm={12} xs={24} style={{ marginBottom: 30 }}>
 						<Card headless style={styles.countingCardStyles}>
-							<h3 style={{ fontWeight: "700", marginBottom: "1em" }}>Recent Orders</h3>
+							<h3 style={{ fontWeight: "700", marginBottom: "1em", color: "rgb(136, 97, 224)" }}>Recent Orders</h3>
 							{isLoading ? (
 								<div className="spin">
 									<Spin />
@@ -572,7 +591,7 @@ const Dashboard = () => {
 					</Col>
 					<Col sm={12} xs={24} style={{ marginBottom: 30 }}>
 						<Card headless style={styles.countingCardStyles}>
-							<h3 style={{ fontWeight: "700", marginBottom: "1em" }}>Recent PO's</h3>
+							<h3 style={{ fontWeight: "700", marginBottom: "1em", color: "#EE5A24" }}>Recent PO's</h3>
 							{isLoading ? (
 								<div className="spin">
 									<Spin />
@@ -601,7 +620,7 @@ const Dashboard = () => {
 				<Row gutter={25} style={{ marginBottom: 0, marginTop: 10 }}>
 					<Col sm={12} xs={24} style={{ marginBottom: 30 }}>
 						<Card headless style={styles.countingCardStyles}>
-							<h3 style={{ fontWeight: "700", marginBottom: "1em" }}>Unread Messages</h3>
+							<h3 style={{ fontWeight: "700", marginBottom: "1em", color: "#ED4C67" }}>Unread Messages</h3>
 							{messages.isLoading ?
 								<div className="spin">
 									<Spin />
@@ -628,7 +647,7 @@ const Dashboard = () => {
 					</Col>
 					<Col sm={12} xs={24} style={{ marginBottom: 30 }}>
 						<Card headless style={styles.countingCardStyles}>
-							<h3 style={{ fontWeight: "700", marginBottom: "1em" }}>Recent Quotes</h3>
+							<h3 style={{ fontWeight: "700", marginBottom: "1em", color: "#0984e3" }}>Recent Quotes</h3>
 							{isLoading ? (
 								<div className="spin">
 									<Spin />
