@@ -160,7 +160,7 @@ const ListOrder = () => {
       render: (text, record) => (
         <>
           <Tooltip placement="topLeft" title="Edit Order" color="cyan">
-            <Link to={`/admin/order/add`}>
+            <Link to={`/admin/order/edit/${record.id}`}>
               <FontAwesome name="edit" style={{ margin: '.5em 1em' }} />
             </Link>
           </Tooltip>

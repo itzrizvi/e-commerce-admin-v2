@@ -97,12 +97,4 @@ export const productSchema = {
       }
     }
   `,
-  CREATE_ORDER: gql`
-    mutation createOrderByAdmin($data: createOrderByAdminInput) {
-      createOrderByAdmin(data: $data) {
-        message
-        status
-      }
-    }
-  `,
 };

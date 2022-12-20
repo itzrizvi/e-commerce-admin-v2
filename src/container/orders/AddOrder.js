@@ -264,22 +264,26 @@ const AddOrder = () => {
   const steps = [
     {
       title: 'Customer',
-      percent: 20,
+      percent: 15,
     },
     {
       title: 'Products',
-      percent: 40,
+      percent: 35,
     },
     {
       title: 'Addresses',
-      percent: 60,
+      percent: 50,
     },
     {
-      title: 'Payment & Shipping',
+      title: 'Shipping',
+      percent: 65,
+    },
+    {
+      title: 'Voucher & Status',
       percent: 80,
     },
     {
-      title: 'Coupon',
+      title: 'Payment',
       percent: 100,
     },
   ];
@@ -336,14 +340,20 @@ const AddOrder = () => {
                 ref={formRef}
                 style={{ width: '100%' }}
                 form={form}
-                name="addRole"
+                name="addOrder"
                 onFinish={handleSubmit}
                 onFinishFailed={errorInfo => console.log('form error info:\n', errorInfo)}
                 // labelCol={{ span: 4 }}
                 layout="vertical"
               >
                 <Row style={{ marginBottom: 20 }}>
-                  <Steps current={current} items={items} percent={items[current].percent} />
+                  <Steps
+                    current={current}
+                    items={items}
+                    percent={items[current].percent}
+                    responsive={true}
+                    size="small"
+                  />
                 </Row>
                 <Row style={{ marginTop: 40 }}>
                   <Col span={24}>
@@ -367,8 +377,8 @@ const AddOrder = () => {
                                   const billing = [];
                                   const shipping = [];
                                   data?.item?.addresses?.forEach(addr => {
-                                    if (addr.type === 'billing') billing.push(addr);
-                                    if (addr.type === 'shipping') shipping.push(addr);
+                                    if (addr.type === 'billing' && addr.isDefault) billing.push(addr);
+                                    if (addr.type === 'shipping' && addr.isDefault) shipping.push(addr);
                                   });
                                   setBillingAddresses(billing);
                                   setShippingAddresses(shipping);
@@ -453,9 +463,10 @@ const AddOrder = () => {
                       )}
                       {current === 1 && (
                         <Row gutter={25}>
-                          <Col lg={18} xs={24}>
+                          <Col lg={18} md={16} sm={24}>
                             <span className={'psp_list'}>
                               <Table
+                                className="table-responsive"
                                 columns={productColumn}
                                 dataSource={selectedProduct}
                                 pagination={false}
@@ -468,6 +479,7 @@ const AddOrder = () => {
                                   justifyContent: 'flex-end',
                                   marginTop: '10px',
                                   marginBottom: '10px',
+                                  paddingRight: '18px',
                                 }}
                               >
                                 <Button
@@ -482,23 +494,49 @@ const AddOrder = () => {
                                   htmlType="button"
                                   type="primary"
                                 >
-                                  <FeatherIcon icon="plus" />
+                                  <FeatherIcon icon="plus-circle" />
                                 </Button>
                               </div>
                             </span>
                           </Col>
-                          <Col lg={6} xs={24}>
-                            <Paragraph>
-                              <Text strong>Sub Total Price : </Text>$
-                              {selectedProduct.reduce(
-                                (accumulator, item) => accumulator + item.quantity * item.price,
-                                0,
-                              )}
-                            </Paragraph>
-                            <Paragraph>
-                              <Text strong>Product Quantity : </Text>
-                              {selectedProduct.reduce((accumulator, item) => accumulator + item.quantity, 0)}
-                            </Paragraph>
+                          <Col lg={6} md={8} sm={24}>
+                            <Card
+                              title="Summary"
+                              bordered={true}
+                              size="small"
+                              headStyle={{
+                                backgroundColor: '#5f63f24d',
+                                borderTopLeftRadius: 3,
+                                borderTopRightRadius: 3,
+                              }}
+                            >
+                              <Paragraph>
+                                <Text strong>Sub Total Price : </Text>$
+                                {selectedProduct.reduce(
+                                  (accumulator, item) => accumulator + item.quantity * item.price,
+                                  0,
+                                )}
+                              </Paragraph>
+                              <Paragraph>
+                                <Text strong>Product Quantity : </Text>
+                                {selectedProduct.reduce((accumulator, item) => accumulator + item.quantity, 0)}
+                              </Paragraph>
+                              <Paragraph>
+                                <Text strong>Discount : </Text>${discount}
+                              </Paragraph>
+                              <Paragraph>
+                                <Text strong>Shipping Cost : </Text>${shippingCost}
+                              </Paragraph>{' '}
+                              <Paragraph>
+                                <Text strong>Total Price : </Text>$
+                                {selectedProduct.reduce(
+                                  (accumulator, item) => accumulator + item.quantity * item.price,
+                                  0,
+                                ) +
+                                  shippingCost -
+                                  discount}
+                              </Paragraph>
+                            </Card>
                           </Col>
                         </Row>
                       )}
@@ -510,12 +548,7 @@ const AddOrder = () => {
                               name="order_shipping_id"
                               label="Shipping Addresses"
                             >
-                              <Radio.Group
-                                style={{ width: '100%', padding: 10 }}
-                                defaultValue={
-                                  shippingAddresses.filter(item => item.isDefault && item.type === 'shipping')[0]?.id
-                                }
-                              >
+                              <Radio.Group style={{ width: '100%', padding: 10 }}>
                                 <Row gutter={25}>
                                   {shippingAddresses.map(item => (
                                     <Col key={item.id} xs={24}>
@@ -571,12 +604,7 @@ const AddOrder = () => {
                               name="order_billing_id"
                               label="Billing Addresses"
                             >
-                              <Radio.Group
-                                style={{ width: '100%', padding: 10 }}
-                                defaultValue={
-                                  billingAddresses.filter(item => item.isDefault && item.type === 'billing')[0]?.id
-                                }
-                              >
+                              <Radio.Group style={{ width: '100%', padding: 10 }}>
                                 <Row gutter={25}>
                                   {billingAddresses.map(item => (
                                     <Col key={item.id} xs={24}>
@@ -628,44 +656,74 @@ const AddOrder = () => {
                           </Col>
                         </Row>
                       )}
-                      {current === 3 && (
+                      {current === 5 && (
                         <Row gutter={25}>
-                          <Col lg={12} sm={24}>
+                          <Col lg={24} sm={24}>
                             <Form.Item
                               name="payment_method_id"
                               label="Payment Method"
                               rules={[{ required: true, message: 'Select Payment Method' }]}
                             >
-                              <Select
-                                style={{ width: '100%' }}
-                                placeholder="Select Payment Method"
-                                optionLabelProp="label"
+                              <Radio.Group
+                                style={{ width: '100%', padding: 10 }}
                               >
-                                {paymentMethod?.map(item => (
-                                  <Select.Option key={item.id} value={item.id} label={item.name}>
-                                    <div className="demo-option-label-item">{item.name}</div>
-                                  </Select.Option>
-                                ))}
-                              </Select>
+                                <Row gutter={25}>
+                                  {paymentMethod.map(item => (
+                                    <Col key={item.id} xs={8}>
+                                      <Radio
+                                        style={{
+                                          width: '100%',
+                                          border: '1px solid #f0f0f0',
+                                          fontSize: 12,
+                                          marginBottom: 10,
+                                          padding: 10,
+                                          borderRadius: 5,
+                                        }}
+                                        value={item.id}
+                                      >
+                                        <Typography.Title level={4}>{item.name}</Typography.Title>
+                                        <Typography.Text>{item?.description}</Typography.Text>
+                                      </Radio>
+                                    </Col>
+                                  ))}
+                                </Row>
+                              </Radio.Group>
                             </Form.Item>
                           </Col>
-                          <Col lg={12} sm={24}>
+                        </Row>
+                      )}
+                      {current === 3 && (
+                        <Row gutter={25}>
+                          <Col sm={24}>
                             <Form.Item
                               name="shipping_method_id"
                               label="Shipping Method"
                               rules={[{ required: true, message: 'Select Shipping Method' }]}
                             >
-                              <Select
-                                style={{ width: '100%' }}
-                                placeholder="Select Shipping Method"
-                                optionLabelProp="label"
+                              <Radio.Group
+                                style={{ width: '100%', padding: 10 }}
                               >
-                                {shippingMethod?.map(item => (
-                                  <Select.Option key={item.id} value={item.id} label={item.name}>
-                                    <div className="demo-option-label-item">{item.name}</div>
-                                  </Select.Option>
-                                ))}
-                              </Select>
+                                <Row gutter={25}>
+                                  {shippingMethod.map(item => (
+                                    <Col key={item.id} xs={8}>
+                                      <Radio
+                                        style={{
+                                          width: '100%',
+                                          border: '1px solid #f0f0f0',
+                                          fontSize: 12,
+                                          marginBottom: 10,
+                                          padding: 10,
+                                          borderRadius: 5,
+                                        }}
+                                        value={item.id}
+                                      >
+                                        <Typography.Title level={4}>{item.name}</Typography.Title>
+                                        <Typography.Text>{item?.description}</Typography.Text>
+                                      </Radio>
+                                    </Col>
+                                  ))}
+                                </Row>
+                              </Radio.Group>
                             </Form.Item>
                           </Col>
                         </Row>
@@ -673,41 +731,54 @@ const AddOrder = () => {
                       {current === 4 && (
                         <Row gutter={25}>
                           <Col lg={18} xs={24}>
-                            <Input.Search
-                              placeholder="Input Voucher Code"
-                              allowClear
-                              enterButton="Search"
-                              size="large"
-                              onSearch={validateVoucher}
-                            />
+                            <Form.Item label="Voucher Code">
+                              <Input.Search
+                                placeholder="Input Voucher Code"
+                                allowClear
+                                enterButton="Apply Voucher"
+                                size="large"
+                                onSearch={validateVoucher}
+                              />
+                            </Form.Item>
                           </Col>
                           <Col lg={6} xs={24}>
-                            <Paragraph>
-                              <Text strong>Sub Total Price : </Text>$
-                              {selectedProduct.reduce(
-                                (accumulator, item) => accumulator + item.quantity * item.price,
-                                0,
-                              )}
-                            </Paragraph>
-                            <Paragraph>
-                              <Text strong>Product Quantity : </Text>
-                              {selectedProduct.reduce((accumulator, item) => accumulator + item.quantity, 0)}
-                            </Paragraph>
-                            <Paragraph>
-                              <Text strong>Discount : </Text>${discount}
-                            </Paragraph>
-                            <Paragraph>
-                              <Text strong>Shipping Cost : </Text>${shippingCost}
-                            </Paragraph>{' '}
-                            <Paragraph>
-                              <Text strong>Total Price : </Text>$
-                              {selectedProduct.reduce(
-                                (accumulator, item) => accumulator + item.quantity * item.price,
-                                0,
-                              ) +
-                                shippingCost -
-                                discount}
-                            </Paragraph>
+                            <Card
+                              title="Summary"
+                              bordered={true}
+                              size="small"
+                              headStyle={{
+                                backgroundColor: '#5f63f24d',
+                                borderTopLeftRadius: 3,
+                                borderTopRightRadius: 3,
+                              }}
+                            >
+                              <Paragraph>
+                                <Text strong>Sub Total Price : </Text>$
+                                {selectedProduct.reduce(
+                                  (accumulator, item) => accumulator + item.quantity * item.price,
+                                  0,
+                                )}
+                              </Paragraph>
+                              <Paragraph>
+                                <Text strong>Product Quantity : </Text>
+                                {selectedProduct.reduce((accumulator, item) => accumulator + item.quantity, 0)}
+                              </Paragraph>
+                              <Paragraph>
+                                <Text strong>Discount : </Text>${discount}
+                              </Paragraph>
+                              <Paragraph>
+                                <Text strong>Shipping Cost : </Text>${shippingCost}
+                              </Paragraph>{' '}
+                              <Paragraph>
+                                <Text strong>Total Price : </Text>$
+                                {selectedProduct.reduce(
+                                  (accumulator, item) => accumulator + item.quantity * item.price,
+                                  0,
+                                ) +
+                                  shippingCost -
+                                  discount}
+                              </Paragraph>
+                            </Card>
                           </Col>
                         </Row>
                       )}
@@ -759,7 +830,7 @@ const AddOrder = () => {
                           }}
                           type="primary"
                         >
-                          Save
+                          Create Order
                         </Button>
                       )}
                     </div>
