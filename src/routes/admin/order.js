@@ -4,6 +4,7 @@ import { useRouteMatch } from 'react-router-dom/cjs/react-router-dom.min';
 const ListOrder = lazy(() => import('../../container/orders/ListOrder'));
 const ViewOrder = lazy(() => import('../../container/orders/ViewOrder'));
 const AddOrder = lazy(() => import('../../container/orders/AddOrder'));
+const UpdateOrder = lazy(() => import('../../container/orders/UpdateOrder'));
 
 const OrderRoutes = () => {
   const { path } = useRouteMatch();
@@ -12,6 +13,7 @@ const OrderRoutes = () => {
       <Route path={`${path}/list`} component={ListOrder} />
       <Route path={`${path}/view`} component={ViewOrder} />
       <Route path={`${path}/add`} component={AddOrder} />
+      <Route path={`${path}/edit/:id`} component={UpdateOrder} />
     </Switch>
   );
 };

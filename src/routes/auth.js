@@ -18,7 +18,7 @@ const FrontendRoutes = () => {
           </div>
         }
       >
-        <Route exact path="/reset-password/:codeHashed" component={ResetPassword} />
+        <Route exact path="/set-password/:codeHashed" component={ResetPassword} />
         <Route exact path="/" component={Login} />
         <Route exact path="*" component={NotFound} />
       </Suspense>
