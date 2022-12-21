@@ -14,6 +14,7 @@ import {
   Avatar,
   Typography,
   Radio,
+  Upload,
 } from 'antd';
 import FeatherIcon from 'feather-icons-react';
 import { PageHeader } from '../../components/page-headers/page-headers';
@@ -30,6 +31,8 @@ import { errorImageSrc, renderImage } from '../../utility/images';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
 import { productSchema } from '../../apollo/product';
 import { useSelector } from 'react-redux';
+import { orderQuery } from '../../apollo/order';
+import { UploadOutlined } from '@ant-design/icons';
 const { TextArea } = Input;
 const { Title, Text, Paragraph } = Typography;
 const prod_initial = {
@@ -40,7 +43,7 @@ const prod_initial = {
 };
 const AddOrder = () => {
   viewPermission('order');
-  const { search } = useLocation();
+  const history = useHistory();
   const [isLoading, setIsLoading] = useState(false);
   const token = useSelector(state => state.auth.token);
   const [form] = Form.useForm();
@@ -57,25 +60,33 @@ const AddOrder = () => {
   const [discount, setDiscount] = useState('00.0');
   const [shippingMethod, setShippingMethod] = useState([]);
   const [paymentMethod, setPaymentMethod] = useState([]);
+  const [orderStatusOptions, setOrderStatusOptions] = useState([]);
   const [selctedCouponCode, setSelectedCouponCode] = useState(null);
   const [shippingCost, setShippingCost] = useState(0);
+  const [textExempt, setTextExempt] = useState(false);
+  const [image, setImage] = useState(null);
 
-  const handleSubmit = values => {
-    console.log(values);
-    return;
+  const handleSubmit = () => {
+    const form_data = form.getFieldsValue(true);
+    const orderProducts = selectedProduct.map(item => ({ product_id: item.id, quantity: item.quantity }));
+    if (orderProducts.length === 0) return toast.error('Please Select at Least One Product.');
+    if (!form_data.billing_address_id) return toast.error('Please Select Billing Address.');
+    if (!form_data.shipping_address_id) return toast.error('Please Select Shipping Address.');
+    if (!form_data.customer_id) return toast.error('Please Select Customer.');
+    if (!form_data.order_status_id) return toast.error('Please Select Order Status.');
+    if (!form_data.payment_id) return toast.error('Please Select Payment Method.');
+    if (!form_data.shipping_method_id) return toast.error('Please Select Shipping Method.');
+    if (form_data.tax_exempt && !image) return toast.error('Please Upload Text Exempt File.');
+    setIsLoading(true);
     apolloUploadClient
       .mutate({
-        mutation: productSchema.CREATE_ORDER,
+        mutation: orderQuery.CREATE_ORDER,
         variables: {
           data: {
-            customer_id: selectedCustomer?.id,
-            cart_id: 5,
-            tax_exempt: true,
-            payment_id: 1,
-            coupon_id: 10001,
-            order_status_id: 1,
-            billing_address_id: 10000,
-            shipping_address_id: 10001,
+            ...form_data,
+            coupon_id: selctedCouponCode,
+            taxexempt_file: image,
+            orderProducts,
           },
         },
         context: {
@@ -84,15 +95,31 @@ const AddOrder = () => {
             Authorization: token,
           },
         },
+        refetchQueries: [
+          {
+            query: orderQuery.GET_ALL_ORDER,
+            context: {
+              headers: {
+                TENANTID: process.env.REACT_APP_TENANTID,
+                Authorization: token,
+              },
+            },
+          },
+          ['getOrderlistAdmin'],
+        ],
       })
       .then(res => {
         const data = res?.data?.createOrderByAdmin;
         if (!data?.status) return toast.error(data?.messsage);
-        console.log(data);
+        toast.success(data?.message);
+        setTimeout(() => {
+          history.push('/admin/order/list');
+        }, 1000);
       })
       .catch(err => {
         toast.error('Something Went wrong !!');
-      });
+      })
+      .finally(() => setIsLoading(false));
   };
 
   const productColumn = [
@@ -258,6 +285,28 @@ const AddOrder = () => {
         if (!data.status) return;
         setPaymentMethod(data?.data);
       });
+
+    // Get Order Status List
+    apolloClient
+      .query({
+        query: orderQuery.GET_ORDER_STATUS_LIST,
+        context: {
+          headers: {
+            TENANTID: process.env.REACT_APP_TENANTID,
+            Authorization: token,
+          },
+        },
+      })
+      .then(res => {
+        const data = res?.data?.getOrderStatusList;
+        if (!data.status) return;
+        const order_status_list = data?.data?.map(item => ({
+          ...item,
+          value: item.id,
+          label: item.name,
+        }));
+        setOrderStatusOptions(order_status_list);
+      });
   }, []);
 
   /* -------------------------- Step From Data Start -------------------------- */
@@ -303,30 +352,41 @@ const AddOrder = () => {
   /* ---------------------------- tep Form Data end --------------------------- */
 
   const validateVoucher = voucher => {
-    apolloClient
-      .query({
-        query: productSchema.GET_COUPON_BY_CODE,
-        variables: { query: { coupon_code: voucher } },
-        context: {
-          headers: {
-            TENANTID: process.env.REACT_APP_TENANTID,
+    if (voucher.length === 0) {
+      setSelectedCouponCode('');
+      setDiscount(0);
+      toast.warn('Voucher Removed!');
+    } else {
+      apolloClient
+        .query({
+          query: productSchema.GET_COUPON_BY_CODE,
+          variables: { query: { coupon_code: voucher } },
+          context: {
+            headers: {
+              TENANTID: process.env.REACT_APP_TENANTID,
+            },
           },
-        },
-      })
-      .then(res => {
-        const data = res?.data?.getSingleCouponByCode;
-        if (data.status) {
-          if (data.data.coupon_type === 'percentage') {
-            setDiscount((total.price / 100) * data.data.coupon_amount);
-            setSelectedCouponCode(voucher);
+        })
+        .then(res => {
+          const data = res?.data?.getSingleCouponByCode;
+          if (data.status) {
+            if (data.data.coupon_type === 'percentage') {
+              setDiscount((total.price / 100) * data.data.coupon_amount);
+            } else {
+              setDiscount(data.data.coupon_amount);
+            }
+            setSelectedCouponCode(data?.data?.id);
+            toast.success(data.message);
           } else {
-            setDiscount(data.data.coupon_amount);
+            toast.error(data.message);
           }
-          toast.success(data.message);
-        } else {
-          toast.error(data.message);
-        }
-      });
+        });
+    }
+  };
+
+  const beforeImageUpload = file => {
+    setImage(file);
+    return false;
   };
 
   return (
@@ -363,7 +423,7 @@ const AddOrder = () => {
                           <Col md={12} sm={24}>
                             <Form.Item
                               rules={[{ required: true, message: 'Please select a customer' }]}
-                              name="customer_group_name"
+                              name="customer_id"
                               label="Customer"
                             >
                               <Select
@@ -545,7 +605,7 @@ const AddOrder = () => {
                           <Col lg={12} sm={24}>
                             <Form.Item
                               rules={[{ required: true, message: 'Please Select Shipping Address' }]}
-                              name="order_shipping_id"
+                              name="shipping_address_id"
                               label="Shipping Addresses"
                             >
                               <Radio.Group style={{ width: '100%', padding: 10 }}>
@@ -601,7 +661,7 @@ const AddOrder = () => {
                           <Col lg={12} sm={24}>
                             <Form.Item
                               rules={[{ required: true, message: 'Please Select Billing Address' }]}
-                              name="order_billing_id"
+                              name="billing_address_id"
                               label="Billing Addresses"
                             >
                               <Radio.Group style={{ width: '100%', padding: 10 }}>
@@ -660,13 +720,11 @@ const AddOrder = () => {
                         <Row gutter={25}>
                           <Col lg={24} sm={24}>
                             <Form.Item
-                              name="payment_method_id"
+                              name="payment_id"
                               label="Payment Method"
                               rules={[{ required: true, message: 'Select Payment Method' }]}
                             >
-                              <Radio.Group
-                                style={{ width: '100%', padding: 10 }}
-                              >
+                              <Radio.Group style={{ width: '100%', padding: 10 }}>
                                 <Row gutter={25}>
                                   {paymentMethod.map(item => (
                                     <Col key={item.id} xs={8}>
@@ -700,9 +758,7 @@ const AddOrder = () => {
                               label="Shipping Method"
                               rules={[{ required: true, message: 'Select Shipping Method' }]}
                             >
-                              <Radio.Group
-                                style={{ width: '100%', padding: 10 }}
-                              >
+                              <Radio.Group style={{ width: '100%', padding: 10 }}>
                                 <Row gutter={25}>
                                   {shippingMethod.map(item => (
                                     <Col key={item.id} xs={8}>
@@ -734,12 +790,33 @@ const AddOrder = () => {
                             <Form.Item label="Voucher Code">
                               <Input.Search
                                 placeholder="Input Voucher Code"
-                                allowClear
                                 enterButton="Apply Voucher"
                                 size="large"
                                 onSearch={validateVoucher}
+                                defaultValue={selctedCouponCode}
                               />
                             </Form.Item>
+                            <Form.Item
+                              name="order_status_id"
+                              label="Order Status"
+                              rules={[{ required: true, message: 'Select Order Status' }]}
+                            >
+                              <Select
+                                placeholder="Select Order Status"
+                                options={orderStatusOptions}
+                                optionFilterProp="label"
+                              />
+                            </Form.Item>
+                            <Form.Item name="tax_exempt" label="Tax Exempt">
+                              <Switch size="small" defaultChecked={textExempt} onChange={e => setTextExempt(e)} />
+                            </Form.Item>
+                            {textExempt && (
+                              <Form.Item label="Tax Exempt File">
+                                <Upload defaultFileList={image && [image]} beforeUpload={beforeImageUpload} name="tax_exempt_file">
+                                  <Button icon={<UploadOutlined />}>Click to Upload</Button>
+                                </Upload>
+                              </Form.Item>
+                            )}
                           </Col>
                           <Col lg={6} xs={24}>
                             <Card
@@ -823,6 +900,7 @@ const AddOrder = () => {
                       )}
                       {current === steps.length - 1 && (
                         <Button
+                          disabled={isLoading}
                           raised
                           htmlType="submit"
                           style={{
@@ -830,7 +908,7 @@ const AddOrder = () => {
                           }}
                           type="primary"
                         >
-                          Create Order
+                          {isLoading ? 'Processing...' : 'Create Order'}
                         </Button>
                       )}
                     </div>

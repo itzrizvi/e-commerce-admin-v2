@@ -5,7 +5,7 @@ import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
 import { Cards } from '../../components/cards/frame/cards-frame';
 import { Button } from '../../components/buttons/buttons';
-import { Link, useLocation, useParams } from 'react-router-dom';
+import { Link, useHistory, useParams } from 'react-router-dom';
 import apolloClient, { apolloUploadClient } from '../../utility/apollo';
 import { toast } from 'react-toastify';
 import { ellipsis, viewPermission } from '../../utility/utility';
@@ -23,6 +23,7 @@ const prod_initial = {
 };
 const UpdateOrder = () => {
   viewPermission('order');
+  const history = useHistory();
   const [isLoading, setIsLoading] = useState(false);
   const token = useSelector(state => state.auth.token);
   const [form] = Form.useForm();
@@ -45,22 +46,19 @@ const UpdateOrder = () => {
   const [shippingCost, setShippingCost] = useState(0);
   const [singleOrder, setSingleOrder] = useState({ data: {}, isLoading: true });
 
-  const handleSubmit = values => {
-    console.log(values);
-    return;
+  const handleSubmit = () => {
+    setIsLoading(true);
+    const orderItems = selectedProduct.map(item => ({ product_id: item.id, quantity: item.quantity }));
+    const form_data = form.getFieldsValue(true);
     apolloUploadClient
       .mutate({
         mutation: orderQuery.UPDATE_ORDER,
         variables: {
           data: {
-            data: {
-              order_id: 5,
-              orderItems: [
-                { product_id: 10002, quantity: 5 },
-                { product_id: 10003, quantity: 4 },
-                { product_id: 10001, quantity: 4 },
-              ],
-            },
+            ...form_data,
+            order_id: singleOrder?.data?.id,
+            coupon_id: selectedCouponCode,
+            orderItems,
           },
         },
         context: {
@@ -69,15 +67,31 @@ const UpdateOrder = () => {
             Authorization: token,
           },
         },
+        refetchQueries: [
+          {
+            query: orderQuery.GET_ALL_ORDER,
+            context: {
+              headers: {
+                TENANTID: process.env.REACT_APP_TENANTID,
+                Authorization: token,
+              },
+            },
+          },
+          ['getOrderlistAdmin'],
+        ],
       })
       .then(res => {
-        const data = res?.data?.createOrderByAdmin;
-        if (!data?.status) return toast.error(data?.messsage);
-        console.log(data);
+        const data = res?.data?.updateOrder;
+        if (!data?.status) return toast.error(data?.message);
+        toast.success(data.message);
+        setTimeout(() => {
+          history.push('/admin/order/list');
+        }, 1000);
       })
       .catch(err => {
         toast.error('Something Went wrong !!');
-      });
+      })
+      .finally(() => setIsLoading(false));
   };
 
   const productColumn = [
@@ -259,6 +273,7 @@ const UpdateOrder = () => {
             Authorization: token,
           },
         },
+        fetchPolicy: 'network-only',
       })
       .then(res => {
         const data = res.data.getSingleOrderAdmin;
@@ -279,11 +294,13 @@ const UpdateOrder = () => {
         });
         setBillingAddresses(billing);
         setShippingAddresses(shipping);
-        setSelectedCouponCode(data?.data?.coupon?.coupon_code);
-        if (data?.data?.coupon?.coupon_type === 'flat') {
-          setDiscount(data?.data?.coupon?.coupon_amount);
-        } else {
-          setDiscount((data?.data?.total / 100) * data?.data?.coupon?.coupon_amount);
+        setSelectedCouponCode(data?.data?.coupon?.id);
+        if (data?.data?.coupon) {
+          if (data?.data?.coupon?.coupon_type === 'flat') {
+            setDiscount(data?.data?.coupon?.coupon_amount);
+          } else {
+            setDiscount((data?.data?.total / 100) * data?.data?.coupon?.coupon_amount);
+          }
         }
         setShippingCost(data?.data?.shipping_cost);
       });
@@ -369,10 +386,10 @@ const UpdateOrder = () => {
         if (data.status) {
           if (data.data.coupon_type === 'percentage') {
             setDiscount((total.price / 100) * data.data.coupon_amount);
-            setSelectedCouponCode(voucher);
           } else {
             setDiscount(data.data.coupon_amount);
           }
+          setSelectedCouponCode(data?.data?.id);
           toast.success(data.message);
         } else {
           toast.error(data.message);
@@ -419,7 +436,6 @@ const UpdateOrder = () => {
                             <Col md={12} sm={24}>
                               <Form.Item
                                 rules={[{ required: true, message: 'Please select a customer' }]}
-                                name="customer_group_name"
                                 label="Customer"
                               >
                                 <Select
@@ -613,8 +629,9 @@ const UpdateOrder = () => {
                             <Col lg={12} sm={24}>
                               <Form.Item
                                 rules={[{ required: true, message: 'Please Select Shipping Address' }]}
-                                name="order_shipping_id"
+                                name="shipping_address_id"
                                 label="Shipping Addresses"
+                                initialValue={singleOrder?.data?.shippingAddress?.id}
                               >
                                 <Radio.Group
                                   style={{ width: '100%', padding: 10 }}
@@ -672,8 +689,9 @@ const UpdateOrder = () => {
                             <Col lg={12} sm={24}>
                               <Form.Item
                                 rules={[{ required: true, message: 'Please Select Billing Address' }]}
-                                name="order_billing_id"
+                                name="billing_address_id"
                                 label="Billing Addresses"
+                                initialValue={singleOrder?.data?.payment?.billingAddress?.id}
                               >
                                 <Radio.Group
                                   style={{ width: '100%', padding: 10 }}
@@ -734,7 +752,7 @@ const UpdateOrder = () => {
                           <Row gutter={25}>
                             <Col lg={24} sm={24}>
                               <Form.Item
-                                name="payment_method_id"
+                                name="payment_id"
                                 label="Payment Method"
                                 rules={[{ required: true, message: 'Select Payment Method' }]}
                                 initialValue={singleOrder?.data?.paymentmethod?.id}
@@ -812,15 +830,21 @@ const UpdateOrder = () => {
                               <Form.Item label="Voucher Code">
                                 <Input.Search
                                   placeholder="Input Voucher Code"
-                                  allowClear
                                   enterButton="Apply Voucher"
                                   size="large"
                                   onSearch={validateVoucher}
                                   defaultValue={selectedCouponCode}
+                                  onChange={e => {
+                                    if (e.target.value.length === 0) {
+                                      setSelectedCouponCode('');
+                                      setDiscount(0);
+                                      toast.warn('Voucher Removed!');
+                                    }
+                                  }}
                                 />
                               </Form.Item>
                               <Form.Item
-                                name="status"
+                                name="order_status_id"
                                 label="Order Status"
                                 rules={[{ required: true, message: 'Select Order Status' }]}
                                 initialValue={singleOrder?.data?.orderstatus?.id}
@@ -915,6 +939,7 @@ const UpdateOrder = () => {
                         )}
                         {current === steps.length - 1 && (
                           <Button
+                            disabled={isLoading}
                             raised
                             htmlType="submit"
                             style={{
@@ -922,7 +947,7 @@ const UpdateOrder = () => {
                             }}
                             type="primary"
                           >
-                            Update Order
+                            {isLoading ? 'Processing...' : 'Update Order'}
                           </Button>
                         )}
                       </div>
