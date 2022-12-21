@@ -41,14 +41,14 @@ const ListOrder = () => {
         if (!data.status) return;
         // var order_data = [];
         var order_data = data.data.map(item => {
-          const { customer, id, createdAt, orderStatus, payment, total } = item;
+          const { customer, id, createdAt, orderStatus, paymentmethod, total } = item;
           return {
             id,
             customer_name: customer.first_name + ' ' + customer.last_name,
             customer_email: customer.email,
             createdAt,
             orderStatus: orderStatus.name,
-            payment_name: payment?.name ?? 'No Payment Method',
+            payment_name: paymentmethod?.name ?? 'No Payment Method',
             total,
           };
         });
