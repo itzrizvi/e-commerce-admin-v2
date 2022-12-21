@@ -4,17 +4,19 @@ export const dashboardAnalytics = {
   GET_DASHBOARD_ANALYTICS: gql`
     query getDashboardAnalytics {
         getDashboardAnalytics {
-        message
-        status
-        orderCount
-        todayOrderPendingCount
-        todayDeliveredOrderCount
-        todayProductSoldCount
-        todayProductPendingCount
-        revenueCount
-        todayRevenue
-        customerCount
-        newCustomer
+          message
+          status
+          tenant_id
+          totalCustomer
+          newCustomer
+          verifiedCustomer
+          orderCount
+          totalShippedOrder
+          todayShippedOrder
+          shippingInProgress
+          newOrderCount
+          totalQuotes
+          todayQuotes
         recentOrders {
           id
           total
@@ -32,6 +34,24 @@ export const dashboardAnalytics = {
             name
             slug
             status
+          }
+        }
+        recentPurchaseOrders {
+          id
+          po_id
+          order_id
+          type
+          grandTotal_price
+        }
+        recentQuotes {
+          id
+          status
+          grand_total
+          createdAt
+          quotedby {
+            id
+            first_name
+            email
           }
         }
       }
