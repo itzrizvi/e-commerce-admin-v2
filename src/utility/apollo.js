@@ -934,6 +934,7 @@ export const customerQuery = {
           first_name
           last_name
           email
+          image
           addresses {
             id
             address1
@@ -947,6 +948,7 @@ export const customerQuery = {
             country
             type
             status
+            isDefault
             updatedAt
             createdAt
           }

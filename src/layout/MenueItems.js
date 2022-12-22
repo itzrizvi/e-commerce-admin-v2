@@ -210,7 +210,7 @@ const MenuItems = ({ darkMode, toggleCollapsed, topMenu }) => {
 
       {menuPermission('purchase-order') && (
         <SubMenu key="purchase-order" icon={!topMenu && <FeatherIcon icon="cpu" />} title="Purchase Order">
-          <Menu.Item key="purchase-order">
+          <Menu.Item key="purchase-order-sub">
             <NavLink onClick={toggleCollapsed} to={`${path}/po/list`}>
               Purchase Order
             </NavLink>
@@ -220,7 +220,7 @@ const MenuItems = ({ darkMode, toggleCollapsed, topMenu }) => {
 
       {menuPermission('receiving-product') && (
         <SubMenu key="receiving-product" icon={!topMenu && <FeatherIcon icon="anchor" />} title="Receiving Product">
-          <Menu.Item key="receiving-product">
+          <Menu.Item key="receiving-product-sub">
             <NavLink onClick={toggleCollapsed} to={`${path}/rp/list`}>
               Receiving Product
             </NavLink>
@@ -243,9 +243,9 @@ const MenuItems = ({ darkMode, toggleCollapsed, topMenu }) => {
       )}
 
       {menuPermission('company-info') && (
-        <SubMenu key="supports" icon={!topMenu && <FeatherIcon icon="message-circle" />} title="Supports">
+        <SubMenu key="supports-sub" icon={!topMenu && <FeatherIcon icon="message-circle" />} title="Supports">
           {menuPermission('company-info') && (
-            <Menu.Item key="company_info">
+            <Menu.Item key="supports">
               <NavLink onClick={toggleCollapsed} to={`${path}/supports/list`}>
                 Messages
               </NavLink>
@@ -273,7 +273,7 @@ const MenuItems = ({ darkMode, toggleCollapsed, topMenu }) => {
                   Header/Footer
                 </NavLink>
               </Menu.Item>
-              <Menu.Item key="email-template">
+              <Menu.Item key="email-template-content">
                 <NavLink onClick={toggleCollapsed} to={`${path}/email/content/list`}>
                   Content
                 </NavLink>
