@@ -206,8 +206,7 @@ const ViewOrder = () => {
                         <b>Payment Details:</b>
                       </p>
                       <p style={{ marginLeft: '2em' }}>
-                        using bank account <br />
-                        ..... <br /> .....
+                        ${singleOrder.data?.paymentmethod.name}
                       </p>
                       <p>
                         <b>Delivery Option:</b> FedEx
