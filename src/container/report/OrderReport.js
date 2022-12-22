@@ -216,7 +216,7 @@ const OrderReport = () => {
             align: 'center',
             width: 150,
             render: (text, record) => (
-                <span className={'status-text'}>{<Moment format="DD MMMM YYYY">{parseInt(text)}</Moment>}</span>
+                <span className={'status-text'}>{<Moment format="DD MMMM YYYY">{text}</Moment>}</span>
             ),
         },
         {

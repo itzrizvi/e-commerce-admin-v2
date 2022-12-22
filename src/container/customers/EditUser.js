@@ -211,7 +211,7 @@ const EditUser = () => {
 
   return (
     <>
-      <PageHeader title={`Manage User | Edit user ${singleUser.isLoading ? '' : `(${singleUser?.data?.email})`}`} />
+      <PageHeader title={`Manage Customer | Edit Customer ${singleUser.isLoading ? '' : `(${singleUser?.data?.email})`}`} />
       <Main>
         <Row gutter={25}>
           <Col sm={24} xs={24}>
