@@ -8,73 +8,75 @@ const { loginBegin, loginSuccess, loginErr, logoutBegin, logoutSuccess, logoutEr
 const login = (email, password, history) => {
   return async dispatch => {
     dispatch(loginBegin());
-    apolloClient.mutate({
-      mutation: authMutation.LOGIN_MUTATION,
-      variables: { email, password },
-      context: {
-        headers: {
-          TENANTID: process.env.REACT_APP_TENANTID
-        }
-      }
-    }).then(res => {
-      const adminSignIn = res?.data?.adminSignIn
-
-      if (adminSignIn?.status) {
-        Cookies.set('logedIn', true);
-        Cookies.set('psp_t', adminSignIn?.authToken);
-        Cookies.set('r_i', adminSignIn?.roleNo);
-        Cookies.set('user', JSON.stringify(adminSignIn));
-        const permissions = [];
-
-        apolloClient.mutate({
-          mutation: authQuery.GET_AUTH_PERMISSION,
-          variables: {
-            query: {
-              "id": parseInt(adminSignIn?.id)
-            }
+    apolloClient
+      .mutate({
+        mutation: authMutation.LOGIN_MUTATION,
+        variables: { email, password },
+        context: {
+          headers: {
+            TENANTID: process.env.REACT_APP_TENANTID,
           },
-          context: {
-            headers: {
-              TENANTID: process.env.REACT_APP_TENANTID,
-              Authorization: adminSignIn?.authToken
-            }
-          }
-        }).then(res => {
-          const roles = res?.data?.getSingleAdmin?.data?.roles;
-          roles.forEach(per => {
-            per.permissions.forEach(permission => {
-              permissions.push(
-                {
-                  edit_access: permission.edit_access,
-                  read_access: permission.read_access,
-                  permission_name: permission?.rolesPermission?.roles_permission_slug
-                }
-              )
+        },
+      })
+      .then(res => {
+        const adminSignIn = res?.data?.adminSignIn;
+
+        if (adminSignIn?.status) {
+          Cookies.set('logedIn', true);
+          Cookies.set('psp_t', adminSignIn?.authToken);
+          Cookies.set('r_i', adminSignIn?.roleNo);
+          Cookies.set('user', JSON.stringify(adminSignIn));
+          const permissions = [];
+
+          apolloClient
+            .mutate({
+              mutation: authQuery.GET_AUTH_PERMISSION,
+              variables: {
+                query: {
+                  id: parseInt(adminSignIn?.id),
+                },
+              },
+              context: {
+                headers: {
+                  TENANTID: process.env.REACT_APP_TENANTID,
+                  Authorization: adminSignIn?.authToken,
+                },
+              },
+            })
+            .then(res => {
+              const roles = res?.data?.getSingleAdmin?.data?.roles;
+              roles.forEach(per => {
+                per.permissions.forEach(permission => {
+                  permissions.push({
+                    edit_access: permission.edit_access,
+                    read_access: permission.read_access,
+                    permission_name: permission?.rolesPermission?.roles_permission_slug,
+                  });
+                });
+              });
+
+              Cookies.set('permissions', JSON.stringify(permissions));
             });
-          });
 
-          Cookies.set('permissions', JSON.stringify(permissions));
-        })
-
-
-        dispatch(loginSuccess({
-          login: true,
-          token: adminSignIn?.authToken,
-          roleId: adminSignIn?.roleNo,
-          user: adminSignIn,
-          permissions
-        }));
-        history.push('/admin');
-        setTimeout(() => {
-          window.location.reload();
-        }, 2000);
-      } else {
-        dispatch(loginErr('wrong email or password'));
-      }
-    }).catch(err => {
-      dispatch(loginErr('Something went wrong'));
-    })
-
+          dispatch(
+            loginSuccess({
+              login: true,
+              token: adminSignIn?.authToken,
+              roleId: adminSignIn?.roleNo,
+              user: adminSignIn,
+              permissions,
+            }),
+          );
+          history.push('/admin');
+          setTimeout(() => {
+            window.location.reload();
+          }, 2000);
+        }
+      })
+      .catch(err => {
+        dispatch(loginErr('Something went wrong'));
+      })
+      .finally(() => dispatch(loginErr('')));
 
     // FN - OLD CODES//
     // try {
@@ -107,9 +109,9 @@ const logOut = () => {
 
 const changeUser = user => {
   return async dispatch => {
-    dispatch(updateUser({ user }))
+    dispatch(updateUser({ user }));
     Cookies.set('user', JSON.stringify(user));
-  }
-}
+  };
+};
 
 export { login, logOut, changeUser };
