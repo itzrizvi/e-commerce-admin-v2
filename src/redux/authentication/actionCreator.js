@@ -69,7 +69,7 @@ const login = (email, password, history) => {
           window.location.reload();
         }, 2000);
       } else {
-        dispatch(loginErr('wrong email or password'));
+        dispatch(loginErr(adminSignIn.message));
       }
     }).catch(err => {
       dispatch(loginErr('Something went wrong'));

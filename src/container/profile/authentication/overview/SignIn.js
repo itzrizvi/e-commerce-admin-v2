@@ -10,8 +10,8 @@ import { Checkbox } from '../../../../components/checkbox/checkbox';
 import Heading from '../../../../components/heading/heading';
 
 const SignIn = () => {
-  const [email, setEmail] = useState('shahriar.rizvi02@gmail.com');
-  const [password, setPassword] = useState('A12345678');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
 
   const history = useHistory();
   const dispatch = useDispatch();
@@ -25,7 +25,7 @@ const SignIn = () => {
   const handleSubmit = e => {
     e.preventDefault();
     dispatch(login(email, password, history));
-  }
+  };
 
   const onChange = checked => {
     setState({ ...state, checked });
@@ -49,27 +49,24 @@ const SignIn = () => {
           </Heading>
           <Form.Item
             name="username"
-            rules={[{ message: 'Please input your username or Email!', required: true }]}
-            // initialValue="name@example.com"
+            rules={[{ message: 'Please input your username or email!', required: true }]}
             initialValue={email}
             label="Username or Email Address"
           >
             <Input
+              placeholder="Username or Email Address"
               onChange={e => {
-                setEmail(e.target.value)
+                setEmail(e.target.value);
               }}
             />
           </Form.Item>
           <Form.Item
             name="password"
-            // initialValue="123456"
+            rules={[{ message: 'Please input your password!', required: true }]}
             initialValue={password}
             label="Password"
           >
-            <Input.Password
-              placeholder="Password"
-              onChange={e => setPassword(e.target.value)}
-            />
+            <Input.Password placeholder="Password" onChange={e => setPassword(e.target.value)} />
           </Form.Item>
           {/* <div className="auth-form-action">
             <Checkbox onChange={onChange}>Keep me logged in</Checkbox>
@@ -83,9 +80,7 @@ const SignIn = () => {
             </Button>
           </Form.Item>
 
-          {authError &&
-            <p style={{ color: '#ff4d4f' }}>{authError}</p>
-          }
+          {authError && <p style={{ color: '#ff4d4f' }}>{authError}</p>}
 
           {/* <p className="form-divider">
             <span>Or</span>

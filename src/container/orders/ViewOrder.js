@@ -203,14 +203,10 @@ const ViewOrder = () => {
                   <div className={style.tableFooter}>
                     <div>
                       <p>
-                        <b>Payment Details:</b>
-                      </p>
-                      <p style={{ marginLeft: '2em' }}>
-                        using bank account <br />
-                        ..... <br /> .....
+                        <b>Payment Details:</b> {singleOrder.data?.paymentmethod.name}
                       </p>
                       <p>
-                        <b>Delivery Option:</b> FedEx
+                        <b>Delivery Option:</b> {singleOrder.data?.shippingmethod.name}
                       </p>
                     </div>
 

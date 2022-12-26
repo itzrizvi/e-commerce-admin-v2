@@ -148,7 +148,7 @@ const AllAdmin = () => {
             key: 'email_verified',
             width: 100,
             align: 'center',
-            render: (email_verified) => email_verified.toString(),
+            render: (email_verified) => email_verified.toString().toUpperCase(),
             sorter: (a, b) => (a.email_verified === b.email_verified) ? 0 : a.email_verified ? -1 : 1,
             filters: [
                 {
