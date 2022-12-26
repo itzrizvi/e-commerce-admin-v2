@@ -5,36 +5,42 @@ import {
   Form,
   Input,
   Switch,
-  Spin,
   Select,
   Card,
   Table,
-  message,
   Steps,
   Avatar,
   Typography,
   Radio,
   Upload,
+  Modal,
+  Badge,
+  Alert,
 } from 'antd';
 import FeatherIcon from 'feather-icons-react';
 import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
 import { Cards } from '../../components/cards/frame/cards-frame';
 import { Button } from '../../components/buttons/buttons';
-import { Link, useHistory, useLocation } from 'react-router-dom';
-import queryString from 'query-string';
-import apolloClient, { apolloUploadClient, customerMutation, customerQuery, productQuery } from '../../utility/apollo';
-import Cookies from 'js-cookie';
+import { Link, useHistory } from 'react-router-dom';
+import apolloClient, { apolloUploadClient, customerQuery } from '../../utility/apollo';
 import { toast } from 'react-toastify';
 import { ellipsis, viewPermission } from '../../utility/utility';
 import { errorImageSrc, renderImage } from '../../utility/images';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
 import { productSchema } from '../../apollo/product';
+import { customerMutation } from '../../apollo/customer';
 import { useSelector } from 'react-redux';
 import { orderQuery } from '../../apollo/order';
 import { UploadOutlined } from '@ant-design/icons';
-const { TextArea } = Input;
-const { Title, Text, Paragraph } = Typography;
+import getStripe from '../../utility/getStripe';
+import { PayPalScriptProvider } from '@paypal/react-paypal-js';
+import PayPalButton from './PayPalButton';
+import { loadStripe } from '@stripe/stripe-js';
+import { Elements } from '@stripe/react-stripe-js';
+import StripeForm from './StripeForm';
+const stripePromise = loadStripe('pk_test_6pRNASCoBOKtIshFeQd4XMUh');
+const { Text, Paragraph } = Typography;
 const prod_initial = {
   id: '',
   prod_name: '',
@@ -47,6 +53,7 @@ const AddOrder = () => {
   const [isLoading, setIsLoading] = useState(false);
   const token = useSelector(state => state.auth.token);
   const [form] = Form.useForm();
+  const [addressForm] = Form.useForm();
   const [customerData, setCustomerData] = useState([]);
   // ===================== new =====================
   const [selectedCustomer, setSelectedCustomer] = useState({});
@@ -60,11 +67,20 @@ const AddOrder = () => {
   const [discount, setDiscount] = useState('00.0');
   const [shippingMethod, setShippingMethod] = useState([]);
   const [paymentMethod, setPaymentMethod] = useState([]);
-  const [orderStatusOptions, setOrderStatusOptions] = useState([]);
   const [selctedCouponCode, setSelectedCouponCode] = useState(null);
   const [shippingCost, setShippingCost] = useState(0);
   const [textExempt, setTextExempt] = useState(false);
   const [image, setImage] = useState(null);
+  const [addressModalOpen, setAddressModalOpen] = useState(false);
+  const [isAddressEdit, setIsAddressEdit] = useState(false);
+  const [addressType, setAddressType] = useState(null);
+  const [listAddressModalOpen, setListAddressModalOpen] = useState(false);
+  const [selectedBillingAddress, setSelectedBillingAddress] = useState(null);
+  const [selectedShippingAddress, setSelectedShippingAddress] = useState(null);
+  const [editSelectedAddress, setEditSelectedAddress] = useState(null);
+  const [changeAddress, setChangeAddress] = useState(false);
+  const [tempSelectedAddress, setTempSelectedAddress] = useState(null);
+  const [selectedPaymentMethodSlug, setSelectedPaymentMethodSlug] = useState(null);
 
   const handleSubmit = () => {
     const form_data = form.getFieldsValue(true);
@@ -73,7 +89,6 @@ const AddOrder = () => {
     if (!form_data.billing_address_id) return toast.error('Please Select Billing Address.');
     if (!form_data.shipping_address_id) return toast.error('Please Select Shipping Address.');
     if (!form_data.customer_id) return toast.error('Please Select Customer.');
-    if (!form_data.order_status_id) return toast.error('Please Select Order Status.');
     if (!form_data.payment_id) return toast.error('Please Select Payment Method.');
     if (!form_data.shipping_method_id) return toast.error('Please Select Shipping Method.');
     if (form_data.tax_exempt && !image) return toast.error('Please Upload Text Exempt File.');
@@ -85,6 +100,7 @@ const AddOrder = () => {
           data: {
             ...form_data,
             coupon_id: selctedCouponCode,
+            payment_id: paymentMethod.filter(item => item.slug === form_data.payment_id)[0]?.id,
             taxexempt_file: image,
             orderProducts,
           },
@@ -240,14 +256,14 @@ const AddOrder = () => {
         <Button
           size="small"
           title="Remove"
-          type="primary"
+          type="danger"
           onClick={() => {
             setSelectedProduct(prevState => {
               return prevState.filter(value => value?.id !== val);
             });
           }}
         >
-          <FeatherIcon icon="minus" />
+          <FeatherIcon icon="trash-2" />
         </Button>
       ),
     },
@@ -305,7 +321,6 @@ const AddOrder = () => {
           value: item.id,
           label: item.name,
         }));
-        setOrderStatusOptions(order_status_list);
       });
   }, []);
 
@@ -332,6 +347,10 @@ const AddOrder = () => {
       percent: 80,
     },
     {
+      title: 'Payment Method',
+      percent: 90,
+    },
+    {
       title: 'Payment',
       percent: 100,
     },
@@ -355,7 +374,6 @@ const AddOrder = () => {
     if (voucher.length === 0) {
       setSelectedCouponCode('');
       setDiscount(0);
-      toast.warn('Voucher Removed!');
     } else {
       apolloClient
         .query({
@@ -376,7 +394,6 @@ const AddOrder = () => {
               setDiscount(data.data.coupon_amount);
             }
             setSelectedCouponCode(data?.data?.id);
-            toast.success(data.message);
           } else {
             toast.error(data.message);
           }
@@ -388,6 +405,170 @@ const AddOrder = () => {
     setImage(file);
     return false;
   };
+
+  // Add Edit Address Modal Open
+  const addOrEditAddressHandler = (id, type) => {
+    setAddressType(type);
+    if (id) {
+      setIsAddressEdit(true);
+      if (type === 'billing') {
+        setEditSelectedAddress(billingAddresses.filter(item => item.id === id)[0]);
+      } else {
+        setEditSelectedAddress(shippingAddresses.filter(item => item.id === id)[0]);
+      }
+    } else {
+      setEditSelectedAddress(null);
+      addressForm.resetFields();
+      setIsAddressEdit(false);
+    }
+    setAddressModalOpen(true);
+  };
+
+  // First Time Change address open Modal
+  const changeAddressHandler = type => {
+    setListAddressModalOpen(true);
+    setAddressType(type);
+  };
+
+  // Handle Address Submit
+  const handleAddressSubmit = type => {
+    const values = addressForm.getFieldValue();
+    setChangeAddress(false);
+    let newBillingAddress = [];
+    let newShippingAddress = [];
+    if (editSelectedAddress) {
+      if (type === 'billing') {
+        newBillingAddress = billingAddresses.map(item => {
+          let { id, createdAt, updatedAt, __typename, type, isDefault, ...rest } = item;
+          if (values.isDefault) isDefault = false;
+          if (editSelectedAddress?.id === id) {
+            rest = values;
+          }
+          return {
+            parent_id: selectedCustomer?.id,
+            isDefault: isDefault,
+            ...rest,
+          };
+        });
+      } else {
+        newShippingAddress = shippingAddresses.map(item => {
+          let { id, createdAt, updatedAt, __typename, type, isDefault, ...rest } = item;
+          if (values.isDefault) isDefault = false;
+          if (editSelectedAddress?.id === id) {
+            rest = values;
+          }
+          return {
+            parent_id: selectedCustomer?.id,
+            isDefault: isDefault,
+            ...rest,
+          };
+        });
+      }
+
+      apolloClient
+        .mutate({
+          mutation: customerMutation.UPDATE_CUSTOMER_ADDRESSES,
+          variables: {
+            data: {
+              ref_id: selectedCustomer?.id,
+              type,
+              addresses: [...(type === 'billing' ? newBillingAddress : newShippingAddress)],
+            },
+          },
+          context: {
+            headers: {
+              TENANTID: process.env.REACT_APP_TENANTID,
+              Authorization: token,
+            },
+          },
+        })
+        .then(res => {
+          const data = res?.data?.updateCustomerAddress;
+          if (!data?.status) return;
+          setChangeAddress(true);
+          setAddressModalOpen(false);
+        });
+    } else {
+      if (type === 'billing') newBillingAddress.push({ parent_id: selectedCustomer?.id, ...values });
+      else newShippingAddress.push({ parent_id: selectedCustomer?.id, ...values });
+      apolloClient
+        .mutate({
+          mutation:
+            type === 'billing'
+              ? customerMutation.ADD_CUSTOMER_BILLING_ADDRESS
+              : customerMutation.ADD_CUSTOMER_SHIPPING_ADDRESS,
+          variables: {
+            data: {
+              addresses: [...(type === 'billing' ? newBillingAddress : newShippingAddress)],
+            },
+          },
+          context: {
+            headers: {
+              TENANTID: process.env.REACT_APP_TENANTID,
+              Authorization: token,
+            },
+          },
+        })
+        .then(res => {
+          const data =
+            type === 'billing' ? res?.data?.addCustomerBillingAddress : res?.data?.addCustomerShippingAddress;
+          if (!data?.status) return;
+          setChangeAddress(true);
+          setAddressModalOpen(false);
+        });
+    }
+  };
+
+  // Trigger Function when select an address finally
+  const selectAddressHandler = type => {
+    if (type === 'billing') {
+      setSelectedBillingAddress(tempSelectedAddress);
+      form.setFieldValue({
+        billing_address_id: tempSelectedAddress?.id,
+      });
+    } else {
+      setSelectedShippingAddress(tempSelectedAddress);
+      form.setFieldValue({
+        shipping_address_id: tempSelectedAddress?.id,
+      });
+    }
+    setListAddressModalOpen(false);
+  };
+
+  // Refetch query after adding or updating address
+  useEffect(() => {
+    if (!selectedCustomer?.id) return;
+    setTimeout(() => {
+      apolloClient
+        .query({
+          query: customerQuery.GET_SINGLE_CUSTOMER,
+          variables: { customer_id: selectedCustomer?.id },
+          context: {
+            headers: {
+              TENANTID: process.env.REACT_APP_TENANTID,
+              Authorization: token,
+            },
+          },
+          fetchPolicy: 'network-only',
+        })
+        .then(res => {
+          const data = res?.data?.getSingleCustomer;
+          if (!data?.status) return;
+          const shipping = [];
+          const billing = [];
+          setSelectedBillingAddress(null);
+          setSelectedShippingAddress(null);
+          data?.data?.addresses?.forEach(address => {
+            if (address.type === 'billing') billing.push(address);
+            if (address.type === 'shipping') shipping.push(address);
+            if (address.type === 'billing' && address.isDefault) setSelectedBillingAddress(address);
+            if (address.type === 'shipping' && address.isDefault) setSelectedShippingAddress(address);
+          });
+          setBillingAddresses(billing);
+          setShippingAddresses(shipping);
+        });
+    }, 2000);
+  }, [changeAddress]);
 
   return (
     <>
@@ -436,9 +617,13 @@ const AddOrder = () => {
                                   setSelectedCustomer(data.item);
                                   const billing = [];
                                   const shipping = [];
+                                  setSelectedBillingAddress(null);
+                                  setSelectedShippingAddress(null);
                                   data?.item?.addresses?.forEach(addr => {
-                                    if (addr.type === 'billing' && addr.isDefault) billing.push(addr);
-                                    if (addr.type === 'shipping' && addr.isDefault) shipping.push(addr);
+                                    if (addr.type === 'billing') billing.push(addr);
+                                    if (addr.type === 'shipping') shipping.push(addr);
+                                    if (addr.type === 'billing' && addr.isDefault) setSelectedBillingAddress(addr);
+                                    if (addr.type === 'shipping' && addr.isDefault) setSelectedShippingAddress(addr);
                                   });
                                   setBillingAddresses(billing);
                                   setShippingAddresses(shipping);
@@ -603,15 +788,37 @@ const AddOrder = () => {
                       {current === 2 && (
                         <Row gutter={25}>
                           <Col lg={12} sm={24}>
+                            <Button
+                              size="small"
+                              style={{ float: 'right', zIndex: 1000, marginTop: -25, marginBottom: 10 }}
+                              title={`Add shipping address`}
+                              htmlType="button"
+                              type="primary"
+                              onClick={() => addOrEditAddressHandler(null, 'shipping')}
+                            >
+                              <FeatherIcon icon="plus-circle" />
+                            </Button>
                             <Form.Item
                               rules={[{ required: true, message: 'Please Select Shipping Address' }]}
                               name="shipping_address_id"
                               label="Shipping Addresses"
+                              initialValue={selectedShippingAddress?.id}
+                              value={selectedShippingAddress?.id}
                             >
                               <Radio.Group style={{ width: '100%', padding: 10 }}>
                                 <Row gutter={25}>
-                                  {shippingAddresses.map(item => (
-                                    <Col key={item.id} xs={24}>
+                                  {selectedShippingAddress && (
+                                    <Col key={selectedShippingAddress?.id} xs={24}>
+                                      <Button
+                                        size="small"
+                                        style={{ position: 'absolute', right: 14, zIndex: 1000 }}
+                                        title="Change Shipping Address"
+                                        htmlType="button"
+                                        type="info"
+                                        onClick={() => changeAddressHandler('shipping')}
+                                      >
+                                        <FeatherIcon icon="repeat" />
+                                      </Button>
                                       <Radio
                                         style={{
                                           width: '100%',
@@ -621,53 +828,76 @@ const AddOrder = () => {
                                           padding: 10,
                                           borderRadius: 5,
                                         }}
-                                        value={item.id}
+                                        value={selectedShippingAddress?.id}
                                       >
                                         <p>
                                           <b>Email: </b>
-                                          {item.email}
+                                          {selectedShippingAddress?.email}
                                         </p>
                                         <p>
                                           <b>Phone: </b>
-                                          {item.phone}
+                                          {selectedShippingAddress?.phone}
                                         </p>
                                         <p>
                                           <b>Address 1: </b>
-                                          {item.address1 && ellipsis(item.address1, 35)}
+                                          {selectedShippingAddress?.address1 &&
+                                            ellipsis(selectedShippingAddress?.address1, 35)}
                                         </p>
                                         <p>
                                           <b>Address 2: </b>
-                                          {item.address2 && ellipsis(item.address2, 35)}
+                                          {selectedShippingAddress?.address2 &&
+                                            ellipsis(selectedShippingAddress?.address2, 35)}
                                         </p>
                                         <p>
                                           <b>City: </b>
-                                          {item.city}
+                                          {selectedShippingAddress?.city}
                                         </p>
                                         <p>
                                           <b>State: </b>
-                                          {item.state}
+                                          {selectedShippingAddress?.state}
                                         </p>
                                         <p>
                                           <b>Zip Code: </b>
-                                          {item.zip_code}
+                                          {selectedShippingAddress?.zip_code}
                                         </p>
                                       </Radio>
                                     </Col>
-                                  ))}
+                                  )}
                                 </Row>
                               </Radio.Group>
                             </Form.Item>
                           </Col>
                           <Col lg={12} sm={24}>
+                            <Button
+                              size="small"
+                              style={{ float: 'right', zIndex: 1000, marginTop: -25, marginBottom: 10 }}
+                              title={`Add Billing address`}
+                              htmlType="button"
+                              type="primary"
+                              onClick={() => addOrEditAddressHandler(null, 'billing')}
+                            >
+                              <FeatherIcon icon="plus-circle" />
+                            </Button>
                             <Form.Item
                               rules={[{ required: true, message: 'Please Select Billing Address' }]}
                               name="billing_address_id"
                               label="Billing Addresses"
+                              initialValue={selectedBillingAddress?.id}
                             >
                               <Radio.Group style={{ width: '100%', padding: 10 }}>
                                 <Row gutter={25}>
-                                  {billingAddresses.map(item => (
-                                    <Col key={item.id} xs={24}>
+                                  {selectedBillingAddress && (
+                                    <Col key={selectedBillingAddress?.id} xs={24}>
+                                      <Button
+                                        size="small"
+                                        style={{ position: 'absolute', right: 14, zIndex: 1000 }}
+                                        title="Change Billing Address"
+                                        htmlType="button"
+                                        type="info"
+                                        onClick={() => changeAddressHandler('billing')}
+                                      >
+                                        <FeatherIcon icon="repeat" />
+                                      </Button>
                                       <Radio
                                         style={{
                                           width: '100%',
@@ -677,39 +907,41 @@ const AddOrder = () => {
                                           padding: 10,
                                           borderRadius: 5,
                                         }}
-                                        value={item.id}
+                                        value={selectedBillingAddress?.id}
                                       >
                                         <p>
                                           <b>Email: </b>
-                                          {item.email}
+                                          {selectedBillingAddress?.email}
                                         </p>
                                         <p>
                                           <b>Phone: </b>
-                                          {item.phone}
+                                          {selectedBillingAddress?.phone}
                                         </p>
                                         <p>
                                           <b>Address 1: </b>
-                                          {item.address1 && ellipsis(item.address1, 35)}
+                                          {selectedBillingAddress?.address1 &&
+                                            ellipsis(selectedBillingAddress?.address1, 35)}
                                         </p>
                                         <p>
                                           <b>Address 2: </b>
-                                          {item.address2 && ellipsis(item.address2, 35)}
+                                          {selectedBillingAddress?.address2 &&
+                                            ellipsis(selectedBillingAddress?.address2, 35)}
                                         </p>
                                         <p>
                                           <b>City: </b>
-                                          {item.city}
+                                          {selectedBillingAddress?.city}
                                         </p>
                                         <p>
                                           <b>State: </b>
-                                          {item.state}
+                                          {selectedBillingAddress?.state}
                                         </p>
                                         <p>
                                           <b>Zip Code: </b>
-                                          {item.zip_code}
+                                          {selectedBillingAddress?.zip_code}
                                         </p>
                                       </Radio>
                                     </Col>
-                                  ))}
+                                  )}
                                 </Row>
                               </Radio.Group>
                             </Form.Item>
@@ -724,9 +956,12 @@ const AddOrder = () => {
                               label="Payment Method"
                               rules={[{ required: true, message: 'Select Payment Method' }]}
                             >
-                              <Radio.Group style={{ width: '100%', padding: 10 }}>
-                                <Row gutter={25}>
-                                  {paymentMethod.map(item => (
+                              <Radio.Group
+                                style={{ width: '100%', padding: 10 }}
+                                onChange={e => setSelectedPaymentMethodSlug(e.target.value)}
+                              >
+                                {paymentMethod.map(item => (
+                                  <Row gutter={25}>
                                     <Col key={item.id} xs={8}>
                                       <Radio
                                         style={{
@@ -737,14 +972,14 @@ const AddOrder = () => {
                                           padding: 10,
                                           borderRadius: 5,
                                         }}
-                                        value={item.id}
+                                        value={item.slug}
                                       >
                                         <Typography.Title level={4}>{item.name}</Typography.Title>
                                         <Typography.Text>{item?.description}</Typography.Text>
                                       </Radio>
                                     </Col>
-                                  ))}
-                                </Row>
+                                  </Row>
+                                ))}
                               </Radio.Group>
                             </Form.Item>
                           </Col>
@@ -759,8 +994,8 @@ const AddOrder = () => {
                               rules={[{ required: true, message: 'Select Shipping Method' }]}
                             >
                               <Radio.Group style={{ width: '100%', padding: 10 }}>
-                                <Row gutter={25}>
-                                  {shippingMethod.map(item => (
+                                {shippingMethod.map(item => (
+                                  <Row gutter={25}>
                                     <Col key={item.id} xs={8}>
                                       <Radio
                                         style={{
@@ -777,8 +1012,8 @@ const AddOrder = () => {
                                         <Typography.Text>{item?.description}</Typography.Text>
                                       </Radio>
                                     </Col>
-                                  ))}
-                                </Row>
+                                  </Row>
+                                ))}
                               </Radio.Group>
                             </Form.Item>
                           </Col>
@@ -796,23 +1031,16 @@ const AddOrder = () => {
                                 defaultValue={selctedCouponCode}
                               />
                             </Form.Item>
-                            <Form.Item
-                              name="order_status_id"
-                              label="Order Status"
-                              rules={[{ required: true, message: 'Select Order Status' }]}
-                            >
-                              <Select
-                                placeholder="Select Order Status"
-                                options={orderStatusOptions}
-                                optionFilterProp="label"
-                              />
-                            </Form.Item>
                             <Form.Item name="tax_exempt" label="Tax Exempt">
                               <Switch size="small" defaultChecked={textExempt} onChange={e => setTextExempt(e)} />
                             </Form.Item>
                             {textExempt && (
                               <Form.Item label="Tax Exempt File">
-                                <Upload defaultFileList={image && [image]} beforeUpload={beforeImageUpload} name="tax_exempt_file">
+                                <Upload
+                                  defaultFileList={image && [image]}
+                                  beforeUpload={beforeImageUpload}
+                                  name="tax_exempt_file"
+                                >
                                   <Button icon={<UploadOutlined />}>Click to Upload</Button>
                                 </Upload>
                               </Form.Item>
@@ -856,6 +1084,28 @@ const AddOrder = () => {
                                   discount}
                               </Paragraph>
                             </Card>
+                          </Col>
+                        </Row>
+                      )}
+                      {current === 6 && (
+                        <Row gutter={25} align="middle" justify="center">
+                          <Col lg={12}>
+                            {selectedPaymentMethodSlug ? (
+                              <Card title={selectedPaymentMethodSlug?.toUpperCase()} bordered={true} size="small">
+                                {selectedPaymentMethodSlug === 'paypal' && (
+                                  <PayPalScriptProvider options={{ 'client-id': 'test' }}>
+                                    <PayPalButton amount={10} />
+                                  </PayPalScriptProvider>
+                                )}
+                                {selectedPaymentMethodSlug === 'stripe' && (
+                                  <Elements stripe={stripePromise}>
+                                    <StripeForm />
+                                  </Elements>
+                                )}
+                              </Card>
+                            ) : (
+                              <Alert message="Please Select Payment Method" type="error" showIcon />
+                            )}
                           </Col>
                         </Row>
                       )}
@@ -918,6 +1168,257 @@ const AddOrder = () => {
             </Cards>
           </Col>
         </Row>
+        {/* Modal For Add / Update Address */}
+        <Modal
+          title={isAddressEdit ? `Update ${addressType} address` : `Add ${addressType} address`}
+          style={{ top: 20 }}
+          width={600}
+          open={addressModalOpen}
+          destroyOnClose={true}
+          okText={isAddressEdit ? 'Update' : 'Save'}
+          onOk={() => handleAddressSubmit(addressType)}
+          onCancel={() => setAddressModalOpen(false)}
+        >
+          <Form
+            preserve={false}
+            style={{ width: '100%' }}
+            form={addressForm}
+            name="addressForm"
+            layout="vertical"
+            size="small"
+          >
+            <Row gutter={25}>
+              <Col md={12}>
+                <Form.Item
+                  rules={[{ required: true, message: 'Please Enter Address One' }]}
+                  name="address1"
+                  label="Address One"
+                  style={{ marginBottom: 5 }}
+                  initialValue={editSelectedAddress?.address1 ?? ''}
+                >
+                  <Input placeholder="Address One" />
+                </Form.Item>
+                <Form.Item
+                  rules={[{ required: true, message: 'Please Enter Phone' }]}
+                  name="phone"
+                  label="Phone"
+                  style={{ marginBottom: 5 }}
+                  initialValue={editSelectedAddress?.phone}
+                >
+                  <Input placeholder="Phone" />
+                </Form.Item>
+                <Form.Item
+                  rules={[{ required: true, message: 'Please Enter Email' }]}
+                  name="email"
+                  label="Email"
+                  style={{ marginBottom: 5 }}
+                  initialValue={editSelectedAddress?.email}
+                >
+                  <Input placeholder="Email" />
+                </Form.Item>
+                <Form.Item name="fax" label="Fax" style={{ marginBottom: 5 }} initialValue={editSelectedAddress?.fax}>
+                  <Input placeholder="Fax" />
+                </Form.Item>
+                <Form.Item
+                  name="isDefault"
+                  label="Default"
+                  style={{ marginBottom: 0 }}
+                  initialValue={editSelectedAddress?.isDefault}
+                >
+                  <Switch defaultChecked={editSelectedAddress?.isDefault} />
+                </Form.Item>
+              </Col>
+              <Col md={12}>
+                <Form.Item
+                  name="address2"
+                  label="Address Two"
+                  style={{ marginBottom: 5 }}
+                  initialValue={editSelectedAddress?.address2}
+                >
+                  <Input placeholder="Address Two" />
+                </Form.Item>
+                <Form.Item name="country" initialValue="United State" label="Country" style={{ marginBottom: 5 }}>
+                  <Select>
+                    <Select.Option value="United State">United State</Select.Option>
+                  </Select>
+                </Form.Item>
+                <Form.Item
+                  rules={[{ required: true, message: 'Please Enter City' }]}
+                  name="city"
+                  label="City"
+                  style={{ marginBottom: 5 }}
+                  initialValue={editSelectedAddress?.city}
+                >
+                  <Input placeholder="City" />
+                </Form.Item>
+                <Form.Item
+                  name="state"
+                  rules={[{ required: true, message: 'Please Enter State' }]}
+                  label="State"
+                  style={{ marginBottom: 5 }}
+                  initialValue={editSelectedAddress?.state}
+                >
+                  <Input placeholder="State" />
+                </Form.Item>
+                <Form.Item
+                  name="zip_code"
+                  rules={[{ required: true, message: 'Please Enter Zip Code' }]}
+                  label="Zip Code"
+                  style={{ marginBottom: 5 }}
+                  initialValue={editSelectedAddress?.zip_code}
+                >
+                  <Input placeholder="Zip Code" />
+                </Form.Item>
+              </Col>
+            </Row>
+          </Form>
+        </Modal>
+        {/* Modal For Add / Update Address */}
+        {/* Modal For Add / Update Address */}
+        <Modal
+          title={`List of ${addressType} addresses`}
+          style={{ top: 20 }}
+          width={1000}
+          open={listAddressModalOpen}
+          okText="Select"
+          onOk={() => selectAddressHandler(addressType)}
+          onCancel={() => setListAddressModalOpen(false)}
+        >
+          <Radio.Group style={{ width: '100%', padding: 10 }}>
+            <Row gutter={25}>
+              <Col span={24}>
+                <Button
+                  size="small"
+                  style={{ float: 'right', zIndex: 1000, marginTop: -25, marginBottom: 10 }}
+                  title={`Add ${addressType} address`}
+                  htmlType="button"
+                  type="primary"
+                  onClick={() => addOrEditAddressHandler(null, addressType)}
+                >
+                  <FeatherIcon icon="plus-circle" />
+                </Button>
+              </Col>
+              {addressType === 'billing'
+                ? billingAddresses.map(item => (
+                    <Col key={item.id} xs={24} md={12}>
+                      <Button
+                        size="small"
+                        style={{ position: 'absolute', right: 14, zIndex: 1000 }}
+                        title="Edit Billing Address"
+                        htmlType="button"
+                        type="info"
+                        onClick={() => addOrEditAddressHandler(item.id, 'billing')}
+                      >
+                        <FeatherIcon icon="edit" />
+                      </Button>
+                      {billingAddresses.filter(item => item.isDefault)[0]?.id === item.id && (
+                        <Badge.Ribbon text="Default" color="pink" style={{ top: 40, zIndex: 1000 }} />
+                      )}
+                      <Radio
+                        style={{
+                          width: '100%',
+                          border: '1px solid #f0f0f0',
+                          fontSize: 12,
+                          marginBottom: 10,
+                          padding: 10,
+                          borderRadius: 5,
+                        }}
+                        value={item.id}
+                        onChange={() => setTempSelectedAddress(item)}
+                      >
+                        <p>
+                          <b>Email: </b>
+                          {item.email}
+                        </p>
+                        <p>
+                          <b>Phone: </b>
+                          {item.phone}
+                        </p>
+                        <p>
+                          <b>Address 1: </b>
+                          {item.address1 && ellipsis(item.address1, 35)}
+                        </p>
+                        <p>
+                          <b>Address 2: </b>
+                          {item.address2 && ellipsis(item.address2, 35)}
+                        </p>
+                        <p>
+                          <b>City: </b>
+                          {item.city}
+                        </p>
+                        <p>
+                          <b>State: </b>
+                          {item.state}
+                        </p>
+                        <p>
+                          <b>Zip Code: </b>
+                          {item.zip_code}
+                        </p>
+                      </Radio>
+                    </Col>
+                  ))
+                : shippingAddresses.map(item => (
+                    <Col key={item.id} xs={24} md={12}>
+                      <Button
+                        size="small"
+                        style={{ position: 'absolute', right: 14, zIndex: 1000 }}
+                        title="Edit Shipping Address"
+                        htmlType="button"
+                        type="info"
+                        onClick={() => addOrEditAddressHandler(item.id, 'shipping')}
+                      >
+                        <FeatherIcon icon="edit" />
+                      </Button>
+                      {shippingAddresses.filter(item => item.isDefault)[0]?.id === item.id && (
+                        <Badge.Ribbon text="Default" color="pink" style={{ top: 40, zIndex: 1000 }} />
+                      )}
+                      <Radio
+                        style={{
+                          width: '100%',
+                          border: '1px solid #f0f0f0',
+                          fontSize: 12,
+                          marginBottom: 10,
+                          padding: 10,
+                          borderRadius: 5,
+                        }}
+                        value={item.id}
+                        onChange={() => setTempSelectedAddress(item)}
+                      >
+                        <p>
+                          <b>Email: </b>
+                          {item.email}
+                        </p>
+                        <p>
+                          <b>Phone: </b>
+                          {item.phone}
+                        </p>
+                        <p>
+                          <b>Address 1: </b>
+                          {item.address1 && ellipsis(item.address1, 35)}
+                        </p>
+                        <p>
+                          <b>Address 2: </b>
+                          {item.address2 && ellipsis(item.address2, 35)}
+                        </p>
+                        <p>
+                          <b>City: </b>
+                          {item.city}
+                        </p>
+                        <p>
+                          <b>State: </b>
+                          {item.state}
+                        </p>
+                        <p>
+                          <b>Zip Code: </b>
+                          {item.zip_code}
+                        </p>
+                      </Radio>
+                    </Col>
+                  ))}
+            </Row>
+          </Radio.Group>
+        </Modal>
+        {/* Modal For Add / Update Address */}
       </Main>
     </>
   );

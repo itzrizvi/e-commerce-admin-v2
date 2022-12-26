@@ -1,12 +1,30 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Row, Col, Form, Input, Select, Table, Steps, Avatar, Typography, Radio, Spin, Card } from 'antd';
+import {
+  Row,
+  Col,
+  Form,
+  Input,
+  Select,
+  Table,
+  Switch,
+  Avatar,
+  Typography,
+  Radio,
+  Spin,
+  Card,
+  Tabs,
+  Modal,
+  Badge,
+  Alert,
+} from 'antd';
 import FeatherIcon from 'feather-icons-react';
 import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
 import { Cards } from '../../components/cards/frame/cards-frame';
 import { Button } from '../../components/buttons/buttons';
 import { Link, useHistory, useParams } from 'react-router-dom';
-import apolloClient, { apolloUploadClient } from '../../utility/apollo';
+import apolloClient, { apolloUploadClient, customerQuery } from '../../utility/apollo';
+import { customerMutation } from '../../apollo/customer';
 import { toast } from 'react-toastify';
 import { ellipsis, viewPermission } from '../../utility/utility';
 import { errorImageSrc, renderImage } from '../../utility/images';
@@ -27,6 +45,7 @@ const UpdateOrder = () => {
   const [isLoading, setIsLoading] = useState(false);
   const token = useSelector(state => state.auth.token);
   const [form] = Form.useForm();
+  const [addressForm] = Form.useForm();
   const params = useParams();
   const [customerData, setCustomerData] = useState([]);
   // ===================== new =====================
@@ -40,11 +59,19 @@ const UpdateOrder = () => {
   const [lastInitProductId, setLastInitProductId] = useState(null);
   const [discount, setDiscount] = useState('00.0');
   const [shippingMethod, setShippingMethod] = useState([]);
-  const [paymentMethod, setPaymentMethod] = useState([]);
   const [orderStatusOptions, setOrderStatusOptions] = useState([]);
   const [selectedCouponCode, setSelectedCouponCode] = useState(null);
   const [shippingCost, setShippingCost] = useState(0);
   const [singleOrder, setSingleOrder] = useState({ data: {}, isLoading: true });
+  const [addressModalOpen, setAddressModalOpen] = useState(false);
+  const [isAddressEdit, setIsAddressEdit] = useState(false);
+  const [addressType, setAddressType] = useState(null);
+  const [listAddressModalOpen, setListAddressModalOpen] = useState(false);
+  const [selectedBillingAddress, setSelectedBillingAddress] = useState(null);
+  const [selectedShippingAddress, setSelectedShippingAddress] = useState(null);
+  const [editSelectedAddress, setEditSelectedAddress] = useState(null);
+  const [changeAddress, setChangeAddress] = useState(false);
+  const [tempSelectedAddress, setTempSelectedAddress] = useState(null);
 
   const handleSubmit = () => {
     setIsLoading(true);
@@ -242,22 +269,6 @@ const UpdateOrder = () => {
         setShippingMethod(data?.data);
       });
 
-    // Load Payment Mathod
-    apolloClient
-      .query({
-        query: productSchema.GET_PAYMENT_METHOD_LIST,
-        context: {
-          headers: {
-            TENANTID: process.env.REACT_APP_TENANTID,
-          },
-        },
-      })
-      .then(res => {
-        const data = res?.data?.getPaymentMethodListPublic;
-        if (!data.status) return;
-        setPaymentMethod(data?.data);
-      });
-
     // get Single Order
     apolloClient
       .query({
@@ -288,9 +299,14 @@ const UpdateOrder = () => {
           quantity: item?.quantity,
         }));
         setSelectedProduct(product_item);
+        setSelectedBillingAddress(null);
+        setSelectedShippingAddress(null);
+        setSelectedCustomer(data?.data?.customer);
         data?.data?.customer?.addresses?.forEach(addr => {
           if (addr.type === 'billing') billing.push(addr);
           if (addr.type === 'shipping') shipping.push(addr);
+          if (addr.type === 'billing' && addr.isDefault) setSelectedBillingAddress(addr);
+          if (addr.type === 'shipping' && addr.isDefault) setSelectedShippingAddress(addr);
         });
         setBillingAddresses(billing);
         setShippingAddresses(shipping);
@@ -328,48 +344,6 @@ const UpdateOrder = () => {
       });
   }, []);
 
-  /* -------------------------- Step From Data Start -------------------------- */
-  const steps = [
-    {
-      title: 'Customer',
-      percent: 15,
-    },
-    {
-      title: 'Products',
-      percent: 35,
-    },
-    {
-      title: 'Addresses',
-      percent: 50,
-    },
-    {
-      title: 'Shipping',
-      percent: 65,
-    },
-    {
-      title: 'Voucher & Status',
-      percent: 80,
-    },
-    {
-      title: 'Payment',
-      percent: 100,
-    },
-  ];
-
-  const [current, setCurrent] = useState(0);
-  const next = () => {
-    setCurrent(current + 1);
-  };
-  const prev = () => {
-    setCurrent(current - 1);
-  };
-  const items = steps.map(item => ({
-    key: item.title,
-    title: item.title,
-    percent: item.percent,
-  }));
-  /* ---------------------------- tep Form Data end --------------------------- */
-
   const validateVoucher = voucher => {
     apolloClient
       .query({
@@ -397,6 +371,168 @@ const UpdateOrder = () => {
       });
   };
 
+  // Add Edit Address Modal Open
+  const addOrEditAddressHandler = (id, type) => {
+    setAddressType(type);
+    if (id) {
+      setIsAddressEdit(true);
+      if (type === 'billing') {
+        setEditSelectedAddress(billingAddresses.filter(item => item.id === id)[0]);
+      } else {
+        setEditSelectedAddress(shippingAddresses.filter(item => item.id === id)[0]);
+      }
+    } else {
+      setEditSelectedAddress(null);
+      addressForm.resetFields();
+      setIsAddressEdit(false);
+    }
+    setAddressModalOpen(true);
+  };
+
+  // First Time Change address open Modal
+  const changeAddressHandler = type => {
+    setListAddressModalOpen(true);
+    setAddressType(type);
+  };
+
+  // Handle Address Submit
+  const handleAddressSubmit = type => {
+    const values = addressForm.getFieldValue();
+    setChangeAddress(false);
+    let newBillingAddress = [];
+    let newShippingAddress = [];
+    if (editSelectedAddress) {
+      if (type === 'billing') {
+        newBillingAddress = billingAddresses.map(item => {
+          let { id, createdAt, updatedAt, __typename, type, isDefault, ...rest } = item;
+          if (values.isDefault) isDefault = false;
+          if (editSelectedAddress?.id === id) {
+            rest = values;
+          }
+          return {
+            parent_id: selectedCustomer?.id,
+            isDefault: isDefault,
+            id,
+            isNew: false,
+            ...rest,
+          };
+        });
+      } else {
+        newShippingAddress = shippingAddresses.map(item => {
+          let { id, createdAt, updatedAt, __typename, type, isDefault, ...rest } = item;
+          if (values.isDefault) isDefault = false;
+          if (editSelectedAddress?.id === id) {
+            rest = values;
+          }
+          return {
+            parent_id: selectedCustomer?.id,
+            id,
+            isDefault: isDefault,
+            isNew: false,
+            ...rest,
+          };
+        });
+      }
+
+      apolloClient
+        .mutate({
+          mutation: customerMutation.UPDATE_CUSTOMER_ADDRESSES,
+          variables: {
+            data: {
+              ref_id: selectedCustomer?.id,
+              type,
+              addresses: [...(type === 'billing' ? newBillingAddress : newShippingAddress)],
+            },
+          },
+          context: {
+            headers: {
+              TENANTID: process.env.REACT_APP_TENANTID,
+              Authorization: token,
+            },
+          },
+        })
+        .then(res => {
+          const data = res?.data?.updateCustomerAddress;
+          if (!data?.status) return;
+          setChangeAddress(true);
+          setAddressModalOpen(false);
+        });
+    } else {
+      if (type === 'billing') newBillingAddress.push({ parent_id: selectedCustomer?.id, ...values });
+      else newShippingAddress.push({ parent_id: selectedCustomer?.id, ...values });
+      apolloClient
+        .mutate({
+          mutation:
+            type === 'billing'
+              ? customerMutation.ADD_CUSTOMER_BILLING_ADDRESS
+              : customerMutation.ADD_CUSTOMER_SHIPPING_ADDRESS,
+          variables: {
+            data: {
+              addresses: [...(type === 'billing' ? newBillingAddress : newShippingAddress)],
+            },
+          },
+          context: {
+            headers: {
+              TENANTID: process.env.REACT_APP_TENANTID,
+              Authorization: token,
+            },
+          },
+        })
+        .then(res => {
+          const data =
+            type === 'billing' ? res?.data?.addCustomerBillingAddress : res?.data?.addCustomerShippingAddress;
+          if (!data?.status) return;
+          setChangeAddress(true);
+          setAddressModalOpen(false);
+        });
+    }
+  };
+
+  // Trigger Function when select an address finally
+  const selectAddressHandler = type => {
+    if (type === 'billing') {
+      setSelectedBillingAddress(tempSelectedAddress);
+    } else {
+      setSelectedShippingAddress(tempSelectedAddress);
+    }
+    setListAddressModalOpen(false);
+  };
+
+  // Refetch query after adding or updating address
+  useEffect(() => {
+    if (!selectedCustomer?.id) return;
+    setTimeout(() => {
+      apolloClient
+        .query({
+          query: customerQuery.GET_SINGLE_CUSTOMER,
+          variables: { customer_id: selectedCustomer?.id },
+          context: {
+            headers: {
+              TENANTID: process.env.REACT_APP_TENANTID,
+              Authorization: token,
+            },
+          },
+          fetchPolicy: 'network-only',
+        })
+        .then(res => {
+          const data = res?.data?.getSingleCustomer;
+          if (!data?.status) return;
+          const shipping = [];
+          const billing = [];
+          setSelectedBillingAddress(null);
+          setSelectedShippingAddress(null);
+          data?.data?.addresses?.forEach(address => {
+            if (address.type === 'billing') billing.push(address);
+            if (address.type === 'shipping') shipping.push(address);
+            if (address.type === 'billing' && address.isDefault) setSelectedBillingAddress(address);
+            if (address.type === 'shipping' && address.isDefault) setSelectedShippingAddress(address);
+          });
+          setBillingAddresses(billing);
+          setShippingAddresses(shipping);
+        });
+    }, 2000);
+  }, [changeAddress]);
+
   return (
     <>
       <PageHeader title={`Manage Order | Edit Order ${singleOrder?.data?.id ? `(${singleOrder?.data?.id})` : ''}`} />
@@ -419,19 +555,10 @@ const UpdateOrder = () => {
                   // labelCol={{ span: 4 }}
                   layout="vertical"
                 >
-                  <Row style={{ marginBottom: 20 }}>
-                    <Steps
-                      current={current}
-                      items={items}
-                      percent={items[current].percent}
-                      responsive={true}
-                      size="small"
-                    />
-                  </Row>
                   <Row style={{ marginTop: 40 }}>
                     <Col span={24}>
-                      <div className="steps-content">
-                        {current === 0 && (
+                      <Tabs>
+                        <Tabs.TabPane tab="Customer" key="customer">
                           <Row gutter={25}>
                             <Col md={12} sm={24}>
                               <Form.Item
@@ -544,8 +671,8 @@ const UpdateOrder = () => {
                               </Row>
                             </Col>
                           </Row>
-                        )}
-                        {current === 1 && (
+                        </Tabs.TabPane>
+                        <Tabs.TabPane tab="Products" key="products">
                           <Row gutter={25}>
                             <Col lg={18} md={16} sm={24}>
                               <span className={'psp_list'}>
@@ -623,23 +750,40 @@ const UpdateOrder = () => {
                               </Card>
                             </Col>
                           </Row>
-                        )}
-                        {current === 2 && (
+                        </Tabs.TabPane>
+                        <Tabs.TabPane tab="Addresses" key="addresses">
                           <Row gutter={25}>
                             <Col lg={12} sm={24}>
+                              <Button
+                                size="small"
+                                style={{ float: 'right', zIndex: 1000, marginTop: -10, marginBottom: 10 }}
+                                title={`Add shipping address`}
+                                htmlType="button"
+                                type="primary"
+                                onClick={() => addOrEditAddressHandler(null, 'shipping')}
+                              >
+                                <FeatherIcon icon="plus-circle" />
+                              </Button>
                               <Form.Item
                                 rules={[{ required: true, message: 'Please Select Shipping Address' }]}
                                 name="shipping_address_id"
                                 label="Shipping Addresses"
-                                initialValue={singleOrder?.data?.shippingAddress?.id}
+                                initialValue={selectedShippingAddress?.id}
                               >
-                                <Radio.Group
-                                  style={{ width: '100%', padding: 10 }}
-                                  defaultValue={singleOrder?.data?.shippingAddress?.id}
-                                >
+                                <Radio.Group style={{ width: '100%', padding: 10 }}>
                                   <Row gutter={25}>
-                                    {shippingAddresses.map(item => (
-                                      <Col key={item.id} xs={24}>
+                                    {selectedShippingAddress && (
+                                      <Col key={selectedShippingAddress?.id} xs={24}>
+                                        <Button
+                                          size="small"
+                                          style={{ position: 'absolute', right: 14, zIndex: 1000 }}
+                                          title="Change Shipping Address"
+                                          htmlType="button"
+                                          type="info"
+                                          onClick={() => changeAddressHandler('shipping')}
+                                        >
+                                          <FeatherIcon icon="repeat" />
+                                        </Button>
                                         <Radio
                                           style={{
                                             width: '100%',
@@ -649,57 +793,76 @@ const UpdateOrder = () => {
                                             padding: 10,
                                             borderRadius: 5,
                                           }}
-                                          value={item.id}
+                                          value={selectedShippingAddress?.id}
                                         >
                                           <p>
                                             <b>Email: </b>
-                                            {item.email}
+                                            {selectedShippingAddress?.email}
                                           </p>
                                           <p>
                                             <b>Phone: </b>
-                                            {item.phone}
+                                            {selectedShippingAddress?.phone}
                                           </p>
                                           <p>
                                             <b>Address 1: </b>
-                                            {item.address1 && ellipsis(item.address1, 35)}
+                                            {selectedShippingAddress?.address1 &&
+                                              ellipsis(selectedShippingAddress?.address1, 35)}
                                           </p>
                                           <p>
                                             <b>Address 2: </b>
-                                            {item.address2 && ellipsis(item.address2, 35)}
+                                            {selectedShippingAddress?.address2 &&
+                                              ellipsis(selectedShippingAddress?.address2, 35)}
                                           </p>
                                           <p>
                                             <b>City: </b>
-                                            {item.city}
+                                            {selectedShippingAddress?.city}
                                           </p>
                                           <p>
                                             <b>State: </b>
-                                            {item.state}
+                                            {selectedShippingAddress?.state}
                                           </p>
                                           <p>
                                             <b>Zip Code: </b>
-                                            {item.zip_code}
+                                            {selectedShippingAddress?.zip_code}
                                           </p>
                                         </Radio>
                                       </Col>
-                                    ))}
+                                    )}
                                   </Row>
                                 </Radio.Group>
                               </Form.Item>
                             </Col>
                             <Col lg={12} sm={24}>
+                              <Button
+                                size="small"
+                                style={{ float: 'right', zIndex: 1000, marginTop: -10, marginBottom: 10 }}
+                                title={`Add Billing address`}
+                                htmlType="button"
+                                type="primary"
+                                onClick={() => addOrEditAddressHandler(null, 'billing')}
+                              >
+                                <FeatherIcon icon="plus-circle" />
+                              </Button>
                               <Form.Item
                                 rules={[{ required: true, message: 'Please Select Billing Address' }]}
                                 name="billing_address_id"
                                 label="Billing Addresses"
-                                initialValue={singleOrder?.data?.payment?.billingAddress?.id}
+                                initialValue={selectedBillingAddress?.id}
                               >
-                                <Radio.Group
-                                  style={{ width: '100%', padding: 10 }}
-                                  defaultValue={singleOrder?.data?.payment?.billingAddress?.id}
-                                >
+                                <Radio.Group style={{ width: '100%', padding: 10 }}>
                                   <Row gutter={25}>
-                                    {billingAddresses.map(item => (
-                                      <Col key={item.id} xs={24}>
+                                    {selectedBillingAddress && (
+                                      <Col key={selectedBillingAddress?.id} xs={24}>
+                                        <Button
+                                          size="small"
+                                          style={{ position: 'absolute', right: 14, zIndex: 1000 }}
+                                          title="Change Billing Address"
+                                          htmlType="button"
+                                          type="info"
+                                          onClick={() => changeAddressHandler('billing')}
+                                        >
+                                          <FeatherIcon icon="repeat" />
+                                        </Button>
                                         <Radio
                                           style={{
                                             width: '100%',
@@ -709,84 +872,48 @@ const UpdateOrder = () => {
                                             padding: 10,
                                             borderRadius: 5,
                                           }}
-                                          value={item.id}
+                                          value={selectedBillingAddress?.id}
                                         >
                                           <p>
                                             <b>Email: </b>
-                                            {item.email}
+                                            {selectedBillingAddress?.email}
                                           </p>
                                           <p>
                                             <b>Phone: </b>
-                                            {item.phone}
+                                            {selectedBillingAddress?.phone}
                                           </p>
                                           <p>
                                             <b>Address 1: </b>
-                                            {item.address1 && ellipsis(item.address1, 35)}
+                                            {selectedBillingAddress?.address1 &&
+                                              ellipsis(selectedBillingAddress?.address1, 35)}
                                           </p>
                                           <p>
                                             <b>Address 2: </b>
-                                            {item.address2 && ellipsis(item.address2, 35)}
+                                            {selectedBillingAddress?.address2 &&
+                                              ellipsis(selectedBillingAddress?.address2, 35)}
                                           </p>
                                           <p>
                                             <b>City: </b>
-                                            {item.city}
+                                            {selectedBillingAddress?.city}
                                           </p>
                                           <p>
                                             <b>State: </b>
-                                            {item.state}
+                                            {selectedBillingAddress?.state}
                                           </p>
                                           <p>
                                             <b>Zip Code: </b>
-                                            {item.zip_code}
+                                            {selectedBillingAddress?.zip_code}
                                           </p>
                                         </Radio>
                                       </Col>
-                                    ))}
+                                    )}
                                   </Row>
                                 </Radio.Group>
                               </Form.Item>
                             </Col>
                           </Row>
-                        )}
-                        {current === 5 && (
-                          <Row gutter={25}>
-                            <Col lg={24} sm={24}>
-                              <Form.Item
-                                name="payment_id"
-                                label="Payment Method"
-                                rules={[{ required: true, message: 'Select Payment Method' }]}
-                                initialValue={singleOrder?.data?.paymentmethod?.id}
-                              >
-                                <Radio.Group
-                                  style={{ width: '100%', padding: 10 }}
-                                  defaultValue={singleOrder?.data?.paymentmethod?.id}
-                                >
-                                  <Row gutter={25}>
-                                    {paymentMethod.map(item => (
-                                      <Col key={item.id} xs={8}>
-                                        <Radio
-                                          style={{
-                                            width: '100%',
-                                            border: '1px solid #f0f0f0',
-                                            fontSize: 12,
-                                            marginBottom: 10,
-                                            padding: 10,
-                                            borderRadius: 5,
-                                          }}
-                                          value={item.id}
-                                        >
-                                          <Typography.Title level={4}>{item.name}</Typography.Title>
-                                          <Typography.Text>{item?.description}</Typography.Text>
-                                        </Radio>
-                                      </Col>
-                                    ))}
-                                  </Row>
-                                </Radio.Group>
-                              </Form.Item>
-                            </Col>
-                          </Row>
-                        )}
-                        {current === 3 && (
+                        </Tabs.TabPane>
+                        <Tabs.TabPane tab="Shipping" key="shipping">
                           <Row gutter={25}>
                             <Col sm={24}>
                               <Form.Item
@@ -799,8 +926,8 @@ const UpdateOrder = () => {
                                   style={{ width: '100%', padding: 10 }}
                                   defaultValue={singleOrder?.data?.shippingmethod?.id}
                                 >
-                                  <Row gutter={25}>
-                                    {shippingMethod.map(item => (
+                                  {shippingMethod.map(item => (
+                                    <Row gutter={25}>
                                       <Col key={item.id} xs={8}>
                                         <Radio
                                           style={{
@@ -817,14 +944,14 @@ const UpdateOrder = () => {
                                           <Typography.Text>{item?.description}</Typography.Text>
                                         </Radio>
                                       </Col>
-                                    ))}
-                                  </Row>
+                                    </Row>
+                                  ))}
                                 </Radio.Group>
                               </Form.Item>
                             </Col>
                           </Row>
-                        )}
-                        {current === 4 && (
+                        </Tabs.TabPane>
+                        <Tabs.TabPane tab="Voucher & Status" key="voucher-status">
                           <Row gutter={25}>
                             <Col lg={18} xs={24}>
                               <Form.Item label="Voucher Code">
@@ -897,59 +1024,25 @@ const UpdateOrder = () => {
                               </Card>
                             </Col>
                           </Row>
-                        )}
-                      </div>
-                    </Col>
-                  </Row>
-                  <Row style={{ marginTop: 20 }}>
-                    <Col span={24}>
-                      <div className="steps-action" style={{ float: 'right' }}>
-                        <Link to="/admin/order/list">
-                          <Button
-                            type="light"
-                            style={{
-                              margin: '0 8px',
-                            }}
-                            onClick={() => prev()}
-                          >
-                            Cancel
+                        </Tabs.TabPane>
+                      </Tabs>
+                      <div
+                        style={{
+                          display: 'flex',
+                          justifyContent: 'flex-end',
+                          marginTop: '3em',
+                        }}
+                      >
+                        <Form.Item>
+                          <Button loading={isLoading} size="default" htmlType="submit" type="primary" raised>
+                            {isLoading ? 'Processing' : 'Update Order'}
                           </Button>
-                        </Link>
-                        {current > 0 && (
-                          <Button
-                            type="light"
-                            style={{
-                              margin: '0 8px',
-                            }}
-                            onClick={() => prev()}
-                          >
-                            Previous
-                          </Button>
-                        )}
-                        {current < steps.length - 1 && (
-                          <Button
-                            style={{
-                              margin: '0 8px',
-                            }}
-                            type="primary"
-                            onClick={() => next()}
-                          >
-                            Next
-                          </Button>
-                        )}
-                        {current === steps.length - 1 && (
-                          <Button
-                            disabled={isLoading}
-                            raised
-                            htmlType="submit"
-                            style={{
-                              margin: '0 8px',
-                            }}
-                            type="primary"
-                          >
-                            {isLoading ? 'Processing...' : 'Update Order'}
-                          </Button>
-                        )}
+                          <Link to="/admin/order/list">
+                            <Button style={{ marginLeft: 10 }} type="light" size="default">
+                              Cancel
+                            </Button>
+                          </Link>
+                        </Form.Item>
                       </div>
                     </Col>
                   </Row>
@@ -958,6 +1051,257 @@ const UpdateOrder = () => {
             </Cards>
           </Col>
         </Row>
+        {/* Modal For Add / Update Address */}
+        <Modal
+          title={isAddressEdit ? `Update ${addressType} address` : `Add ${addressType} address`}
+          style={{ top: 20 }}
+          width={600}
+          open={addressModalOpen}
+          destroyOnClose={true}
+          okText={isAddressEdit ? 'Update' : 'Save'}
+          onOk={() => handleAddressSubmit(addressType)}
+          onCancel={() => setAddressModalOpen(false)}
+        >
+          <Form
+            preserve={false}
+            style={{ width: '100%' }}
+            form={addressForm}
+            name="addressForm"
+            layout="vertical"
+            size="small"
+          >
+            <Row gutter={25}>
+              <Col md={12}>
+                <Form.Item
+                  rules={[{ required: true, message: 'Please Enter Address One' }]}
+                  name="address1"
+                  label="Address One"
+                  style={{ marginBottom: 5 }}
+                  initialValue={editSelectedAddress?.address1 ?? ''}
+                >
+                  <Input placeholder="Address One" />
+                </Form.Item>
+                <Form.Item
+                  rules={[{ required: true, message: 'Please Enter Phone' }]}
+                  name="phone"
+                  label="Phone"
+                  style={{ marginBottom: 5 }}
+                  initialValue={editSelectedAddress?.phone}
+                >
+                  <Input placeholder="Phone" />
+                </Form.Item>
+                <Form.Item
+                  rules={[{ required: true, message: 'Please Enter Email' }]}
+                  name="email"
+                  label="Email"
+                  style={{ marginBottom: 5 }}
+                  initialValue={editSelectedAddress?.email}
+                >
+                  <Input placeholder="Email" />
+                </Form.Item>
+                <Form.Item name="fax" label="Fax" style={{ marginBottom: 5 }} initialValue={editSelectedAddress?.fax}>
+                  <Input placeholder="Fax" />
+                </Form.Item>
+                <Form.Item
+                  name="isDefault"
+                  label="Default"
+                  style={{ marginBottom: 0 }}
+                  initialValue={editSelectedAddress?.isDefault}
+                >
+                  <Switch defaultChecked={editSelectedAddress?.isDefault} />
+                </Form.Item>
+              </Col>
+              <Col md={12}>
+                <Form.Item
+                  name="address2"
+                  label="Address Two"
+                  style={{ marginBottom: 5 }}
+                  initialValue={editSelectedAddress?.address2}
+                >
+                  <Input placeholder="Address Two" />
+                </Form.Item>
+                <Form.Item name="country" initialValue="United State" label="Country" style={{ marginBottom: 5 }}>
+                  <Select>
+                    <Select.Option value="United State">United State</Select.Option>
+                  </Select>
+                </Form.Item>
+                <Form.Item
+                  rules={[{ required: true, message: 'Please Enter City' }]}
+                  name="city"
+                  label="City"
+                  style={{ marginBottom: 5 }}
+                  initialValue={editSelectedAddress?.city}
+                >
+                  <Input placeholder="City" />
+                </Form.Item>
+                <Form.Item
+                  name="state"
+                  rules={[{ required: true, message: 'Please Enter State' }]}
+                  label="State"
+                  style={{ marginBottom: 5 }}
+                  initialValue={editSelectedAddress?.state}
+                >
+                  <Input placeholder="State" />
+                </Form.Item>
+                <Form.Item
+                  name="zip_code"
+                  rules={[{ required: true, message: 'Please Enter Zip Code' }]}
+                  label="Zip Code"
+                  style={{ marginBottom: 5 }}
+                  initialValue={editSelectedAddress?.zip_code}
+                >
+                  <Input placeholder="Zip Code" />
+                </Form.Item>
+              </Col>
+            </Row>
+          </Form>
+        </Modal>
+        {/* Modal For Add / Update Address */}
+        {/* Modal For Add / Update Address */}
+        <Modal
+          title={`List of ${addressType} addresses`}
+          style={{ top: 20 }}
+          width={1000}
+          open={listAddressModalOpen}
+          okText="Select"
+          onOk={() => selectAddressHandler(addressType)}
+          onCancel={() => setListAddressModalOpen(false)}
+        >
+          <Radio.Group style={{ width: '100%', padding: 10 }}>
+            <Row gutter={25}>
+              <Col span={24}>
+                <Button
+                  size="small"
+                  style={{ float: 'right', zIndex: 1000, marginTop: -25, marginBottom: 10 }}
+                  title={`Add ${addressType} address`}
+                  htmlType="button"
+                  type="primary"
+                  onClick={() => addOrEditAddressHandler(null, addressType)}
+                >
+                  <FeatherIcon icon="plus-circle" />
+                </Button>
+              </Col>
+              {addressType === 'billing'
+                ? billingAddresses.map(item => (
+                    <Col key={item.id} xs={24} md={12}>
+                      <Button
+                        size="small"
+                        style={{ position: 'absolute', right: 14, zIndex: 1000 }}
+                        title="Edit Billing Address"
+                        htmlType="button"
+                        type="info"
+                        onClick={() => addOrEditAddressHandler(item.id, 'billing')}
+                      >
+                        <FeatherIcon icon="edit" />
+                      </Button>
+                      {billingAddresses.filter(item => item.isDefault)[0]?.id === item.id && (
+                        <Badge.Ribbon text="Default" color="pink" style={{ top: 40, zIndex: 1000 }} />
+                      )}
+                      <Radio
+                        style={{
+                          width: '100%',
+                          border: '1px solid #f0f0f0',
+                          fontSize: 12,
+                          marginBottom: 10,
+                          padding: 10,
+                          borderRadius: 5,
+                        }}
+                        value={item.id}
+                        onChange={() => setTempSelectedAddress(item)}
+                      >
+                        <p>
+                          <b>Email: </b>
+                          {item.email}
+                        </p>
+                        <p>
+                          <b>Phone: </b>
+                          {item.phone}
+                        </p>
+                        <p>
+                          <b>Address 1: </b>
+                          {item.address1 && ellipsis(item.address1, 35)}
+                        </p>
+                        <p>
+                          <b>Address 2: </b>
+                          {item.address2 && ellipsis(item.address2, 35)}
+                        </p>
+                        <p>
+                          <b>City: </b>
+                          {item.city}
+                        </p>
+                        <p>
+                          <b>State: </b>
+                          {item.state}
+                        </p>
+                        <p>
+                          <b>Zip Code: </b>
+                          {item.zip_code}
+                        </p>
+                      </Radio>
+                    </Col>
+                  ))
+                : shippingAddresses.map(item => (
+                    <Col key={item.id} xs={24} md={12}>
+                      <Button
+                        size="small"
+                        style={{ position: 'absolute', right: 14, zIndex: 1000 }}
+                        title="Edit Shipping Address"
+                        htmlType="button"
+                        type="info"
+                        onClick={() => addOrEditAddressHandler(item.id, 'shipping')}
+                      >
+                        <FeatherIcon icon="edit" />
+                      </Button>
+                      {shippingAddresses.filter(item => item.isDefault)[0]?.id === item.id && (
+                        <Badge.Ribbon text="Default" color="pink" style={{ top: 40, zIndex: 1000 }} />
+                      )}
+                      <Radio
+                        style={{
+                          width: '100%',
+                          border: '1px solid #f0f0f0',
+                          fontSize: 12,
+                          marginBottom: 10,
+                          padding: 10,
+                          borderRadius: 5,
+                        }}
+                        value={item.id}
+                        onChange={() => setTempSelectedAddress(item)}
+                      >
+                        <p>
+                          <b>Email: </b>
+                          {item.email}
+                        </p>
+                        <p>
+                          <b>Phone: </b>
+                          {item.phone}
+                        </p>
+                        <p>
+                          <b>Address 1: </b>
+                          {item.address1 && ellipsis(item.address1, 35)}
+                        </p>
+                        <p>
+                          <b>Address 2: </b>
+                          {item.address2 && ellipsis(item.address2, 35)}
+                        </p>
+                        <p>
+                          <b>City: </b>
+                          {item.city}
+                        </p>
+                        <p>
+                          <b>State: </b>
+                          {item.state}
+                        </p>
+                        <p>
+                          <b>Zip Code: </b>
+                          {item.zip_code}
+                        </p>
+                      </Radio>
+                    </Col>
+                  ))}
+            </Row>
+          </Radio.Group>
+        </Modal>
+        {/* Modal For Add / Update Address */}
       </Main>
     </>
   );
