@@ -23,6 +23,7 @@ const { darkTheme } = require('../config/theme/themeVariables');
 const { Header, Footer, Sider, Content } = Layout;
 // const { darkMode } = config;
 
+
 const ThemeLayout = WrappedComponent => {
   class LayoutComponent extends Component {
     constructor(props) {
@@ -78,6 +79,7 @@ const ThemeLayout = WrappedComponent => {
           searchHide: true,
         });
       };
+
       const showCustomizer = () => {
         this.setState({
           customizerAction: !customizerAction,
@@ -329,7 +331,7 @@ const ThemeLayout = WrappedComponent => {
               </Layout>
             </Layout>
           </Layout>
-          <Link
+          {/* <Link
             to="#"
             className="customizer-trigger"
             onClick={() => {
@@ -337,7 +339,7 @@ const ThemeLayout = WrappedComponent => {
             }}
           >
             <FeatherIcon icon="settings" />
-          </Link>
+          </Link> */}
           <div className={`${customizerAction ? 'customizer-wrapper show' : 'customizer-wrapper'}`}>
             <div className="customizer">
               <div className="customizer__head">

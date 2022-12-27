@@ -89,6 +89,13 @@ const MenuItems = ({ darkMode, toggleCollapsed, topMenu }) => {
         menuPermission('product-availability-status') ||
         menuPermission('product-condition')) && (
           <SubMenu key="products" icon={!topMenu && <FeatherIcon icon="shopping-cart" />} title="Products">
+            {menuPermission('product') && (
+              <Menu.Item key="products_list">
+                <NavLink onClick={toggleCollapsed} to={`${path}/products/list`}>
+                  Products
+                </NavLink>
+              </Menu.Item>
+            )}
             {menuPermission('quote') && (
               <Menu.Item key="listQuote">
                 <NavLink onClick={toggleCollapsed} to={`${path}/products/quote`}>
@@ -121,13 +128,6 @@ const MenuItems = ({ darkMode, toggleCollapsed, topMenu }) => {
               <Menu.Item key="listCategory">
                 <NavLink onClick={toggleCollapsed} to={`${path}/categories/list`}>
                   Category
-                </NavLink>
-              </Menu.Item>
-            )}
-            {menuPermission('product') && (
-              <Menu.Item key="products_list">
-                <NavLink onClick={toggleCollapsed} to={`${path}/products/list`}>
-                  Products
                 </NavLink>
               </Menu.Item>
             )}
