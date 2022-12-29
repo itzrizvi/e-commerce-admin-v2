@@ -136,7 +136,7 @@ export default function companyInfo() {
     });
 
     billingData.forEach(val => {
-      const { id, parent_id, isDefault, ...rest } = val
+      const { id, parent_id, phone, email, fax, isDefault, ...rest } = val
       if (check_point && Object.values(rest).some(x => x === null || x === '')) {
         toast.info('Please Provide All Field Properly In Billing Address Tab..');
         check_point = false;
@@ -144,7 +144,7 @@ export default function companyInfo() {
       }
     });
     shippingData.forEach(val => {
-      const { id, parent_id, isDefault, ...rest } = val
+      const { id, parent_id, phone, email, fax, isDefault, ...rest } = val
       if (check_point && Object.values(rest).some(x => x === null || x === '')) {
         toast.info('Please Provide All Field Properly In Shipping Address Tab..');
         check_point = false;

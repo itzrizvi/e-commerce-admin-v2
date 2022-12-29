@@ -10,7 +10,6 @@ export const methodQuery = {
         data {
           id
           name
-          slug
           description
           status
           isDefault
@@ -28,11 +27,8 @@ export const methodQuery = {
         data {
           id
           name
-          slug
           description
-          shipping_cost
           status
-          isDefault
           tenant_id
         }
       }

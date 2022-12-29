@@ -15,6 +15,7 @@ const ShippingAddress = ({
       title: 'Address 1',
       dataIndex: 'address1',
       key: 'address1',
+      width: 200,
       render: (text, record) => (
         <Input
           defaultValue={text}
@@ -28,25 +29,13 @@ const ShippingAddress = ({
       title: 'Address 2',
       dataIndex: 'address2',
       key: 'address2',
+      width: 200,
       render: (text, record) => (
         <Input
           defaultValue={text}
           type="text"
           placeholder="Address 2"
           onChange={e => (record.address2 = e.target.value)}
-        />
-      ),
-    },
-    {
-      title: 'Country',
-      dataIndex: 'country ',
-      key: 'country ',
-      render: (text, record) => (
-        <Input
-          defaultValue={record.country}
-          type="text"
-          placeholder="Country"
-          onChange={e => (record.country = e.target.value)}
         />
       ),
     },
@@ -80,27 +69,16 @@ const ShippingAddress = ({
       ),
     },
     {
-      title: 'Fax',
-      dataIndex: 'fax',
-      key: 'fax',
+      title: 'Country',
+      dataIndex: 'country ',
+      key: 'country ',
       render: (text, record) => (
-        <Input defaultValue={text} type="text" placeholder="Fax" onChange={e => (record.fax = e.target.value)} />
-      ),
-    },
-    {
-      title: 'Email',
-      dataIndex: 'email',
-      key: 'email',
-      render: (text, record) => (
-        <Input defaultValue={text} type="email" placeholder="Email" onChange={e => (record.email = e.target.value)} />
-      ),
-    },
-    {
-      title: 'Phone',
-      dataIndex: 'phone',
-      key: 'phone',
-      render: (text, record) => (
-        <Input defaultValue={text} type="text" placeholder="Phone" onChange={e => (record.phone = e.target.value)} />
+        <Input
+          defaultValue={record.country}
+          type="text"
+          placeholder="Country"
+          onChange={e => (record.country = e.target.value)}
+        />
       ),
     },
     {
@@ -133,7 +111,7 @@ const ShippingAddress = ({
       key: 'action',
       render: (text, record) => (
         <Button size="" title="Remove" type="danger" onClick={() => removeRow(record.id)}>
-          <FeatherIcon icon="minus" />
+          <FeatherIcon icon="trash-2" />
         </Button>
       ),
     },
