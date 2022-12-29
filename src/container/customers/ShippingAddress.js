@@ -1,16 +1,71 @@
-import { Button, Checkbox, Input, Switch, Table } from 'antd';
-import React from 'react';
-import { useState } from 'react';
+import { Button, Checkbox, Input, Select, Switch, Table } from 'antd';
+import React, { useEffect, useState } from 'react';
 import FeatherIcon from 'feather-icons-react';
+import { addressSchema } from '../../apollo/address';
+import apolloClient from '../../utility/apollo';
 
-const ShippingAddress = ({
-  defaultShipping,
-  initialData,
-  shippingAddress,
-  setShippingAddress,
-  setDefaultShipping,
-}) => {
+const ShippingAddress = ({ defaultShipping, initialData, shippingAddress, setShippingAddress, setDefaultShipping }) => {
+  // Change State After Country Change
+  const [selectedCountryCode, setSelectedCountryCode] = useState('US');
+  const [countries, setCountries] = useState([]);
+  const [states, setStates] = useState([]);
+  useEffect(() => {
+    apolloClient
+      .query({
+        query: addressSchema.GET_STATE_LISTS,
+        variables: {
+          query: {
+            code: selectedCountryCode,
+          },
+        },
+        context: {
+          headers: {
+            TENANTID: process.env.REACT_APP_TENANTID,
+          },
+        },
+      })
+      .then(res => {
+        const data = res?.data?.getStateList;
+        if (!data?.status) return;
+        setStates(data?.data);
+      });
+  }, [selectedCountryCode]);
+
+  useEffect(() => {
+    apolloClient
+      .query({
+        query: addressSchema.GET_COUNTRY_LIST,
+        context: {
+          headers: { TENANTID: process.env.REACT_APP_TENANTID },
+        },
+      })
+      .then(res => {
+        const data = res.data.getCountryList;
+        if (!data.status) return true;
+        setCountries(data?.data);
+      });
+  }, []);
   const column = [
+    {
+      title: 'Country',
+      dataIndex: 'country ',
+      key: 'country ',
+      render: (text, record) => (
+        <Select
+          style={{ width: '100%' }}
+          placeholder="Country"
+          defaultValue={text}
+          options={countries?.map(item => ({
+            label: item.name,
+            value: item.code,
+          }))}
+          onSelect={(val, item) => {
+            record.country = val;
+            setSelectedCountryCode(val);
+          }}
+        />
+      ),
+    },
     {
       title: 'Address 1',
       dataIndex: 'address1',
@@ -51,8 +106,18 @@ const ShippingAddress = ({
       title: 'State',
       dataIndex: 'state',
       key: 'state',
+      width: 150,
       render: (text, record) => (
-        <Input defaultValue={text} type="text" placeholder="State" onChange={e => (record.state = e.target.value)} />
+        <Select
+          style={{ width: '100%' }}
+          placeholder="State"
+          defaultValue={text}
+          options={states?.map(item => ({
+            label: item.state,
+            value: item.abbreviation,
+          }))}
+          onSelect={val => (record.state = val)}
+        />
       ),
     },
     {
@@ -65,19 +130,6 @@ const ShippingAddress = ({
           type="text"
           placeholder="Zip Code"
           onChange={e => (record.zip_code = e.target.value)}
-        />
-      ),
-    },
-    {
-      title: 'Country',
-      dataIndex: 'country ',
-      key: 'country ',
-      render: (text, record) => (
-        <Input
-          defaultValue={record.country}
-          type="text"
-          placeholder="Country"
-          onChange={e => (record.country = e.target.value)}
         />
       ),
     },

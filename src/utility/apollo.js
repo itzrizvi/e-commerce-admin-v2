@@ -1005,6 +1005,10 @@ export const customerQuery = {
             state
             zip_code
             country
+            countryCode {
+              name
+              code
+            }
             type
             status
             isDefault
