@@ -1238,6 +1238,10 @@ export const vendorQuery = {
             state
             zip_code
             country
+            countryCode {
+              name
+              code
+            }
             status
             isDefault
             updatedAt

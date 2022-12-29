@@ -49,13 +49,13 @@ const BillingAdderess = ({ defaultBilling, initialData, billingAddress, setBilli
   const column = [
     {
       title: 'Country',
-      dataIndex: 'country ',
-      key: 'country ',
+      dataIndex: ['countryCode', 'name'],
+      key: 'name',
       render: (text, record) => (
         <Select
           style={{ width: '100%' }}
           placeholder="Country"
-          defaultValue={text}
+          defaultValue={record.countryCode.code}
           options={countries?.map(item => ({
             label: item.name,
             value: item.code,

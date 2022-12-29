@@ -55,6 +55,10 @@ export const companyInfoQuery = {
             state
             zip_code
             country
+            countryCode {
+              name
+              code
+            }
             type
             status
             isDefault
