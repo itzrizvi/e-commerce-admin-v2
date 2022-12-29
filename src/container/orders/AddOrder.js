@@ -33,9 +33,6 @@ import { customerMutation } from '../../apollo/customer';
 import { useSelector } from 'react-redux';
 import { orderQuery } from '../../apollo/order';
 import { UploadOutlined } from '@ant-design/icons';
-import getStripe from '../../utility/getStripe';
-import { PayPalScriptProvider } from '@paypal/react-paypal-js';
-import PayPalButton from './PayPalButton';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements } from '@stripe/react-stripe-js';
 import StripeForm from './StripeForm';
@@ -788,16 +785,6 @@ const AddOrder = () => {
                       {current === 2 && (
                         <Row gutter={25}>
                           <Col lg={12} sm={24}>
-                            <Button
-                              size="small"
-                              style={{ float: 'right', zIndex: 1000, marginTop: -25, marginBottom: 10 }}
-                              title={`Add shipping address`}
-                              htmlType="button"
-                              type="primary"
-                              onClick={() => addOrEditAddressHandler(null, 'shipping')}
-                            >
-                              <FeatherIcon icon="plus-circle" />
-                            </Button>
                             <Form.Item
                               rules={[{ required: true, message: 'Please Select Shipping Address' }]}
                               name="shipping_address_id"
@@ -817,7 +804,7 @@ const AddOrder = () => {
                                         type="info"
                                         onClick={() => changeAddressHandler('shipping')}
                                       >
-                                        <FeatherIcon icon="repeat" />
+                                        Change
                                       </Button>
                                       <Radio
                                         style={{
@@ -831,35 +818,18 @@ const AddOrder = () => {
                                         value={selectedShippingAddress?.id}
                                       >
                                         <p>
-                                          <b>Email: </b>
-                                          {selectedShippingAddress?.email}
-                                        </p>
-                                        <p>
-                                          <b>Phone: </b>
-                                          {selectedShippingAddress?.phone}
-                                        </p>
-                                        <p>
-                                          <b>Address 1: </b>
                                           {selectedShippingAddress?.address1 &&
                                             ellipsis(selectedShippingAddress?.address1, 35)}
                                         </p>
                                         <p>
-                                          <b>Address 2: </b>
                                           {selectedShippingAddress?.address2 &&
                                             ellipsis(selectedShippingAddress?.address2, 35)}
                                         </p>
                                         <p>
-                                          <b>City: </b>
-                                          {selectedShippingAddress?.city}
-                                        </p>
-                                        <p>
-                                          <b>State: </b>
-                                          {selectedShippingAddress?.state}
-                                        </p>
-                                        <p>
-                                          <b>Zip Code: </b>
+                                          {selectedShippingAddress?.city}, {selectedShippingAddress?.state} -{' '}
                                           {selectedShippingAddress?.zip_code}
                                         </p>
+                                        {/* Need To Add Country */}
                                       </Radio>
                                     </Col>
                                   )}
@@ -868,16 +838,6 @@ const AddOrder = () => {
                             </Form.Item>
                           </Col>
                           <Col lg={12} sm={24}>
-                            <Button
-                              size="small"
-                              style={{ float: 'right', zIndex: 1000, marginTop: -25, marginBottom: 10 }}
-                              title={`Add Billing address`}
-                              htmlType="button"
-                              type="primary"
-                              onClick={() => addOrEditAddressHandler(null, 'billing')}
-                            >
-                              <FeatherIcon icon="plus-circle" />
-                            </Button>
                             <Form.Item
                               rules={[{ required: true, message: 'Please Select Billing Address' }]}
                               name="billing_address_id"
@@ -896,7 +856,7 @@ const AddOrder = () => {
                                         type="info"
                                         onClick={() => changeAddressHandler('billing')}
                                       >
-                                        <FeatherIcon icon="repeat" />
+                                        Change
                                       </Button>
                                       <Radio
                                         style={{
@@ -910,33 +870,15 @@ const AddOrder = () => {
                                         value={selectedBillingAddress?.id}
                                       >
                                         <p>
-                                          <b>Email: </b>
-                                          {selectedBillingAddress?.email}
-                                        </p>
-                                        <p>
-                                          <b>Phone: </b>
-                                          {selectedBillingAddress?.phone}
-                                        </p>
-                                        <p>
-                                          <b>Address 1: </b>
                                           {selectedBillingAddress?.address1 &&
                                             ellipsis(selectedBillingAddress?.address1, 35)}
                                         </p>
                                         <p>
-                                          <b>Address 2: </b>
                                           {selectedBillingAddress?.address2 &&
                                             ellipsis(selectedBillingAddress?.address2, 35)}
                                         </p>
                                         <p>
-                                          <b>City: </b>
-                                          {selectedBillingAddress?.city}
-                                        </p>
-                                        <p>
-                                          <b>State: </b>
-                                          {selectedBillingAddress?.state}
-                                        </p>
-                                        <p>
-                                          <b>Zip Code: </b>
+                                          {selectedBillingAddress?.city}, {selectedBillingAddress?.state} -{' '}
                                           {selectedBillingAddress?.zip_code}
                                         </p>
                                       </Radio>
@@ -1008,7 +950,9 @@ const AddOrder = () => {
                                         }}
                                         value={item.id}
                                       >
-                                        <Typography.Title level={4}>{item.name}</Typography.Title>
+                                        <Typography.Title level={5} style={{ fontSize: 14 }}>
+                                          {item.name}
+                                        </Typography.Title>
                                         <Typography.Text>{item?.description}</Typography.Text>
                                       </Radio>
                                     </Col>
@@ -1092,11 +1036,6 @@ const AddOrder = () => {
                           <Col lg={12}>
                             {selectedPaymentMethodSlug ? (
                               <Card title={selectedPaymentMethodSlug?.toUpperCase()} bordered={true} size="small">
-                                {selectedPaymentMethodSlug === 'paypal' && (
-                                  <PayPalScriptProvider options={{ 'client-id': 'test' }}>
-                                    <PayPalButton amount={10} />
-                                  </PayPalScriptProvider>
-                                )}
                                 {selectedPaymentMethodSlug === 'stripe' && (
                                   <Elements stripe={stripePromise}>
                                     <StripeForm />
@@ -1326,34 +1265,12 @@ const AddOrder = () => {
                         value={item.id}
                         onChange={() => setTempSelectedAddress(item)}
                       >
+                        <p>{item.address1 && ellipsis(item.address1, 35)}</p>
+                        <p>{item.address2 && ellipsis(item.address2, 35)}</p>
                         <p>
-                          <b>Email: </b>
-                          {item.email}
+                          {item.city}, {item.state} - {item.zip_code}
                         </p>
-                        <p>
-                          <b>Phone: </b>
-                          {item.phone}
-                        </p>
-                        <p>
-                          <b>Address 1: </b>
-                          {item.address1 && ellipsis(item.address1, 35)}
-                        </p>
-                        <p>
-                          <b>Address 2: </b>
-                          {item.address2 && ellipsis(item.address2, 35)}
-                        </p>
-                        <p>
-                          <b>City: </b>
-                          {item.city}
-                        </p>
-                        <p>
-                          <b>State: </b>
-                          {item.state}
-                        </p>
-                        <p>
-                          <b>Zip Code: </b>
-                          {item.zip_code}
-                        </p>
+                        <p>{item?.countryCode?.name}</p>
                       </Radio>
                     </Col>
                   ))
@@ -1384,34 +1301,12 @@ const AddOrder = () => {
                         value={item.id}
                         onChange={() => setTempSelectedAddress(item)}
                       >
+                        <p>{item.address1 && ellipsis(item.address1, 35)}</p>
+                        <p>{item.address2 && ellipsis(item.address2, 35)}</p>
                         <p>
-                          <b>Email: </b>
-                          {item.email}
+                          {item.city}, {item.state} - {item.zip_code}
                         </p>
-                        <p>
-                          <b>Phone: </b>
-                          {item.phone}
-                        </p>
-                        <p>
-                          <b>Address 1: </b>
-                          {item.address1 && ellipsis(item.address1, 35)}
-                        </p>
-                        <p>
-                          <b>Address 2: </b>
-                          {item.address2 && ellipsis(item.address2, 35)}
-                        </p>
-                        <p>
-                          <b>City: </b>
-                          {item.city}
-                        </p>
-                        <p>
-                          <b>State: </b>
-                          {item.state}
-                        </p>
-                        <p>
-                          <b>Zip Code: </b>
-                          {item.zip_code}
-                        </p>
+                        <p>{item?.countryCode?.name}</p>
                       </Radio>
                     </Col>
                   ))}

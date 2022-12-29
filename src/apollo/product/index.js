@@ -25,11 +25,8 @@ export const productSchema = {
         data {
           id
           name
-          slug
           description
-          shipping_cost
           status
-          isDefault
         }
       }
     }

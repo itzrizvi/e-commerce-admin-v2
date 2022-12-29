@@ -176,11 +176,11 @@ const ViewOrder = () => {
                     >
                       {({ loading }) =>
                         loading ? (
-                          <Button size="small" title="Add Manufacture" type="primary">
+                          <Button size="small" title="Generate Invoice" type="primary">
                             Generating Invoice
                           </Button>
                         ) : (
-                          <Button size="small" title="Add Manufacture" type="primary">
+                          <Button size="small" title="Download Invoice" type="primary">
                             Download Invoice
                           </Button>
                         )

@@ -10,7 +10,6 @@ export const methodQuery = {
         data {
           id
           name
-          slug
           description
           status
           isDefault
@@ -28,11 +27,26 @@ export const methodQuery = {
         data {
           id
           name
-          slug
           description
-          shipping_cost
           status
-          isDefault
+          tenant_id
+        }
+      }
+    }
+  `,
+  GET_SHIPPING_METHOD_LIST_ADMIN: gql`
+    query getShippingMethodListAdmin {
+      getShippingMethodListAdmin {
+        message
+        status
+        tenant_id
+        data {
+          id
+          name
+          description
+          status
+          sort_order
+          internal_type
           tenant_id
         }
       }

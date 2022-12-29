@@ -48,16 +48,16 @@ const AddUser = () => {
   const handleSubmit = values => {
     // validate billingAddresses.
     const notValidate = billingAddress.find(item => {
-      const { id, address1, country, city, state, zip_code, email, fax, phone } = item;
-      const checkFalse = !(id && address1 && country && city && state && zip_code && email && fax && phone);
+      const { id, address1, country, city, state, zip_code } = item;
+      const checkFalse = !(id && address1 && country && city && state && zip_code );
       return checkFalse;
     });
     if (notValidate?.id) return toast.warning('Enter Billing Address Correctly!');
 
     // validate shippingAddresses.
     const notValidate1 = shippingAddress.find(item => {
-      const { id, address1, country, city, state, zip_code, email, fax, phone } = item;
-      const checkFalse = !(id && address1 && country && city && state && zip_code && email && fax && phone);
+      const { id, address1, country, city, state, zip_code } = item;
+      const checkFalse = !(id && address1 && country && city && state && zip_code);
       return checkFalse;
     });
     if (notValidate1?.id) return toast.warning('Enter Shipping Address Correctly!');

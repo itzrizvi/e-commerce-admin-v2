@@ -109,16 +109,16 @@ const AddVendor = () => {
     const variables = { ...values, status };
     // validate billingAddresses.
     const notValidate = billingAddresses.find(item => {
-      const { id, address1, country, city, state, zip_code, email, fax, phone, address2 } = item;
-      const checkFalse = !(id && address1 && country && city && state && zip_code && email && fax && phone && address2);
+      const { id, address1, country, city, state, zip_code, address2 } = item;
+      const checkFalse = !(id && address1 && country && city && state && zip_code && address2);
       return checkFalse;
     });
     if (notValidate?.id) return toast.warning('Enter Billing Address Correctly!');
 
     // validate shippingAddresses.
     const notValidate1 = shippingAddresses.find(item => {
-      const { id, address1, country, city, state, zip_code, email, fax, phone, address2 } = item;
-      const checkFalse = !(id && address1 && country && city && state && zip_code && email && fax && phone && address2);
+      const { id, address1, country, city, state, zip_code, address2 } = item;
+      const checkFalse = !(id && address1 && country && city && state && zip_code && address2);
       return checkFalse;
     });
     if (notValidate1?.id) return toast.warning('Enter Shipping Address Correctly!');

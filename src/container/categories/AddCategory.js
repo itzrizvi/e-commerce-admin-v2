@@ -35,22 +35,6 @@ const AddCategory = () => {
   const [image, setImage] = useState(null);
   const [thumbUrl, setThumbUrl] = useState('');
 
-  const [state, setState] = useState({
-    file: null,
-    list: null,
-    submitValues: {},
-  });
-
-  const fileList = [
-    {
-      uid: '1',
-      name: '1.png',
-      status: 'done',
-      url: require('../../static/img/products/1.png'),
-      thumbUrl: require('../../static/img/products/1.png'),
-    },
-  ];
-
   useEffect(() => {
     // load all category
     apolloClient
@@ -59,7 +43,6 @@ const AddCategory = () => {
         context: {
           headers: {
             TENANTID: process.env.REACT_APP_TENANTID,
-            // Authorization: Cookies.get('psp_t')
           },
         },
       })
@@ -85,15 +68,7 @@ const AddCategory = () => {
       if (item.subcategories) {
         item.subcategories.forEach(subCat => {
           const sub = subCat.cat_name;
-
           arrData.push({ cat_name: `${parent} > ${sub}`, id: subCat.id });
-          // if (subCat.subsubcategories) {
-          //     subCat.subsubcategories.forEach(subSubCat => {
-          //         const subSub = subSubCat.cat_name
-
-          //         arrData.push({ cat_name: `${parent} > ${sub} > ${subSub}`, id: subSubCat.id })
-          //     })
-          // }
         });
       }
     });
@@ -128,8 +103,6 @@ const AddCategory = () => {
   }, []);
 
   const handleSubmit = values => {
-    console.log(image);
-
     // return;
     setIsLoading(true);
     const {
@@ -182,6 +155,7 @@ const AddCategory = () => {
             },
             ['getAllCategories'],
           ],
+          fetchPolicy: "network-only",
           context: {
             headers: {
               TENANTID: process.env.REACT_APP_TENANTID,
@@ -202,7 +176,6 @@ const AddCategory = () => {
           setIsLoading(false);
         });
     } else {
-      console.log('in upd');
       //for update
       const data = {
         cat_id: parseInt(params.id),
@@ -240,6 +213,7 @@ const AddCategory = () => {
             },
             ['getAllBrands'],
           ],
+          fetchPolicy: "network-only",
           context: {
             headers: {
               TENANTID: process.env.REACT_APP_TENANTID,
@@ -270,14 +244,6 @@ const AddCategory = () => {
             ? `Manage category | Edit - ${!singleCategory.cat_name ? '' : `(${singleCategory.cat_name})`}	`
             : 'Add Category'
         }
-        // buttons={[
-        //     <div key="1" className="page-header-actions">
-        //         <Switch
-        //             checked={categoryStatus}
-        //             onChange={checked => setCategoryStatus(checked)}
-        //         />
-        //     </div>
-        // ]}
       />
       <Main>
         <Row gutter={25}>

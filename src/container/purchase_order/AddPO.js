@@ -134,15 +134,16 @@ const AddPO = () => {
     // Load Shipping Method
     apolloClient
       .query({
-        query: methodQuery.GET_SHIPPING_METHOD_LIST,
+        query: methodQuery.GET_SHIPPING_METHOD_LIST_ADMIN,
         context: {
           headers: {
             TENANTID: process.env.REACT_APP_TENANTID,
+            Authorization: token,
           },
         },
       })
       .then(res => {
-        const data = res?.data?.getShippingMethodListPublic;
+        const data = res?.data?.getShippingMethodListAdmin;
         if (!data.status) return;
         setShippingMethod(data?.data);
         setSelectedShippingMethod(data?.data?.filter(item => item.isDefault === true)[0]?.id);
@@ -217,7 +218,7 @@ const AddPO = () => {
         }));
         setProductOption(options);
       })
-      .catch(err => {});
+      .catch(err => { });
   }, []);
 
   /* -------------------------- End of product fetch -------------------------- */

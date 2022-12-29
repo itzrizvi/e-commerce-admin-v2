@@ -8,7 +8,7 @@ const AddressTable = ({ initialData, addresses, setAddresses, defaultAddressId, 
       title: 'Address 1',
       dataIndex: 'address1',
       key: 'address1',
-      width: 150,
+      width: 400,
       render: (text, record) => (
         <Input
           defaultValue={text}
@@ -22,64 +22,13 @@ const AddressTable = ({ initialData, addresses, setAddresses, defaultAddressId, 
       title: 'Address 2',
       dataIndex: 'address2',
       key: 'address2',
-      width: 150,
+      width: 400,
       render: (text, record) => (
         <Input
           defaultValue={text}
           type="text"
           placeholder="Address 2"
           onChange={e => (record.address2 = e.target.value)}
-        />
-      ),
-    },
-    {
-      title: 'Email',
-      dataIndex: 'email',
-      key: 'email ',
-      width: 150,
-      render: (text, record) => (
-        <Input
-          defaultValue={record.email}
-          type="email"
-          placeholder="email"
-          onChange={e => (record.email = e.target.value)}
-        />
-      ),
-    },
-    {
-      title: 'Phone',
-      dataIndex: 'phone',
-      key: 'phone ',
-      width: 150,
-      render: (text, record) => (
-        <Input
-          defaultValue={record.phone}
-          type="text"
-          placeholder="phone"
-          onChange={e => (record.phone = e.target.value)}
-        />
-      ),
-    },
-    {
-      title: 'Fax',
-      dataIndex: 'fax',
-      key: 'fax',
-      width: 150,
-      render: (text, record) => (
-        <Input defaultValue={text} type="text" placeholder="Fax" onChange={e => (record.fax = e.target.value)} />
-      ),
-    },
-    {
-      title: 'Country',
-      dataIndex: 'country ',
-      key: 'country',
-      width: 150,
-      render: (text, record) => (
-        <Input
-          defaultValue={record.country}
-          type="text"
-          placeholder="country"
-          onChange={e => (record.country = e.target.value)}
         />
       ),
     },
@@ -116,11 +65,25 @@ const AddressTable = ({ initialData, addresses, setAddresses, defaultAddressId, 
       ),
     },
     {
+      title: 'Country',
+      dataIndex: 'country ',
+      key: 'country',
+      width: 150,
+      render: (text, record) => (
+        <Input
+          defaultValue={record.country}
+          type="text"
+          placeholder="country"
+          onChange={e => (record.country = e.target.value)}
+        />
+      ),
+    },
+    {
       title: 'Default',
       dataIndex: 'id',
       key: 'id',
       align: 'right',
-      width: 90,
+      width: 70,
       render: (val, record) => (
         <Checkbox
           checked={defaultAddressId === val ? true : false}
@@ -149,7 +112,7 @@ const AddressTable = ({ initialData, addresses, setAddresses, defaultAddressId, 
       width: 150,
       render: (text, record) => (
         <Button size="" title="Remove" type="danger" onClick={() => removeRow(record.id)}>
-          <FeatherIcon icon="minus" />
+          <FeatherIcon icon="trash-2" />
         </Button>
       ),
     },

@@ -408,6 +408,9 @@ export const productQuery = {
           prod_partnum
           prod_sku
           prod_status
+          is_featured
+          is_sale
+          is_serial
           taxable
           prod_weight
           prod_weight_class
@@ -415,6 +418,28 @@ export const productQuery = {
           prod_thumbnail
           createdAt
           updatedAt
+          prod_condition
+          extended_warranty
+          extended_warranty_value
+          location
+          hs_code
+          product_rank
+          mfg_build_part_number
+          representative {
+            id
+            first_name
+            last_name
+            email
+            image
+            roles {
+              id
+              role_no
+              role
+              role_slug
+              role_status
+              role_description
+            }
+          }
           brand {
             id
             brand_name
