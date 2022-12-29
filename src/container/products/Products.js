@@ -302,7 +302,8 @@ const Products = () => {
       title: 'Status',
       dataIndex: 'prod_status',
       key: 'prod_status',
-      align: 'right',
+      width: 80,
+      align: 'middle',
       sorter: (a, b) => (a.prod_status === b.prod_status ? 0 : a.prod_status ? -1 : 1),
       filters: [
         {
@@ -319,32 +320,32 @@ const Products = () => {
         <Switch defaultChecked={value} title="Status" onChange={checked => handleStatusChange(record, checked)} />
       ),
     },
-    {
-      title: 'Is Serial',
-      dataIndex: 'is_serial',
-      key: 'is_serial',
-      align: 'right',
-      sorter: (a, b) => (a.is_serial === b.is_serial ? 0 : a.is_serial ? -1 : 1),
-      filters: [
-        {
-          text: 'Active',
-          value: true,
-        },
-        {
-          text: 'Inactive',
-          value: false,
-        },
-      ],
-      onFilter: (value, record) => record.is_serial === value,
-      render: (value, record) => (
-        <Switch defaultChecked={value} title="Is Serial" onChange={checked => handleIsSerialChange(record, checked)} />
-      ),
-    },
+    // {
+    //   title: 'Is Serial',
+    //   dataIndex: 'is_serial',
+    //   key: 'is_serial',
+    //   align: 'right',
+    //   sorter: (a, b) => (a.is_serial === b.is_serial ? 0 : a.is_serial ? -1 : 1),
+    //   filters: [
+    //     {
+    //       text: 'Active',
+    //       value: true,
+    //     },
+    //     {
+    //       text: 'Inactive',
+    //       value: false,
+    //     },
+    //   ],
+    //   onFilter: (value, record) => record.is_serial === value,
+    //   render: (value, record) => (
+    //     <Switch defaultChecked={value} title="Is Serial" onChange={checked => handleIsSerialChange(record, checked)} />
+    //   ),
+    // },
     {
       title: 'On Sale',
       dataIndex: 'is_sale',
       key: 'is_sale',
-      align: 'right',
+      align: 'center',
       width: 90,
       sorter: (a, b) => (a.is_sale === b.is_sale ? 0 : a.is_sale ? -1 : 1),
       filters: [
@@ -370,11 +371,11 @@ const Products = () => {
       render: (text, record) => (
         <>
           <Link to={`/admin/products/view?id=${record.id}`}>
-            <FontAwesome name="eye" style={{ margin: '.5em 1em' }} />
+            <FontAwesome name="eye" style={{ margin: '.5em 1em', color: "rgb(46, 204, 113)" }} />
           </Link>
-          <Link to={`/admin/products/add?id=${record.id}`}>
+          <Link to={`/admin/products/edit?id=${record.id}`}>
             {/* <Button size="default" type="white" title='Edit'> */}
-            <FontAwesome name="edit" style={{ margin: '.5em 1em' }} />
+            <FontAwesome name="edit" style={{ margin: '.5em 1em', color: "#5F63F2" }} />
             {/* </Button> */}
           </Link>
         </>

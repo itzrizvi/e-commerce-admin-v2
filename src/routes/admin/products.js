@@ -15,6 +15,7 @@ const ProductRoutes = () => {
     <Switch>
       <Route path={`${path}/list`} component={Products} />
       <Route path={`${path}/add`} component={AddProduct} />
+      <Route path={`${path}/edit`} component={AddProduct} />
       <Route path={`${path}/coupon`} component={ListCoupon} />
       <Route path={`${path}/add-coupon`} component={AddCoupon} />
       <Route path={`${path}/quote/edit/:id`} component={EditQuote} />
