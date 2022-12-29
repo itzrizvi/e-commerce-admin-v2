@@ -115,6 +115,7 @@ const AddProduct = () => {
     setLongDescription(value);
   };
   const [prod_status, setProd_status] = useState(true);
+  const [is_sale, setIsSale] = useState(true);
   const [isTaxable, setIsTaxable] = useState(true);
   // ================= 1.for General tab END =================
 
@@ -357,6 +358,7 @@ const AddProduct = () => {
       prod_long_desc,
       related_product,
       prod_status,
+      is_sale,
       partof_product,
       taxable: isTaxable,
       // prod_thumbnail,
@@ -505,28 +507,29 @@ const AddProduct = () => {
                   initialValues={
                     params.id
                       ? {
-                          prod_name: singleProduct.data.prod_name,
-                          prod_short_desc: singleProduct.data.prod_short_desc,
-                          prod_meta_title: singleProduct.data.prod_meta_title,
-                          prod_meta_desc: singleProduct.data.prod_meta_desc,
-                          prod_meta_keywords: singleProduct.data.prod_meta_keywords,
-                          prod_tags: singleProduct.data.prod_tags,
-                          prod_partnum: singleProduct.data.prod_partnum,
-                          prod_sku: singleProduct.data.prod_sku,
-                          brand_id: singleProduct.data?.brand?.id,
-                          prod_category: singleProduct.data?.category?.id,
-                          dimension_class: singleProduct.data?.dimensions?.dimension_class || '',
-                          prod_weight: singleProduct.data?.prod_weight || '',
-                          prod_weight_class: singleProduct.data?.prod_weight_class || '',
-                          prod_outofstock_status: singleProduct.data?.prod_outofstock_status || '',
-                          prod_regular_price: singleProduct.data?.prod_regular_price || '',
-                          prod_sale_price: singleProduct.data?.prod_sale_price || '',
-                        }
+                        prod_name: singleProduct.data.prod_name,
+                        prod_short_desc: singleProduct.data.prod_short_desc,
+                        prod_meta_title: singleProduct.data.prod_meta_title,
+                        prod_meta_desc: singleProduct.data.prod_meta_desc,
+                        prod_meta_keywords: singleProduct.data.prod_meta_keywords,
+                        prod_tags: singleProduct.data.prod_tags,
+                        prod_partnum: singleProduct.data.prod_partnum,
+                        prod_sku: singleProduct.data.prod_sku,
+                        is_sale: singleProduct.data.is_sale,
+                        brand_id: singleProduct.data?.brand?.id,
+                        prod_category: singleProduct.data?.category?.id,
+                        dimension_class: singleProduct.data?.dimensions?.dimension_class || '',
+                        prod_weight: singleProduct.data?.prod_weight || '',
+                        prod_weight_class: singleProduct.data?.prod_weight_class || '',
+                        prod_outofstock_status: singleProduct.data?.prod_outofstock_status || '',
+                        prod_regular_price: singleProduct.data?.prod_regular_price || '',
+                        prod_sale_price: singleProduct.data?.prod_sale_price || '',
+                      }
                       : {
-                          dimension_class: 'Inch',
-                          prod_weight_class: 'Pound',
-                          prod_outofstock_status: 'In Stock',
-                        }
+                        dimension_class: 'Inch',
+                        prod_weight_class: 'Pound',
+                        prod_outofstock_status: 'In Stock',
+                      }
                   }
                 >
                   <Tabs>
@@ -598,6 +601,9 @@ const AddProduct = () => {
                       <Form.Item name="prod_sku" rules={[{ required: true, message: 'Please enter SKU' }]} label="SKU">
                         <Input placeholder="Enter Product SKU" />
                       </Form.Item>
+                      <Form.Item name="is_sale" rules={[{ required: false }]} label="On Sale">
+                        <Switch checked={is_sale} onChange={checked => setIsSale(checked)} />
+                      </Form.Item>
                     </Tabs.TabPane>
                     <Tabs.TabPane tab="Links" key="Links">
                       <Form.Item
@@ -625,15 +631,15 @@ const AddProduct = () => {
                             brand.loading
                               ? 'Loading...'
                               : categories.length
-                              ? 'Select Category'
-                              : 'Select manifacture first'
+                                ? 'Select Category'
+                                : 'Select manifacture first'
                           }
                           options={categories.map(item => ({
                             label: item.cat_name,
                             value: item.id,
                             key: item.id,
                           }))}
-                          // mode="multiple"
+                        // mode="multiple"
                         />
                       </Form.Item>
                       <Form.Item
@@ -676,8 +682,8 @@ const AddProduct = () => {
                               !params.id
                                 ? ''
                                 : singleProduct?.data?.dimensions?.length
-                                ? singleProduct?.data?.dimensions?.length
-                                : ''
+                                  ? singleProduct?.data?.dimensions?.length
+                                  : ''
                             }
                           />
                           <Input
@@ -689,8 +695,8 @@ const AddProduct = () => {
                               !params.id
                                 ? ''
                                 : singleProduct?.data?.dimensions?.length
-                                ? singleProduct?.data?.dimensions?.width
-                                : ''
+                                  ? singleProduct?.data?.dimensions?.width
+                                  : ''
                             }
                           />
                           <Input
@@ -702,8 +708,8 @@ const AddProduct = () => {
                               !params.id
                                 ? ''
                                 : singleProduct?.data?.dimensions?.length
-                                ? singleProduct?.data?.dimensions?.height
-                                : ''
+                                  ? singleProduct?.data?.dimensions?.height
+                                  : ''
                             }
                           />
                         </Input.Group>

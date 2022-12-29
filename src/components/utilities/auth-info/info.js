@@ -12,6 +12,7 @@ import { Popover } from '../../popup/popup';
 import { Dropdown } from '../../dropdown/dropdown';
 import { logOut } from '../../../redux/authentication/actionCreator';
 import Heading from '../../heading/heading';
+import ThemeLayout from '../../../layout/withAdminLayout';
 
 const AuthInfo = () => {
   const dispatch = useDispatch();
@@ -43,7 +44,12 @@ const AuthInfo = () => {
             </Link>
           </li>
           <li>
-            <Link to="#">
+            <Link to="#"
+            // className="customizer-trigger"
+            // onClick={() => {
+            //   showCustomizerExtra();
+            // }}
+            >
               <FeatherIcon icon="settings" /> Settings
             </Link>
           </li>
