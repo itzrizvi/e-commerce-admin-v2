@@ -115,7 +115,6 @@ const AddProduct = () => {
     setLongDescription(value);
   };
   const [prod_status, setProd_status] = useState(true);
-  const [is_sale, setIsSale] = useState(true);
   const [isTaxable, setIsTaxable] = useState(true);
   // ================= 1.for General tab END =================
 
@@ -258,7 +257,6 @@ const AddProduct = () => {
       })
       .then(res => {
         const data = res?.data?.getProductList;
-
         if (!data?.status) return;
         setProducts(s => ({ ...s, data: data?.data, error: '' }));
       })
@@ -358,7 +356,7 @@ const AddProduct = () => {
       prod_long_desc,
       related_product,
       prod_status,
-      is_sale,
+      // is_sale,
       partof_product,
       taxable: isTaxable,
       // prod_thumbnail,
@@ -507,102 +505,138 @@ const AddProduct = () => {
                   initialValues={
                     params.id
                       ? {
-                        prod_name: singleProduct.data.prod_name,
-                        prod_short_desc: singleProduct.data.prod_short_desc,
-                        prod_meta_title: singleProduct.data.prod_meta_title,
-                        prod_meta_desc: singleProduct.data.prod_meta_desc,
-                        prod_meta_keywords: singleProduct.data.prod_meta_keywords,
-                        prod_tags: singleProduct.data.prod_tags,
-                        prod_partnum: singleProduct.data.prod_partnum,
-                        prod_sku: singleProduct.data.prod_sku,
-                        is_sale: singleProduct.data.is_sale,
-                        brand_id: singleProduct.data?.brand?.id,
-                        prod_category: singleProduct.data?.category?.id,
-                        dimension_class: singleProduct.data?.dimensions?.dimension_class || '',
-                        prod_weight: singleProduct.data?.prod_weight || '',
-                        prod_weight_class: singleProduct.data?.prod_weight_class || '',
-                        prod_outofstock_status: singleProduct.data?.prod_outofstock_status || '',
-                        prod_regular_price: singleProduct.data?.prod_regular_price || '',
-                        prod_sale_price: singleProduct.data?.prod_sale_price || '',
-                      }
+                          prod_name: singleProduct.data.prod_name,
+                          prod_short_desc: singleProduct.data.prod_short_desc,
+                          prod_meta_title: singleProduct.data.prod_meta_title,
+                          prod_meta_desc: singleProduct.data.prod_meta_desc,
+                          prod_meta_keywords: singleProduct.data.prod_meta_keywords,
+                          prod_tags: singleProduct.data.prod_tags,
+                          prod_partnum: singleProduct.data.prod_partnum,
+                          prod_sku: singleProduct.data.prod_sku,
+                          is_sale: singleProduct.data.is_sale,
+                          brand_id: singleProduct.data?.brand?.id,
+                          prod_category: singleProduct.data?.category?.id,
+                          dimension_class: singleProduct.data?.dimensions?.dimension_class || '',
+                          prod_weight: singleProduct.data?.prod_weight || '',
+                          prod_weight_class: singleProduct.data?.prod_weight_class || '',
+                          prod_outofstock_status: singleProduct.data?.prod_outofstock_status || '',
+                          prod_regular_price: singleProduct.data?.prod_regular_price || '',
+                          prod_sale_price: singleProduct.data?.prod_sale_price || '',
+                        }
                       : {
-                        dimension_class: 'Inch',
-                        prod_weight_class: 'Pound',
-                        prod_outofstock_status: 'In Stock',
-                      }
+                          dimension_class: 'Inch',
+                          prod_weight_class: 'Pound',
+                          prod_outofstock_status: 'In Stock',
+                        }
                   }
                 >
                   <Tabs>
                     <Tabs.TabPane tab="General" key="general">
-                      <Form.Item
-                        name="prod_name"
-                        rules={[{ required: true, message: 'Please enter Product Name' }]}
-                        label="Name"
-                      >
-                        <Input placeholder="Enter Product Name" />
-                      </Form.Item>
-                      <Form.Item
-                        name="prod_short_desc"
-                        rules={[{ required: true, message: 'Please enter n' }]}
-                        label="Short Description"
-                      >
-                        <TextArea rows={3} placeholder="Enter Short Description" />
-                      </Form.Item>
-                      <Form.Item label="Long Description">
-                        <RichTextEditor
-                          value={longDescription}
-                          onChange={onChangeRte}
-                          placeholder="Long Description"
-                          className={style.rte}
-                          editorClassName={style.rteEditor}
-                          toolbarClassName={style.rteToolbar}
-                        />
-                      </Form.Item>
-                      <Form.Item
-                        name="prod_meta_title"
-                        rules={[{ required: true, message: 'Please enter Meta Title' }]}
-                        label="Meta Title"
-                      >
-                        <Input placeholder="Enter Meta Title" />
-                      </Form.Item>
-                      <Form.Item
-                        name="prod_meta_desc"
-                        rules={[{ required: true, message: 'Please enter Meta Description' }]}
-                        label="Meta Description"
-                      >
-                        <Input placeholder="Enter Meta Description" />
-                      </Form.Item>
-                      <Form.Item
-                        name="prod_meta_keywords"
-                        rules={[{ required: true, message: 'Please enter Meta Keywords' }]}
-                        label="Meta Keywords"
-                      >
-                        <Input placeholder="Enter comma separated Meta Keywords" />
-                      </Form.Item>
-                      <Form.Item
-                        name="prod_tags"
-                        rules={[{ required: true, message: 'Please enter Tags' }]}
-                        label="Tags"
-                      >
-                        <Input placeholder="Enter comma separated Tags" />
-                      </Form.Item>
-                      <Form.Item label="Status">
-                        <Switch checked={prod_status} onChange={checked => setProd_status(checked)} />
-                      </Form.Item>
+                      <Row gutter={25}>
+                        <Col span={24}>
+                          <Form.Item
+                            name="prod_partnum"
+                            rules={[{ required: true, message: 'Please enter Part NO' }]}
+                            label="Part Number"
+                          >
+                            <Row>
+                              <Col span={8}>
+                                <Input placeholder="Enter Part No" />
+                              </Col>
+                            </Row>
+                          </Form.Item>
+                        </Col>
+                        <Col span={24}>
+                          <Form.Item name="prod_sku" label="SKU">
+                            <Row>
+                              <Col span={8}>
+                                <Input placeholder="Enter Product SKU" />
+                              </Col>
+                            </Row>
+                          </Form.Item>
+                        </Col>
+                        <Col span={24}>
+                          <Form.Item
+                            name="prod_name"
+                            rules={[{ required: true, message: 'Please enter Product Name' }]}
+                            label="Name"
+                          >
+                            <Input placeholder="Enter Product Name" />
+                          </Form.Item>
+                        </Col>
+                        <Col span={24}>
+                          <Form.Item
+                            name="prod_short_desc"
+                            rules={[{ required: true, message: 'Please enter n' }]}
+                            label="Short Description"
+                          >
+                            <TextArea rows={3} placeholder="Enter Short Description" />
+                          </Form.Item>
+                        </Col>
+                        <Col span={24}>
+                          <Form.Item label="Long Description">
+                            <RichTextEditor
+                              value={longDescription}
+                              onChange={onChangeRte}
+                              placeholder="Long Description"
+                              className={style.rte}
+                              editorClassName={style.rteEditor}
+                              toolbarClassName={style.rteToolbar}
+                            />
+                          </Form.Item>
+                        </Col>
+                        <Col span={24}>
+                          <Form.Item
+                            name="prod_meta_title"
+                            rules={[{ required: true, message: 'Please enter Meta Title' }]}
+                            label="Meta Title"
+                          >
+                            <Input placeholder="Enter Meta Title" />
+                          </Form.Item>
+                        </Col>
+                        <Col span={24}>
+                          <Form.Item
+                            name="prod_meta_desc"
+                            rules={[{ required: true, message: 'Please enter Meta Description' }]}
+                            label="Meta Description"
+                          >
+                            <Input placeholder="Enter Meta Description" />
+                          </Form.Item>
+                        </Col>
+                        <Col span={24}>
+                          <Form.Item
+                            name="prod_meta_keywords"
+                            rules={[{ required: true, message: 'Please enter Meta Keywords' }]}
+                            label="Meta Keywords"
+                          >
+                            <Input placeholder="Enter comma separated Meta Keywords" />
+                          </Form.Item>
+                        </Col>
+                        <Col span={24}>
+                          <Form.Item
+                            name="prod_tags"
+                            rules={[{ required: true, message: 'Please enter Tags' }]}
+                            label="Tags"
+                          >
+                            <Input placeholder="Enter comma separated Tags" />
+                          </Form.Item>
+                        </Col>
+                        <Col span={24}>
+                          <Form.Item name="prod_status" label="Status">
+                            <Switch
+                              defaultChecked={singleProduct.data.prod_status}
+                              defaultValue={singleProduct.data.prod_status}
+                            />
+                          </Form.Item>
+                        </Col>
+                      </Row>
                     </Tabs.TabPane>
                     <Tabs.TabPane tab="Data" key="Data">
-                      <Form.Item
-                        name="prod_partnum"
-                        rules={[{ required: true, message: 'Please enter Part NO' }]}
-                        label="Part NO"
-                      >
-                        <Input placeholder="Enter Part No" />
+                      <Form.Item name="is_sale" label="On Sale">
+                        <Switch defaultChecked={singleProduct.data.is_sale} defaultValue={singleProduct.data.is_sale} />
                       </Form.Item>
-                      <Form.Item name="prod_sku" rules={[{ required: true, message: 'Please enter SKU' }]} label="SKU">
-                        <Input placeholder="Enter Product SKU" />
-                      </Form.Item>
-                      <Form.Item name="is_sale" rules={[{ required: false }]} label="On Sale">
-                        <Switch checked={is_sale} onChange={checked => setIsSale(checked)} />
+                      <Form.Item name="is_featured" label="Featured">
+                        <Switch defaultChecked={singleProduct.data.is_featured} defaultValue={singleProduct.data.is_featured} />
                       </Form.Item>
                     </Tabs.TabPane>
                     <Tabs.TabPane tab="Links" key="Links">
@@ -631,15 +665,15 @@ const AddProduct = () => {
                             brand.loading
                               ? 'Loading...'
                               : categories.length
-                                ? 'Select Category'
-                                : 'Select manifacture first'
+                              ? 'Select Category'
+                              : 'Select manifacture first'
                           }
                           options={categories.map(item => ({
                             label: item.cat_name,
                             value: item.id,
                             key: item.id,
                           }))}
-                        // mode="multiple"
+                          // mode="multiple"
                         />
                       </Form.Item>
                       <Form.Item
@@ -682,8 +716,8 @@ const AddProduct = () => {
                               !params.id
                                 ? ''
                                 : singleProduct?.data?.dimensions?.length
-                                  ? singleProduct?.data?.dimensions?.length
-                                  : ''
+                                ? singleProduct?.data?.dimensions?.length
+                                : ''
                             }
                           />
                           <Input
@@ -695,8 +729,8 @@ const AddProduct = () => {
                               !params.id
                                 ? ''
                                 : singleProduct?.data?.dimensions?.length
-                                  ? singleProduct?.data?.dimensions?.width
-                                  : ''
+                                ? singleProduct?.data?.dimensions?.width
+                                : ''
                             }
                           />
                           <Input
@@ -708,8 +742,8 @@ const AddProduct = () => {
                               !params.id
                                 ? ''
                                 : singleProduct?.data?.dimensions?.length
-                                  ? singleProduct?.data?.dimensions?.height
-                                  : ''
+                                ? singleProduct?.data?.dimensions?.height
+                                : ''
                             }
                           />
                         </Input.Group>
