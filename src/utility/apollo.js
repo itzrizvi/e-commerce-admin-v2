@@ -334,6 +334,7 @@ export const productQuery = {
           prod_regular_price
           is_serial
           is_sale
+          cost
           prod_outofstock_status
           category {
             id
@@ -412,6 +413,7 @@ export const productQuery = {
           is_sale
           is_serial
           taxable
+          cost
           prod_weight
           prod_weight_class
           prod_outofstock_status
@@ -425,6 +427,13 @@ export const productQuery = {
           hs_code
           product_rank
           mfg_build_part_number
+          productCondition{
+            id
+            name
+            status
+            createdAt
+            updatedAt
+          }
           representative {
             id
             first_name
@@ -1163,7 +1172,9 @@ export const utilityQuery = {
         message
         status
         data {
+          id
           name
+          status
         }
       }
     }

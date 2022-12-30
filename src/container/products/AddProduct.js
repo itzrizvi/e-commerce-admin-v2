@@ -13,7 +13,7 @@ import ImageTab from './addProducts/ImageTab';
 import apolloClient from '../../apollo';
 import { brandQuery } from '../../apollo/brand';
 import Cookies from 'js-cookie';
-import { apolloUploadClient, productMutation, productQuery } from '../../utility/apollo';
+import { apolloUploadClient, productMutation, productQuery, utilityQuery } from '../../utility/apollo';
 import PartsOfProductTab from './addProducts/PartsOfProductTab';
 import { viewPermission } from '../../utility/utility';
 import { Link, useHistory, useLocation } from 'react-router-dom';
@@ -26,6 +26,8 @@ const AddProduct = () => {
   const [form] = Form.useForm();
   const [isLoading, setIsLoading] = useState(false);
   const history = useHistory();
+  const [selectedConditionID, setSelectedConditionID] = useState(null);
+  const [selectedProdCategory, setSelectedProdCategory] = useState(null);
 
   // update prod
   const { search } = useLocation();
@@ -45,6 +47,7 @@ const AddProduct = () => {
             Authorization: Cookies.get('psp_t'),
           },
         },
+        fetchPolicy: "network-only"
       })
       .then(res => {
         const data = res?.data?.getSingleProduct;
@@ -101,10 +104,37 @@ const AddProduct = () => {
             prod_gallery_uuid: img.id,
           })),
         );
+
+        form.setFieldValue({
+          prod_name: data?.data.prod_name,
+          prod_short_desc: data?.data.prod_short_desc,
+          prod_meta_title: data?.data.prod_meta_title,
+          prod_meta_desc: data?.data.prod_meta_desc,
+          prod_meta_keywords: data?.data.prod_meta_keywords,
+          prod_tags: data?.data.prod_tags,
+          prod_partnum: data?.data.prod_partnum,
+          prod_sku: data?.data.prod_sku,
+          is_sale: data?.data.is_sale,
+          brand_id: data?.data?.brand?.id,
+          // prod_category: data?.data?.category?.id,
+          dimension_class: data?.data?.dimensions?.dimension_class || 'Inch',
+          prod_weight: data?.data?.prod_weight || '',
+          prod_weight_class: data?.data?.prod_weight_class || 'Pound',
+          prod_outofstock_status: data?.data?.prod_outofstock_status || 'In Stock',
+          prod_regular_price: data?.data?.prod_regular_price || '',
+          prod_sale_price: data?.data?.prod_sale_price || '',
+          cost: data?.data?.cost || '',
+          prod_condition: data?.data?.productCondition?.id || '',
+        })
+        setSelectedProdCategory(data?.data?.category?.id)
       })
       .catch(err => {
         console.log('error on loading porduct,\n', err);
       });
+
+
+
+
   }, []);
 
   // ================= 1.for General tab START =================
@@ -120,9 +150,12 @@ const AddProduct = () => {
 
   // ================= 3.for links tab START =================
   const [brand, setBrand] = useState({ data: [], loading: true, error: '' });
+  const [productcondition, setProductCondition] = useState({ data: [], loading: true, error: '' });
   const [categories, setCategories] = useState([]);
   const [relatedProducts, setRelatedProducts] = useState([]);
   const onManufactureSelect = (val, item) => {
+    setCategories([]);
+    setSelectedProdCategory('')
     if (!item?.categories?.length) return;
     let arrData = [];
     // Loop & organize categories
@@ -203,7 +236,31 @@ const AddProduct = () => {
       .finally(() => {
         setBrand(s => ({ ...s, loading: false }));
       });
+
+    //////////////////////////////////
+    apolloClient
+      .query({
+        query: utilityQuery.GET_ALL_CONDITIONS,
+        context: {
+          headers: {
+            TENANTID: process.env.REACT_APP_TENANTID,
+            Authorization: Cookies.get('psp_t'),
+          },
+        },
+      })
+      .then(res => {
+        const data = res?.data?.getAllProductCondition;
+        setProductCondition(data)
+      })
+      .catch(err => {
+        setProductCondition(s => ({ ...s, error: 'Something went Wrong.!! ' }));
+      })
+      .finally(() => {
+        setProductCondition(s => ({ ...s, loading: false }));
+      });
+
   }, [singleProduct]);
+
   // ================= 3.for links tab END =================
 
   // ================= 4.for Specification tab START =================
@@ -274,8 +331,10 @@ const AddProduct = () => {
   const [gallaryImages, setGallaryImages] = useState([]);
   // ================= 10.for Image tab END =================
 
-  const handleSubmit = values => {
-    const { dimension_class, prod_regular_price, prod_sale_price, prod_weight, prod_weight_class, ...rest } = values;
+  const handleSubmit = () => {
+    const values = form.getFieldsValue(true);
+    console.log(values)
+    const { dimension_class, prod_regular_price, prod_condition, prod_sale_price, cost, prod_weight, prod_weight_class, ...rest } = values;
 
     let isAttribute = true;
     let isAttrCorrect = true;
@@ -359,12 +418,16 @@ const AddProduct = () => {
       // is_sale,
       partof_product,
       taxable: isTaxable,
+      prod_condition: selectedConditionID
       // prod_thumbnail,
       // prod_gallery,
     };
 
     if (prod_regular_price) {
       data.prod_regular_price = parseFloat(prod_regular_price);
+    }
+    if (cost) {
+      data.cost = parseFloat(cost);
     }
     if (prod_sale_price) {
       data.prod_sale_price = parseFloat(prod_sale_price);
@@ -424,6 +487,19 @@ const AddProduct = () => {
               Authorization: Cookies.get('psp_t'),
             },
           },
+          refetchQueries: [
+            {
+              query: productQuery.GET_PRODUCT_LIST,
+              context: {
+                headers: {
+                  TENANTID: process.env.REACT_APP_TENANTID,
+                  Authorization: Cookies.get('psp_t'),
+                },
+              },
+              fetchPolicy: 'network-only'
+            },
+            ['getProductList'],
+          ],
         })
         .then(res => {
           const data = res?.data?.addProduct;
@@ -455,6 +531,19 @@ const AddProduct = () => {
               Authorization: Cookies.get('psp_t'),
             },
           },
+          refetchQueries: [
+            {
+              query: productQuery.GET_PRODUCT_LIST,
+              context: {
+                headers: {
+                  TENANTID: process.env.REACT_APP_TENANTID,
+                  Authorization: Cookies.get('psp_t'),
+                },
+              },
+              fetchPolicy: 'network-only'
+            },
+            ['getProductList'],
+          ],
         })
         .then(res => {
           const data = res?.data?.updateProduct;
@@ -473,7 +562,6 @@ const AddProduct = () => {
         });
     }
   };
-
 
   return (
     <>
@@ -504,31 +592,31 @@ const AddProduct = () => {
                   }}
                   labelCol={{ span: 4 }}
                   initialValues={
-                    params.id
-                      ? {
-                        prod_name: singleProduct.data.prod_name,
-                        prod_short_desc: singleProduct.data.prod_short_desc,
-                        prod_meta_title: singleProduct.data.prod_meta_title,
-                        prod_meta_desc: singleProduct.data.prod_meta_desc,
-                        prod_meta_keywords: singleProduct.data.prod_meta_keywords,
-                        prod_tags: singleProduct.data.prod_tags,
-                        prod_partnum: singleProduct.data.prod_partnum,
-                        prod_sku: singleProduct.data.prod_sku,
-                        is_sale: singleProduct.data.is_sale,
-                        brand_id: singleProduct.data?.brand?.id,
-                        prod_category: singleProduct.data?.category?.id,
-                        dimension_class: singleProduct.data?.dimensions?.dimension_class || '',
-                        prod_weight: singleProduct.data?.prod_weight || '',
-                        prod_weight_class: singleProduct.data?.prod_weight_class || '',
-                        prod_outofstock_status: singleProduct.data?.prod_outofstock_status || '',
-                        prod_regular_price: singleProduct.data?.prod_regular_price || '',
-                        prod_sale_price: singleProduct.data?.prod_sale_price || '',
-                      }
-                      : {
-                        dimension_class: 'Inch',
-                        prod_weight_class: 'Pound',
-                        prod_outofstock_status: 'In Stock',
-                      }
+                    params.id ? {
+                      prod_name: singleProduct.data.prod_name,
+                      prod_short_desc: singleProduct.data.prod_short_desc,
+                      prod_meta_title: singleProduct.data.prod_meta_title,
+                      prod_meta_desc: singleProduct.data.prod_meta_desc,
+                      prod_meta_keywords: singleProduct.data.prod_meta_keywords,
+                      prod_tags: singleProduct.data.prod_tags,
+                      prod_partnum: singleProduct.data.prod_partnum,
+                      prod_sku: singleProduct.data.prod_sku,
+                      is_sale: singleProduct.data.is_sale,
+                      brand_id: singleProduct.data?.brand?.id,
+                      prod_condition: singleProduct.data?.productCondition?.id,
+                      // prod_category: singleProduct.data?.category?.id,
+                      dimension_class: singleProduct.data?.dimensions?.dimension_class || '',
+                      prod_weight: singleProduct.data?.prod_weight || '',
+                      prod_weight_class: singleProduct.data?.prod_weight_class || '',
+                      prod_outofstock_status: singleProduct.data?.prod_outofstock_status || '',
+                      prod_regular_price: singleProduct.data?.prod_regular_price || 0,
+                      prod_sale_price: singleProduct.data?.prod_sale_price || 0,
+                      cost: singleProduct.data?.cost || 0,
+                    } : {
+                      dimension_class: 'Inch',
+                      prod_weight_class: 'Pound',
+                      prod_outofstock_status: 'In Stock',
+                    }
                   }
                 >
                   <Tabs>
@@ -560,7 +648,7 @@ const AddProduct = () => {
                           <Form.Item
                             name="prod_name"
                             rules={[{ required: true, message: 'Please enter Product Name' }]}
-                            label="Name"
+                            label="Title"
                           >
                             <Input placeholder="Enter Product Name" />
                           </Form.Item>
@@ -633,21 +721,47 @@ const AddProduct = () => {
                       </Row>
                     </Tabs.TabPane>
                     <Tabs.TabPane tab="Data" key="Data">
+                      <Row gutter={25}>
+                        <Col span={24}>
+                          <Form.Item
+                            name="prod_condition"
+                            label="Product Condition"
+                          >
+                            <Row>
+                              <Col span={8}>
+                                <Select
+                                  defaultValue={singleProduct?.data?.productCondition?.id}
+                                  placeholder={productcondition.loading ? 'Loading...' : 'Select Condition'}
+                                  options={productcondition?.data?.map(item => ({
+                                    label: item.name,
+                                    value: item.id,
+                                  }))}
+                                  onSelect={(val) => setSelectedConditionID(val)}
+                                />
+                              </Col>
+                            </Row>
+                          </Form.Item>
+                        </Col>
+                      </Row>
+
                       <Form.Item name="is_sale" label="On Sale">
                         <Switch defaultChecked={singleProduct.data.is_sale} defaultValue={singleProduct.data.is_sale} />
                       </Form.Item>
                       <Form.Item name="is_featured" label="Featured">
                         <Switch defaultChecked={singleProduct.data.is_featured} defaultValue={singleProduct.data.is_featured} />
                       </Form.Item>
+                      <Form.Item name="is_serial" label="Has Serial">
+                        <Switch defaultChecked={singleProduct.data.is_serial} defaultValue={singleProduct.data.is_serial} />
+                      </Form.Item>
                     </Tabs.TabPane>
                     <Tabs.TabPane tab="Links" key="Links">
                       <Form.Item
                         name="brand_id"
-                        rules={[{ required: true, message: 'Please select a Brand' }]}
+                        rules={[{ required: true, message: 'Please Select a Manufacture' }]}
                         label="Manufacturer"
                       >
                         <Select
-                          placeholder={brand.loading ? 'Loading...' : 'select Manufacture'}
+                          placeholder={brand.loading ? 'Loading...' : 'Select Manufacture'}
                           options={brand?.data?.map(item => ({
                             label: item.brand_name,
                             value: item.id,
@@ -658,10 +772,12 @@ const AddProduct = () => {
                       </Form.Item>
                       <Form.Item
                         name="prod_category"
-                        rules={[{ required: true, message: 'Please enter Product Name' }]}
+                        initialValue={selectedProdCategory}
+                        rules={[{ required: true, message: 'Please Select a Category' }]}
                         label="Categories"
                       >
                         <Select
+                          // value={selectedProdCategory}
                           placeholder={
                             brand.loading
                               ? 'Loading...'
@@ -815,26 +931,52 @@ const AddProduct = () => {
                     <Tabs.TabPane tab="Attribute" key="Attribute">
                       <AttributeTab {...{ attributesTableData, setAttributesTableData }} />
                     </Tabs.TabPane>
+
                     <Tabs.TabPane tab="Price" key="Price">
-                      <Form.Item
-                        name="prod_regular_price"
-                        rules={[{ required: true, message: 'Please Enter Regular Price' }]}
-                        label="Regular Price"
-                      >
-                        <Input placeholder="Enter Regular Price" prefix="US$  " type="number" />
-                      </Form.Item>
-                      <Form.Item name="prod_sale_price" label="Sales Price">
-                        <Input prefix="US$  " type="number" placeholder="Enter Sales Price" />
-                      </Form.Item>
+                      <Row gutter={25}>
+                        <Col span={24}>
+                          <Form.Item
+                            name="prod_regular_price"
+                            rules={[{ required: true, message: 'Please Enter Regular Price' }]}
+                            label="MSRP"
+                          >
+                            <Row>
+                              <Col span={8}>
+                                <Input placeholder="Enter Regular Price" defaultValue={singleProduct.data.prod_regular_price} prefix="US$  " type="number" />
+                              </Col>
+                            </Row>
+                          </Form.Item>
+                        </Col>
+                        <Col span={24}>
+                          <Form.Item name="prod_sale_price" label="Sales Price">
+                            <Row>
+                              <Col span={8}>
+                                <Input prefix="US$  " type="number" defaultValue={singleProduct.data.prod_sale_price} placeholder="Enter Sales Price" />
+                              </Col>
+                            </Row>
+                          </Form.Item>
+                        </Col>
+                        <Col span={24}>
+                          <Form.Item name="cost" label="Cost">
+                            <Row>
+                              <Col span={8}>
+                                <Input prefix="US$  " type="number" defaultValue={singleProduct.data.cost} placeholder="Enter Product Cost" />
+                              </Col>
+                            </Row>
+                          </Form.Item>
+                        </Col>
+                      </Row>
+
                       <Form.Item label="Taxable">
                         <Switch checked={isTaxable} onChange={checked => setIsTaxable(checked)} />
                       </Form.Item>
                     </Tabs.TabPane>
+
                     <Tabs.TabPane tab="Discount" key="Discount">
                       <DiscountTab {...{ discount, setDiscount }} />
                     </Tabs.TabPane>
 
-                    <Tabs.TabPane tab="Parts Of Product" key="PartsOf">
+                    <Tabs.TabPane tab="Build Of Product" key="PartsOf">
                       <PartsOfProductTab
                         {...{
                           products,
