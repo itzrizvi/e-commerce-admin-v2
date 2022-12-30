@@ -13,7 +13,7 @@ import ImageTab from './addProducts/ImageTab';
 import apolloClient from '../../apollo';
 import { brandQuery } from '../../apollo/brand';
 import Cookies from 'js-cookie';
-import { apolloUploadClient, productMutation, productQuery, utilityQuery } from '../../utility/apollo';
+import { apolloUploadClient, authQuery, productMutation, productQuery, utilityQuery } from '../../utility/apollo';
 import PartsOfProductTab from './addProducts/PartsOfProductTab';
 import { viewPermission } from '../../utility/utility';
 import { Link, useHistory, useLocation } from 'react-router-dom';
@@ -27,7 +27,10 @@ const AddProduct = () => {
   const [isLoading, setIsLoading] = useState(false);
   const history = useHistory();
   const [selectedConditionID, setSelectedConditionID] = useState(null);
+  const [selectedProductRepID, setSelectedProductRepID] = useState(null);
   const [selectedProdCategory, setSelectedProdCategory] = useState(null);
+  const [selectedavailabilitystatusID, setSelectedAvailabilityStatusID] = useState(null);
+  const [extendedWarrantyEnable, setExtendedWarrantyEnable] = useState(false);
 
   // update prod
   const { search } = useLocation();
@@ -116,17 +119,25 @@ const AddProduct = () => {
           prod_sku: data?.data.prod_sku,
           is_sale: data?.data.is_sale,
           brand_id: data?.data?.brand?.id,
-          // prod_category: data?.data?.category?.id,
+          prod_category: data?.data?.category?.id,
           dimension_class: data?.data?.dimensions?.dimension_class || 'Inch',
           prod_weight: data?.data?.prod_weight || '',
           prod_weight_class: data?.data?.prod_weight_class || 'Pound',
-          prod_outofstock_status: data?.data?.prod_outofstock_status || 'In Stock',
+          prod_outofstock_status: data?.data?.productavailablitystatus?.id || '',
           prod_regular_price: data?.data?.prod_regular_price || '',
           prod_sale_price: data?.data?.prod_sale_price || '',
           cost: data?.data?.cost || '',
-          prod_condition: data?.data?.productCondition?.id || '',
+          prod_condition: data?.data?.productCondition?.id,
+          product_rep: data?.data?.representative?.id || '',
+          extended_warranty: data?.data?.extended_warranty,
+          extended_warranty_value: data?.data?.extended_warranty_value || 0,
+          location: data?.data?.location || '',
+          hs_code: data?.data?.hs_code || '',
+          product_rank: data?.data?.product_rank || '',
+          mfg_build_part_number: data?.data?.mfg_build_part_number || '',
         })
         setSelectedProdCategory(data?.data?.category?.id)
+        setExtendedWarrantyEnable(data?.data?.extended_warranty_value)
       })
       .catch(err => {
         console.log('error on loading porduct,\n', err);
@@ -151,6 +162,8 @@ const AddProduct = () => {
   // ================= 3.for links tab START =================
   const [brand, setBrand] = useState({ data: [], loading: true, error: '' });
   const [productcondition, setProductCondition] = useState({ data: [], loading: true, error: '' });
+  const [representative, setRepresentative] = useState({ data: [], loading: true, error: '' });
+  const [availabilitystatus, setAvailabilityStatus] = useState({ data: [], loading: true, error: '' });
   const [categories, setCategories] = useState([]);
   const [relatedProducts, setRelatedProducts] = useState([]);
   const onManufactureSelect = (val, item) => {
@@ -259,6 +272,50 @@ const AddProduct = () => {
         setProductCondition(s => ({ ...s, loading: false }));
       });
 
+    //////////////////////////////////
+    apolloClient
+      .query({
+        query: authQuery.GET_ALL_STAFF,
+        context: {
+          headers: {
+            TENANTID: process.env.REACT_APP_TENANTID,
+            Authorization: Cookies.get('psp_t'),
+          },
+        },
+      })
+      .then(res => {
+        const data = res?.data?.getAllStaff;
+        setRepresentative(data)
+      })
+      .catch(err => {
+        setRepresentative(s => ({ ...s, error: 'Something went Wrong.!! ' }));
+      })
+      .finally(() => {
+        setRepresentative(s => ({ ...s, loading: false }));
+      });
+
+    //////////////////////////////////
+    apolloClient
+      .query({
+        query: utilityQuery.GET_ALL_AVAILABILITY,
+        context: {
+          headers: {
+            TENANTID: process.env.REACT_APP_TENANTID,
+            Authorization: Cookies.get('psp_t'),
+          },
+        },
+      })
+      .then(res => {
+        const data = res?.data?.getAllProductAvailabilityStatus;
+        setAvailabilityStatus(data)
+      })
+      .catch(err => {
+        setAvailabilityStatus(s => ({ ...s, error: 'Something went Wrong.!! ' }));
+      })
+      .finally(() => {
+        setAvailabilityStatus(s => ({ ...s, loading: false }));
+      });
+
   }, [singleProduct]);
 
   // ================= 3.for links tab END =================
@@ -334,8 +391,7 @@ const AddProduct = () => {
   const handleSubmit = () => {
     const values = form.getFieldsValue(true);
     console.log(values)
-    const { dimension_class, prod_regular_price, prod_condition, prod_sale_price, cost, prod_weight, prod_weight_class, ...rest } = values;
-
+    const { dimension_class, prod_regular_price, extended_warranty_value, prod_condition, product_rep, prod_outofstock_status, prod_sale_price, cost, prod_weight, prod_weight_class, ...rest } = values;
     let isAttribute = true;
     let isAttrCorrect = true;
     const product_attributes = attributesTableData.map(item => {
@@ -409,7 +465,6 @@ const AddProduct = () => {
       };
       return data;
     });
-
     const data = {
       ...rest,
       prod_long_desc,
@@ -418,7 +473,9 @@ const AddProduct = () => {
       // is_sale,
       partof_product,
       taxable: isTaxable,
-      prod_condition: selectedConditionID
+      prod_condition: selectedConditionID,
+      product_rep: selectedProductRepID,
+      prod_outofstock_status: selectedavailabilitystatusID
       // prod_thumbnail,
       // prod_gallery,
     };
@@ -428,6 +485,9 @@ const AddProduct = () => {
     }
     if (cost) {
       data.cost = parseFloat(cost);
+    }
+    if (extended_warranty_value) {
+      data.extended_warranty_value = parseFloat(extended_warranty_value);
     }
     if (prod_sale_price) {
       data.prod_sale_price = parseFloat(prod_sale_price);
@@ -604,14 +664,21 @@ const AddProduct = () => {
                       is_sale: singleProduct.data.is_sale,
                       brand_id: singleProduct.data?.brand?.id,
                       prod_condition: singleProduct.data?.productCondition?.id,
-                      // prod_category: singleProduct.data?.category?.id,
+                      product_rep: singleProduct.data?.representative?.id,
+                      prod_outofstock_status: singleProduct?.data?.productavailablitystatus?.id,
+                      prod_category: singleProduct.data?.category?.id,
                       dimension_class: singleProduct.data?.dimensions?.dimension_class || '',
                       prod_weight: singleProduct.data?.prod_weight || '',
                       prod_weight_class: singleProduct.data?.prod_weight_class || '',
-                      prod_outofstock_status: singleProduct.data?.prod_outofstock_status || '',
                       prod_regular_price: singleProduct.data?.prod_regular_price || 0,
                       prod_sale_price: singleProduct.data?.prod_sale_price || 0,
                       cost: singleProduct.data?.cost || 0,
+                      extended_warranty: singleProduct.data?.extended_warranty || false,
+                      extended_warranty_value: singleProduct.data?.extended_warranty_value || 0,
+                      location: singleProduct.data?.location || '',
+                      hs_code: singleProduct.data?.hs_code || '',
+                      product_rank: singleProduct.data?.product_rank || '',
+                      mfg_build_part_number: singleProduct.data?.mfg_build_part_number || '',
                     } : {
                       dimension_class: 'Inch',
                       prod_weight_class: 'Pound',
@@ -624,12 +691,26 @@ const AddProduct = () => {
                       <Row gutter={25}>
                         <Col span={24}>
                           <Form.Item
+                            name="mfg_build_part_number"
+                            label="MFG Build Part Number"
+                          >
+                            <Row>
+                              <Col span={6}>
+                                <Input defaultValue={singleProduct?.data?.mfg_build_part_number} placeholder="Enter MFG Build Part Number" />
+                              </Col>
+                            </Row>
+                          </Form.Item>
+                        </Col>
+                      </Row>
+                      <Row gutter={25}>
+                        <Col span={24}>
+                          <Form.Item
                             name="prod_partnum"
                             rules={[{ required: true, message: 'Please enter Part NO' }]}
                             label="Part Number"
                           >
                             <Row>
-                              <Col span={8}>
+                              <Col span={6}>
                                 <Input placeholder="Enter Part No" />
                               </Col>
                             </Row>
@@ -638,7 +719,7 @@ const AddProduct = () => {
                         <Col span={24}>
                           <Form.Item name="prod_sku" label="SKU">
                             <Row>
-                              <Col span={8}>
+                              <Col span={6}>
                                 <Input placeholder="Enter Product SKU" />
                               </Col>
                             </Row>
@@ -728,9 +809,9 @@ const AddProduct = () => {
                             label="Product Condition"
                           >
                             <Row>
-                              <Col span={8}>
+                              <Col span={6}>
                                 <Select
-                                  defaultValue={singleProduct?.data?.productCondition?.id}
+                                  defaultValue={singleProduct?.data?.productCondition?.name}
                                   placeholder={productcondition.loading ? 'Loading...' : 'Select Condition'}
                                   options={productcondition?.data?.map(item => ({
                                     label: item.name,
@@ -743,7 +824,96 @@ const AddProduct = () => {
                           </Form.Item>
                         </Col>
                       </Row>
+                      <Row gutter={25}>
+                        <Col span={24}>
+                          <Form.Item
+                            name="location"
+                            label="Location"
+                          >
+                            <Row>
+                              <Col span={6}>
+                                <Input defaultValue={singleProduct?.data?.location} placeholder="Enter Product Location" />
+                              </Col>
+                            </Row>
+                          </Form.Item>
+                        </Col>
+                      </Row>
+                      <Row gutter={25}>
+                        <Col span={24}>
+                          <Form.Item
+                            name="hs_code"
+                            label="HS Code"
+                          >
+                            <Row>
+                              <Col span={6}>
+                                <Input defaultValue={singleProduct?.data?.hs_code} placeholder="Enter HS Code" />
+                              </Col>
+                            </Row>
+                          </Form.Item>
+                        </Col>
+                      </Row>
+                      <Row gutter={25}>
+                        <Col span={24}>
+                          <Form.Item
+                            name="product_rank"
+                            label="Product Rank"
+                          >
+                            <Row>
+                              <Col span={6}>
+                                <Input defaultValue={singleProduct?.data?.product_rank} placeholder="Enter Product Rank" />
+                              </Col>
+                            </Row>
+                          </Form.Item>
+                        </Col>
+                      </Row>
 
+                      <Row gutter={25}>
+                        <Col span={24}>
+                          <Form.Item
+                            name="product_rep"
+                            label="Product Representative"
+                          >
+                            <Row>
+                              <Col span={6}>
+                                <Select
+                                  defaultValue={`${singleProduct?.data?.representative?.first_name} ${singleProduct?.data?.representative?.last_name}`}
+                                  placeholder={representative.loading ? 'Loading...' : 'Select a Product Representative'}
+                                  options={representative?.data?.map(item => ({
+                                    label: item.first_name + ' ' + item.last_name,
+                                    value: item.id,
+                                  }))}
+                                  onSelect={(val) => setSelectedProductRepID(val)}
+                                />
+
+                                <ul>
+                                  {singleProduct?.data?.representative?.roles.map((item) =>
+                                    <li key={item.id}>{item.role}</li>
+                                  )}
+                                </ul>
+
+                              </Col>
+                            </Row>
+                          </Form.Item>
+                        </Col>
+                      </Row>
+
+                      {extendedWarrantyEnable && (
+                        <Row gutter={25}>
+                          <Col span={24}>
+                            <Form.Item rules={[{ required: true, message: 'Please Enter Extended Warranty Value' }]} name="extended_warranty_value" label="Extended Warranty Value">
+                              <Row>
+                                <Col span={6}>
+                                  <Input placeholder="Extended Warranty Value" defaultValue={singleProduct?.data?.extended_warranty_value} type="number" />
+                                </Col>
+                              </Row>
+
+                            </Form.Item>
+                          </Col>
+                        </Row>
+                      )}
+                      <Form.Item name="extended_warranty" label="Extended Warranty">
+                        <Switch defaultChecked={singleProduct.data.extended_warranty} onChange={(val) => setExtendedWarrantyEnable(val)} defaultValue={singleProduct.data.extended_warranty} />
+                      </Form.Item>
                       <Form.Item name="is_sale" label="On Sale">
                         <Switch defaultChecked={singleProduct.data.is_sale} defaultValue={singleProduct.data.is_sale} />
                       </Form.Item>
@@ -755,178 +925,241 @@ const AddProduct = () => {
                       </Form.Item>
                     </Tabs.TabPane>
                     <Tabs.TabPane tab="Links" key="Links">
-                      <Form.Item
-                        name="brand_id"
-                        rules={[{ required: true, message: 'Please Select a Manufacture' }]}
-                        label="Manufacturer"
-                      >
-                        <Select
-                          placeholder={brand.loading ? 'Loading...' : 'Select Manufacture'}
-                          options={brand?.data?.map(item => ({
-                            label: item.brand_name,
-                            value: item.id,
-                            categories: item.categories,
-                          }))}
-                          onSelect={onManufactureSelect}
-                        />
-                      </Form.Item>
-                      <Form.Item
-                        name="prod_category"
-                        initialValue={selectedProdCategory}
-                        rules={[{ required: true, message: 'Please Select a Category' }]}
-                        label="Categories"
-                      >
-                        <Select
-                          // value={selectedProdCategory}
-                          placeholder={
-                            brand.loading
-                              ? 'Loading...'
-                              : categories.length
-                                ? 'Select Category'
-                                : 'Select manifacture first'
-                          }
-                          options={categories.map(item => ({
-                            label: item.cat_name,
-                            value: item.id,
-                            key: item.id,
-                          }))}
-                        // mode="multiple"
-                        />
-                      </Form.Item>
-                      <Form.Item
-                        label="Related Product"
-                        rules={[{ required: true, message: 'Please enter Product Name' }]}
-                      >
-                        <Select
-                          placeholder={products.isLoading ? 'Loading...' : 'select Related Products'}
-                          mode="multiple"
-                          optionFilterProp="label"
-                          defaultValue={
-                            params.id ? singleProduct?.data?.related_products?.map(item => item?.related_prod?.id) : []
-                          }
-                          options={products?.data?.map(item => ({
-                            label: item.prod_name,
-                            value: item.id,
-                            uid: item.id,
-                          }))}
-                          onChange={(newVal, items) => {
-                            setRelatedProducts(items);
-                          }}
-                        ></Select>
-                      </Form.Item>
+
+                      <Row gutter={25}>
+                        <Col span={24}>
+                          <Form.Item
+                            name="brand_id"
+                            rules={[{ required: true, message: 'Please Select a Manufacture' }]}
+                            label="Manufacturer"
+                          >
+                            <Row >
+                              <Col span={7}>
+                                <Select
+                                  defaultValue={singleProduct?.data?.brand?.brand_name}
+                                  placeholder={brand.loading ? 'Loading...' : 'Select Manufacture'}
+                                  options={brand?.data?.map(item => ({
+                                    label: item.brand_name,
+                                    value: item.id,
+                                    categories: item.categories,
+                                  }))}
+                                  onSelect={onManufactureSelect}
+                                />
+                              </Col>
+                            </Row>
+
+                          </Form.Item>
+                        </Col>
+                      </Row>
+
+                      <Row gutter={25}>
+                        <Col span={24}>
+                          <Form.Item
+                            name="prod_category"
+                            initialValue={selectedProdCategory}
+                            rules={[{ required: true, message: 'Please Select a Category' }]}
+                            label="Categories"
+                          >
+                            <Row>
+                              <Col span={7}>
+                                <Select
+                                  defaultValue={singleProduct?.data?.category?.cat_name}
+                                  placeholder={
+                                    brand.loading
+                                      ? 'Loading...'
+                                      : categories.length
+                                        ? 'Select Category'
+                                        : 'Select manifacture first'
+                                  }
+                                  options={categories.map(item => ({
+                                    label: item.cat_name,
+                                    value: item.id,
+                                    key: item.id,
+                                  }))}
+                                // mode="multiple"
+                                />
+                              </Col>
+                            </Row>
+                          </Form.Item>
+                        </Col>
+                      </Row>
+
+                      <Row gutter={25}>
+                        <Col span={24}>
+                          <Form.Item
+                            label="Related Product"
+                            rules={[{ required: true, message: 'Please enter Product Name' }]}
+                          >
+                            <Row>
+                              <Col span={7}>
+                                <Select
+                                  placeholder={products.isLoading ? 'Loading...' : 'select Related Products'}
+                                  mode="multiple"
+                                  optionFilterProp="label"
+                                  defaultValue={
+                                    params.id ? singleProduct?.data?.related_products?.map(item => item?.related_prod?.id) : []
+                                  }
+                                  options={products?.data?.map(item => ({
+                                    label: item.prod_name,
+                                    value: item.id,
+                                    uid: item.id,
+                                  }))}
+                                  onChange={(newVal, items) => {
+                                    setRelatedProducts(items);
+                                  }}
+                                ></Select>
+                              </Col>
+                            </Row>
+                          </Form.Item>
+                        </Col>
+                      </Row>
+
                     </Tabs.TabPane>
                     <Tabs.TabPane tab="Specifications" key="Specifications">
-                      <Form.Item
-                        label={
-                          <p>
-                            Dimensions <br /> (L x W x H)
-                          </p>
-                        }
-                      >
-                        <Input.Group compact>
-                          <Input
-                            type="number"
-                            style={{ width: '33.3%' }}
-                            placeholder="Length"
-                            onBlur={e => setDimensions(state => ({ ...state, length: parseFloat(e.target.value) }))}
-                            defaultValue={
-                              !params.id
-                                ? ''
-                                : singleProduct?.data?.dimensions?.length
-                                  ? singleProduct?.data?.dimensions?.length
-                                  : ''
+                      <Row gutter={25}>
+                        <Col span={24}>
+                          <Form.Item
+                            label={
+                              <p>
+                                Dimensions <br /> (L x W x H)
+                              </p>
                             }
-                          />
-                          <Input
-                            type="number"
-                            style={{ width: '33.3%' }}
-                            placeholder="Width"
-                            onBlur={e => setDimensions(state => ({ ...state, width: parseFloat(e.target.value) }))}
-                            defaultValue={
-                              !params.id
-                                ? ''
-                                : singleProduct?.data?.dimensions?.length
-                                  ? singleProduct?.data?.dimensions?.width
-                                  : ''
+                          >
+                            <Input.Group compact>
+                              <Input
+                                type="number"
+                                style={{ width: '20%' }}
+                                placeholder="Length"
+                                onBlur={e => setDimensions(state => ({ ...state, length: parseFloat(e.target.value) }))}
+                                defaultValue={
+                                  !params.id
+                                    ? ''
+                                    : singleProduct?.data?.dimensions?.length
+                                      ? singleProduct?.data?.dimensions?.length
+                                      : ''
+                                }
+                              />
+                              <Input
+                                type="number"
+                                style={{ width: '20%' }}
+                                placeholder="Width"
+                                onBlur={e => setDimensions(state => ({ ...state, width: parseFloat(e.target.value) }))}
+                                defaultValue={
+                                  !params.id
+                                    ? ''
+                                    : singleProduct?.data?.dimensions?.length
+                                      ? singleProduct?.data?.dimensions?.width
+                                      : ''
+                                }
+                              />
+                              <Input
+                                type="number"
+                                style={{ width: '20%' }}
+                                placeholder="Height"
+                                onBlur={e => setDimensions(state => ({ ...state, height: parseFloat(e.target.value) }))}
+                                defaultValue={
+                                  !params.id
+                                    ? ''
+                                    : singleProduct?.data?.dimensions?.length
+                                      ? singleProduct?.data?.dimensions?.height
+                                      : ''
+                                }
+                              />
+                            </Input.Group>
+                          </Form.Item>
+                        </Col>
+                      </Row>
+
+                      <Row gutter={25}>
+                        <Col span={24}>
+                          <Form.Item
+                            name="dimension_class"
+                            label={
+                              <p>
+                                Dimensions <br />
+                                Class{' '}
+                              </p>
                             }
-                          />
-                          <Input
-                            type="number"
-                            style={{ width: '33.3%' }}
-                            placeholder="Height"
-                            onBlur={e => setDimensions(state => ({ ...state, height: parseFloat(e.target.value) }))}
-                            defaultValue={
-                              !params.id
-                                ? ''
-                                : singleProduct?.data?.dimensions?.length
-                                  ? singleProduct?.data?.dimensions?.height
-                                  : ''
-                            }
-                          />
-                        </Input.Group>
-                      </Form.Item>
-                      <Form.Item
-                        name="dimension_class"
-                        label={
-                          <p>
-                            Dimensions <br />
-                            Class{' '}
-                          </p>
-                        }
-                      >
-                        <Select style={{ height: '3.5em' }} placeholder="Enter Dimension Class">
-                          <Option key={1} value="Centimeter">
-                            Centimeter
-                          </Option>
-                          <Option key={2} value="Millimeter">
-                            Millimeter
-                          </Option>
-                          <Option key={3} value="Inch">
-                            Inch
-                          </Option>
-                        </Select>
-                      </Form.Item>
+                          >
+                            <Row>
+                              <Col span={7}>
+                                <Select style={{ height: '3.5em' }} placeholder="Enter Dimension Class">
+                                  <Option key={1} value="Centimeter">
+                                    Centimeter
+                                  </Option>
+                                  <Option key={2} value="Millimeter">
+                                    Millimeter
+                                  </Option>
+                                  <Option key={3} value="Inch">
+                                    Inch
+                                  </Option>
+                                </Select>
+                              </Col>
+                            </Row>
+
+                          </Form.Item>
+                        </Col>
+                      </Row>
+
                       <Form.Item name="prod_weight" label="Weight">
-                        <Input type="number" placeholder="Enter Weight" />
+                        <Row>
+                          <Col span={7}>
+                            <Input type="number" placeholder="Enter Weight" />
+                          </Col>
+                        </Row>
                       </Form.Item>
-                      <Form.Item name="prod_weight_class" label="Weight Class">
-                        <Select placeholder="Enter Weight Class">
-                          <Option key={1} value="Kilogram">
-                            Kilogram
-                          </Option>
-                          <Option key={1} value="Gram">
-                            Gram
-                          </Option>
-                          <Option key={2} value="Pound">
-                            Pound
-                          </Option>
-                          <Option key={3} value="Ounce">
-                            Ounce
-                          </Option>
-                        </Select>
-                      </Form.Item>
+                      <Row gutter={25}>
+                        <Col span={24}>
+                          <Form.Item name="prod_weight_class" label="Weight Class">
+                            <Row>
+                              <Col span={7}>
+                                <Select placeholder="Enter Weight Class">
+                                  <Option key={1} value="Kilogram">
+                                    Kilogram
+                                  </Option>
+                                  <Option key={1} value="Gram">
+                                    Gram
+                                  </Option>
+                                  <Option key={2} value="Pound">
+                                    Pound
+                                  </Option>
+                                  <Option key={3} value="Ounce">
+                                    Ounce
+                                  </Option>
+                                </Select>
+                              </Col>
+                            </Row>
+                          </Form.Item>
+                        </Col>
+                      </Row>
+
                     </Tabs.TabPane>
                     <Tabs.TabPane tab="Stock" key="Stock">
-                      <Form.Item
-                        name="prod_outofstock_status"
-                        rules={[{ required: true, message: 'Please enter Availability Status' }]}
-                        label="Availability"
-                      >
-                        <Select placeholder="Please select a Status">
-                          <Select.Option key={1} value="2-3 Days">
-                            2-3 Days
-                          </Select.Option>
-                          <Select.Option key={2} value="In Stock">
-                            In Stock
-                          </Select.Option>
-                          <Select.Option key={3} value="Out Of Stock">
-                            Out Of Stock
-                          </Select.Option>
-                          <Select.Option key={4} value="Pre-Orde">
-                            Pre-Order
-                          </Select.Option>
-                        </Select>
-                      </Form.Item>
+                      <Row gutter={25}>
+                        <Col span={24}>
+                          <Form.Item
+                            name="prod_outofstock_status"
+                            rules={[{ required: true, message: 'Please Select Availability Status' }]}
+                            label="Availability"
+                          >
+                            <Row>
+                              <Col span={6}>
+                                <Select
+                                  defaultValue={singleProduct?.data?.productavailablitystatus?.name}
+                                  placeholder={availabilitystatus.loading ? 'Loading...' : 'Select a Status'}
+                                  options={availabilitystatus?.data?.map(item => ({
+                                    label: item.name,
+                                    value: item.id
+                                  }))}
+                                  onSelect={(val) => setSelectedAvailabilityStatusID(val)}
+                                />
+                              </Col>
+                            </Row>
+
+                          </Form.Item>
+                        </Col>
+                      </Row>
+
                     </Tabs.TabPane>
                     <Tabs.TabPane tab="Attribute" key="Attribute">
                       <AttributeTab {...{ attributesTableData, setAttributesTableData }} />
@@ -941,7 +1174,7 @@ const AddProduct = () => {
                             label="MSRP"
                           >
                             <Row>
-                              <Col span={8}>
+                              <Col span={6}>
                                 <Input placeholder="Enter Regular Price" defaultValue={singleProduct.data.prod_regular_price} prefix="US$  " type="number" />
                               </Col>
                             </Row>
@@ -950,7 +1183,7 @@ const AddProduct = () => {
                         <Col span={24}>
                           <Form.Item name="prod_sale_price" label="Sales Price">
                             <Row>
-                              <Col span={8}>
+                              <Col span={6}>
                                 <Input prefix="US$  " type="number" defaultValue={singleProduct.data.prod_sale_price} placeholder="Enter Sales Price" />
                               </Col>
                             </Row>
@@ -959,7 +1192,7 @@ const AddProduct = () => {
                         <Col span={24}>
                           <Form.Item name="cost" label="Cost">
                             <Row>
-                              <Col span={8}>
+                              <Col span={6}>
                                 <Input prefix="US$  " type="number" defaultValue={singleProduct.data.cost} placeholder="Enter Product Cost" />
                               </Col>
                             </Row>
