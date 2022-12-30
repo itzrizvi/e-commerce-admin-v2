@@ -153,18 +153,18 @@ const AddOrder = () => {
         setCountries(data?.data);
       });
     // Get Account List for Shipping Method
-    // apolloClient
-    //   .query({
-    //     query: orderQuery.GET_SHIPPING_ACCOUNT_LIST,
-    //     context: {
-    //       headers: { TENANTID: process.env.REACT_APP_TENANTID },
-    //     },
-    //   })
-    //   .then(res => {
-    //     const data = res.data.getCountryList;
-    //     if (!data.status) return true;
-    //     setCountries(data?.data);
-    //   });
+    apolloClient
+      .query({
+        query: orderQuery.GET_SHIPPING_ACCOUNT_LIST,
+        context: {
+          headers: { TENANTID: process.env.REACT_APP_TENANTID },
+        },
+      })
+      .then(res => {
+        const data = res.data.getCountryList;
+        if (!data.status) return true;
+        setCountries(data?.data);
+      });
   }, []);
 
   useEffect(() => {
