@@ -48,8 +48,8 @@ const AddressTable = ({ initialData, addresses, setAddress, defaultAddressId, se
   const column = [
     {
       title: 'Country',
-      dataIndex: 'country ',
-      key: 'country ',
+      dataIndex: ['countryCode', 'name'],
+      key: 'name',
       render: (text, record) => (
         <Select
           style={{ width: '100%' }}

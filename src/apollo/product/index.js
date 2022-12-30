@@ -84,6 +84,10 @@ export const productSchema = {
             state
             zip_code
             country
+            countryCode{
+              name
+              code
+            }
             type
             status
             isDefault

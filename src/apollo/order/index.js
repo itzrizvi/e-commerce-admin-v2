@@ -239,5 +239,20 @@ export const orderQuery = {
       }
     }
   `,
+  GET_SHIPPING_ACCOUNT_LIST: gql`
+    query getShippingAccountListAdmin {
+      getShippingAccountListAdmin {
+        message
+        status
+        data {
+          id
+          name
+          account
+          description
+          status
+        }
+      }
+    }
+  `,
 };
 export const orderMutation = {};

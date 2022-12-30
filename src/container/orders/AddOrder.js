@@ -36,6 +36,8 @@ import { UploadOutlined } from '@ant-design/icons';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements } from '@stripe/react-stripe-js';
 import StripeForm from './StripeForm';
+import { addressSchema } from '../../apollo/address';
+import { strCamelCase } from '../../utility/stringModify';
 const stripePromise = loadStripe('pk_test_6pRNASCoBOKtIshFeQd4XMUh');
 const { Text, Paragraph } = Typography;
 const prod_initial = {
@@ -78,6 +80,114 @@ const AddOrder = () => {
   const [changeAddress, setChangeAddress] = useState(false);
   const [tempSelectedAddress, setTempSelectedAddress] = useState(null);
   const [selectedPaymentMethodSlug, setSelectedPaymentMethodSlug] = useState(null);
+  // Change State After Country Change
+  const [selectedCountryCode, setSelectedCountryCode] = useState('US');
+  const [countries, setCountries] = useState([]);
+  const [states, setStates] = useState([]);
+  const [shippingMethodAccountList, setShippingMethodAccountList] = useState([]);
+
+  useEffect(() => {
+    // Load Shipping Method
+    apolloClient
+      .query({
+        query: productSchema.GET_SHIPPING_METHOD_LIST,
+        context: {
+          headers: {
+            TENANTID: process.env.REACT_APP_TENANTID,
+          },
+        },
+      })
+      .then(res => {
+        const data = res?.data?.getShippingMethodListPublic;
+        if (!data.status) return;
+        setShippingMethod(data?.data);
+      });
+
+    // Load Payment Mathod
+    apolloClient
+      .query({
+        query: productSchema.GET_PAYMENT_METHOD_LIST,
+        context: {
+          headers: {
+            TENANTID: process.env.REACT_APP_TENANTID,
+          },
+        },
+      })
+      .then(res => {
+        const data = res?.data?.getPaymentMethodListPublic;
+        if (!data.status) return;
+        setPaymentMethod(data?.data);
+      });
+
+    // Get Order Status List
+    apolloClient
+      .query({
+        query: orderQuery.GET_ORDER_STATUS_LIST,
+        context: {
+          headers: {
+            TENANTID: process.env.REACT_APP_TENANTID,
+            Authorization: token,
+          },
+        },
+      })
+      .then(res => {
+        const data = res?.data?.getOrderStatusList;
+        if (!data.status) return;
+        const order_status_list = data?.data?.map(item => ({
+          ...item,
+          value: item.id,
+          label: item.name,
+        }));
+      });
+    // Get Country List
+    apolloClient
+      .query({
+        query: addressSchema.GET_COUNTRY_LIST,
+        context: {
+          headers: { TENANTID: process.env.REACT_APP_TENANTID },
+        },
+      })
+      .then(res => {
+        const data = res.data.getCountryList;
+        if (!data.status) return true;
+        setCountries(data?.data);
+      });
+    // Get Account List for Shipping Method
+    // apolloClient
+    //   .query({
+    //     query: orderQuery.GET_SHIPPING_ACCOUNT_LIST,
+    //     context: {
+    //       headers: { TENANTID: process.env.REACT_APP_TENANTID },
+    //     },
+    //   })
+    //   .then(res => {
+    //     const data = res.data.getCountryList;
+    //     if (!data.status) return true;
+    //     setCountries(data?.data);
+    //   });
+  }, []);
+
+  useEffect(() => {
+    apolloClient
+      .query({
+        query: addressSchema.GET_STATE_LISTS,
+        variables: {
+          query: {
+            code: selectedCountryCode,
+          },
+        },
+        context: {
+          headers: {
+            TENANTID: process.env.REACT_APP_TENANTID,
+          },
+        },
+      })
+      .then(res => {
+        const data = res?.data?.getStateList;
+        if (!data?.status) return;
+        setStates(data?.data);
+      });
+  }, [selectedCountryCode]);
 
   const handleSubmit = () => {
     const form_data = form.getFieldsValue(true);
@@ -266,61 +376,6 @@ const AddOrder = () => {
     },
   ];
 
-  useEffect(() => {
-    // Load Shipping Method
-    apolloClient
-      .query({
-        query: productSchema.GET_SHIPPING_METHOD_LIST,
-        context: {
-          headers: {
-            TENANTID: process.env.REACT_APP_TENANTID,
-          },
-        },
-      })
-      .then(res => {
-        const data = res?.data?.getShippingMethodListPublic;
-        if (!data.status) return;
-        setShippingMethod(data?.data);
-      });
-
-    // Load Payment Mathod
-    apolloClient
-      .query({
-        query: productSchema.GET_PAYMENT_METHOD_LIST,
-        context: {
-          headers: {
-            TENANTID: process.env.REACT_APP_TENANTID,
-          },
-        },
-      })
-      .then(res => {
-        const data = res?.data?.getPaymentMethodListPublic;
-        if (!data.status) return;
-        setPaymentMethod(data?.data);
-      });
-
-    // Get Order Status List
-    apolloClient
-      .query({
-        query: orderQuery.GET_ORDER_STATUS_LIST,
-        context: {
-          headers: {
-            TENANTID: process.env.REACT_APP_TENANTID,
-            Authorization: token,
-          },
-        },
-      })
-      .then(res => {
-        const data = res?.data?.getOrderStatusList;
-        if (!data.status) return;
-        const order_status_list = data?.data?.map(item => ({
-          ...item,
-          value: item.id,
-          label: item.name,
-        }));
-      });
-  }, []);
-
   /* -------------------------- Step From Data Start -------------------------- */
   const steps = [
     {
@@ -354,8 +409,25 @@ const AddOrder = () => {
   ];
 
   const [current, setCurrent] = useState(0);
-  const next = () => {
-    setCurrent(current + 1);
+  const next = async () => {
+    try {
+      console.log('🚀 ~ file: AddOrder.js:357 ~ AddOrder ~ current', current);
+      if (current === 0) {
+        await form.validateFields(['customer_id']);
+      } else if (current === 1) {
+        if (selectedProduct.length === 0) {
+          return toast.warn('Please Select at Least One Product.');
+        } else if (selectedProduct.some(item => item.prod_name === '')) {
+          return toast.warn('Please Fill Product Field Properly.');
+        }
+      } else if (current === 2) {
+        if (!selectedBillingAddress) return toast.warn('Please select billing address');
+        if (!selectedShippingAddress) return toast.warn('Please select shipping address');
+      } else if (current === 3) {
+        await form.validateFields(['shipping_method_id']);
+      }
+      setCurrent(current + 1);
+    } catch {}
   };
   const prev = () => {
     setCurrent(current - 1);
@@ -436,20 +508,22 @@ const AddOrder = () => {
     if (editSelectedAddress) {
       if (type === 'billing') {
         newBillingAddress = billingAddresses.map(item => {
-          let { id, createdAt, updatedAt, __typename, type, isDefault, ...rest } = item;
+          let { id, createdAt, updatedAt, __typename, type, isDefault, countryCode, ...rest } = item;
           if (values.isDefault) isDefault = false;
           if (editSelectedAddress?.id === id) {
             rest = values;
           }
           return {
             parent_id: selectedCustomer?.id,
+            isNew: false,
             isDefault: isDefault,
+            id,
             ...rest,
           };
         });
       } else {
         newShippingAddress = shippingAddresses.map(item => {
-          let { id, createdAt, updatedAt, __typename, type, isDefault, ...rest } = item;
+          let { id, createdAt, updatedAt, __typename, type, isDefault, countryCode, ...rest } = item;
           if (values.isDefault) isDefault = false;
           if (editSelectedAddress?.id === id) {
             rest = values;
@@ -457,6 +531,8 @@ const AddOrder = () => {
           return {
             parent_id: selectedCustomer?.id,
             isDefault: isDefault,
+            isNew: false,
+            id,
             ...rest,
           };
         });
@@ -517,16 +593,17 @@ const AddOrder = () => {
   };
 
   // Trigger Function when select an address finally
-  const selectAddressHandler = type => {
+  const selectAddressHandler = (type, id) => {
+    if (!tempSelectedAddress) return;
     if (type === 'billing') {
       setSelectedBillingAddress(tempSelectedAddress);
       form.setFieldValue({
-        billing_address_id: tempSelectedAddress?.id,
+        billing_address_id: id,
       });
     } else {
       setSelectedShippingAddress(tempSelectedAddress);
       form.setFieldValue({
-        shipping_address_id: tempSelectedAddress?.id,
+        shipping_address_id: id,
       });
     }
     setListAddressModalOpen(false);
@@ -792,6 +869,19 @@ const AddOrder = () => {
                               initialValue={selectedShippingAddress?.id}
                               value={selectedShippingAddress?.id}
                             >
+                              {!selectedShippingAddress?.id ? (
+                                <Button
+                                  size="small"
+                                  style={{ float: 'right', zIndex: 1000, marginTop: -25, marginBottom: 10 }}
+                                  title={`Add shipping address`}
+                                  htmlType="button"
+                                  type="primary"
+                                  onClick={() => addOrEditAddressHandler(null, 'shipping')}
+                                >
+                                  Add address
+                                </Button>
+                              ) : null}
+
                               <Radio.Group style={{ width: '100%', padding: 10 }}>
                                 <Row gutter={25}>
                                   {selectedShippingAddress && (
@@ -844,6 +934,18 @@ const AddOrder = () => {
                               label="Billing Addresses"
                               initialValue={selectedBillingAddress?.id}
                             >
+                              {!selectedBillingAddress?.id ? (
+                                <Button
+                                  size="small"
+                                  style={{ float: 'right', zIndex: 1000, marginTop: -25, marginBottom: 10 }}
+                                  title={`Add billing address`}
+                                  htmlType="button"
+                                  type="primary"
+                                  onClick={() => addOrEditAddressHandler(null, 'billing')}
+                                >
+                                  Add address
+                                </Button>
+                              ) : null}
                               <Radio.Group style={{ width: '100%', padding: 10 }}>
                                 <Row gutter={25}>
                                   {selectedBillingAddress && (
@@ -1127,7 +1229,26 @@ const AddOrder = () => {
             size="small"
           >
             <Row gutter={25}>
-              <Col md={12}>
+              <Col md={24}>
+                <Row gutter={25}>
+                  <Col xs={24} md={12}>
+                    <Form.Item
+                      name="country"
+                      initialValue={isAddressEdit ? editSelectedAddress?.countryCode?.code : 'US'}
+                      label="Country"
+                      style={{ marginBottom: 5 }}
+                    >
+                      <Select
+                        onChange={val => setSelectedCountryCode(val)}
+                        defaultValue={isAddressEdit ? editSelectedAddress?.countryCode?.code : 'US'}
+                        options={countries?.map(item => ({
+                          label: item.name,
+                          value: item.code,
+                        }))}
+                      ></Select>
+                    </Form.Item>
+                  </Col>
+                </Row>
                 <Form.Item
                   rules={[{ required: true, message: 'Please Enter Address One' }]}
                   name="address1"
@@ -1138,37 +1259,6 @@ const AddOrder = () => {
                   <Input placeholder="Address One" />
                 </Form.Item>
                 <Form.Item
-                  rules={[{ required: true, message: 'Please Enter Phone' }]}
-                  name="phone"
-                  label="Phone"
-                  style={{ marginBottom: 5 }}
-                  initialValue={editSelectedAddress?.phone}
-                >
-                  <Input placeholder="Phone" />
-                </Form.Item>
-                <Form.Item
-                  rules={[{ required: true, message: 'Please Enter Email' }]}
-                  name="email"
-                  label="Email"
-                  style={{ marginBottom: 5 }}
-                  initialValue={editSelectedAddress?.email}
-                >
-                  <Input placeholder="Email" />
-                </Form.Item>
-                <Form.Item name="fax" label="Fax" style={{ marginBottom: 5 }} initialValue={editSelectedAddress?.fax}>
-                  <Input placeholder="Fax" />
-                </Form.Item>
-                <Form.Item
-                  name="isDefault"
-                  label="Default"
-                  style={{ marginBottom: 0 }}
-                  initialValue={editSelectedAddress?.isDefault}
-                >
-                  <Switch defaultChecked={editSelectedAddress?.isDefault} />
-                </Form.Item>
-              </Col>
-              <Col md={12}>
-                <Form.Item
                   name="address2"
                   label="Address Two"
                   style={{ marginBottom: 5 }}
@@ -1176,38 +1266,61 @@ const AddOrder = () => {
                 >
                   <Input placeholder="Address Two" />
                 </Form.Item>
-                <Form.Item name="country" initialValue="United State" label="Country" style={{ marginBottom: 5 }}>
-                  <Select>
-                    <Select.Option value="United State">United State</Select.Option>
-                  </Select>
-                </Form.Item>
-                <Form.Item
-                  rules={[{ required: true, message: 'Please Enter City' }]}
-                  name="city"
-                  label="City"
-                  style={{ marginBottom: 5 }}
-                  initialValue={editSelectedAddress?.city}
-                >
-                  <Input placeholder="City" />
-                </Form.Item>
-                <Form.Item
-                  name="state"
-                  rules={[{ required: true, message: 'Please Enter State' }]}
-                  label="State"
-                  style={{ marginBottom: 5 }}
-                  initialValue={editSelectedAddress?.state}
-                >
-                  <Input placeholder="State" />
-                </Form.Item>
-                <Form.Item
-                  name="zip_code"
-                  rules={[{ required: true, message: 'Please Enter Zip Code' }]}
-                  label="Zip Code"
-                  style={{ marginBottom: 5 }}
-                  initialValue={editSelectedAddress?.zip_code}
-                >
-                  <Input placeholder="Zip Code" />
-                </Form.Item>
+                <Row gutter={25}>
+                  <Col xs={24} md={12}>
+                    <Form.Item
+                      rules={[{ required: true, message: 'Please Enter City' }]}
+                      name="city"
+                      label="City"
+                      style={{ marginBottom: 5 }}
+                      initialValue={editSelectedAddress?.city}
+                    >
+                      <Input placeholder="City" />
+                    </Form.Item>
+                  </Col>
+                  <Col xs={24} md={12}>
+                    <Form.Item
+                      name="zip_code"
+                      rules={[{ required: true, message: 'Please Enter Zip Code' }]}
+                      label="Zip Code"
+                      style={{ marginBottom: 5 }}
+                      initialValue={editSelectedAddress?.zip_code}
+                    >
+                      <Input placeholder="Zip Code" />
+                    </Form.Item>
+                  </Col>
+                </Row>
+                <Row gutter={{}}>
+                  <Col xs={24} md={12}>
+                    <Form.Item
+                      name="state"
+                      rules={[{ required: true, message: 'Please Enter State' }]}
+                      label="State"
+                      style={{ marginBottom: 5 }}
+                      initialValue={editSelectedAddress?.state}
+                    >
+                      <Select
+                        style={{ width: '100%' }}
+                        placeholder="State"
+                        defaultValue={editSelectedAddress?.state}
+                        options={states?.map(item => ({
+                          label: item.state,
+                          value: item.abbreviation,
+                        }))}
+                      />
+                    </Form.Item>
+                  </Col>
+                  <Col xs={24} md={12} style={{ paddingLeft: 15 }}>
+                    <Form.Item
+                      name="isDefault"
+                      label="Default"
+                      style={{ marginBottom: 0 }}
+                      initialValue={editSelectedAddress?.isDefault}
+                    >
+                      <Switch defaultChecked={editSelectedAddress?.isDefault} />
+                    </Form.Item>
+                  </Col>
+                </Row>
               </Col>
             </Row>
           </Form>
@@ -1215,12 +1328,13 @@ const AddOrder = () => {
         {/* Modal For Add / Update Address */}
         {/* Modal For Add / Update Address */}
         <Modal
-          title={`List of ${addressType} addresses`}
+          title={`${strCamelCase(addressType)} addresses`}
           style={{ top: 20 }}
-          width={1000}
+          width={600}
           open={listAddressModalOpen}
+          className="orderAddressModal"
           okText="Select"
-          onOk={() => selectAddressHandler(addressType)}
+          onOk={false}
           onCancel={() => setListAddressModalOpen(false)}
         >
           <Radio.Group style={{ width: '100%', padding: 10 }}>
@@ -1234,12 +1348,12 @@ const AddOrder = () => {
                   type="primary"
                   onClick={() => addOrEditAddressHandler(null, addressType)}
                 >
-                  <FeatherIcon icon="plus-circle" />
+                  Add new address
                 </Button>
               </Col>
               {addressType === 'billing'
                 ? billingAddresses.map(item => (
-                    <Col key={item.id} xs={24} md={12}>
+                    <Col key={item.id} xs={24}>
                       <Button
                         size="small"
                         style={{ position: 'absolute', right: 14, zIndex: 1000 }}
@@ -1248,7 +1362,17 @@ const AddOrder = () => {
                         type="info"
                         onClick={() => addOrEditAddressHandler(item.id, 'billing')}
                       >
-                        <FeatherIcon icon="edit" />
+                        Edit
+                      </Button>
+                      <Button
+                        size="small"
+                        style={{ position: 'absolute', right: 14, zIndex: 1000, top: 45 }}
+                        title="Edit Shipping Address"
+                        htmlType="button"
+                        type="info"
+                        onClick={() => selectAddressHandler(addressType, item.id)}
+                      >
+                        Select
                       </Button>
                       {billingAddresses.filter(item => item.isDefault)[0]?.id === item.id && (
                         <Badge.Ribbon text="Default" color="pink" style={{ top: 40, zIndex: 1000 }} />
@@ -1271,11 +1395,14 @@ const AddOrder = () => {
                           {item.city}, {item.state} - {item.zip_code}
                         </p>
                         <p>{item?.countryCode?.name}</p>
+                        {billingAddresses.filter(item => item.isDefault)[0]?.id === item.id && (
+                          <Badge count="Default billing address" color="#ddd" style={{ color: '#000' }} />
+                        )}
                       </Radio>
                     </Col>
                   ))
                 : shippingAddresses.map(item => (
-                    <Col key={item.id} xs={24} md={12}>
+                    <Col key={item.id} xs={24}>
                       <Button
                         size="small"
                         style={{ position: 'absolute', right: 14, zIndex: 1000 }}
@@ -1284,11 +1411,18 @@ const AddOrder = () => {
                         type="info"
                         onClick={() => addOrEditAddressHandler(item.id, 'shipping')}
                       >
-                        <FeatherIcon icon="edit" />
+                        Edit
                       </Button>
-                      {shippingAddresses.filter(item => item.isDefault)[0]?.id === item.id && (
-                        <Badge.Ribbon text="Default" color="pink" style={{ top: 40, zIndex: 1000 }} />
-                      )}
+                      <Button
+                        size="small"
+                        style={{ position: 'absolute', right: 14, zIndex: 1000, top: 45 }}
+                        title="Edit Shipping Address"
+                        htmlType="button"
+                        type="info"
+                        onClick={() => selectAddressHandler(addressType, item.id)}
+                      >
+                        Select
+                      </Button>
                       <Radio
                         style={{
                           width: '100%',
@@ -1307,6 +1441,9 @@ const AddOrder = () => {
                           {item.city}, {item.state} - {item.zip_code}
                         </p>
                         <p>{item?.countryCode?.name}</p>
+                        {shippingAddresses.filter(item => item.isDefault)[0]?.id === item.id && (
+                          <Badge count="Default shipping address" color="#ddd" style={{ color: '#000' }} />
+                        )}
                       </Radio>
                     </Col>
                   ))}
