@@ -581,7 +581,7 @@ const Dashboard = () => {
 										rowClassName={(record, index) => (index % 2 == 0 ? '' : 'altTableClass')}
 										pagination={{
 											defaultPageSize: 5,
-											total: analytics.data.recentOrders.length,
+											total: analytics?.data?.recentOrders?.length,
 											showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`,
 										}}
 									/>
@@ -608,7 +608,7 @@ const Dashboard = () => {
 										rowClassName={(record, index) => (index % 2 == 0 ? '' : 'altTableClass')}
 										pagination={{
 											defaultPageSize: 5,
-											total: analytics.data.recentPurchaseOrders.length,
+											total: analytics?.data?.recentPurchaseOrders?.length,
 											showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`,
 										}}
 									/>
@@ -638,7 +638,7 @@ const Dashboard = () => {
 										rowClassName={(record, index) => (index % 2 == 0 ? "" : "altTableClass")}
 										pagination={{
 											defaultPageSize: 5,
-											total: messages.data.length,
+											total: messages?.data?.length,
 											showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`,
 										}}
 									/>
@@ -665,7 +665,7 @@ const Dashboard = () => {
 										pagination={{
 											style: {},
 											defaultPageSize: 5,
-											total: analytics.data.recentQuotes.length,
+											total: analytics?.data?.recentQuotes?.length,
 											showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`,
 										}}
 									/>
