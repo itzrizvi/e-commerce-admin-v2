@@ -21,8 +21,10 @@ const { RangePicker } = DatePicker;
 const Products = () => {
   viewPermission('product');
   const [products, setProducts] = useState({ data: [], isLoading: true });
+  const [backupProducts, setBackupProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [searchText, setSearchText] = useState('');
+  const [searchButton, setSearchButton] = useState(false);
   const [isFilter, setIsFilter] = useState(true);
   const [categories, setCategories] = useState({ data: [], isLoading: true });
   const [attributes, setAttributes] = useState({ data: [], isLoading: true });
@@ -56,7 +58,7 @@ const Products = () => {
         const data = res?.data?.getProductList;
 
         if (!data?.status) return;
-        setProducts(s => ({ ...s, data: data?.data, error: '' }));
+        setBackupProducts(data?.data);
       })
       .catch(err => {
         setProducts(s => ({ ...s, error: 'Something went Wrong.!! ' }));
@@ -103,7 +105,7 @@ const Products = () => {
         });
         setCategories({ data: arrData, isLoading: false });
       })
-      .catch(err => { });
+      .catch(err => {});
 
     // 2.load Arrributes
     apolloClient
@@ -167,6 +169,10 @@ const Products = () => {
         if (!data.status) return;
         setConditions({ data: data.data, isLoading: false });
       });
+    // Loader Of after 2 sec
+    setTimeout(() => {
+      setProducts(s => ({ ...s, isLoading: false }));
+    }, 5000);
   }, []);
 
   const handleStatusChange = (record, checked) => {
@@ -206,28 +212,6 @@ const Products = () => {
         const data = res?.data?.updateProduct;
         if (!data.status) return toast.error(data.message);
         toast.success(`${record.prod_sku} status updated.`);
-      })
-      .catch(err => {
-        return toast.error('Something Went wrong !!');
-      });
-  };
-
-  const handleIsSerialChange = (record, checked) => {
-    apolloClient
-      .mutate({
-        mutation: productMutation.PRODUCT_IS_SERIAL_STATUS_CHANGE,
-        variables: { data: { id: record.id, is_serial: checked } },
-        context: {
-          headers: {
-            TENANTID: process.env.REACT_APP_TENANTID,
-            Authorization: Cookies.get('psp_t'),
-          },
-        },
-      })
-      .then(res => {
-        const data = res?.data?.changeProductIsSerial;
-        if (!data.status) return toast.error(data.message);
-        toast.success(`${record.prod_sku} serial status updated.`);
       })
       .catch(err => {
         return toast.error('Something Went wrong !!');
@@ -320,27 +304,6 @@ const Products = () => {
         <Switch defaultChecked={value} title="Status" onChange={checked => handleStatusChange(record, checked)} />
       ),
     },
-    // {
-    //   title: 'Is Serial',
-    //   dataIndex: 'is_serial',
-    //   key: 'is_serial',
-    //   align: 'right',
-    //   sorter: (a, b) => (a.is_serial === b.is_serial ? 0 : a.is_serial ? -1 : 1),
-    //   filters: [
-    //     {
-    //       text: 'Active',
-    //       value: true,
-    //     },
-    //     {
-    //       text: 'Inactive',
-    //       value: false,
-    //     },
-    //   ],
-    //   onFilter: (value, record) => record.is_serial === value,
-    //   render: (value, record) => (
-    //     <Switch defaultChecked={value} title="Is Serial" onChange={checked => handleIsSerialChange(record, checked)} />
-    //   ),
-    // },
     {
       title: 'On Sale',
       dataIndex: 'is_sale',
@@ -360,7 +323,11 @@ const Products = () => {
       ],
       onFilter: (value, record) => record.is_sale === value,
       render: (value, record) => (
-        <Switch defaultChecked={value} title="Is Sale" onChange={checked => handleIsSaleStatusChange(record, checked)} />
+        <Switch
+          defaultChecked={value}
+          title="Is Sale"
+          onChange={checked => handleIsSaleStatusChange(record, checked)}
+        />
       ),
     },
     {
@@ -371,11 +338,11 @@ const Products = () => {
       render: (text, record) => (
         <>
           <Link to={`/admin/products/view?id=${record.id}`}>
-            <FontAwesome name="eye" style={{ margin: '.5em 1em', color: "rgb(46, 204, 113)" }} />
+            <FontAwesome name="eye" style={{ margin: '.5em 1em', color: 'rgb(46, 204, 113)' }} />
           </Link>
           <Link to={`/admin/products/edit?id=${record.id}`}>
             {/* <Button size="default" type="white" title='Edit'> */}
-            <FontAwesome name="edit" style={{ margin: '.5em 1em', color: "#5F63F2" }} />
+            <FontAwesome name="edit" style={{ margin: '.5em 1em', color: '#5F63F2' }} />
             {/* </Button> */}
           </Link>
         </>
@@ -387,10 +354,9 @@ const Products = () => {
   // All filter
   useEffect(() => {
     if (products.isLoading) return;
-    let filteredData = products.data;
-
+    let filteredData = backupProducts;
     if (searchText) {
-      filteredData = products.data.filter(prod =>
+      filteredData = filteredData.filter(prod =>
         (prod?.prod_name + prod?.prod_sku).toLowerCase().includes(searchText.toLowerCase()),
       );
     }
@@ -431,7 +397,7 @@ const Products = () => {
     }
 
     setFilteredProducts(filteredData);
-  }, [products, searchText, filterDate]);
+  }, [searchButton]);
 
   return (
     <>
@@ -461,14 +427,23 @@ const Products = () => {
                 </div>
               ) : (
                 <>
-                  <Input
-                    placeholder="Search Products..."
-                    prefix={<SearchOutlined />}
-                    onChange={e => {
-                      const value = e.target.value;
-                      setSearchText(value);
-                    }}
-                  />
+                  <Row gutter={25}>
+                    <Col span={18}>
+                      <Input
+                        placeholder="Search Products..."
+                        prefix={<SearchOutlined />}
+                        onChange={e => {
+                          const value = e.target.value;
+                          setSearchText(value);
+                        }}
+                      />
+                    </Col>
+                    <Col span={6}>
+                      <Button size="large" type="primary" onClick={() => setSearchButton(!searchButton)}>
+                        Search
+                      </Button>
+                    </Col>
+                  </Row>
                   <br />
                   <br />
 
@@ -518,8 +493,8 @@ const Products = () => {
                               setFilterDate(s => {
                                 return {
                                   ...s,
-                                  startDate: val[0]._d,
-                                  endDate: val[1]._d,
+                                  startDate: val ? val[0]?._d : null,
+                                  endDate: val ? val[1]?._d : null,
                                 };
                               });
                             }}

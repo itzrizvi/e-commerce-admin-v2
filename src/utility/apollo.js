@@ -1022,6 +1022,10 @@ export const customerQuery = {
             state
             zip_code
             country
+            countryCode {
+              name
+              code
+            }
             type
             status
             isDefault
@@ -1257,6 +1261,10 @@ export const vendorQuery = {
             state
             zip_code
             country
+            countryCode {
+              name
+              code
+            }
             status
             isDefault
             updatedAt
