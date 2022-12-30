@@ -15,7 +15,6 @@ import {
   Tabs,
   Modal,
   Badge,
-  Alert,
 } from 'antd';
 import FeatherIcon from 'feather-icons-react';
 import { PageHeader } from '../../components/page-headers/page-headers';
@@ -32,6 +31,8 @@ import { LazyLoadImage } from 'react-lazy-load-image-component';
 import { productSchema } from '../../apollo/product';
 import { useSelector } from 'react-redux';
 import { orderQuery } from '../../apollo/order';
+import { addressSchema } from '../../apollo/address';
+import { strCamelCase } from '../../utility/stringModify';
 const { Text, Paragraph } = Typography;
 const prod_initial = {
   id: '',
@@ -54,7 +55,6 @@ const UpdateOrder = () => {
   const [shippingAddresses, setShippingAddresses] = useState([]);
 
   const [selectedProduct, setSelectedProduct] = useState([]);
-  const formRef = useRef();
   const [productOption, setProductOption] = useState([]);
   const [lastInitProductId, setLastInitProductId] = useState(null);
   const [discount, setDiscount] = useState('00.0');
@@ -72,11 +72,158 @@ const UpdateOrder = () => {
   const [editSelectedAddress, setEditSelectedAddress] = useState(null);
   const [changeAddress, setChangeAddress] = useState(false);
   const [tempSelectedAddress, setTempSelectedAddress] = useState(null);
+  // Change State After Country Change
+  const [selectedCountryCode, setSelectedCountryCode] = useState('US');
+  const [countries, setCountries] = useState([]);
+  const [states, setStates] = useState([]);
+  const [shippingMethodAccountList, setShippingMethodAccountList] = useState([]);
 
-  const handleSubmit = () => {
+  useEffect(() => {
+    // Load Shipping Method
+    apolloClient
+      .query({
+        query: productSchema.GET_SHIPPING_METHOD_LIST,
+        context: {
+          headers: {
+            TENANTID: process.env.REACT_APP_TENANTID,
+          },
+        },
+      })
+      .then(res => {
+        const data = res?.data?.getShippingMethodListPublic;
+        if (!data.status) return;
+        setShippingMethod(data?.data);
+      });
+
+    // get Single Order
+    apolloClient
+      .query({
+        query: orderQuery.GET_SINGLE_ORDER_ADMIN,
+        variables: {
+          query: {
+            order_id: parseInt(params.id),
+          },
+        },
+        context: {
+          headers: {
+            TENANTID: process.env.REACT_APP_TENANTID,
+            Authorization: token,
+          },
+        },
+        fetchPolicy: 'network-only',
+      })
+      .then(res => {
+        const data = res.data.getSingleOrderAdmin;
+        if (!data.status) return toast.error(data.message);
+        setSingleOrder({ data: data.data, isLoading: false });
+        const billing = [];
+        const shipping = [];
+        const product_item = data?.data?.orderitems.map(item => ({
+          id: item?.product?.id,
+          price: item?.price,
+          prod_name: item?.product?.prod_name,
+          quantity: item?.quantity,
+        }));
+        setSelectedProduct(product_item);
+        setSelectedBillingAddress(null);
+        setSelectedShippingAddress(null);
+        setSelectedCustomer(data?.data?.customer);
+        data?.data?.customer?.addresses?.forEach(addr => {
+          if (addr.type === 'billing') billing.push(addr);
+          if (addr.type === 'shipping') shipping.push(addr);
+          if (addr.type === 'billing' && addr.isDefault) setSelectedBillingAddress(addr);
+          if (addr.type === 'shipping' && addr.isDefault) setSelectedShippingAddress(addr);
+        });
+        setBillingAddresses(billing);
+        setShippingAddresses(shipping);
+        setSelectedCouponCode(data?.data?.coupon?.id);
+        if (data?.data?.coupon) {
+          if (data?.data?.coupon?.coupon_type === 'flat') {
+            setDiscount(data?.data?.coupon?.coupon_amount);
+          } else {
+            setDiscount((data?.data?.total / 100) * data?.data?.coupon?.coupon_amount);
+          }
+        }
+        setShippingCost(data?.data?.shipping_cost);
+      });
+
+    // Get Order Status List
+    apolloClient
+      .query({
+        query: orderQuery.GET_ORDER_STATUS_LIST,
+        context: {
+          headers: {
+            TENANTID: process.env.REACT_APP_TENANTID,
+            Authorization: token,
+          },
+        },
+      })
+      .then(res => {
+        const data = res?.data?.getOrderStatusList;
+        if (!data.status) return;
+        const order_status_list = data?.data?.map(item => ({
+          ...item,
+          value: item.id,
+          label: item.name,
+        }));
+        setOrderStatusOptions(order_status_list);
+      });
+
+    // Get Country List
+    apolloClient
+      .query({
+        query: addressSchema.GET_COUNTRY_LIST,
+        context: {
+          headers: { TENANTID: process.env.REACT_APP_TENANTID },
+        },
+      })
+      .then(res => {
+        const data = res.data.getCountryList;
+        if (!data.status) return true;
+        setCountries(data?.data);
+      });
+    // Get Account List for Shipping Method
+    apolloClient
+      .query({
+        query: orderQuery.GET_SHIPPING_ACCOUNT_LIST,
+        context: {
+          headers: { TENANTID: process.env.REACT_APP_TENANTID },
+          Authorization: token,
+        },
+      })
+      .then(res => {
+        const data = res.data.getShippingAccountListAdmin;
+        if (!data?.status) return true;
+        setShippingMethodAccountList(data?.data);
+      });
+  }, []);
+
+  useEffect(() => {
+    apolloClient
+      .query({
+        query: addressSchema.GET_STATE_LISTS,
+        variables: {
+          query: {
+            code: selectedCountryCode,
+          },
+        },
+        context: {
+          headers: {
+            TENANTID: process.env.REACT_APP_TENANTID,
+          },
+        },
+      })
+      .then(res => {
+        const data = res?.data?.getStateList;
+        if (!data?.status) return;
+        setStates(data?.data);
+      });
+  }, [selectedCountryCode]);
+
+  const handleSubmit = async () => {
     setIsLoading(true);
     const orderItems = selectedProduct.map(item => ({ product_id: item.id, quantity: item.quantity }));
-    const form_data = form.getFieldsValue(true);
+    const form_data = await form.getFieldsValue(true);
     apolloUploadClient
       .mutate({
         mutation: orderQuery.UPDATE_ORDER,
@@ -103,6 +250,7 @@ const UpdateOrder = () => {
                 Authorization: token,
               },
             },
+            fetchPolicy: 'network-only',
           },
           ['getOrderlistAdmin'],
         ],
@@ -113,7 +261,7 @@ const UpdateOrder = () => {
         toast.success(data.message);
         setTimeout(() => {
           history.push('/admin/order/list');
-        }, 1000);
+        }, 3000);
       })
       .catch(err => {
         toast.error('Something Went wrong !!');
@@ -252,98 +400,6 @@ const UpdateOrder = () => {
     },
   ];
 
-  useEffect(() => {
-    // Load Shipping Method
-    apolloClient
-      .query({
-        query: productSchema.GET_SHIPPING_METHOD_LIST,
-        context: {
-          headers: {
-            TENANTID: process.env.REACT_APP_TENANTID,
-          },
-        },
-      })
-      .then(res => {
-        const data = res?.data?.getShippingMethodListPublic;
-        if (!data.status) return;
-        setShippingMethod(data?.data);
-      });
-
-    // get Single Order
-    apolloClient
-      .query({
-        query: orderQuery.GET_SINGLE_ORDER_ADMIN,
-        variables: {
-          query: {
-            order_id: parseInt(params.id),
-          },
-        },
-        context: {
-          headers: {
-            TENANTID: process.env.REACT_APP_TENANTID,
-            Authorization: token,
-          },
-        },
-        fetchPolicy: 'network-only',
-      })
-      .then(res => {
-        const data = res.data.getSingleOrderAdmin;
-        if (!data.status) return toast.error(data.message);
-        setSingleOrder({ data: data.data, isLoading: false });
-        const billing = [];
-        const shipping = [];
-        const product_item = data?.data?.orderitems.map(item => ({
-          id: item?.product?.id,
-          price: item?.price,
-          prod_name: item?.product?.prod_name,
-          quantity: item?.quantity,
-        }));
-        setSelectedProduct(product_item);
-        setSelectedBillingAddress(null);
-        setSelectedShippingAddress(null);
-        setSelectedCustomer(data?.data?.customer);
-        data?.data?.customer?.addresses?.forEach(addr => {
-          if (addr.type === 'billing') billing.push(addr);
-          if (addr.type === 'shipping') shipping.push(addr);
-          if (addr.type === 'billing' && addr.isDefault) setSelectedBillingAddress(addr);
-          if (addr.type === 'shipping' && addr.isDefault) setSelectedShippingAddress(addr);
-        });
-        setBillingAddresses(billing);
-        setShippingAddresses(shipping);
-        setSelectedCouponCode(data?.data?.coupon?.id);
-        if (data?.data?.coupon) {
-          if (data?.data?.coupon?.coupon_type === 'flat') {
-            setDiscount(data?.data?.coupon?.coupon_amount);
-          } else {
-            setDiscount((data?.data?.total / 100) * data?.data?.coupon?.coupon_amount);
-          }
-        }
-        setShippingCost(data?.data?.shipping_cost);
-      });
-
-    // Get Order Status List
-    apolloClient
-      .query({
-        query: orderQuery.GET_ORDER_STATUS_LIST,
-        context: {
-          headers: {
-            TENANTID: process.env.REACT_APP_TENANTID,
-            Authorization: token,
-          },
-        },
-      })
-      .then(res => {
-        const data = res?.data?.getOrderStatusList;
-        if (!data.status) return;
-        const order_status_list = data?.data?.map(item => ({
-          ...item,
-          value: item.id,
-          label: item.name,
-        }));
-        setOrderStatusOptions(order_status_list);
-      });
-  }, []);
-
   const validateVoucher = voucher => {
     apolloClient
       .query({
@@ -378,8 +434,14 @@ const UpdateOrder = () => {
       setIsAddressEdit(true);
       if (type === 'billing') {
         setEditSelectedAddress(billingAddresses.filter(item => item.id === id)[0]);
+        form.setFieldsValue({
+          billing_address_id: id,
+        });
       } else {
         setEditSelectedAddress(shippingAddresses.filter(item => item.id === id)[0]);
+        form.setFieldsValue({
+          shipping_address_id: id,
+        });
       }
     } else {
       setEditSelectedAddress(null);
@@ -404,31 +466,31 @@ const UpdateOrder = () => {
     if (editSelectedAddress) {
       if (type === 'billing') {
         newBillingAddress = billingAddresses.map(item => {
-          let { id, createdAt, updatedAt, __typename, type, isDefault, ...rest } = item;
+          let { id, createdAt, updatedAt, __typename, type, isDefault, countryCode, ...rest } = item;
           if (values.isDefault) isDefault = false;
           if (editSelectedAddress?.id === id) {
             rest = values;
           }
           return {
             parent_id: selectedCustomer?.id,
+            isNew: false,
             isDefault: isDefault,
             id,
-            isNew: false,
             ...rest,
           };
         });
       } else {
         newShippingAddress = shippingAddresses.map(item => {
-          let { id, createdAt, updatedAt, __typename, type, isDefault, ...rest } = item;
+          let { id, createdAt, updatedAt, __typename, type, isDefault, countryCode, ...rest } = item;
           if (values.isDefault) isDefault = false;
           if (editSelectedAddress?.id === id) {
             rest = values;
           }
           return {
             parent_id: selectedCustomer?.id,
-            id,
             isDefault: isDefault,
             isNew: false,
+            id,
             ...rest,
           };
         });
@@ -489,13 +551,22 @@ const UpdateOrder = () => {
   };
 
   // Trigger Function when select an address finally
-  const selectAddressHandler = type => {
+  const selectAddressHandler = (type, id) => {
+    console.log(type, id);
+    if (!tempSelectedAddress) return;
     if (type === 'billing') {
       setSelectedBillingAddress(tempSelectedAddress);
+      form.setFieldsValue({
+        billing_address_id: id,
+      });
     } else {
       setSelectedShippingAddress(tempSelectedAddress);
+      form.setFieldsValue({
+        shipping_address_id: id,
+      });
     }
     setListAddressModalOpen(false);
+    setTempSelectedAddress(null);
   };
 
   // Refetch query after adding or updating address
@@ -524,8 +595,18 @@ const UpdateOrder = () => {
           data?.data?.addresses?.forEach(address => {
             if (address.type === 'billing') billing.push(address);
             if (address.type === 'shipping') shipping.push(address);
-            if (address.type === 'billing' && address.isDefault) setSelectedBillingAddress(address);
-            if (address.type === 'shipping' && address.isDefault) setSelectedShippingAddress(address);
+            if (address.type === 'billing' && address.isDefault) {
+              setSelectedBillingAddress(address);
+              form.setFieldsValue({
+                billing_address_id: address.id,
+              });
+            }
+            if (address.type === 'shipping' && address.isDefault) {
+              setSelectedShippingAddress(address);
+              form.setFieldsValue({
+                shipping_address_id: address?.id,
+              });
+            }
           });
           setBillingAddresses(billing);
           setShippingAddresses(shipping);
@@ -546,7 +627,6 @@ const UpdateOrder = () => {
                 </div>
               ) : (
                 <Form
-                  ref={formRef}
                   style={{ width: '100%' }}
                   form={form}
                   name="updateOrder"
@@ -555,87 +635,76 @@ const UpdateOrder = () => {
                   // labelCol={{ span: 4 }}
                   layout="vertical"
                 >
-                  <Row style={{ marginTop: 40 }}>
-                    <Col span={24}>
-                      <Tabs>
-                        <Tabs.TabPane tab="Customer" key="customer">
-                          <Row gutter={25}>
-                            <Col md={12} sm={24}>
-                              <Form.Item
-                                rules={[{ required: true, message: 'Please select a customer' }]}
-                                label="Customer"
-                              >
-                                <Select
-                                  placeholder="Select a customer"
-                                  options={customerData}
-                                  showSearch
-                                  allowClear
-                                  optionFilterProp="label"
-                                  disabled
-                                  defaultValue={singleOrder?.data?.customer?.id}
-                                  onSelect={(val, data) => {
-                                    setSelectedCustomer(data.item);
-                                    const billing = [];
-                                    const shipping = [];
-                                    data?.item?.addresses?.forEach(addr => {
-                                      if (addr.type === 'billing') billing.push(addr);
-                                      if (addr.type === 'shipping') shipping.push(addr);
-                                    });
-                                    setBillingAddresses(billing);
-                                    setShippingAddresses(shipping);
-                                  }}
-                                  onSearch={val => {
-                                    if (val.length > 3) {
-                                      apolloClient
-                                        .query({
-                                          query: productSchema.GET_SEARCH_CUSTOMER,
-                                          variables: {
-                                            query: {
-                                              searchQuery: val,
+                  {() => (
+                    <Row style={{ marginTop: 40 }}>
+                      <Col span={24}>
+                        <Tabs>
+                          <Tabs.TabPane tab="Customer" key="customer">
+                            <Row gutter={25}>
+                              <Col md={12} sm={24}>
+                                <Form.Item
+                                  rules={[{ required: true, message: 'Please select a customer' }]}
+                                  label="Customer"
+                                >
+                                  <Select
+                                    placeholder="Select a customer"
+                                    options={customerData}
+                                    showSearch
+                                    allowClear
+                                    optionFilterProp="label"
+                                    disabled
+                                    defaultValue={singleOrder?.data?.customer?.id}
+                                    onSelect={(val, data) => {
+                                      setSelectedCustomer(data.item);
+                                      const billing = [];
+                                      const shipping = [];
+                                      data?.item?.addresses?.forEach(addr => {
+                                        if (addr.type === 'billing') billing.push(addr);
+                                        if (addr.type === 'shipping') shipping.push(addr);
+                                      });
+                                      setBillingAddresses(billing);
+                                      setShippingAddresses(shipping);
+                                    }}
+                                    onSearch={val => {
+                                      if (val.length > 3) {
+                                        apolloClient
+                                          .query({
+                                            query: productSchema.GET_SEARCH_CUSTOMER,
+                                            variables: {
+                                              query: {
+                                                searchQuery: val,
+                                              },
                                             },
-                                          },
-                                          context: {
-                                            headers: {
-                                              TENANTID: process.env.REACT_APP_TENANTID,
-                                              Authorization: token,
+                                            context: {
+                                              headers: {
+                                                TENANTID: process.env.REACT_APP_TENANTID,
+                                                Authorization: token,
+                                              },
                                             },
-                                          },
-                                        })
-                                        .then(res => {
-                                          const data = res.data.getSearchedCustomers;
-                                          if (!data.status) return toast.error(data.message);
-                                          const options = data?.data?.map(item => ({
-                                            label: item.email,
-                                            value: item.id,
-                                            item,
-                                          }));
-                                          setCustomerData(options);
-                                        });
-                                    } else {
-                                      setCustomerData([]);
-                                    }
-                                  }}
-                                />
-                              </Form.Item>
-                            </Col>
-                            <Col md={12} sm={24}>
-                              <Row gutter={25}>
-                                <Col>
-                                  {singleOrder?.data?.customer?.image ? (
-                                    <Avatar
-                                      size={{ xs: 24, sm: 32, md: 40, lg: 64, xl: 80, xxl: 100 }}
-                                      src={renderImage(
-                                        singleOrder?.data?.customer?.id,
-                                        singleOrder?.data?.customer?.image,
-                                        'user',
-                                        '',
-                                        true,
-                                      )}
-                                    >
-                                      <LazyLoadImage
-                                        effect="blur"
-                                        width={100}
-                                        height={100}
+                                          })
+                                          .then(res => {
+                                            const data = res.data.getSearchedCustomers;
+                                            if (!data.status) return toast.error(data.message);
+                                            const options = data?.data?.map(item => ({
+                                              label: item.email,
+                                              value: item.id,
+                                              item,
+                                            }));
+                                            setCustomerData(options);
+                                          });
+                                      } else {
+                                        setCustomerData([]);
+                                      }
+                                    }}
+                                  />
+                                </Form.Item>
+                              </Col>
+                              <Col md={12} sm={24}>
+                                <Row gutter={25}>
+                                  <Col>
+                                    {singleOrder?.data?.customer?.image ? (
+                                      <Avatar
+                                        size={{ xs: 24, sm: 32, md: 40, lg: 64, xl: 80, xxl: 100 }}
                                         src={renderImage(
                                           singleOrder?.data?.customer?.id,
                                           singleOrder?.data?.customer?.image,
@@ -643,409 +712,424 @@ const UpdateOrder = () => {
                                           '',
                                           true,
                                         )}
-                                        onError={errorImageSrc}
-                                        alt={singleOrder?.data?.customer?.id}
+                                      >
+                                        <LazyLoadImage
+                                          effect="blur"
+                                          width={100}
+                                          height={100}
+                                          src={renderImage(
+                                            singleOrder?.data?.customer?.id,
+                                            singleOrder?.data?.customer?.image,
+                                            'user',
+                                            '',
+                                            true,
+                                          )}
+                                          onError={errorImageSrc}
+                                          alt={singleOrder?.data?.customer?.id}
+                                        />
+                                      </Avatar>
+                                    ) : (
+                                      <Avatar
+                                        size={{ xs: 24, sm: 32, md: 40, lg: 64, xl: 80, xxl: 100 }}
+                                        src={'/no-image.png'}
                                       />
-                                    </Avatar>
-                                  ) : (
-                                    <Avatar
-                                      size={{ xs: 24, sm: 32, md: 40, lg: 64, xl: 80, xxl: 100 }}
-                                      src={'/no-image.png'}
-                                    />
-                                  )}
-                                </Col>
-                                <Col>
-                                  <Paragraph>
-                                    <Text strong>ID: </Text>
-                                    {singleOrder?.data?.customer?.id}
-                                  </Paragraph>
-                                  <Paragraph>
-                                    <Text strong>Name: </Text>
-                                    {`${singleOrder?.data?.customer?.first_name} ${singleOrder?.data?.customer?.last_name}`}
-                                  </Paragraph>
-                                  <Paragraph>
-                                    <Text strong>Email: </Text>
-                                    {singleOrder?.data?.customer?.email}
-                                  </Paragraph>
-                                </Col>
-                              </Row>
-                            </Col>
-                          </Row>
-                        </Tabs.TabPane>
-                        <Tabs.TabPane tab="Products" key="products">
-                          <Row gutter={25}>
-                            <Col lg={18} md={16} sm={24}>
-                              <span className={'psp_list'}>
-                                <Table
-                                  className="table-responsive"
-                                  columns={productColumn}
-                                  dataSource={selectedProduct}
-                                  pagination={false}
-                                  rowKey="id"
-                                  rowClassName={(record, index) => (index % 2 === 0 ? '' : 'altTableClass')}
-                                />
-                                <div
-                                  style={{
-                                    display: 'flex',
-                                    justifyContent: 'flex-end',
-                                    marginTop: '10px',
-                                    marginBottom: '10px',
-                                    paddingRight: '18px',
-                                  }}
-                                >
-                                  <Button
-                                    onClick={() => {
-                                      const new_id = new Date().getTime();
-                                      setLastInitProductId(new_id);
-                                      setSelectedProduct(prevState => [...prevState, { ...prod_initial, id: new_id }]);
-                                      setProductOption([]);
+                                    )}
+                                  </Col>
+                                  <Col>
+                                    <Paragraph>
+                                      <Text strong>ID: </Text>
+                                      {singleOrder?.data?.customer?.id}
+                                    </Paragraph>
+                                    <Paragraph>
+                                      <Text strong>Name: </Text>
+                                      {`${singleOrder?.data?.customer?.first_name} ${singleOrder?.data?.customer?.last_name}`}
+                                    </Paragraph>
+                                    <Paragraph>
+                                      <Text strong>Email: </Text>
+                                      {singleOrder?.data?.customer?.email}
+                                    </Paragraph>
+                                  </Col>
+                                </Row>
+                              </Col>
+                            </Row>
+                          </Tabs.TabPane>
+                          <Tabs.TabPane tab="Products" key="products">
+                            <Row gutter={25}>
+                              <Col lg={18} md={16} sm={24}>
+                                <span className={'psp_list'}>
+                                  <Table
+                                    className="table-responsive"
+                                    columns={productColumn}
+                                    dataSource={selectedProduct}
+                                    pagination={false}
+                                    rowKey="id"
+                                    rowClassName={(record, index) => (index % 2 === 0 ? '' : 'altTableClass')}
+                                  />
+                                  <div
+                                    style={{
+                                      display: 'flex',
+                                      justifyContent: 'flex-end',
+                                      marginTop: '10px',
+                                      marginBottom: '10px',
+                                      paddingRight: '18px',
                                     }}
-                                    size="small"
-                                    title="Add Product"
-                                    htmlType="button"
-                                    type="primary"
                                   >
-                                    <FeatherIcon icon="plus-circle" />
-                                  </Button>
-                                </div>
-                              </span>
-                            </Col>
-                            <Col lg={6} md={8} sm={24}>
-                              <Card
-                                title="Summary"
-                                bordered={true}
-                                size="small"
-                                headStyle={{
-                                  backgroundColor: '#5f63f24d',
-                                  borderTopLeftRadius: 3,
-                                  borderTopRightRadius: 3,
-                                }}
-                              >
-                                <Paragraph>
-                                  <Text strong>Sub Total Price : </Text>$
-                                  {selectedProduct.reduce(
-                                    (accumulator, item) => accumulator + item.quantity * item.price,
-                                    0,
-                                  )}
-                                </Paragraph>
-                                <Paragraph>
-                                  <Text strong>Product Quantity : </Text>
-                                  {selectedProduct.reduce((accumulator, item) => accumulator + item.quantity, 0)}
-                                </Paragraph>
-                                <Paragraph>
-                                  <Text strong>Discount : </Text>${discount}
-                                </Paragraph>
-                                <Paragraph>
-                                  <Text strong>Shipping Cost : </Text>${shippingCost}
-                                </Paragraph>{' '}
-                                <Paragraph>
-                                  <Text strong>Total Price : </Text>$
-                                  {selectedProduct.reduce(
-                                    (accumulator, item) => accumulator + item.quantity * item.price,
-                                    0,
-                                  ) +
-                                    shippingCost -
-                                    discount}
-                                </Paragraph>
-                              </Card>
-                            </Col>
-                          </Row>
-                        </Tabs.TabPane>
-                        <Tabs.TabPane tab="Addresses" key="addresses">
-                          <Row gutter={25}>
-                            <Col lg={12} sm={24}>
-                              <Button
-                                size="small"
-                                style={{ float: 'right', zIndex: 1000, marginTop: -10, marginBottom: 10 }}
-                                title={`Add shipping address`}
-                                htmlType="button"
-                                type="primary"
-                                onClick={() => addOrEditAddressHandler(null, 'shipping')}
-                              >
-                                <FeatherIcon icon="plus-circle" />
-                              </Button>
-                              <Form.Item
-                                rules={[{ required: true, message: 'Please Select Shipping Address' }]}
-                                name="shipping_address_id"
-                                label="Shipping Addresses"
-                                initialValue={selectedShippingAddress?.id}
-                              >
-                                <Radio.Group style={{ width: '100%', padding: 10 }}>
-                                  <Row gutter={25}>
-                                    {selectedShippingAddress && (
-                                      <Col key={selectedShippingAddress?.id} xs={24}>
-                                        <Button
-                                          size="small"
-                                          style={{ position: 'absolute', right: 14, zIndex: 1000 }}
-                                          title="Change Shipping Address"
-                                          htmlType="button"
-                                          type="info"
-                                          onClick={() => changeAddressHandler('shipping')}
-                                        >
-                                          <FeatherIcon icon="repeat" />
-                                        </Button>
-                                        <Radio
-                                          style={{
-                                            width: '100%',
-                                            border: '1px solid #f0f0f0',
-                                            fontSize: 12,
-                                            marginBottom: 10,
-                                            padding: 10,
-                                            borderRadius: 5,
-                                          }}
-                                          value={selectedShippingAddress?.id}
-                                        >
-                                          <p>
-                                            <b>Email: </b>
-                                            {selectedShippingAddress?.email}
-                                          </p>
-                                          <p>
-                                            <b>Phone: </b>
-                                            {selectedShippingAddress?.phone}
-                                          </p>
-                                          <p>
-                                            <b>Address 1: </b>
-                                            {selectedShippingAddress?.address1 &&
-                                              ellipsis(selectedShippingAddress?.address1, 35)}
-                                          </p>
-                                          <p>
-                                            <b>Address 2: </b>
-                                            {selectedShippingAddress?.address2 &&
-                                              ellipsis(selectedShippingAddress?.address2, 35)}
-                                          </p>
-                                          <p>
-                                            <b>City: </b>
-                                            {selectedShippingAddress?.city}
-                                          </p>
-                                          <p>
-                                            <b>State: </b>
-                                            {selectedShippingAddress?.state}
-                                          </p>
-                                          <p>
-                                            <b>Zip Code: </b>
-                                            {selectedShippingAddress?.zip_code}
-                                          </p>
-                                        </Radio>
-                                      </Col>
-                                    )}
-                                  </Row>
-                                </Radio.Group>
-                              </Form.Item>
-                            </Col>
-                            <Col lg={12} sm={24}>
-                              <Button
-                                size="small"
-                                style={{ float: 'right', zIndex: 1000, marginTop: -10, marginBottom: 10 }}
-                                title={`Add Billing address`}
-                                htmlType="button"
-                                type="primary"
-                                onClick={() => addOrEditAddressHandler(null, 'billing')}
-                              >
-                                <FeatherIcon icon="plus-circle" />
-                              </Button>
-                              <Form.Item
-                                rules={[{ required: true, message: 'Please Select Billing Address' }]}
-                                name="billing_address_id"
-                                label="Billing Addresses"
-                                initialValue={selectedBillingAddress?.id}
-                              >
-                                <Radio.Group style={{ width: '100%', padding: 10 }}>
-                                  <Row gutter={25}>
-                                    {selectedBillingAddress && (
-                                      <Col key={selectedBillingAddress?.id} xs={24}>
-                                        <Button
-                                          size="small"
-                                          style={{ position: 'absolute', right: 14, zIndex: 1000 }}
-                                          title="Change Billing Address"
-                                          htmlType="button"
-                                          type="info"
-                                          onClick={() => changeAddressHandler('billing')}
-                                        >
-                                          <FeatherIcon icon="repeat" />
-                                        </Button>
-                                        <Radio
-                                          style={{
-                                            width: '100%',
-                                            border: '1px solid #f0f0f0',
-                                            fontSize: 12,
-                                            marginBottom: 10,
-                                            padding: 10,
-                                            borderRadius: 5,
-                                          }}
-                                          value={selectedBillingAddress?.id}
-                                        >
-                                          <p>
-                                            <b>Email: </b>
-                                            {selectedBillingAddress?.email}
-                                          </p>
-                                          <p>
-                                            <b>Phone: </b>
-                                            {selectedBillingAddress?.phone}
-                                          </p>
-                                          <p>
-                                            <b>Address 1: </b>
-                                            {selectedBillingAddress?.address1 &&
-                                              ellipsis(selectedBillingAddress?.address1, 35)}
-                                          </p>
-                                          <p>
-                                            <b>Address 2: </b>
-                                            {selectedBillingAddress?.address2 &&
-                                              ellipsis(selectedBillingAddress?.address2, 35)}
-                                          </p>
-                                          <p>
-                                            <b>City: </b>
-                                            {selectedBillingAddress?.city}
-                                          </p>
-                                          <p>
-                                            <b>State: </b>
-                                            {selectedBillingAddress?.state}
-                                          </p>
-                                          <p>
-                                            <b>Zip Code: </b>
-                                            {selectedBillingAddress?.zip_code}
-                                          </p>
-                                        </Radio>
-                                      </Col>
-                                    )}
-                                  </Row>
-                                </Radio.Group>
-                              </Form.Item>
-                            </Col>
-                          </Row>
-                        </Tabs.TabPane>
-                        <Tabs.TabPane tab="Shipping" key="shipping">
-                          <Row gutter={25}>
-                            <Col sm={24}>
-                              <Form.Item
-                                name="shipping_method_id"
-                                label="Shipping Method"
-                                rules={[{ required: true, message: 'Select Shipping Method' }]}
-                                initialValue={singleOrder?.data?.shippingmethod?.id}
-                              >
-                                <Radio.Group
-                                  style={{ width: '100%', padding: 10 }}
-                                  defaultValue={singleOrder?.data?.shippingmethod?.id}
-                                >
-                                  {shippingMethod.map(item => (
-                                    <Row gutter={25}>
-                                      <Col key={item.id} xs={8}>
-                                        <Radio
-                                          style={{
-                                            width: '100%',
-                                            border: '1px solid #f0f0f0',
-                                            fontSize: 12,
-                                            marginBottom: 10,
-                                            padding: 10,
-                                            borderRadius: 5,
-                                          }}
-                                          value={item.id}
-                                        >
-                                          <Typography.Title level={4}>{item.name}</Typography.Title>
-                                          <Typography.Text>{item?.description}</Typography.Text>
-                                        </Radio>
-                                      </Col>
-                                    </Row>
-                                  ))}
-                                </Radio.Group>
-                              </Form.Item>
-                            </Col>
-                          </Row>
-                        </Tabs.TabPane>
-                        <Tabs.TabPane tab="Voucher & Status" key="voucher-status">
-                          <Row gutter={25}>
-                            <Col lg={18} xs={24}>
-                              <Form.Item label="Voucher Code">
-                                <Input.Search
-                                  placeholder="Input Voucher Code"
-                                  enterButton="Apply Voucher"
-                                  size="large"
-                                  onSearch={validateVoucher}
-                                  defaultValue={selectedCouponCode}
-                                  onChange={e => {
-                                    if (e.target.value.length === 0) {
-                                      setSelectedCouponCode('');
-                                      setDiscount(0);
-                                      toast.warn('Voucher Removed!');
-                                    }
+                                    <Button
+                                      onClick={() => {
+                                        const new_id = new Date().getTime();
+                                        setLastInitProductId(new_id);
+                                        setSelectedProduct(prevState => [
+                                          ...prevState,
+                                          { ...prod_initial, id: new_id },
+                                        ]);
+                                        setProductOption([]);
+                                      }}
+                                      size="small"
+                                      title="Add Product"
+                                      htmlType="button"
+                                      type="primary"
+                                    >
+                                      <FeatherIcon icon="plus-circle" />
+                                    </Button>
+                                  </div>
+                                </span>
+                              </Col>
+                              <Col lg={6} md={8} sm={24}>
+                                <Card
+                                  title="Summary"
+                                  bordered={true}
+                                  size="small"
+                                  headStyle={{
+                                    backgroundColor: '#5f63f24d',
+                                    borderTopLeftRadius: 3,
+                                    borderTopRightRadius: 3,
                                   }}
-                                />
-                              </Form.Item>
-                              <Form.Item
-                                name="order_status_id"
-                                label="Order Status"
-                                rules={[{ required: true, message: 'Select Order Status' }]}
-                                initialValue={singleOrder?.data?.orderstatus?.id}
-                              >
-                                <Select
-                                  placeholder="Select Order Status"
-                                  options={orderStatusOptions}
-                                  optionFilterProp="label"
-                                  defaultValue={singleOrder?.data?.orderstatus?.id}
-                                />
-                              </Form.Item>
-                            </Col>
-                            <Col lg={6} xs={24}>
-                              <Card
-                                title="Summary"
-                                bordered={true}
-                                size="small"
-                                headStyle={{
-                                  backgroundColor: '#5f63f24d',
-                                  borderTopLeftRadius: 3,
-                                  borderTopRightRadius: 3,
-                                }}
-                              >
-                                <Paragraph>
-                                  <Text strong>Sub Total Price : </Text>$
-                                  {selectedProduct.reduce(
-                                    (accumulator, item) => accumulator + item.quantity * item.price,
-                                    0,
-                                  )}
-                                </Paragraph>
-                                <Paragraph>
-                                  <Text strong>Product Quantity : </Text>
-                                  {selectedProduct.reduce((accumulator, item) => accumulator + item.quantity, 0)}
-                                </Paragraph>
-                                <Paragraph>
-                                  <Text strong>Discount : </Text>${discount}
-                                </Paragraph>
-                                <Paragraph>
-                                  <Text strong>Shipping Cost : </Text>${shippingCost}
-                                </Paragraph>{' '}
-                                <Paragraph>
-                                  <Text strong>Total Price : </Text>$
-                                  {selectedProduct.reduce(
-                                    (accumulator, item) => accumulator + item.quantity * item.price,
-                                    0,
-                                  ) +
-                                    shippingCost -
-                                    discount}
-                                </Paragraph>
-                              </Card>
-                            </Col>
-                          </Row>
-                        </Tabs.TabPane>
-                      </Tabs>
-                      <div
-                        style={{
-                          display: 'flex',
-                          justifyContent: 'flex-end',
-                          marginTop: '3em',
-                        }}
-                      >
-                        <Form.Item>
-                          <Button loading={isLoading} size="default" htmlType="submit" type="primary" raised>
-                            {isLoading ? 'Processing' : 'Update Order'}
-                          </Button>
-                          <Link to="/admin/order/list">
-                            <Button style={{ marginLeft: 10 }} type="light" size="default">
-                              Cancel
+                                >
+                                  <Paragraph>
+                                    <Text strong>Sub Total Price : </Text>$
+                                    {selectedProduct.reduce(
+                                      (accumulator, item) => accumulator + item.quantity * item.price,
+                                      0,
+                                    )}
+                                  </Paragraph>
+                                  <Paragraph>
+                                    <Text strong>Product Quantity : </Text>
+                                    {selectedProduct.reduce((accumulator, item) => accumulator + item.quantity, 0)}
+                                  </Paragraph>
+                                  <Paragraph>
+                                    <Text strong>Discount : </Text>${discount}
+                                  </Paragraph>
+                                  <Paragraph>
+                                    <Text strong>Shipping Cost : </Text>${shippingCost}
+                                  </Paragraph>{' '}
+                                  <Paragraph>
+                                    <Text strong>Total Price : </Text>$
+                                    {selectedProduct.reduce(
+                                      (accumulator, item) => accumulator + item.quantity * item.price,
+                                      0,
+                                    ) +
+                                      shippingCost -
+                                      discount}
+                                  </Paragraph>
+                                </Card>
+                              </Col>
+                            </Row>
+                          </Tabs.TabPane>
+                          <Tabs.TabPane tab="Addresses" key="addresses">
+                            <Row gutter={25}>
+                              <Col lg={12} sm={24}>
+                                <Form.Item
+                                  rules={[{ required: true, message: 'Please Select Shipping Address' }]}
+                                  name="shipping_address_id"
+                                  label="Shipping Addresses"
+                                  initialValue={selectedShippingAddress?.id}
+                                >
+                                  {!selectedShippingAddress?.id ? (
+                                    <Button
+                                      size="small"
+                                      style={{ float: 'right', zIndex: 1000, marginTop: -25, marginBottom: 10 }}
+                                      title={`Add shipping address`}
+                                      htmlType="button"
+                                      type="primary"
+                                      onClick={() => addOrEditAddressHandler(null, 'shipping')}
+                                    >
+                                      Add address
+                                    </Button>
+                                  ) : null}
+
+                                  <Radio.Group style={{ width: '100%', padding: 10 }}>
+                                    <Row gutter={25}>
+                                      {selectedShippingAddress && (
+                                        <Col key={selectedShippingAddress?.id} xs={24}>
+                                          <Button
+                                            size="small"
+                                            style={{ position: 'absolute', right: 14, zIndex: 1000 }}
+                                            title="Change Shipping Address"
+                                            htmlType="button"
+                                            type="info"
+                                            onClick={() => changeAddressHandler('shipping')}
+                                          >
+                                            Change
+                                          </Button>
+                                          <Radio
+                                            style={{
+                                              width: '100%',
+                                              border: '1px solid #f0f0f0',
+                                              fontSize: 12,
+                                              marginBottom: 10,
+                                              padding: 10,
+                                              borderRadius: 5,
+                                            }}
+                                            defaultValue={selectedShippingAddress?.id}
+                                          >
+                                            <p>
+                                              {selectedShippingAddress?.address1 &&
+                                                ellipsis(selectedShippingAddress?.address1, 35)}
+                                            </p>
+                                            <p>
+                                              {selectedShippingAddress?.address2 &&
+                                                ellipsis(selectedShippingAddress?.address2, 35)}
+                                            </p>
+                                            <p>
+                                              {selectedShippingAddress?.city}, {selectedShippingAddress?.state} -{' '}
+                                              {selectedShippingAddress?.zip_code}
+                                            </p>
+                                            {/* Need To Add Country */}
+                                          </Radio>
+                                        </Col>
+                                      )}
+                                    </Row>
+                                  </Radio.Group>
+                                </Form.Item>
+                              </Col>
+                              <Col lg={12} sm={24}>
+                                <Form.Item
+                                  rules={[{ required: true, message: 'Please Select Billing Address' }]}
+                                  name="billing_address_id"
+                                  label="Billing Addresses"
+                                  initialValue={selectedBillingAddress?.id}
+                                >
+                                  {!selectedBillingAddress?.id ? (
+                                    <Button
+                                      size="small"
+                                      style={{ float: 'right', zIndex: 1000, marginTop: -25, marginBottom: 10 }}
+                                      title={`Add billing address`}
+                                      htmlType="button"
+                                      type="primary"
+                                      onClick={() => addOrEditAddressHandler(null, 'billing')}
+                                    >
+                                      Add address
+                                    </Button>
+                                  ) : null}
+                                  <Radio.Group style={{ width: '100%', padding: 10 }}>
+                                    <Row gutter={25}>
+                                      {selectedBillingAddress && (
+                                        <Col key={selectedBillingAddress?.id} xs={24}>
+                                          <Button
+                                            size="small"
+                                            style={{ position: 'absolute', right: 14, zIndex: 1000 }}
+                                            title="Change Billing Address"
+                                            htmlType="button"
+                                            type="info"
+                                            onClick={() => changeAddressHandler('billing')}
+                                          >
+                                            Change
+                                          </Button>
+                                          <Radio
+                                            style={{
+                                              width: '100%',
+                                              border: '1px solid #f0f0f0',
+                                              fontSize: 12,
+                                              marginBottom: 10,
+                                              padding: 10,
+                                              borderRadius: 5,
+                                            }}
+                                            defaultValue={selectedBillingAddress?.id}
+                                          >
+                                            <p>
+                                              {selectedBillingAddress?.address1 &&
+                                                ellipsis(selectedBillingAddress?.address1, 35)}
+                                            </p>
+                                            <p>
+                                              {selectedBillingAddress?.address2 &&
+                                                ellipsis(selectedBillingAddress?.address2, 35)}
+                                            </p>
+                                            <p>
+                                              {selectedBillingAddress?.city}, {selectedBillingAddress?.state} -{' '}
+                                              {selectedBillingAddress?.zip_code}
+                                            </p>
+                                          </Radio>
+                                        </Col>
+                                      )}
+                                    </Row>
+                                  </Radio.Group>
+                                </Form.Item>
+                              </Col>
+                            </Row>
+                          </Tabs.TabPane>
+                          <Tabs.TabPane tab="Shipping" key="shipping">
+                            <Row gutter={25}>
+                              <Col xs={24} md={12}>
+                                <Form.Item
+                                  name="shipping_method_id"
+                                  label="Shipping Method"
+                                  rules={[{ required: true, message: 'Select Shipping Method' }]}
+                                >
+                                  <Radio.Group style={{ width: '100%', padding: 10 }}>
+                                    {shippingMethod.map(item => (
+                                      <Row gutter={25}>
+                                        <Col key={item.id} xs={8}>
+                                          <Radio
+                                            style={{
+                                              width: '100%',
+                                              border: '1px solid #f0f0f0',
+                                              fontSize: 12,
+                                              marginBottom: 10,
+                                              padding: 10,
+                                              borderRadius: 5,
+                                            }}
+                                            value={item.id}
+                                          >
+                                            <Typography.Title level={5} style={{ fontSize: 14 }}>
+                                              {item.name}
+                                            </Typography.Title>
+                                            <Typography.Text>{item?.description}</Typography.Text>
+                                          </Radio>
+                                        </Col>
+                                      </Row>
+                                    ))}
+                                  </Radio.Group>
+                                </Form.Item>
+                              </Col>
+                              <Col xs={24} md={12}>
+                                <Form.Item
+                                  // name="shipping_account_id"
+                                  label="Shipping Account"
+                                >
+                                  <Radio.Group style={{ width: '100%', padding: 10 }}>
+                                    {shippingMethodAccountList.map(item => (
+                                      <Row gutter={25}>
+                                        <Col key={item.id} xs={8}>
+                                          <Radio
+                                            style={{
+                                              width: '100%',
+                                              border: '1px solid #f0f0f0',
+                                              fontSize: 12,
+                                              marginBottom: 10,
+                                              padding: 10,
+                                              borderRadius: 5,
+                                            }}
+                                            value={item.id}
+                                          >
+                                            <Typography.Title level={5} style={{ fontSize: 14 }}>
+                                              {item.name}
+                                            </Typography.Title>
+                                            <Typography.Text>{item?.description}</Typography.Text>
+                                          </Radio>
+                                        </Col>
+                                      </Row>
+                                    ))}
+                                  </Radio.Group>
+                                </Form.Item>
+                              </Col>
+                            </Row>
+                          </Tabs.TabPane>
+                          <Tabs.TabPane tab="Voucher & Status" key="voucher-status">
+                            <Row gutter={25}>
+                              <Col lg={18} xs={24}>
+                                <Form.Item label="Voucher Code">
+                                  <Input.Search
+                                    placeholder="Input Voucher Code"
+                                    enterButton="Apply Voucher"
+                                    size="large"
+                                    onSearch={validateVoucher}
+                                    defaultValue={selectedCouponCode}
+                                    onChange={e => {
+                                      if (e.target.value.length === 0) {
+                                        setSelectedCouponCode('');
+                                        setDiscount(0);
+                                        toast.warn('Voucher Removed!');
+                                      }
+                                    }}
+                                  />
+                                </Form.Item>
+                                <Form.Item
+                                  name="order_status_id"
+                                  label="Order Status"
+                                  rules={[{ required: true, message: 'Select Order Status' }]}
+                                  initialValue={singleOrder?.data?.orderstatus?.id}
+                                >
+                                  <Select
+                                    placeholder="Select Order Status"
+                                    options={orderStatusOptions}
+                                    optionFilterProp="label"
+                                    defaultValue={singleOrder?.data?.orderstatus?.id}
+                                  />
+                                </Form.Item>
+                              </Col>
+                              <Col lg={6} xs={24}>
+                                <Card
+                                  title="Summary"
+                                  bordered={true}
+                                  size="small"
+                                  headStyle={{
+                                    backgroundColor: '#5f63f24d',
+                                    borderTopLeftRadius: 3,
+                                    borderTopRightRadius: 3,
+                                  }}
+                                >
+                                  <Paragraph>
+                                    <Text strong>Sub Total Price : </Text>$
+                                    {selectedProduct.reduce(
+                                      (accumulator, item) => accumulator + item.quantity * item.price,
+                                      0,
+                                    )}
+                                  </Paragraph>
+                                  <Paragraph>
+                                    <Text strong>Product Quantity : </Text>
+                                    {selectedProduct.reduce((accumulator, item) => accumulator + item.quantity, 0)}
+                                  </Paragraph>
+                                  <Paragraph>
+                                    <Text strong>Discount : </Text>${discount}
+                                  </Paragraph>
+                                  <Paragraph>
+                                    <Text strong>Shipping Cost : </Text>${shippingCost}
+                                  </Paragraph>{' '}
+                                  <Paragraph>
+                                    <Text strong>Total Price : </Text>$
+                                    {selectedProduct.reduce(
+                                      (accumulator, item) => accumulator + item.quantity * item.price,
+                                      0,
+                                    ) +
+                                      shippingCost -
+                                      discount}
+                                  </Paragraph>
+                                </Card>
+                              </Col>
+                            </Row>
+                          </Tabs.TabPane>
+                        </Tabs>
+                        <div
+                          style={{
+                            display: 'flex',
+                            justifyContent: 'flex-end',
+                            marginTop: '3em',
+                          }}
+                        >
+                          <Form.Item>
+                            <Button loading={isLoading} size="default" htmlType="submit" type="primary" raised>
+                              {isLoading ? 'Processing' : 'Update Order'}
                             </Button>
-                          </Link>
-                        </Form.Item>
-                      </div>
-                    </Col>
-                  </Row>
+                            <Link to="/admin/order/list">
+                              <Button style={{ marginLeft: 10 }} type="light" size="default">
+                                Cancel
+                              </Button>
+                            </Link>
+                          </Form.Item>
+                        </div>
+                      </Col>
+                    </Row>
+                  )}
                 </Form>
               )}
             </Cards>
@@ -1071,7 +1155,26 @@ const UpdateOrder = () => {
             size="small"
           >
             <Row gutter={25}>
-              <Col md={12}>
+              <Col md={24}>
+                <Row gutter={25}>
+                  <Col xs={24} md={12}>
+                    <Form.Item
+                      name="country"
+                      initialValue={isAddressEdit ? editSelectedAddress?.countryCode?.code : 'US'}
+                      label="Country"
+                      style={{ marginBottom: 5 }}
+                    >
+                      <Select
+                        onChange={val => setSelectedCountryCode(val)}
+                        defaultValue={isAddressEdit ? editSelectedAddress?.countryCode?.code : 'US'}
+                        options={countries?.map(item => ({
+                          label: item.name,
+                          value: item.code,
+                        }))}
+                      ></Select>
+                    </Form.Item>
+                  </Col>
+                </Row>
                 <Form.Item
                   rules={[{ required: true, message: 'Please Enter Address One' }]}
                   name="address1"
@@ -1082,37 +1185,6 @@ const UpdateOrder = () => {
                   <Input placeholder="Address One" />
                 </Form.Item>
                 <Form.Item
-                  rules={[{ required: true, message: 'Please Enter Phone' }]}
-                  name="phone"
-                  label="Phone"
-                  style={{ marginBottom: 5 }}
-                  initialValue={editSelectedAddress?.phone}
-                >
-                  <Input placeholder="Phone" />
-                </Form.Item>
-                <Form.Item
-                  rules={[{ required: true, message: 'Please Enter Email' }]}
-                  name="email"
-                  label="Email"
-                  style={{ marginBottom: 5 }}
-                  initialValue={editSelectedAddress?.email}
-                >
-                  <Input placeholder="Email" />
-                </Form.Item>
-                <Form.Item name="fax" label="Fax" style={{ marginBottom: 5 }} initialValue={editSelectedAddress?.fax}>
-                  <Input placeholder="Fax" />
-                </Form.Item>
-                <Form.Item
-                  name="isDefault"
-                  label="Default"
-                  style={{ marginBottom: 0 }}
-                  initialValue={editSelectedAddress?.isDefault}
-                >
-                  <Switch defaultChecked={editSelectedAddress?.isDefault} />
-                </Form.Item>
-              </Col>
-              <Col md={12}>
-                <Form.Item
                   name="address2"
                   label="Address Two"
                   style={{ marginBottom: 5 }}
@@ -1120,38 +1192,61 @@ const UpdateOrder = () => {
                 >
                   <Input placeholder="Address Two" />
                 </Form.Item>
-                <Form.Item name="country" initialValue="United State" label="Country" style={{ marginBottom: 5 }}>
-                  <Select>
-                    <Select.Option value="United State">United State</Select.Option>
-                  </Select>
-                </Form.Item>
-                <Form.Item
-                  rules={[{ required: true, message: 'Please Enter City' }]}
-                  name="city"
-                  label="City"
-                  style={{ marginBottom: 5 }}
-                  initialValue={editSelectedAddress?.city}
-                >
-                  <Input placeholder="City" />
-                </Form.Item>
-                <Form.Item
-                  name="state"
-                  rules={[{ required: true, message: 'Please Enter State' }]}
-                  label="State"
-                  style={{ marginBottom: 5 }}
-                  initialValue={editSelectedAddress?.state}
-                >
-                  <Input placeholder="State" />
-                </Form.Item>
-                <Form.Item
-                  name="zip_code"
-                  rules={[{ required: true, message: 'Please Enter Zip Code' }]}
-                  label="Zip Code"
-                  style={{ marginBottom: 5 }}
-                  initialValue={editSelectedAddress?.zip_code}
-                >
-                  <Input placeholder="Zip Code" />
-                </Form.Item>
+                <Row gutter={25}>
+                  <Col xs={24} md={12}>
+                    <Form.Item
+                      rules={[{ required: true, message: 'Please Enter City' }]}
+                      name="city"
+                      label="City"
+                      style={{ marginBottom: 5 }}
+                      initialValue={editSelectedAddress?.city}
+                    >
+                      <Input placeholder="City" />
+                    </Form.Item>
+                  </Col>
+                  <Col xs={24} md={12}>
+                    <Form.Item
+                      name="zip_code"
+                      rules={[{ required: true, message: 'Please Enter Zip Code' }]}
+                      label="Zip Code"
+                      style={{ marginBottom: 5 }}
+                      initialValue={editSelectedAddress?.zip_code}
+                    >
+                      <Input placeholder="Zip Code" />
+                    </Form.Item>
+                  </Col>
+                </Row>
+                <Row gutter={{}}>
+                  <Col xs={24} md={12}>
+                    <Form.Item
+                      name="state"
+                      rules={[{ required: true, message: 'Please Enter State' }]}
+                      label="State"
+                      style={{ marginBottom: 5 }}
+                      initialValue={editSelectedAddress?.state}
+                    >
+                      <Select
+                        style={{ width: '100%' }}
+                        placeholder="State"
+                        defaultValue={editSelectedAddress?.state}
+                        options={states?.map(item => ({
+                          label: item.state,
+                          value: item.abbreviation,
+                        }))}
+                      />
+                    </Form.Item>
+                  </Col>
+                  <Col xs={24} md={12} style={{ paddingLeft: 15 }}>
+                    <Form.Item
+                      name="isDefault"
+                      label="Default"
+                      style={{ marginBottom: 0 }}
+                      initialValue={editSelectedAddress?.isDefault}
+                    >
+                      <Switch defaultChecked={editSelectedAddress?.isDefault} />
+                    </Form.Item>
+                  </Col>
+                </Row>
               </Col>
             </Row>
           </Form>
@@ -1159,12 +1254,12 @@ const UpdateOrder = () => {
         {/* Modal For Add / Update Address */}
         {/* Modal For Add / Update Address */}
         <Modal
-          title={`List of ${addressType} addresses`}
+          title={`${strCamelCase(addressType)} addresses`}
           style={{ top: 20 }}
-          width={1000}
+          width={600}
           open={listAddressModalOpen}
-          okText="Select"
-          onOk={() => selectAddressHandler(addressType)}
+          className="orderAddressModal"
+          footer={null}
           onCancel={() => setListAddressModalOpen(false)}
         >
           <Radio.Group style={{ width: '100%', padding: 10 }}>
@@ -1178,12 +1273,12 @@ const UpdateOrder = () => {
                   type="primary"
                   onClick={() => addOrEditAddressHandler(null, addressType)}
                 >
-                  <FeatherIcon icon="plus-circle" />
+                  Add new address
                 </Button>
               </Col>
               {addressType === 'billing'
                 ? billingAddresses.map(item => (
-                    <Col key={item.id} xs={24} md={12}>
+                    <Col key={item.id} xs={24}>
                       <Button
                         size="small"
                         style={{ position: 'absolute', right: 14, zIndex: 1000 }}
@@ -1192,11 +1287,18 @@ const UpdateOrder = () => {
                         type="info"
                         onClick={() => addOrEditAddressHandler(item.id, 'billing')}
                       >
-                        <FeatherIcon icon="edit" />
+                        Edit
                       </Button>
-                      {billingAddresses.filter(item => item.isDefault)[0]?.id === item.id && (
-                        <Badge.Ribbon text="Default" color="pink" style={{ top: 40, zIndex: 1000 }} />
-                      )}
+                      <Button
+                        size="small"
+                        style={{ position: 'absolute', right: 14, zIndex: 1000, top: 45 }}
+                        title="Edit Shipping Address"
+                        htmlType="button"
+                        type="info"
+                        onClick={() => selectAddressHandler(addressType, item.id)}
+                      >
+                        Select
+                      </Button>
                       <Radio
                         style={{
                           width: '100%',
@@ -1209,39 +1311,20 @@ const UpdateOrder = () => {
                         value={item.id}
                         onChange={() => setTempSelectedAddress(item)}
                       >
+                        <p>{item.address1 && ellipsis(item.address1, 35)}</p>
+                        <p>{item.address2 && ellipsis(item.address2, 35)}</p>
                         <p>
-                          <b>Email: </b>
-                          {item.email}
+                          {item.city}, {item.state} - {item.zip_code}
                         </p>
-                        <p>
-                          <b>Phone: </b>
-                          {item.phone}
-                        </p>
-                        <p>
-                          <b>Address 1: </b>
-                          {item.address1 && ellipsis(item.address1, 35)}
-                        </p>
-                        <p>
-                          <b>Address 2: </b>
-                          {item.address2 && ellipsis(item.address2, 35)}
-                        </p>
-                        <p>
-                          <b>City: </b>
-                          {item.city}
-                        </p>
-                        <p>
-                          <b>State: </b>
-                          {item.state}
-                        </p>
-                        <p>
-                          <b>Zip Code: </b>
-                          {item.zip_code}
-                        </p>
+                        <p>{item?.countryCode?.name}</p>
+                        {billingAddresses.filter(item => item.isDefault)[0]?.id === item.id && (
+                          <Badge count="Default billing address" color="#ddd" style={{ color: '#000' }} />
+                        )}
                       </Radio>
                     </Col>
                   ))
                 : shippingAddresses.map(item => (
-                    <Col key={item.id} xs={24} md={12}>
+                    <Col key={item.id} xs={24}>
                       <Button
                         size="small"
                         style={{ position: 'absolute', right: 14, zIndex: 1000 }}
@@ -1250,11 +1333,18 @@ const UpdateOrder = () => {
                         type="info"
                         onClick={() => addOrEditAddressHandler(item.id, 'shipping')}
                       >
-                        <FeatherIcon icon="edit" />
+                        Edit
                       </Button>
-                      {shippingAddresses.filter(item => item.isDefault)[0]?.id === item.id && (
-                        <Badge.Ribbon text="Default" color="pink" style={{ top: 40, zIndex: 1000 }} />
-                      )}
+                      <Button
+                        size="small"
+                        style={{ position: 'absolute', right: 14, zIndex: 1000, top: 45 }}
+                        title="Edit Shipping Address"
+                        htmlType="button"
+                        type="info"
+                        onClick={() => selectAddressHandler(addressType, item.id)}
+                      >
+                        Select
+                      </Button>
                       <Radio
                         style={{
                           width: '100%',
@@ -1267,34 +1357,15 @@ const UpdateOrder = () => {
                         value={item.id}
                         onChange={() => setTempSelectedAddress(item)}
                       >
+                        <p>{item.address1 && ellipsis(item.address1, 35)}</p>
+                        <p>{item.address2 && ellipsis(item.address2, 35)}</p>
                         <p>
-                          <b>Email: </b>
-                          {item.email}
+                          {item.city}, {item.state} - {item.zip_code}
                         </p>
-                        <p>
-                          <b>Phone: </b>
-                          {item.phone}
-                        </p>
-                        <p>
-                          <b>Address 1: </b>
-                          {item.address1 && ellipsis(item.address1, 35)}
-                        </p>
-                        <p>
-                          <b>Address 2: </b>
-                          {item.address2 && ellipsis(item.address2, 35)}
-                        </p>
-                        <p>
-                          <b>City: </b>
-                          {item.city}
-                        </p>
-                        <p>
-                          <b>State: </b>
-                          {item.state}
-                        </p>
-                        <p>
-                          <b>Zip Code: </b>
-                          {item.zip_code}
-                        </p>
+                        <p>{item?.countryCode?.name}</p>
+                        {shippingAddresses.filter(item => item.isDefault)[0]?.id === item.id && (
+                          <Badge count="Default shipping address" color="#ddd" style={{ color: '#000' }} />
+                        )}
                       </Radio>
                     </Col>
                   ))}

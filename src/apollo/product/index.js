@@ -52,7 +52,6 @@ export const productSchema = {
         data {
           id
           name
-          slug
           description
           status
           isDefault

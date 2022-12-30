@@ -1,14 +1,6 @@
 module.exports = {
-  strCamelCase: str => {
-    if (str)
-      return str
-        .replace(/\s(.)/g, function(a) {
-          return a.toUpperCase();
-        })
-        .replace(/\s/g, '')
-        .replace(/^(.)/, function(b) {
-          return b.toLowerCase();
-        });
+  strCamelCase: string => {
+    if (string) return string.charAt(0).toUpperCase() + string.slice(1);
     return false;
   },
 };

@@ -15,7 +15,6 @@ import {
   Upload,
   Modal,
   Badge,
-  Alert,
 } from 'antd';
 import FeatherIcon from 'feather-icons-react';
 import { PageHeader } from '../../components/page-headers/page-headers';
@@ -33,12 +32,8 @@ import { customerMutation } from '../../apollo/customer';
 import { useSelector } from 'react-redux';
 import { orderQuery } from '../../apollo/order';
 import { UploadOutlined } from '@ant-design/icons';
-import { loadStripe } from '@stripe/stripe-js';
-import { Elements } from '@stripe/react-stripe-js';
-import StripeForm from './StripeForm';
 import { addressSchema } from '../../apollo/address';
 import { strCamelCase } from '../../utility/stringModify';
-const stripePromise = loadStripe('pk_test_6pRNASCoBOKtIshFeQd4XMUh');
 const { Text, Paragraph } = Typography;
 const prod_initial = {
   id: '',
@@ -79,7 +74,6 @@ const AddOrder = () => {
   const [editSelectedAddress, setEditSelectedAddress] = useState(null);
   const [changeAddress, setChangeAddress] = useState(false);
   const [tempSelectedAddress, setTempSelectedAddress] = useState(null);
-  const [selectedPaymentMethodSlug, setSelectedPaymentMethodSlug] = useState(null);
   // Change State After Country Change
   const [selectedCountryCode, setSelectedCountryCode] = useState('US');
   const [countries, setCountries] = useState([]);
@@ -119,26 +113,6 @@ const AddOrder = () => {
         setPaymentMethod(data?.data);
       });
 
-    // Get Order Status List
-    apolloClient
-      .query({
-        query: orderQuery.GET_ORDER_STATUS_LIST,
-        context: {
-          headers: {
-            TENANTID: process.env.REACT_APP_TENANTID,
-            Authorization: token,
-          },
-        },
-      })
-      .then(res => {
-        const data = res?.data?.getOrderStatusList;
-        if (!data.status) return;
-        const order_status_list = data?.data?.map(item => ({
-          ...item,
-          value: item.id,
-          label: item.name,
-        }));
-      });
     // Get Country List
     apolloClient
       .query({
@@ -158,12 +132,13 @@ const AddOrder = () => {
         query: orderQuery.GET_SHIPPING_ACCOUNT_LIST,
         context: {
           headers: { TENANTID: process.env.REACT_APP_TENANTID },
+          Authorization: token,
         },
       })
       .then(res => {
-        const data = res.data.getCountryList;
-        if (!data.status) return true;
-        setCountries(data?.data);
+        const data = res.data.getShippingAccountListAdmin;
+        if (!data?.status) return true;
+        setShippingMethodAccountList(data?.data);
       });
   }, []);
 
@@ -189,6 +164,8 @@ const AddOrder = () => {
       });
   }, [selectedCountryCode]);
 
+  // Need T Remove order_status_id from varibales after removing api
+
   const handleSubmit = () => {
     const form_data = form.getFieldsValue(true);
     const orderProducts = selectedProduct.map(item => ({ product_id: item.id, quantity: item.quantity }));
@@ -207,7 +184,7 @@ const AddOrder = () => {
           data: {
             ...form_data,
             coupon_id: selctedCouponCode,
-            payment_id: paymentMethod.filter(item => item.slug === form_data.payment_id)[0]?.id,
+            order_status_id: 1,
             taxexempt_file: image,
             orderProducts,
           },
@@ -227,6 +204,7 @@ const AddOrder = () => {
                 Authorization: token,
               },
             },
+            fetchPolicy: 'network-only',
           },
           ['getOrderlistAdmin'],
         ],
@@ -237,7 +215,7 @@ const AddOrder = () => {
         toast.success(data?.message);
         setTimeout(() => {
           history.push('/admin/order/list');
-        }, 1000);
+        }, 3000);
       })
       .catch(err => {
         toast.error('Something Went wrong !!');
@@ -400,10 +378,10 @@ const AddOrder = () => {
     },
     {
       title: 'Payment Method',
-      percent: 90,
+      percent: 100,
     },
     {
-      title: 'Payment',
+      title: 'OverView',
       percent: 100,
     },
   ];
@@ -411,7 +389,6 @@ const AddOrder = () => {
   const [current, setCurrent] = useState(0);
   const next = async () => {
     try {
-      console.log('🚀 ~ file: AddOrder.js:357 ~ AddOrder ~ current', current);
       if (current === 0) {
         await form.validateFields(['customer_id']);
       } else if (current === 1) {
@@ -482,8 +459,14 @@ const AddOrder = () => {
       setIsAddressEdit(true);
       if (type === 'billing') {
         setEditSelectedAddress(billingAddresses.filter(item => item.id === id)[0]);
+        form.setFieldsValue({
+          billing_address_id: id,
+        });
       } else {
         setEditSelectedAddress(shippingAddresses.filter(item => item.id === id)[0]);
+        form.setFieldsValue({
+          shipping_address_id: id,
+        });
       }
     } else {
       setEditSelectedAddress(null);
@@ -597,16 +580,17 @@ const AddOrder = () => {
     if (!tempSelectedAddress) return;
     if (type === 'billing') {
       setSelectedBillingAddress(tempSelectedAddress);
-      form.setFieldValue({
+      form.setFieldsValue({
         billing_address_id: id,
       });
     } else {
       setSelectedShippingAddress(tempSelectedAddress);
-      form.setFieldValue({
+      form.setFieldsValue({
         shipping_address_id: id,
       });
     }
     setListAddressModalOpen(false);
+    setTempSelectedAddress(null);
   };
 
   // Refetch query after adding or updating address
@@ -635,8 +619,18 @@ const AddOrder = () => {
           data?.data?.addresses?.forEach(address => {
             if (address.type === 'billing') billing.push(address);
             if (address.type === 'shipping') shipping.push(address);
-            if (address.type === 'billing' && address.isDefault) setSelectedBillingAddress(address);
-            if (address.type === 'shipping' && address.isDefault) setSelectedShippingAddress(address);
+            if (address.type === 'billing' && address.isDefault) {
+              setSelectedBillingAddress(address);
+              form.setFieldsValue({
+                billing_address_id: address.id,
+              });
+            }
+            if (address.type === 'shipping' && address.isDefault) {
+              setSelectedShippingAddress(address);
+              form.setFieldsValue({
+                shipping_address_id: address?.id,
+              });
+            }
           });
           setBillingAddresses(billing);
           setShippingAddresses(shipping);
@@ -867,7 +861,6 @@ const AddOrder = () => {
                               name="shipping_address_id"
                               label="Shipping Addresses"
                               initialValue={selectedShippingAddress?.id}
-                              value={selectedShippingAddress?.id}
                             >
                               {!selectedShippingAddress?.id ? (
                                 <Button
@@ -905,7 +898,7 @@ const AddOrder = () => {
                                           padding: 10,
                                           borderRadius: 5,
                                         }}
-                                        value={selectedShippingAddress?.id}
+                                        defaultValue={selectedShippingAddress?.id}
                                       >
                                         <p>
                                           {selectedShippingAddress?.address1 &&
@@ -969,7 +962,7 @@ const AddOrder = () => {
                                           padding: 10,
                                           borderRadius: 5,
                                         }}
-                                        value={selectedBillingAddress?.id}
+                                        defaultValue={selectedBillingAddress?.id}
                                       >
                                         <p>
                                           {selectedBillingAddress?.address1 &&
@@ -1000,10 +993,7 @@ const AddOrder = () => {
                               label="Payment Method"
                               rules={[{ required: true, message: 'Select Payment Method' }]}
                             >
-                              <Radio.Group
-                                style={{ width: '100%', padding: 10 }}
-                                onChange={e => setSelectedPaymentMethodSlug(e.target.value)}
-                              >
+                              <Radio.Group style={{ width: '100%', padding: 10 }}>
                                 {paymentMethod.map(item => (
                                   <Row gutter={25}>
                                     <Col key={item.id} xs={8}>
@@ -1016,7 +1006,7 @@ const AddOrder = () => {
                                           padding: 10,
                                           borderRadius: 5,
                                         }}
-                                        value={item.slug}
+                                        value={item.id}
                                       >
                                         <Typography.Title level={4}>{item.name}</Typography.Title>
                                         <Typography.Text>{item?.description}</Typography.Text>
@@ -1031,7 +1021,7 @@ const AddOrder = () => {
                       )}
                       {current === 3 && (
                         <Row gutter={25}>
-                          <Col sm={24}>
+                          <Col xs={24} md={12}>
                             <Form.Item
                               name="shipping_method_id"
                               label="Shipping Method"
@@ -1039,6 +1029,37 @@ const AddOrder = () => {
                             >
                               <Radio.Group style={{ width: '100%', padding: 10 }}>
                                 {shippingMethod.map(item => (
+                                  <Row gutter={25}>
+                                    <Col key={item.id} xs={8}>
+                                      <Radio
+                                        style={{
+                                          width: '100%',
+                                          border: '1px solid #f0f0f0',
+                                          fontSize: 12,
+                                          marginBottom: 10,
+                                          padding: 10,
+                                          borderRadius: 5,
+                                        }}
+                                        value={item.id}
+                                      >
+                                        <Typography.Title level={5} style={{ fontSize: 14 }}>
+                                          {item.name}
+                                        </Typography.Title>
+                                        <Typography.Text>{item?.description}</Typography.Text>
+                                      </Radio>
+                                    </Col>
+                                  </Row>
+                                ))}
+                              </Radio.Group>
+                            </Form.Item>
+                          </Col>
+                          <Col xs={24} md={12}>
+                            <Form.Item
+                              // name="shipping_account_id"
+                              label="Shipping Account"
+                            >
+                              <Radio.Group style={{ width: '100%', padding: 10 }}>
+                                {shippingMethodAccountList.map(item => (
                                   <Row gutter={25}>
                                     <Col key={item.id} xs={8}>
                                       <Radio
@@ -1135,19 +1156,7 @@ const AddOrder = () => {
                       )}
                       {current === 6 && (
                         <Row gutter={25} align="middle" justify="center">
-                          <Col lg={12}>
-                            {selectedPaymentMethodSlug ? (
-                              <Card title={selectedPaymentMethodSlug?.toUpperCase()} bordered={true} size="small">
-                                {selectedPaymentMethodSlug === 'stripe' && (
-                                  <Elements stripe={stripePromise}>
-                                    <StripeForm />
-                                  </Elements>
-                                )}
-                              </Card>
-                            ) : (
-                              <Alert message="Please Select Payment Method" type="error" showIcon />
-                            )}
-                          </Col>
+                          <Col lg={12}>Order Overview</Col>
                         </Row>
                       )}
                     </div>
@@ -1333,8 +1342,7 @@ const AddOrder = () => {
           width={600}
           open={listAddressModalOpen}
           className="orderAddressModal"
-          okText="Select"
-          onOk={false}
+          footer={null}
           onCancel={() => setListAddressModalOpen(false)}
         >
           <Radio.Group style={{ width: '100%', padding: 10 }}>
@@ -1374,9 +1382,7 @@ const AddOrder = () => {
                       >
                         Select
                       </Button>
-                      {billingAddresses.filter(item => item.isDefault)[0]?.id === item.id && (
-                        <Badge.Ribbon text="Default" color="pink" style={{ top: 40, zIndex: 1000 }} />
-                      )}
+
                       <Radio
                         style={{
                           width: '100%',

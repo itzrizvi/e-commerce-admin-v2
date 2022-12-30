@@ -10,7 +10,6 @@ export const orderQuery = {
           id
           total
           sub_total
-          shipping_cost
           discount_amount
           tax_amount
           tax_exempt
@@ -28,7 +27,6 @@ export const orderQuery = {
           paymentmethod {
             id
             name
-            slug
             description
             status
           }
@@ -85,7 +83,6 @@ export const orderQuery = {
           paymentmethod {
             id
             name
-            slug
             description
             status
           }
@@ -164,10 +161,8 @@ export const orderQuery = {
           shippingmethod {
             id
             name
-            slug
             description
             status
-            shipping_cost
           }
           taxExemptFiles {
             id
