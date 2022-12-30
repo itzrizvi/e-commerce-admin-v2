@@ -31,9 +31,6 @@ const EditUser = () => {
   const initialData = {
     address1: null,
     address2: null,
-    phone: null,
-    fax: null,
-    email: null,
     city: null,
     state: null,
     zip_code: null,

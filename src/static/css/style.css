@@ -1,5 +1,10 @@
 /* Utilitiy classes */
 
+:root {
+  --primary: #4bacf5;
+  --secondary: #77838f;
+}
+
 .spin {
   height: 100vh;
   display: flex;
@@ -2678,3 +2683,12 @@ html[dir='rtl'] .ant-menu.ant-menu-vertical .ant-menu-submenu-arrow {
 html[dir='rtl'] .ant-menu-vertical .ant-menu-submenu-title {
   padding-right: 15px !important;
 }
+
+.orderAddressModal .ant-modal-header{
+  background: var(--primary);
+}
+.orderAddressModal .ant-modal-header .ant-modal-title{
+  color: #fff;
+}
+
+

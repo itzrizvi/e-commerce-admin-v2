@@ -52,7 +52,6 @@ export const productSchema = {
         data {
           id
           name
-          slug
           description
           status
           isDefault
@@ -84,6 +83,10 @@ export const productSchema = {
             state
             zip_code
             country
+            countryCode{
+              name
+              code
+            }
             type
             status
             isDefault
