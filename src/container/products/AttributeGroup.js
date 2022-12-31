@@ -160,7 +160,7 @@ const AttributeGroup = () => {
                                 </div>
                                 :
                                 <>
-                                    <Input placeholder="Search Permission..." prefix={<SearchOutlined />} onChange={onChangeSearch} />
+                                    <Input placeholder="Search Attribute Groups..." prefix={<SearchOutlined />} onChange={onChangeSearch} />
                                     <br /><br />
 
                                     <span className={"psp_list"} >

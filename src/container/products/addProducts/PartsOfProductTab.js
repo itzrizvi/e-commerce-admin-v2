@@ -1,4 +1,4 @@
-import { Button, Form, Input, Select, Table } from 'antd';
+import { Button, Col, Form, Input, Row, Select, Table } from 'antd';
 import React, { useEffect, useState } from 'react';
 import FeatherIcon from 'feather-icons-react';
 
@@ -56,43 +56,51 @@ const PartsOfProductTab = ({ products, setProducts, selectedPartsOfProducts, set
 
     return (
         <div>
-            <Form.Item
-                // rules={[{ required: true, message: "Please enter Model" }]}
-                // name="model"
-                label="Products"
-            >
+            <Row gutter={25}>
+                <Col span={24}>
+                    <Form.Item
+                        // rules={[{ required: true, message: "Please enter Model" }]}
+                        // name="model"
+                        label="Products"
+                    >
+                        <Row>
+                            <Col span={8}>
+                                <Select
+                                    style={{ marginBottom: "2em" }}
+                                    mode="multiple"
+                                    value={selectedPartsOfProducts}
+                                    placeholder={products.isLoading ? "Loading.." : "Select Product.."}
+                                    optionFilterProp="label"
 
-                <Select
-                    style={{ marginBottom: "2em" }}
-                    mode="multiple"
-                    value={selectedPartsOfProducts}
-                    placeholder={products.isLoading ? "Loading.." : "Select Product.."}
-                    optionFilterProp="label"
+                                    options={products?.data?.map(item => (
+                                        {
+                                            label: item.prod_name,
+                                            value: item.id,
+                                            uid: item.id,
+                                            key: item.id,
+                                            name: item.prod_name,
+                                            sku: item.prod_sku,
+                                        }
+                                    ))}
+                                    // value={[]}
+                                    onChange={(newVal, items) => {
+                                        setSelectedPartsOfProducts(items)
+                                    }}
+                                />
+                            </Col>
+                        </Row>
 
-                    options={products?.data?.map(item => (
-                        {
-                            label: item.prod_name,
-                            value: item.id,
-                            uid: item.id,
-                            key: item.id,
-                            name: item.prod_name,
-                            sku: item.prod_sku,
-                        }
-                    ))}
-                    // value={[]}
-                    onChange={(newVal, items) => {
-                        setSelectedPartsOfProducts(items)
-                    }}
-                />
+                        <Table
+                            dataSource={selectedPartsOfProducts}
+                            columns={columns}
+                            pagination={false}
+                            rowKey="uid"
+                        />
 
-                <Table
-                    dataSource={selectedPartsOfProducts}
-                    columns={columns}
-                    pagination={false}
-                    rowKey="uid"
-                />
+                    </Form.Item>
+                </Col>
+            </Row>
 
-            </Form.Item>
         </div>
     );
 };

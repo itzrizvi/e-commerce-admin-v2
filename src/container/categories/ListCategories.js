@@ -273,7 +273,7 @@ const ListCategories = () => {
 
                                 <>
                                     <Input
-                                        placeholder="Search Permission..."
+                                        placeholder="Search Categories..."
                                         prefix={<SearchOutlined />}
                                         onChange={onChangeSearch}
                                     /> <br /> <br />

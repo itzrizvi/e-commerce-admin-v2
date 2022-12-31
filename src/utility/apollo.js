@@ -57,6 +57,7 @@ export const authQuery = {
           user_status
           image
           roles {
+            id
             role
             role_slug
           }
@@ -427,10 +428,17 @@ export const productQuery = {
           hs_code
           product_rank
           mfg_build_part_number
-          productCondition{
+          productCondition {
             id
             name
             status
+            createdAt
+            updatedAt
+          }
+          productavailablitystatus {
+            id
+            name
+            slug
             createdAt
             updatedAt
           }
@@ -1165,7 +1173,11 @@ export const utilityQuery = {
         message
         status
         data {
+          id
           name
+          slug
+          createdAt
+          updatedAt
         }
       }
     }
