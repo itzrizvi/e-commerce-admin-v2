@@ -12,7 +12,8 @@ import { useSelector } from 'react-redux';
 import { useEffect } from 'react';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
 import { toast } from 'react-toastify';
-import AddressTable from './AdderessTable';
+import ShippingAddress from './ShippingAddress';
+import BillingAddress from './BillingAddress';
 import apolloClient from './../../apollo';
 
 export default function companyInfo() {
@@ -240,7 +241,7 @@ export default function companyInfo() {
         variables = {
           data: {
             addresses: billingData.map(add => {
-              const { id, ...rest } = add
+              const { id, countryCode, states, ...rest } = add
               return id === defaultBilling ? { ...rest, isDefault: true } : rest
             })
           }
@@ -252,7 +253,7 @@ export default function companyInfo() {
             ref_id: parseInt(companyInfoId),
             type: "billing",
             addresses: billingData.map(add => {
-              const { id, isNew, ...rest } = add
+              const { id, isNew, states, countryCode, ...rest } = add
               const addresses = id === defaultBilling
                 ? { ...rest, isDefault: true }
                 : rest
@@ -304,7 +305,7 @@ export default function companyInfo() {
         variables = {
           data: {
             addresses: shippingData.map(add => {
-              const { id, ...rest } = add
+              const { id, states, countryCode, ...rest } = add
               return id === defaultShipping ? { ...rest, isDefault: true } : rest
             })
           }
@@ -316,7 +317,7 @@ export default function companyInfo() {
             ref_id: parseInt(companyInfoId),
             type: "shipping",
             addresses: shippingData.map(add => {
-              const { id, isNew, ...rest } = add
+              const { id, isNew, countryCode, states, ...rest } = add
               const addresses = id === defaultShipping ? { ...rest, isDefault: true } : rest
               if (isNew === undefined) {
                 addresses.isNew = true
@@ -698,21 +699,17 @@ export default function companyInfo() {
                       />
                     </Tabs.TabPane>
                     <Tabs.TabPane tab="Billing Addresses" key="billing">
-                      <AddressTable
+                      <BillingAddress
                         initialData={initialAddressData}
-                        addresses={billingData}
-                        setAddress={setBillingData}
                         defaultAddressId={defaultBilling}
-                        setDefaultAddressId={setDefaultBilling}
+                        {...{setBillingData, setDefaultBilling, billingData}}
                       />
                     </Tabs.TabPane>
                     <Tabs.TabPane tab="Shipping Addresses" key="Shipping">
-                      <AddressTable
+                      <ShippingAddress
                         initialData={initialAddressData}
-                        addresses={shippingData}
-                        setAddress={setShippingData}
                         defaultAddressId={defaultShipping}
-                        setDefaultAddressId={setDefaultShipping}
+                        {...{setShippingData, setDefaultShipping, shippingData}}
                       />
                     </Tabs.TabPane>
                   </Tabs>

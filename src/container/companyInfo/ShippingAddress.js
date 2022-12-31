@@ -1,13 +1,14 @@
-import { Button, Checkbox, Input, Select, Switch, Table } from 'antd';
+import { Button, Checkbox, Input, Switch, Select, Table } from 'antd';
 import React, { useEffect, useState } from 'react';
 import FeatherIcon from 'feather-icons-react';
 import { addressSchema } from '../../apollo/address';
 import apolloClient from '../../utility/apollo';
 
-const AddressTable = ({ initialData, addresses, setAddresses, defaultAddressId, setDefaultAddressId }) => {
+const ShippingAddress = ({ initialData, shippingData, setShippingData, defaultAddressId, setDefaultShipping }) => {
   // Change State After Country Change
   const [countries, setCountries] = useState([]);
   const [newInitialData, setNewInitialData] = useState({ data: [], loading: true });
+
   useEffect(() => {
     // Get Country List
     apolloClient
@@ -42,9 +43,9 @@ const AddressTable = ({ initialData, addresses, setAddresses, defaultAddressId, 
         const data = res?.data?.getStateList;
         if (!data?.status) return;
         setNewInitialData({ data: { ...initialData, states: data?.data }, loading: false });
-        setAddresses(
-          addresses.map(item => {
-            return { ...item, states: data?.data?.filter(a => a.country_code === item.countryCode.code) };
+        setShippingData(
+          shippingData.map(item => {
+            return { ...item, states: data?.data?.filter(a => a.country_code === item?.countryCode?.code) };
           }),
         );
       })
@@ -52,6 +53,7 @@ const AddressTable = ({ initialData, addresses, setAddresses, defaultAddressId, 
         setNewInitialData(prev => ({ ...prev, loading: false }));
       });
   }, []);
+
   const column = [
     {
       title: 'Country',
@@ -60,8 +62,8 @@ const AddressTable = ({ initialData, addresses, setAddresses, defaultAddressId, 
       render: (_, record) => (
         <Select
           onSelect={country => {
-            setAddresses(
-              addresses.map(item => {
+            setShippingData(
+              shippingData.map(item => {
                 if (item.id === record.id) {
                   return {
                     ...item,
@@ -87,7 +89,7 @@ const AddressTable = ({ initialData, addresses, setAddresses, defaultAddressId, 
       title: 'Address 1',
       dataIndex: 'address1',
       key: 'address1',
-      width: 400,
+      width: 200,
       render: (text, record) => (
         <Input
           defaultValue={text}
@@ -101,7 +103,7 @@ const AddressTable = ({ initialData, addresses, setAddresses, defaultAddressId, 
       title: 'Address 2',
       dataIndex: 'address2',
       key: 'address2',
-      width: 400,
+      width: 200,
       render: (text, record) => (
         <Input
           defaultValue={text}
@@ -115,7 +117,6 @@ const AddressTable = ({ initialData, addresses, setAddresses, defaultAddressId, 
       title: 'City',
       dataIndex: 'city',
       key: 'city',
-      width: 150,
       render: (text, record) => (
         <Input defaultValue={text} type="text" placeholder="City" onChange={e => (record.city = e.target.value)} />
       ),
@@ -142,7 +143,6 @@ const AddressTable = ({ initialData, addresses, setAddresses, defaultAddressId, 
       title: 'Zip Code',
       dataIndex: 'zip_code',
       key: 'zip_code',
-      width: 150,
       render: (text, record) => (
         <Input
           defaultValue={text}
@@ -157,13 +157,13 @@ const AddressTable = ({ initialData, addresses, setAddresses, defaultAddressId, 
       dataIndex: 'id',
       key: 'id',
       align: 'right',
-      width: 70,
+      // width: 90,
       render: (val, record) => (
         <Checkbox
           checked={defaultAddressId === val ? true : false}
           onChange={e => {
-            record.isDefault = e.target.checked;
-            setDefaultAddressId(val);
+            if (e.target.checked) setDefaultShipping(val);
+            else setDefaultShipping(null);
           }}
         />
       ),
@@ -173,17 +173,15 @@ const AddressTable = ({ initialData, addresses, setAddresses, defaultAddressId, 
       dataIndex: 'status',
       key: 'status',
       align: 'right',
-      width: 90,
+      // width: 90,
       render: (text, record) => (
         <Switch defaultChecked={text} title="Status" onChange={checked => (record.status = checked)} />
       ),
     },
-
     {
       title: 'Action',
       dataIndex: 'action',
       key: 'action',
-      width: 150,
       render: (text, record) => (
         <Button size="" title="Remove" type="danger" onClick={() => removeRow(record.id)}>
           <FeatherIcon icon="trash-2" />
@@ -194,13 +192,13 @@ const AddressTable = ({ initialData, addresses, setAddresses, defaultAddressId, 
 
   // Adding new row on table
   const addNewRow = () => {
-    setAddresses(prevState => {
+    setShippingData(prevState => {
       return [...prevState, { ...newInitialData.data, id: new Date().getTime() }];
     });
   };
 
   const removeRow = id => {
-    setAddresses(prevState => {
+    setShippingData(prevState => {
       return prevState.filter(item => item.id !== id);
     });
   };
@@ -210,17 +208,16 @@ const AddressTable = ({ initialData, addresses, setAddresses, defaultAddressId, 
       <Table
         className="table-responsive"
         columns={column}
-        rowClassName={(record, index) => (index % 2 == 0 ? '' : 'altTableClass')}
         pagination={false}
         rowKey={'id'}
         size="small"
-        dataSource={addresses}
+        dataSource={shippingData}
         loading={newInitialData?.loading}
       />
       <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '10px', marginBottom: '10px' }}>
         <Button
-          disabled={newInitialData?.loading}
           title="Add Address"
+          disabled={newInitialData?.loading}
           htmlType="button"
           type="primary"
           onClick={addNewRow}
@@ -233,4 +230,4 @@ const AddressTable = ({ initialData, addresses, setAddresses, defaultAddressId, 
   );
 };
 
-export default AddressTable;
+export default ShippingAddress;

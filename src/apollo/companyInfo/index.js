@@ -11,7 +11,7 @@ export const companyInfoQuery = {
     }
   `,
   GET_COMPANY_INFO: gql`
-    query getCompanyInfo{
+    query getCompanyInfo {
       getCompanyInfo {
         message
         status
@@ -76,6 +76,10 @@ export const companyInfoQuery = {
             state
             zip_code
             country
+            countryCode {
+              name
+              code
+            }
             type
             status
             isDefault
@@ -91,32 +95,29 @@ export const companyInfoQuery = {
     }
   `,
   ADD_COMPANY_BILLING_ADDRESS: gql`
-  mutation addCompanyBillingAddress($data:AddCompanyBillingAddressInput){
-    addCompanyBillingAddress(data:$data){
-      message
-      status
+    mutation addCompanyBillingAddress($data: AddCompanyBillingAddressInput) {
+      addCompanyBillingAddress(data: $data) {
+        message
+        status
+      }
     }
-  }
   `,
   ADD_COMPANY_SHIPPING_ADDRESS: gql`
-  mutation addCompanyShippingAddress($data:AddCompanyShippingAddressInput){
-    addCompanyShippingAddress(data:$data){
-      message
-      status
-      tenant_id
+    mutation addCompanyShippingAddress($data: AddCompanyShippingAddressInput) {
+      addCompanyShippingAddress(data: $data) {
+        message
+        status
+        tenant_id
+      }
     }
-  }
   `,
   UPDATE_COMPANY_ADDRESS: gql`
-  mutation updateCompanyAddress($data:UpdateCompanyAddressInput){
-    updateCompanyAddress(data:$data){
-      message
-      status
-      tenant_id
+    mutation updateCompanyAddress($data: UpdateCompanyAddressInput) {
+      updateCompanyAddress(data: $data) {
+        message
+        status
+        tenant_id
+      }
     }
-  }
   `,
-
-
-
 };

@@ -105,17 +105,17 @@ const AddUser = () => {
   useEffect(() => {
     if (operation && user_id) {
       const newBillingAddress = billingAddress.map(item => {
-        const { parent_id, id, ...rest } = item;
+        const { id, states, ...rest } = item;
         return {
           parent_id: user_id,
           ...rest,
         };
       });
       const newShippingAddress = shippingAddress.map(item => {
-        const { parent_id, id, ...rest } = item;
+        const { id, states, ...rest } = item;
         return {
-          parent_id: user_id,
           ...rest,
+          parent_id: user_id,
         };
       });
 

@@ -48,10 +48,10 @@ const AddVendor = () => {
     isDefault: false,
     isNew: true,
   };
-  const [billingAddresses, setBillingAddresses] = useState([initialAddressData]);
+  const [billingAddresses, setBillingAddresses] = useState([]);
   // ============+ for billing END +====================
 
-  const [shippingAddresses, setShippingAddresses] = useState([initialAddressData]);
+  const [shippingAddresses, setShippingAddresses] = useState([]);
   // ============+ for billing END +====================
 
   // LOAD SINGLE Vendor
@@ -192,9 +192,9 @@ const AddVendor = () => {
   };
 
   useEffect(() => {
-    if (operation) {
+    if (operation && vendor_id) {
       const newBillingAddress = billingAddresses.map(item => {
-        const { parent_id, isNew, id, isDefault, ...rest } = item;
+        const { parent_id, isNew, states, id, isDefault, ...rest } = item;
         return {
           isDefault: defaultBilling === id,
           parent_id: vendor_id,
@@ -204,7 +204,7 @@ const AddVendor = () => {
         };
       });
       const newShippingAddress = shippingAddresses.map(item => {
-        const { parent_id, isNew, isDefault, id, ...rest } = item;
+        const { parent_id, isNew, states, isDefault, id, ...rest } = item;
         return {
           isDefault: defaultShipping === id,
           parent_id: vendor_id,
@@ -244,7 +244,7 @@ const AddVendor = () => {
             setIsLoading(false);
             if (type === 'shipping') {
               if (!isError) {
-                toast.success('Vendor Updated Successfully.');
+                toast.success('Vendor Added Successfully.');
                 setTimeout(() => {
                   history.push('/admin/vendor/list');
                 }, [2000]);
@@ -253,7 +253,7 @@ const AddVendor = () => {
           });
       });
     }
-  }, [operation]);
+  }, [operation, vendor_id]);
 
   return (
     <>
