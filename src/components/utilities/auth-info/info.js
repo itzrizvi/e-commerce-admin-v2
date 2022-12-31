@@ -9,10 +9,7 @@ import Notification from './notification';
 import Settings from './settings';
 import Support from './support';
 import { Popover } from '../../popup/popup';
-import { Dropdown } from '../../dropdown/dropdown';
-import { logOut } from '../../../redux/authentication/actionCreator';
 import Heading from '../../heading/heading';
-import ThemeLayout from '../../../layout/withAdminLayout';
 
 const AuthInfo = () => {
   const dispatch = useDispatch();
@@ -20,7 +17,6 @@ const AuthInfo = () => {
   const [state, setState] = useState({
     flag: 'english',
   });
-  const { flag } = state;
 
   const SignOut = e => {
     e.preventDefault();

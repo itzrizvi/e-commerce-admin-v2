@@ -93,7 +93,7 @@ const AddTemplate = () => {
         console.log(err);
         setSingleTemplate({ data: {}, loading: false, error: 'Something went worng' });
       });
-  }, []);
+  });
   useEffect(() => {
     apolloClient
       .query({
