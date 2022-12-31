@@ -123,11 +123,11 @@ const AddProduct = () => {
           dimension_class: data?.data?.dimensions?.dimension_class || 'Inch',
           prod_weight: data?.data?.prod_weight || '',
           prod_weight_class: data?.data?.prod_weight_class || 'Pound',
-          prod_outofstock_status: data?.data?.productavailablitystatus?.id || '',
+          prod_outofstock_status: data?.data?.productavailablitystatus?.id,
           prod_regular_price: data?.data?.prod_regular_price || '',
           prod_sale_price: data?.data?.prod_sale_price || '',
           cost: data?.data?.cost || '',
-          prod_condition: data?.data?.productCondition?.id,
+          prod_condition: data?.data?.productCondition?.id || '',
           product_rep: data?.data?.representative?.id || '',
           extended_warranty: data?.data?.extended_warranty,
           extended_warranty_value: data?.data?.extended_warranty_value || 0,
@@ -138,6 +138,9 @@ const AddProduct = () => {
         })
         setSelectedProdCategory(data?.data?.category?.id)
         setExtendedWarrantyEnable(data?.data?.extended_warranty_value)
+        setSelectedAvailabilityStatusID(data?.data?.productavailablitystatus?.id)
+        setSelectedConditionID(data?.data?.productCondition?.id)
+        setSelectedProductRepID(data?.data?.representative?.id)
       })
       .catch(err => {
         console.log('error on loading porduct,\n', err);
@@ -391,7 +394,7 @@ const AddProduct = () => {
   const handleSubmit = () => {
     const values = form.getFieldsValue(true);
     console.log(values)
-    const { dimension_class, prod_regular_price, extended_warranty_value, prod_condition, product_rep, prod_outofstock_status, prod_sale_price, cost, prod_weight, prod_weight_class, ...rest } = values;
+    const { dimension_class, prod_regular_price, extended_warranty_value, prod_sale_price, cost, prod_weight, prod_weight_class, ...rest } = values;
     let isAttribute = true;
     let isAttrCorrect = true;
     const product_attributes = attributesTableData.map(item => {
@@ -465,6 +468,7 @@ const AddProduct = () => {
       };
       return data;
     });
+
     const data = {
       ...rest,
       prod_long_desc,
@@ -524,7 +528,8 @@ const AddProduct = () => {
     if (!data.prod_partnum) return toast.warning('Please enter Part No');
     if (!data.brand_id) return toast.warning('Please select a Manufacture');
     if (!data.prod_category) return toast.warning('Please select a Category');
-    if (!data.prod_outofstock_status) return toast.warning('Please select an Availability Status');
+    if (!data.product_rep) return toast.warning('Please select a Product Representative');
+    if (!data.prod_outofstock_status && !params.id) return toast.warning('Please select an Availability Status');
     if (!data.prod_regular_price) return toast.warning('Please enter Regular Price');
     // All Validation End
 
@@ -663,8 +668,8 @@ const AddProduct = () => {
                       prod_sku: singleProduct.data.prod_sku,
                       is_sale: singleProduct.data.is_sale,
                       brand_id: singleProduct.data?.brand?.id,
-                      prod_condition: singleProduct.data?.productCondition?.id,
-                      product_rep: singleProduct.data?.representative?.id,
+                      prod_condition: singleProduct.data?.productCondition?.id || '',
+                      product_rep: singleProduct.data?.representative?.id || '',
                       prod_outofstock_status: singleProduct?.data?.productavailablitystatus?.id,
                       prod_category: singleProduct.data?.category?.id,
                       dimension_class: singleProduct.data?.dimensions?.dimension_class || '',
