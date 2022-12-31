@@ -811,6 +811,7 @@ const AddProduct = () => {
                         <Col span={24}>
                           <Form.Item
                             name="prod_condition"
+                            rules={[{ required: true, message: 'Product Condition Is Required' }]}
                             label="Product Condition"
                           >
                             <Row>
