@@ -53,7 +53,7 @@ const Products = () => {
             Authorization: Cookies.get('psp_t'),
           },
         },
-        fetchPolicy: 'cache-and-network',
+        fetchPolicy: 'cache-first',
       })
       .then(res => {
         const data = res?.data?.getProductList;
