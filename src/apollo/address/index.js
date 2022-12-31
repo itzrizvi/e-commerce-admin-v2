@@ -9,6 +9,7 @@ export const addressSchema = {
         data {
           state
           abbreviation
+          country_code
         }
       }
     }

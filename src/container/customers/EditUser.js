@@ -54,6 +54,7 @@ const EditUser = () => {
             Authorization: token,
           },
         },
+        fetchPolicy: 'network-only'
       })
       .then(res => {
         const data = res?.data?.getSingleCustomer;
@@ -62,7 +63,7 @@ const EditUser = () => {
         const billing = [];
         setSingleUser({ data: data?.data, isLoading: false });
         setUserStatus(data?.data?.user_status);
-        form.setFieldValue({
+        form.setFieldsValue({
           first_name: data?.data?.first_name,
           last_name: data?.data?.last_name,
           email: data?.data?.email,
@@ -71,18 +72,18 @@ const EditUser = () => {
           const { __typename, type, createdAt, updatedAt, ...rest } = address;
           if (address.type === 'shipping') {
             if (address.isDefault) setDefaultShipping(address.id);
-            shipping.push(rest);
+            shipping.push({...rest, isNew: false});
           }
           if (address.type === 'billing') {
             if (address.isDefault) setDefaultBilling(address.id);
-            billing.push(rest);
+            billing.push({...rest, isNew: false});
           }
         });
         setShippingAddress(shipping);
         setBillingAddress(billing);
       })
       .catch(err => {
-        console.log('🚀 ~ file: AddAdmin.js ~ line 46 ~ useEffect ~ err', err);
+        console.log('🚀 ~ file: AddAdmin.js ~ line 85 ~ useEffect ~ err', err);
       });
   }, [params?.id]);
 
@@ -124,7 +125,7 @@ const EditUser = () => {
                 Authorization: token,
               },
             },
-            fetchPolicy: 'network-only',
+            fetchPolicy: 'no-cache',
           },
           ['getAllCustomer'],
         ],
@@ -145,7 +146,7 @@ const EditUser = () => {
   useEffect(() => {
     if (operation && params?.id) {
       const newBillingAddress = billingAddress.map(item => {
-        const { parent_id, isNew, id, isDefault, ...rest } = item;
+        const { parent_id, isNew, id, isDefault, countryCode, states, ...rest } = item;
         return {
           isDefault: defaultBilling === id,
           parent_id: parseInt(params?.id),
@@ -155,7 +156,7 @@ const EditUser = () => {
         };
       });
       const newShippingAddress = shippingAddress.map(item => {
-        const { parent_id, isNew, isDefault, id, ...rest } = item;
+        const { parent_id, isNew, isDefault, id, countryCode, states, ...rest } = item;
         return {
           isDefault: defaultShipping === id,
           parent_id: parseInt(params?.id),

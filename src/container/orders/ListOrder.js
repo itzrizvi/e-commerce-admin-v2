@@ -35,6 +35,7 @@ const ListOrder = () => {
             Authorization: token,
           },
         },
+        fetchPolicy: 'network-only'
       })
       .then(res => {
         const data = res?.data?.getOrderlistAdmin;
