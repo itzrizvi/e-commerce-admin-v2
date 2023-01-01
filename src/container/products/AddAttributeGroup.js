@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { Row, Col, Form, Input, Switch, Spin } from 'antd';
-import FeatherIcon from 'feather-icons-react';
 import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
 import { Cards } from '../../components/cards/frame/cards-frame';
@@ -50,7 +49,7 @@ const AddAttributeGroup = () => {
       .catch(err => {
         console.log(err);
       });
-  }, []);
+  });
 
   const handleSubmit = values => {
     const { attr_group_name, attrgroup_sortorder } = values;

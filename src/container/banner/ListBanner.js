@@ -45,7 +45,7 @@ const ListBanner = () => {
       .finally(() => {
         setBanner(s => ({ ...s, loading: false }));
       });
-  }, []);
+  });
 
   const handleStatusChange = (record, checked) => {
     const variables = { data: { banner_id: record.id, status: checked } };

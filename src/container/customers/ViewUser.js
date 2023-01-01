@@ -85,7 +85,7 @@ const ViewUser = () => {
       .catch(err => {
         console.log('🚀 ~ file: AddAdmin.js ~ line 46 ~ useEffect ~ err', err);
       });
-  }, [params.id]);
+  }, [params.id, token]);
 
   const order_columns = [
     {

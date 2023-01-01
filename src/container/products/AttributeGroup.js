@@ -42,7 +42,7 @@ const AttributeGroup = () => {
             setAttributeGroups(s => ({ ...s, isLoading: false }))
         })
 
-    }, [])
+    });
 
 
 
@@ -170,7 +170,7 @@ const AttributeGroup = () => {
                                             rowKey={'g_s'}
                                             size="small"
                                             dataSource={searchText ? filteredAttributeGroups : attributeGroups.data}
-                                            rowClassName={(record, index) => (index % 2 == 0 ? "" : "altTableClass")}
+                                            rowClassName={(record, index) => (index % 2 === 0 ? "" : "altTableClass")}
                                         // pagination={false}
                                         // pagination={{
                                         //     defaultPageSize: config.PERMISSIONS_PER_PAGE,

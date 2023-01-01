@@ -74,7 +74,7 @@ const EditPO = () => {
           });
         setOrderList(order_data);
       });
-  }, []);
+  });
 
   // ============+ for product END +====================
 
@@ -95,7 +95,7 @@ const EditPO = () => {
         if (!data?.status) return;
         setVendors(data?.data);
       });
-  }, []);
+  });
   /* --------------------------- product list fetch start --------------------------- */
   useEffect(() => {
     apolloClient
@@ -118,7 +118,7 @@ const EditPO = () => {
         setProductOption(options);
       })
       .catch(err => {});
-  }, []);
+  });
 
   /* -------------------------- End of product fetch -------------------------- */
 

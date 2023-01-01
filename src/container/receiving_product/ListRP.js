@@ -167,7 +167,7 @@ const ListRP = () => {
       .finally(() => {
         setRP(s => ({ ...s, isLoading: false }));
       });
-  }, []);
+  });
 
   const onChangeSearch = e => {
     const value = e.target.value;
@@ -208,7 +208,7 @@ const ListRP = () => {
                       rowKey={'id'}
                       size="small"
                       dataSource={searchText ? filteredRP : rp.data}
-                      rowClassName={(record, index) => (index % 2 == 0 ? '' : 'altTableClass')}
+                      rowClassName={(record, index) => (index % 2 === 0 ? '' : 'altTableClass')}
                       pagination={{
                         defaultPageSize: config.PO_PER_PAGE,
                         total: searchText ? filteredRP.length : rp.data.length,

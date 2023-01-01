@@ -57,7 +57,7 @@ const BillingAdderess = ({
       .finally(() => {
         setNewInitialData(prev => ({ ...prev, loading: false }));
       });
-  }, []);
+  });
   const column = [
     {
       title: 'Country',

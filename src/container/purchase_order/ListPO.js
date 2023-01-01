@@ -111,7 +111,7 @@ const ListPO = () => {
       .finally(() => {
         setPO(s => ({ ...s, isLoading: false }));
       });
-  }, []);
+  });
 
   const onChangeSearch = e => {
     const value = e.target.value;
@@ -197,7 +197,7 @@ const ListPO = () => {
                       rowKey={'id'}
                       size="small"
                       dataSource={searchText ? filteredPO : po.data}
-                      rowClassName={(record, index) => (index % 2 == 0 ? '' : 'altTableClass')}
+                      rowClassName={(record, index) => (index % 2 === 0 ? '' : 'altTableClass')}
                       // pagination={false}
                       pagination={{
                         defaultPageSize: config.PO_PER_PAGE,

@@ -52,7 +52,7 @@ const ShippingAddress = ({ initialData, shippingData, setShippingData, defaultAd
       .finally(() => {
         setNewInitialData(prev => ({ ...prev, loading: false }));
       });
-  }, []);
+  });
 
   const column = [
     {

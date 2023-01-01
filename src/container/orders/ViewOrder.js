@@ -1,6 +1,5 @@
 import React from 'react';
 import { Row, Col, Table, Spin, Input, Typography, Divider } from 'antd';
-import FeatherIcon from 'feather-icons-react';
 import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
 import { Cards } from '../../components/cards/frame/cards-frame';
@@ -14,8 +13,6 @@ import { orderQuery } from '../../apollo/order';
 import { toast } from 'react-toastify';
 import { useLocation } from 'react-router-dom';
 import queryString from 'query-string';
-import Invoice from '../../utility/invoice/invoice';
-import { PDFViewer, PDFDownloadLink, BlobProvider } from '@react-pdf/renderer';
 import Invoice1 from '../../utility/invoice/invoice1';
 
 const ViewOrder = () => {
@@ -117,7 +114,7 @@ const ViewOrder = () => {
         setProducts(prods);
         setSubTotal(sub_total);
       });
-  }, []);
+  });
 
   return (
     <>
@@ -196,7 +193,7 @@ const ViewOrder = () => {
                       columns={column}
                       dataSource={products}
                       pagination={false}
-                      rowClassName={(record, index) => (index % 2 == 0 ? '' : 'altTableClass')}
+                      rowClassName={(record, index) => (index % 2 === 0 ? '' : 'altTableClass')}
                     />
                   </div>
 

@@ -23,7 +23,7 @@ const Peity = () => {
     window.addEventListener('resize', updateSize);
     updateSize();
     return () => window.removeEventListener('resize', updateSize);
-  }, []);
+  });
   return (
     <>
       <PageHeader title="Peity Charts" />

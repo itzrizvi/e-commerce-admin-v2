@@ -1,6 +1,6 @@
 import { Form, Upload } from 'antd';
 import Dragger from 'antd/lib/upload/Dragger';
-import React, { useState } from 'react';
+import React from 'react';
 import { toast } from 'react-toastify';
 import { InboxOutlined } from '@ant-design/icons'
 import { apolloUploadClient, productMutation } from '../../../utility/apollo';

@@ -83,7 +83,7 @@ const ListProductAvailabilityStatus = () => {
             setAvailability(s => ({ ...s, isLoading: false }))
         })
 
-    }, [])
+    });
 
 
 
@@ -130,7 +130,7 @@ const ListProductAvailabilityStatus = () => {
                                             rowKey={'id'}
                                             size="small"
                                             dataSource={searchText ? filteredAvailability : availability.data}
-                                            rowClassName={(record, index) => (index % 2 == 0 ? "" : "altTableClass")}
+                                            rowClassName={(record, index) => (index % 2 === 0 ? "" : "altTableClass")}
                                             // pagination={false}
                                             pagination={{
                                                 defaultPageSize: config.PRODUCT_AVAILABILITY_STATUS_PER_PAGE,

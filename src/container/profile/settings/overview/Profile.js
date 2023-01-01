@@ -2,18 +2,16 @@ import React, { useState } from 'react';
 import { Row, Col, Form, Input, Select, Upload } from 'antd';
 import { Cards } from '../../../../components/cards/frame/cards-frame';
 import { Button } from '../../../../components/buttons/buttons';
-import { BasicFormWrapper, TagInput } from '../../../styled';
+import { BasicFormWrapper } from '../../../styled';
 import Heading from '../../../../components/heading/heading';
-import { Tag } from '../../../../components/tags/tags';
 import { useDispatch, useSelector } from 'react-redux';
-import apolloClient, { apolloUploadClient, authMutation } from '../../../../utility/apollo';
+import { apolloUploadClient, authMutation } from '../../../../utility/apollo';
 import Cookies from 'js-cookie';
 import { toast } from 'react-toastify';
 import { Link } from 'react-router-dom';
 import ImgCrop from 'antd-img-crop';
 import { changeUser } from '../../../../redux/authentication/actionCreator';
 
-const { Option } = Select;
 const Profile = () => {
   const [form] = Form.useForm();
   const user = useSelector(state => state.auth.user);
@@ -42,7 +40,7 @@ const Profile = () => {
       }
     }).then(res => {
       const status = res?.data?.adminUpdate?.status
-      if (!status) return toast.error(data.message)
+      if (!status) return toast.error(res?.data?.adminUpdate?.message)
       toast.success(`Profile updated successfully.`)
       const { first_name, last_name } = values;
       dispatch(changeUser({ ...user, first_name, last_name }));
@@ -53,12 +51,6 @@ const Profile = () => {
       setIsLoading(false)
 
     })
-  };
-
-
-  const handleCancel = e => {
-    e.preventDefault();
-    form.resetFields();
   };
 
   const handleBeforeUpload = file => {

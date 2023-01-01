@@ -162,7 +162,7 @@ const ListVendor = () => {
       .finally(() => {
         setVendors(s => ({ ...s, isLoading: false }));
       });
-  }, []);
+  });
 
   const onChangeSearch = e => {
     const value = e.target.value;
@@ -211,7 +211,7 @@ const ListVendor = () => {
                       rowKey={'g_s'}
                       size="small"
                       dataSource={searchText ? filteredVendors : vendors.data}
-                      rowClassName={(record, index) => (index % 2 == 0 ? '' : 'altTableClass')}
+                      rowClassName={(record, index) => (index % 2 === 0 ? '' : 'altTableClass')}
                       // pagination={false}
                       pagination={{
                         defaultPageSize: config.VENDOR_PER_PAGE,
