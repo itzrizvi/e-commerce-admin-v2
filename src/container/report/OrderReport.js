@@ -168,7 +168,7 @@ const OrderReport = () => {
             .catch(err => { });
 
 
-    }, []);
+    });
 
 
     const columns = [

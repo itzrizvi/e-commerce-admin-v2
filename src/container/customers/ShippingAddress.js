@@ -52,7 +52,7 @@ const ShippingAddress = ({ defaultShipping, initialData, shippingAddress, setShi
       .finally(() => {
         setNewInitialData(prev => ({ ...prev, loading: false }));
       });
-  }, []);
+  });
   const column = [
     {
       title: 'Country',

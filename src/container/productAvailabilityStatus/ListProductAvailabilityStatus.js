@@ -83,7 +83,7 @@ const ListProductAvailabilityStatus = () => {
             setAvailability(s => ({ ...s, isLoading: false }))
         })
 
-    }, [])
+    });
 
 
 

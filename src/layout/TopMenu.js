@@ -19,7 +19,7 @@ const TopMenu = () => {
     };
     window.addEventListener('load', active && activeDefault);
     return () => window.removeEventListener('load', activeDefault);
-  }, []);
+  });
 
   const addParentActive = event => {
     document.querySelectorAll('.parent').forEach(element => {

@@ -49,7 +49,7 @@ const ListCategories = () => {
 
         })
 
-    }, [])
+    });
 
     // organize category
     useEffect(() => {
@@ -231,7 +231,7 @@ const ListCategories = () => {
     }
 
     // Search & filter
-    // useEffect(() => { }, [])
+    // useEffect(() => { });
 
 
     return (

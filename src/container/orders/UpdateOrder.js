@@ -195,7 +195,7 @@ const UpdateOrder = () => {
         if (!data?.status) return true;
         setShippingMethodAccountList(data?.data);
       });
-  }, []);
+  });
 
   useEffect(() => {
     apolloClient

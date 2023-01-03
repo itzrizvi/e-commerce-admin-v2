@@ -33,7 +33,7 @@ const handleStatusChange = (record, checked) => {
         }
     }).then(res => {
         const status = res?.data?.adminUpdate?.status
-        if (!status) return toast.error(data.message)
+        if (!status) return toast.error(res?.data?.adminUpdate.message)
         toast.success(`${record.email} user Status updated successfully.`)
     }).catch(err => {
         console.log("🚀 ~ file: AllAdmins.js ~ line 33 ~ handleStatusChange ~ err", err);
@@ -83,7 +83,7 @@ const AllAdmin = () => {
 
 
 
-    }, [])
+    });
 
     const columns = [
         {

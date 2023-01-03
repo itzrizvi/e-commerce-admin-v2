@@ -47,7 +47,7 @@ const ListUser = () => {
             setStaffs(s => ({ ...s, isLoading: false }))
         })
 
-    }, [])
+    })
 
     const columns = [
         {

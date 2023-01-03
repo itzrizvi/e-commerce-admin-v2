@@ -63,7 +63,7 @@ const AddAdmin = () => {
       .finally(() => {
         setRoles(state => ({ ...state, isLoading: false }));
       });
-  }, []);
+  });
 
   useEffect(() => {
     // get Single admin - update admin
@@ -96,7 +96,7 @@ const AddAdmin = () => {
       .finally(() => {
         setRoles(state => ({ ...state, isLoading: false }));
       });
-  }, []);
+  });
 
   const handleSubmit = values => {
     if (!selectedRoles.length) return toast.warn('Select At List 1 Role..');

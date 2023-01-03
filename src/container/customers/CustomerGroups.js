@@ -137,7 +137,7 @@ const CustomerGroups = () => {
             setCustomerGroups(s => ({ ...s, isLoading: false }))
         })
 
-    }, [])
+    });
 
 
 

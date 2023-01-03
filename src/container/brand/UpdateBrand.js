@@ -164,7 +164,7 @@ const UpdateBrand = () => {
         console.log(err);
         setSingleBrand({ data: {}, loading: false, error: 'Something went worng' });
       });
-  }, []);
+  });
 
   return (
     <>

@@ -43,7 +43,7 @@ const ListContent = () => {
       .finally(() => {
         setEmailContent(s => ({ ...s, loading: false }));
       });
-  }, []);
+  });
 
   const columns = [
     {

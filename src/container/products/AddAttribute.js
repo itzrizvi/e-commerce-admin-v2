@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { Row, Col, Form, Input, Select, Spin, Switch } from 'antd';
-import FeatherIcon from 'feather-icons-react';
 import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
 import { Cards } from '../../components/cards/frame/cards-frame';
 import { Button } from '../../components/buttons/buttons';
 import { Link, useHistory, useLocation } from 'react-router-dom';
 import queryString from 'query-string';
-import apolloClient, { apolloUploadClient, attributeMutation, attributeQuery } from '../../utility/apollo';
+import apolloClient, { attributeMutation, attributeQuery } from '../../utility/apollo';
 import Cookies from 'js-cookie';
 import { toast } from 'react-toastify';
 import { viewPermission } from '../../utility/utility';
@@ -51,7 +50,7 @@ const AddAttribute = () => {
       .finally(() => {
         setAttributeGroups(s => ({ ...s, isLoading: false }));
       });
-  }, []);
+  });
 
   useEffect(() => {
     if (!params.id) return;
@@ -78,7 +77,7 @@ const AddAttribute = () => {
       .catch(err => {
         console.log(err);
       });
-  }, []);
+  });
 
   const handleSubmit = values => {
     const { attribute_name } = values;

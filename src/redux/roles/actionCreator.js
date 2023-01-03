@@ -36,43 +36,6 @@ const rolesDataRead = () => {
   }
 };
 
-const roleDataAdd = (data) => {
-  return async dispatch => {
-    await dispatch(roleAddBegin());
-    apolloClient.mutate({
-      mutation: rolesMutation.ADD_ROLE_MUTATION,
-      variables: { data: { role: data.role, role_status: JSON.parse(data.status) } },
-      refetchQueries: [
-        {
-          query: rolesQuery.GET_ALL_ROLES_QUERY,
-          context: {
-            headers: {
-              TENANTID: process.env.REACT_APP_TENANTID,
-              Authorization: Cookies.get('psp_t')
-            }
-          }
-        },
-        ['getAllRoles']
-      ],
-      context: {
-        headers: {
-          TENANTID: process.env.REACT_APP_TENANTID,
-          Authorization: Cookies.get('psp_t')
-        }
-      }
-    }).then(res => {
-      dispatch(roleAddSuccess(res));
-      toast.success("User group added successfully");
-    }).catch(err => {
-      dispatch(roleAddError(err));
-      toast.error("User group added failed!");
-    })
-  }
-}
-
-
-
 export {
-  rolesDataRead,
-  roleDataAdd
+  rolesDataRead
 };

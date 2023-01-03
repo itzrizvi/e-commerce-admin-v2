@@ -83,7 +83,7 @@ const ListCondition = () => {
             setCondition(s => ({ ...s, isLoading: false }))
         })
 
-    }, [])
+    });
 
 
 

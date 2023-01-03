@@ -1,4 +1,4 @@
-import { Button, Checkbox, Input, Select, Switch, Table } from 'antd';
+import { Button, Checkbox, Input, Select, Table } from 'antd';
 import React, { useEffect, useState } from 'react';
 import FeatherIcon from 'feather-icons-react';
 import { addressSchema } from '../../apollo/address';
@@ -52,7 +52,7 @@ const BillingAdderess = ({ defaultBilling, initialData, billingAddress, setBilli
       .finally(() => {
         setNewInitialData(prev => ({ ...prev, loading: false }));
       });
-  }, []);
+  });
 
   const column = [
     {

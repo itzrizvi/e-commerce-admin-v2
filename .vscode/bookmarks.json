@@ -21,16 +21,6 @@
 			]
 		},
 		{
-			"path": "src/redux/roles/actionCreator.js",
-			"bookmarks": [
-				{
-					"line": 49,
-					"column": 28,
-					"label": "-refetch query"
-				}
-			]
-		},
-		{
 			"path": "src/container/profile/settings/overview/ProfileAuthorBox.js",
 			"bookmarks": [
 				{
@@ -44,12 +34,12 @@
 			"path": "src/container/orders/ViewOrder.js",
 			"bookmarks": [
 				{
-					"line": 204,
+					"line": 201,
 					"column": 56,
 					"label": "-222"
 				},
 				{
-					"line": 265,
+					"line": 262,
 					"column": 52,
 					"label": "-1111"
 				}

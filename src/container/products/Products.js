@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Col, Spin, Input, Table, Switch, Checkbox, DatePicker, Select } from 'antd';
+import { Row, Col, Spin, Input, Table, Switch, DatePicker, Select } from 'antd';
 import FeatherIcon from 'feather-icons-react';
 import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
@@ -174,7 +174,7 @@ const Products = () => {
     setTimeout(() => {
       setProducts(s => ({ ...s, isLoading: false }));
     }, 5000);
-  }, []);
+  });
 
   const handleStatusChange = (record, checked) => {
     apolloClient

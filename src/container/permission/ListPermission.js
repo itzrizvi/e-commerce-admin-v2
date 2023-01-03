@@ -47,7 +47,7 @@ const ListPermission = () => {
             setPermissions(s => ({ ...s, loading: false }))
         })
 
-    }, [])
+    });
 
     const handleStatusChange = (record, checked) => {
         const variables = { data: { id: record.id, roles_permission_status: checked } }

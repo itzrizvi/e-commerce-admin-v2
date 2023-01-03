@@ -57,7 +57,7 @@ const ListCoupon = () => {
             setCoupons(s => ({ ...s, isLoading: false }))
         })
 
-    }, [])
+    });
 
 
     const columns = [

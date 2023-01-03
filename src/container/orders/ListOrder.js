@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Col, Spin, Input, Table, Switch, Tooltip  } from 'antd';
+import { Row, Col, Spin, Input, Table, Tooltip  } from 'antd';
 import FeatherIcon from 'feather-icons-react';
 import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
@@ -9,9 +9,7 @@ import { Link } from 'react-router-dom';
 import FontAwesome from 'react-fontawesome';
 import { SearchOutlined } from '@ant-design/icons';
 import config from '../../config/config';
-import apolloClient, { customerMutation, customerQuery } from '../../utility/apollo';
-import Cookies from 'js-cookie';
-import { toast } from 'react-toastify';
+import apolloClient from '../../utility/apollo';
 import { viewPermission } from '../../utility/utility';
 import { useSelector } from 'react-redux';
 import { orderQuery } from '../../apollo/order';
@@ -62,7 +60,7 @@ const ListOrder = () => {
       .finally(() => {
         setOrders(s => ({ ...s, loading: false }));
       });
-  }, []);
+  });
 
   const columns = [
     {
