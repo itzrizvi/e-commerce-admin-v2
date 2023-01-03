@@ -1116,6 +1116,7 @@ const AddOrder = () => {
                                 <Radio.Group style={{ width: '100%', padding: 10 }}>
                                   {paymentMethod.map(item => (
                                     <Radio
+                                      key={item?.id}
                                       style={{
                                         width: '100%',
                                         border: '1px solid #f0f0f0',
@@ -1142,7 +1143,6 @@ const AddOrder = () => {
                                               shippingCost -
                                               discount
                                             }
-                                            setCreditCardLast4={setCreditCardLast4}
                                             finalPayment={finalPayment}
                                             paymentValidateCard={paymentValidateCard}
                                             clientSecret={clientSecret}
