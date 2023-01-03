@@ -69,7 +69,7 @@ const AttributeTab = ({ attributesTableData, setAttributesTableData }) => {
             setAttributeGroups(s => ({ ...s, isLoading: false }))
         })
 
-    }, [])
+    });
 
     // List For Table Column
     const column = [

@@ -187,8 +187,7 @@ const UpdateOrder = () => {
       .query({
         query: orderQuery.GET_SHIPPING_ACCOUNT_LIST,
         context: {
-          headers: { TENANTID: process.env.REACT_APP_TENANTID },
-          Authorization: token,
+          headers: { TENANTID: process.env.REACT_APP_TENANTID, Authorization: token },
         },
       })
       .then(res => {
@@ -196,7 +195,7 @@ const UpdateOrder = () => {
         if (!data?.status) return true;
         setShippingMethodAccountList(data?.data);
       });
-  }, []);
+  });
 
   useEffect(() => {
     apolloClient
@@ -978,7 +977,7 @@ const UpdateOrder = () => {
                                   <Radio.Group style={{ width: '100%', padding: 10 }}>
                                     {shippingMethod.map(item => (
                                       <Row gutter={25}>
-                                        <Col key={item.id} xs={8}>
+                                        <Col key={item.id} xs={18}>
                                           <Radio
                                             style={{
                                               width: '100%',
@@ -1002,14 +1001,11 @@ const UpdateOrder = () => {
                                 </Form.Item>
                               </Col>
                               <Col xs={24} md={12}>
-                                <Form.Item
-                                  // name="shipping_account_id"
-                                  label="Shipping Account"
-                                >
+                                <Form.Item name="shipping_account_id" label="Shipping Account">
                                   <Radio.Group style={{ width: '100%', padding: 10 }}>
                                     {shippingMethodAccountList.map(item => (
                                       <Row gutter={25}>
-                                        <Col key={item.id} xs={8}>
+                                        <Col key={item.id} xs={18}>
                                           <Radio
                                             style={{
                                               width: '100%',
@@ -1024,7 +1020,6 @@ const UpdateOrder = () => {
                                             <Typography.Title level={5} style={{ fontSize: 14 }}>
                                               {item.name}
                                             </Typography.Title>
-                                            <Typography.Text>{item?.description}</Typography.Text>
                                           </Radio>
                                         </Col>
                                       </Row>
@@ -1037,35 +1032,39 @@ const UpdateOrder = () => {
                           <Tabs.TabPane tab="Voucher & Status" key="voucher-status">
                             <Row gutter={25}>
                               <Col lg={18} xs={24}>
-                                <Form.Item label="Voucher Code">
-                                  <Input.Search
-                                    placeholder="Input Voucher Code"
-                                    enterButton="Apply Voucher"
-                                    size="large"
-                                    onSearch={validateVoucher}
-                                    defaultValue={selectedCouponCode}
-                                    onChange={e => {
-                                      if (e.target.value.length === 0) {
-                                        setSelectedCouponCode('');
-                                        setDiscount(0);
-                                        toast.warn('Voucher Removed!');
-                                      }
-                                    }}
-                                  />
-                                </Form.Item>
-                                <Form.Item
-                                  name="order_status_id"
-                                  label="Order Status"
-                                  rules={[{ required: true, message: 'Select Order Status' }]}
-                                  initialValue={singleOrder?.data?.orderstatus?.id}
-                                >
-                                  <Select
-                                    placeholder="Select Order Status"
-                                    options={orderStatusOptions}
-                                    optionFilterProp="label"
-                                    defaultValue={singleOrder?.data?.orderstatus?.id}
-                                  />
-                                </Form.Item>
+                                <Row gutter={25}>
+                                  <Col xs={24} md={16} lg={12}>
+                                    <Form.Item label="Voucher Code">
+                                      <Input.Search
+                                        placeholder="Input Voucher Code"
+                                        enterButton="Apply Voucher"
+                                        size="large"
+                                        onSearch={validateVoucher}
+                                        defaultValue={selectedCouponCode}
+                                        onChange={e => {
+                                          if (e.target.value.length === 0) {
+                                            setSelectedCouponCode('');
+                                            setDiscount(0);
+                                            toast.warn('Voucher Removed!');
+                                          }
+                                        }}
+                                      />
+                                    </Form.Item>
+                                    <Form.Item
+                                      name="order_status_id"
+                                      label="Order Status"
+                                      rules={[{ required: true, message: 'Select Order Status' }]}
+                                      initialValue={singleOrder?.data?.orderstatus?.id}
+                                    >
+                                      <Select
+                                        placeholder="Select Order Status"
+                                        options={orderStatusOptions}
+                                        optionFilterProp="label"
+                                        defaultValue={singleOrder?.data?.orderstatus?.id}
+                                      />
+                                    </Form.Item>
+                                  </Col>
+                                </Row>
                               </Col>
                               <Col lg={6} xs={24}>
                                 <Card

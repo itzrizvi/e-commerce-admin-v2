@@ -30,7 +30,7 @@ const DiscountTab = ({ discount, setDiscount }) => {
             setCustomerGroups(s => ({ ...s, isLoading: false }))
         })
 
-    }, [])
+    });
 
     const column = [
         {

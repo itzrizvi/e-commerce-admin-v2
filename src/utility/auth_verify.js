@@ -1,6 +1,6 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { withRouter, Redirect  } from "react-router-dom";
+import { withRouter  } from "react-router-dom";
 import { toast } from 'react-toastify';
 import apolloClient from '../apollo';
 import { authQuery } from '../apollo/auth';

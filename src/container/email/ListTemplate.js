@@ -45,7 +45,7 @@ const ListTemplate = () => {
       .finally(() => {
         setEmail(s => ({ ...s, loading: false }));
       });
-  }, []);
+  });
 
   const columns = [
     {

@@ -73,8 +73,7 @@ const Invoice = () => {
         country: "Bangladesh",
         type: "shipping",
     }
-    const shipping = { ...billing }
-
+    
     const product = [
         {
             id: 33,

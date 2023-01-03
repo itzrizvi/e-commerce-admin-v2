@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Col, Spin, Input, Table, Switch, Checkbox, DatePicker, Select } from 'antd';
+import { Row, Col, Spin, Input, Table, Switch, DatePicker, Select } from 'antd';
 import FeatherIcon from 'feather-icons-react';
 import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
@@ -567,7 +567,7 @@ const Products = () => {
                       size="small"
                       // dataSource={searchText ? filteredProducts : products.data}
                       dataSource={filteredProducts}
-                      rowClassName={(record, index) => (index % 2 == 0 ? '' : 'altTableClass')}
+                      rowClassName={(record, index) => (index % 2 === 0 ? '' : 'altTableClass')}
                       // pagination={false}
                       pagination={{
                         defaultPageSize: config.PRODUCTS_PER_PAGE,

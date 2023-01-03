@@ -1,16 +1,11 @@
 import React, { lazy, Suspense } from 'react';
 import { Row, Col, Skeleton } from 'antd';
-import FeatherIcon from 'feather-icons-react';
 import { Switch, Route } from 'react-router-dom';
 import propTypes from 'prop-types';
 import { SettingWrapper } from './overview/style';
 import { PageHeader } from '../../../components/page-headers/page-headers';
 import { Main } from '../../styled';
 import { Cards } from '../../../components/cards/frame/cards-frame';
-import { Button } from '../../../components/buttons/buttons';
-import { ShareButtonPageHeader } from '../../../components/buttons/share-button/share-button';
-import { ExportButtonPageHeader } from '../../../components/buttons/export-button/export-button';
-import { CalendarButtonPageHeader } from '../../../components/buttons/calendar-button/calendar-button';
 
 const Profile = lazy(() => import('./overview/Profile'));
 const Account = lazy(() => import('./overview/Account'));
@@ -18,7 +13,6 @@ const Password = lazy(() => import('./overview/Passwoard'));
 const SocialProfiles = lazy(() => import('./overview/SocialProfile'));
 const Notification = lazy(() => import('./overview/Notification'));
 const AuthorBox = lazy(() => import('./overview/ProfileAuthorBox'));
-const CoverSection = lazy(() => import('../overview/CoverSection'));
 
 const Settings = ({ match }) => {
   const { path } = match;

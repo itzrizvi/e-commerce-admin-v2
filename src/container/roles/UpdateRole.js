@@ -38,7 +38,7 @@ const UpdateRole = () => {
         <Checkbox
           defaultChecked={value}
           onChange={e => {
-            const { id, read_access, edit_access } = item;
+            const { id, edit_access } = item;
             const variables = {
               data: {
                 permissionsData: {
@@ -89,7 +89,7 @@ const UpdateRole = () => {
         <Checkbox
           defaultChecked={value}
           onChange={e => {
-            const { id, read_access, edit_access } = item;
+            const { id, read_access } = item;
             const variables = {
               data: {
                 permissionsData: {
@@ -187,7 +187,7 @@ const UpdateRole = () => {
       .catch(err => {
         setAllPermissions(s => ({ ...s, error: 'Something went Wrong.!! ' }));
       });
-  }, []);
+  });
 
   // organize permission
   useEffect(() => {
@@ -195,7 +195,7 @@ const UpdateRole = () => {
 
     const data = allPermissions.data.map(item => {
       const pid1 = item.id;
-      let findRes = singleRole?.data?.permissions?.find(permission => permission.rolesPermission.id == pid1);
+      let findRes = singleRole?.data?.permissions?.find(permission => permission.rolesPermission.id === pid1);
       const copyItem = { ...item, edit_access: false, read_access: false };
 
       if (findRes) {

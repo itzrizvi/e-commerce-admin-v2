@@ -173,7 +173,7 @@ const RoleListTable = () => {
               dataSource={searchText ? filteredRoles : rolesTableData}
               columns={rolesTableColumns}
               size="small"
-              rowClassName={(record, index) => (index % 2 == 0 ? "" : "altTableClass")}
+              rowClassName={(record, index) => (index % 2 === 0 ? "" : "altTableClass")}
               rowKey={'key'}
               pagination={{
                 defaultPageSize: config.ROLES_PER_PAGE,

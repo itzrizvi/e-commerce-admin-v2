@@ -1,9 +1,6 @@
 import React from 'react';
 import { Document, Page, View, Text, Image, StyleSheet } from "@react-pdf/renderer"
 import Logo from './logo.png'
-import LogoSvg from './logo.svg'
-
-
 
 const style = StyleSheet.create({
     body: {

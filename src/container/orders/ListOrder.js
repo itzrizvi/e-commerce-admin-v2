@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Col, Spin, Input, Table, Switch, Tooltip  } from 'antd';
+import { Row, Col, Spin, Input, Table, Tooltip  } from 'antd';
 import FeatherIcon from 'feather-icons-react';
 import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
@@ -9,9 +9,7 @@ import { Link } from 'react-router-dom';
 import FontAwesome from 'react-fontawesome';
 import { SearchOutlined } from '@ant-design/icons';
 import config from '../../config/config';
-import apolloClient, { customerMutation, customerQuery } from '../../utility/apollo';
-import Cookies from 'js-cookie';
-import { toast } from 'react-toastify';
+import apolloClient from '../../utility/apollo';
 import { viewPermission } from '../../utility/utility';
 import { useSelector } from 'react-redux';
 import { orderQuery } from '../../apollo/order';
@@ -40,20 +38,18 @@ const ListOrder = () => {
       .then(res => {
         const data = res?.data?.getOrderlistAdmin;
         if (!data.status) return;
-        // var order_data = [];
-        var order_data = data.data.map(item => {
+        var order_data = data?.data?.map(item => {
           const { customer, id, createdAt, orderStatus, paymentmethod, total } = item;
           return {
             id,
-            customer_name: customer.first_name + ' ' + customer.last_name,
-            customer_email: customer.email,
+            customer_name: customer?.first_name + ' ' + customer?.last_name,
+            customer_email: customer?.email,
             createdAt,
-            orderStatus: orderStatus.name,
+            orderStatus: orderStatus?.name,
             payment_name: paymentmethod?.name ?? 'No Payment Method',
             total,
           };
         });
-
         setOrders(s => ({ ...s, data: order_data, error: '' }));
       })
       .catch(err => {
@@ -228,8 +224,8 @@ const ListOrder = () => {
                       columns={columns}
                       rowKey={'id'}
                       size="small"
-                      dataSource={isFilter ? filteredOrders : orders.data}
-                      rowClassName={(record, index) => (index % 2 == 0 ? '' : 'altTableClass')}
+                      dataSource={isFilter ? filteredOrders : orders?.data}
+                      rowClassName={(record, index) => (index % 2 === 0 ? '' : 'altTableClass')}
                       // pagination={false}
                       pagination={{
                         defaultPageSize: config.ORDER_PER_PAGE,

@@ -149,7 +149,7 @@ const AddContent = () => {
         setHeader(data?.data?.filter(item => item.type === 'header'));
         setFooter(data?.data?.filter(item => item.type === 'footer'));
       });
-  }, []);
+  });
 
   return (
     <>

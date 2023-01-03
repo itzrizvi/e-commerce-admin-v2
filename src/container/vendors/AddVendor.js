@@ -77,7 +77,7 @@ const AddVendor = () => {
 
         let billings = [];
         let shippings = [];
-        data?.data?.addresses.forEach(address => {
+        data?.data.addresses.forEach(address => {
           const { updatedAt, createdAt, __typename, type, isDefault, ...rest } = address;
           const item = {
             isDefault: false,

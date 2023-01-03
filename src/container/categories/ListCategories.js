@@ -49,7 +49,7 @@ const ListCategories = () => {
 
         })
 
-    }, [])
+    });
 
     // organize category
     useEffect(() => {
@@ -231,7 +231,7 @@ const ListCategories = () => {
     }
 
     // Search & filter
-    // useEffect(() => { }, [])
+    // useEffect(() => { });
 
 
     return (
@@ -299,7 +299,7 @@ const ListCategories = () => {
                                             size="small"
                                             // dataSource={categoriesData.data}
                                             dataSource={searchText ? filteredCategoryData : categoriesData.data}
-                                            rowClassName={(record, index) => (index % 2 == 0 ? "" : "altTableClass")}
+                                            rowClassName={(record, index) => (index % 2 === 0 ? "" : "altTableClass")}
                                             // pagination={false}
                                             pagination={{
                                                 defaultPageSize: config.CATEGORY_PER_PAGE,

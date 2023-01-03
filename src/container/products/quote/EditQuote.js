@@ -65,7 +65,7 @@ const EditQuote = () => {
         console.log(err);
         setSingleQuote({ data: {}, loading: false, error: 'Something went wrong' });
       });
-  }, []);
+  });
 
   //Submit Form
   const handleSubmit = values => {
@@ -233,18 +233,18 @@ const EditQuote = () => {
   ];
 
   // Adding new row on table
-  const addNewRow = () => {
-    const newData = {
-      id: new Date().getTime(),
-      price: '',
-      quantity: '',
-      total_price: '',
-      prod_name: '',
-      prod_sku: '',
-      prod_partnum: '',
-    };
-    setQuoteData(prevState => [...prevState, newData]);
-  };
+  // const addNewRow = () => {
+  //   const newData = {
+  //     id: new Date().getTime(),
+  //     price: '',
+  //     quantity: '',
+  //     total_price: '',
+  //     prod_name: '',
+  //     prod_sku: '',
+  //     prod_partnum: '',
+  //   };
+  //   setQuoteData(prevState => [...prevState, newData]);
+  // };
 
   useEffect(() => {
     let price = 0;

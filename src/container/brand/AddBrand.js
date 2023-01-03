@@ -52,7 +52,7 @@ const AddBrand = () => {
         setCategories([]);
         console.log(err);
       });
-  }, []);
+  });
 
   //Submit Form
   const handleSubmit = values => {
@@ -62,7 +62,7 @@ const AddBrand = () => {
       modify_category.push({ cat_id: val });
     });
 
-    if (modify_category.length == 0) {
+    if (modify_category.length === 0) {
       setIsLoading(false);
       return toast.error('Please Select Category');
     }

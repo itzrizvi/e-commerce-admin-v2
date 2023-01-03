@@ -19,7 +19,7 @@ import 'antd/es/modal/style';
 import './config/customTable.css'
 import AuthVerify from './utility/auth_verify';
 import ResetPassword from './container/profile/authentication/overview/ResetPassword';
-import NotFound404 from './container/noFound/404';
+// import NotFound404 from './container/noFound/404';
 import Pool from './components/pool/Pool';
 
 const { theme } = config;

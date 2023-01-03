@@ -47,7 +47,7 @@ const ListUser = () => {
             setStaffs(s => ({ ...s, isLoading: false }))
         })
 
-    }, [])
+    })
 
     const columns = [
         {
@@ -172,7 +172,7 @@ const ListUser = () => {
                                                 rowKey={'uid'}
                                                 size="small"
                                                 dataSource={searchText ? filteredUser : staffs.data}
-                                                rowClassName={(record, index) => (index % 2 == 0 ? "" : "altTableClass")}
+                                                rowClassName={(record, index) => (index % 2 === 0 ? "" : "altTableClass")}
                                                 // pagination={false}
                                                 pagination={{
                                                     defaultPageSize: config.CUSTOMER_PER_PAGE,

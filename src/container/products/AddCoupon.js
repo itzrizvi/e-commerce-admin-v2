@@ -53,7 +53,7 @@ const AddCoupon = () => {
       .finally(() => {
         setSingleCoupon(s => ({ ...s, isLoading: false }));
       });
-  }, []);
+  });
 
   const handleSubmit = values => {
     const {

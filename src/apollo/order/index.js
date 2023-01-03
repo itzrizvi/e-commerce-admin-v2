@@ -223,6 +223,7 @@ export const orderQuery = {
       createOrderByAdmin(data: $data) {
         message
         status
+        id
       }
     }
   `,

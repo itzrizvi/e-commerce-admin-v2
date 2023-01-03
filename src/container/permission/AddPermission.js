@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Col, Form, Input, Switch, Checkbox, Spin } from 'antd';
+import { Row, Col, Form, Input, Switch, Spin } from 'antd';
 import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
 import { Cards } from '../../components/cards/frame/cards-frame';
@@ -48,7 +48,7 @@ const AddPermission = () => {
       .catch(err => {
         console.log(err);
       });
-  }, []);
+  });
 
   const handleSubmit = values => {
     console.log(values);

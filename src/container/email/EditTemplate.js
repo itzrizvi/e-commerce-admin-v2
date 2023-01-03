@@ -93,7 +93,7 @@ const AddTemplate = () => {
         console.log(err);
         setSingleTemplate({ data: {}, loading: false, error: 'Something went worng' });
       });
-  }, []);
+  });
   useEffect(() => {
     apolloClient
       .query({
@@ -113,7 +113,7 @@ const AddTemplate = () => {
         setEmailTemplate([]);
         console.log('🚀 ~ file: AddTemplate.js:83 ~ useEffect ~ err', err);
       });
-  }, []);
+  });
 
   return (
     <>

@@ -168,7 +168,7 @@ const OrderReport = () => {
             .catch(err => { });
 
 
-    }, []);
+    });
 
 
     const columns = [
@@ -683,7 +683,7 @@ const OrderReport = () => {
                                             rowKey={'id'}
                                             size="small"
                                             dataSource={isFilter ? filteredOrders : orders.data}
-                                            rowClassName={(record, index) => (index % 2 == 0 ? '' : 'altTableClass')}
+                                            rowClassName={(record, index) => (index % 2 === 0 ? '' : 'altTableClass')}
                                             // pagination={false}
                                             pagination={{
                                                 defaultPageSize: config.ORDER_PER_PAGE,

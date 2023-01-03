@@ -2,16 +2,14 @@ import { ApolloClient, gql, InMemoryCache } from '@apollo/client';
 import { createUploadLink } from 'apollo-upload-client';
 
 const apolloClient = new ApolloClient({
-  uri: 'https://api.primeserverparts.com/graphql',
-  // uri: 'http://localhost:8000/graphql',
+  uri: process.env.REACT_APP_API_URL,
   cache: new InMemoryCache(),
 });
 
 export const apolloUploadClient = new ApolloClient({
   cache: new InMemoryCache(),
   link: createUploadLink({
-    uri: 'https://api.primeserverparts.com/graphql',
-    // uri: 'http://localhost:8000/graphql',
+    uri: process.env.REACT_APP_API_URL,
   }),
 });
 
