@@ -415,8 +415,8 @@ export const productQuery = {
           is_serial
           taxable
           cost
-          prod_weight
-          prod_weight_class
+          # prod_weight
+          # prod_weight_class
           prod_outofstock_status
           prod_thumbnail
           createdAt
@@ -496,13 +496,13 @@ export const productQuery = {
             discount_startdate
             discount_enddate
           }
-          dimensions {
-            id
-            length
-            width
-            height
-            dimension_class
-          }
+          # dimensions {
+          #   id
+          #   length
+          #   width
+          #   height
+          #   dimension_class
+          # }
           gallery {
             id
             prod_id

@@ -1034,7 +1034,7 @@ const AddProduct = () => {
                       </Row>
 
                     </Tabs.TabPane>
-                    <Tabs.TabPane tab="Specifications" key="Specifications">
+                    {/* <Tabs.TabPane tab="Specifications" key="Specifications">
                       <Row gutter={25}>
                         <Col span={24}>
                           <Form.Item
@@ -1152,7 +1152,7 @@ const AddProduct = () => {
                         </Col>
                       </Row>
 
-                    </Tabs.TabPane>
+                    </Tabs.TabPane> */}
                     <Tabs.TabPane tab="Stock" key="Stock">
                       <Row gutter={25}>
                         <Col span={24}>
