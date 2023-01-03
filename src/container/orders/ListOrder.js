@@ -38,20 +38,18 @@ const ListOrder = () => {
       .then(res => {
         const data = res?.data?.getOrderlistAdmin;
         if (!data.status) return;
-        // var order_data = [];
-        var order_data = data.data.map(item => {
+        var order_data = data?.data?.map(item => {
           const { customer, id, createdAt, orderStatus, paymentmethod, total } = item;
           return {
             id,
-            customer_name: customer.first_name + ' ' + customer.last_name,
-            customer_email: customer.email,
+            customer_name: customer?.first_name + ' ' + customer?.last_name,
+            customer_email: customer?.email,
             createdAt,
-            orderStatus: orderStatus.name,
+            orderStatus: orderStatus?.name,
             payment_name: paymentmethod?.name ?? 'No Payment Method',
             total,
           };
         });
-
         setOrders(s => ({ ...s, data: order_data, error: '' }));
       })
       .catch(err => {
@@ -60,7 +58,7 @@ const ListOrder = () => {
       .finally(() => {
         setOrders(s => ({ ...s, loading: false }));
       });
-  });
+  }, []);
 
   const columns = [
     {
@@ -226,7 +224,7 @@ const ListOrder = () => {
                       columns={columns}
                       rowKey={'id'}
                       size="small"
-                      dataSource={isFilter ? filteredOrders : orders.data}
+                      dataSource={isFilter ? filteredOrders : orders?.data}
                       rowClassName={(record, index) => (index % 2 === 0 ? '' : 'altTableClass')}
                       // pagination={false}
                       pagination={{
