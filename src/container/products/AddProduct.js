@@ -122,8 +122,8 @@ const AddProduct = () => {
           brand_id: data?.data?.brand?.id,
           prod_category: data?.data?.category?.id,
           dimension_class: data?.data?.dimensions?.dimension_class || 'Inch',
-          prod_weight: data?.data?.prod_weight || '',
-          prod_weight_class: data?.data?.prod_weight_class || 'Pound',
+          // prod_weight: data?.data?.prod_weight || '',
+          // prod_weight_class: data?.data?.prod_weight_class || 'Pound',
           prod_outofstock_status: data?.data?.productavailablitystatus?.id,
           prod_regular_price: data?.data?.prod_regular_price || '',
           prod_sale_price: data?.data?.prod_sale_price || '',
@@ -395,7 +395,14 @@ const AddProduct = () => {
   const handleSubmit = () => {
     const values = form.getFieldsValue(true);
     // console.log(values)
-    const { dimension_class, prod_regular_price, extended_warranty_value, prod_sale_price, cost, prod_weight, prod_weight_class, ...rest } = values;
+    const { dimension_class,
+      prod_regular_price,
+      extended_warranty_value,
+      prod_sale_price,
+      cost,
+      // prod_weight,
+      // prod_weight_class,
+      ...rest } = values;
     let isAttribute = true;
     let isAttrCorrect = true;
     console.log(attributesTableData)
@@ -504,10 +511,10 @@ const AddProduct = () => {
     if (isDiscount) {
       data.discount_type = discount_type;
     }
-    if (prod_weight) {
-      data.prod_weight = prod_weight;
-      data.prod_weight_class = prod_weight_class;
-    }
+    // if (prod_weight) {
+    //   data.prod_weight = prod_weight;
+    //   data.prod_weight_class = prod_weight_class;
+    // }
     const { height, length, width } = dimensions;
     if (height || length || width) {
       let dimensions = { dimension_class };
@@ -675,8 +682,8 @@ const AddProduct = () => {
                       prod_outofstock_status: singleProduct?.data?.productavailablitystatus?.id,
                       prod_category: singleProduct.data?.category?.id,
                       dimension_class: singleProduct.data?.dimensions?.dimension_class || '',
-                      prod_weight: singleProduct.data?.prod_weight || '',
-                      prod_weight_class: singleProduct.data?.prod_weight_class || '',
+                      // prod_weight: singleProduct.data?.prod_weight || '',
+                      // prod_weight_class: singleProduct.data?.prod_weight_class || '',
                       prod_regular_price: singleProduct.data?.prod_regular_price || 0,
                       prod_sale_price: singleProduct.data?.prod_sale_price || 0,
                       cost: singleProduct.data?.cost || 0,
@@ -688,7 +695,7 @@ const AddProduct = () => {
                       mfg_build_part_number: singleProduct.data?.mfg_build_part_number || '',
                     } : {
                       dimension_class: 'Inch',
-                      prod_weight_class: 'Pound',
+                      // prod_weight_class: 'Pound',
                       prod_outofstock_status: 'In Stock',
                     }
                   }
