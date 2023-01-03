@@ -52,7 +52,7 @@ const BillingAdderess = ({ defaultBilling, initialData, billingAddress, setBilli
       .finally(() => {
         setNewInitialData(prev => ({ ...prev, loading: false }));
       });
-  });
+  }, []);
 
   const column = [
     {

@@ -14,7 +14,7 @@ const MessageBox = () => {
     if (readMessageList) {
       dispatch(readMessageList());
     }
-  });
+  }, []);
 
   const popoverContent = (
     <div>

@@ -48,7 +48,7 @@ const AddPermission = () => {
       .catch(err => {
         console.log(err);
       });
-  });
+  }, []);
 
   const handleSubmit = values => {
     console.log(values);

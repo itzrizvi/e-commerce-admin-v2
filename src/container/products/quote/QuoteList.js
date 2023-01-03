@@ -41,7 +41,7 @@ const QuoteList = () => {
       .finally(() => {
         setQuote(s => ({ ...s, loading: false }));
       });
-  });
+  }, []);
 
 
   const columns = [

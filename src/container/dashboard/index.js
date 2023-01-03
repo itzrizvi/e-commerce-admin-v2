@@ -252,7 +252,7 @@ const Dashboard = () => {
 			setMessages(s => ({ ...s, isLoading: false }))
 		})
 
-	});
+	}, []);
 
 
 	// GET ANALYTICS DATA
@@ -273,7 +273,7 @@ const Dashboard = () => {
 				setAnalytics({ data: data, error: '' });
 			})
 			.finally(() => setIsLoading(false));
-	});
+	}, []);
 
 	// Greetings Function
 	const getGreetings = (date) => {

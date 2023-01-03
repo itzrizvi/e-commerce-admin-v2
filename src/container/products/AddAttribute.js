@@ -50,7 +50,7 @@ const AddAttribute = () => {
       .finally(() => {
         setAttributeGroups(s => ({ ...s, isLoading: false }));
       });
-  });
+  }, []);
 
   useEffect(() => {
     if (!params.id) return;
@@ -77,7 +77,7 @@ const AddAttribute = () => {
       .catch(err => {
         console.log(err);
       });
-  });
+  }, []);
 
   const handleSubmit = values => {
     const { attribute_name } = values;

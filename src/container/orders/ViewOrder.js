@@ -116,7 +116,7 @@ const ViewOrder = () => {
         setProducts(prods);
         setSubTotal(sub_total);
       });
-  });
+  }, []);
 
   return (
     <>

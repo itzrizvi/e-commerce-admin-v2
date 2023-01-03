@@ -80,7 +80,7 @@ const AddTemplate = () => {
         setEmailTemplate([]);
         console.log("🚀 ~ file: AddTemplate.js:83 ~ useEffect ~ err", err)
       });
-  });
+  }, []);
 
   return (
     <>

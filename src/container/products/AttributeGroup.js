@@ -42,7 +42,7 @@ const AttributeGroup = () => {
             setAttributeGroups(s => ({ ...s, isLoading: false }))
         })
 
-    });
+    }, []);
 
 
 

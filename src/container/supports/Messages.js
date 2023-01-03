@@ -112,7 +112,7 @@ const Messages = () => {
             setMessages(s => ({ ...s, isLoading: false }))
         })
 
-    });
+    }, []);
 
 
 

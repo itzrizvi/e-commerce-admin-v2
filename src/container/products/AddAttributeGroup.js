@@ -49,7 +49,7 @@ const AddAttributeGroup = () => {
       .catch(err => {
         console.log(err);
       });
-  });
+  }, []);
 
   const handleSubmit = values => {
     const { attr_group_name, attrgroup_sortorder } = values;

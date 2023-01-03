@@ -14,7 +14,7 @@ const NotificationBox = () => {
     if (readNotificationList) {
       dispatch(readNotificationList());
     }
-  });
+  }, []);
 
   const popoverContent = (
     <div>

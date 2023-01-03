@@ -92,7 +92,7 @@ const EditRP = () => {
         if (!data?.status) return;
         setHistoryData(data?.data);
       });
-  });
+  }, []);
   /* ------------------------- Get Single PO Order End ------------------------ */
 
   const handleSubmit = values => {

@@ -131,7 +131,7 @@ const HeaderFooterEdit = () => {
         console.log(err);
         setSingleHeaderFooter({ data: {}, loading: false, error: 'Something went worng' });
       });
-  });
+  }, []);
 
   return (
     <>

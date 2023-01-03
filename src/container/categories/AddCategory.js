@@ -52,7 +52,7 @@ const AddCategory = () => {
         setCategories(data.categories);
       })
       .catch(err => {});
-  });
+  }, []);
 
   useEffect(() => {
     // category structure
@@ -100,7 +100,7 @@ const AddCategory = () => {
       .catch(err => {
         toast.error('Something went worng.!');
       });
-  });
+  }, []);
 
   const handleSubmit = values => {
     // return;

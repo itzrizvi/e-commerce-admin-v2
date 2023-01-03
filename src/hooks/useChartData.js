@@ -10,7 +10,7 @@ const useChartData = () => {
       const { data } = ref.current.chartInstance;
       setChartData(data);
     }
-  });
+  }, []);
 
   return { ref, chartData };
 };

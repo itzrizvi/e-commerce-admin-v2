@@ -42,7 +42,7 @@ const ViewSingleMessage = () => {
 
             });
 
-    });
+    }, []);
 
 
     return (

@@ -111,7 +111,7 @@ const ListPO = () => {
       .finally(() => {
         setPO(s => ({ ...s, isLoading: false }));
       });
-  });
+  }, []);
 
   const onChangeSearch = e => {
     const value = e.target.value;

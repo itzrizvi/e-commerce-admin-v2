@@ -51,7 +51,7 @@ const UpdateAvailabilityStatus = () => {
       .finally(() => {
         setAvailabilityStatus(s => ({ ...s, isLoading: false }));
       });
-  });
+  }, []);
 
   //Submit Form
   const handleSubmit = values => {

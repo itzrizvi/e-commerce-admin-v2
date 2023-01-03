@@ -65,7 +65,7 @@ const EditQuote = () => {
         console.log(err);
         setSingleQuote({ data: {}, loading: false, error: 'Something went wrong' });
       });
-  });
+  }, []);
 
   //Submit Form
   const handleSubmit = values => {

@@ -52,7 +52,7 @@ const AddBrand = () => {
         setCategories([]);
         console.log(err);
       });
-  });
+  }, []);
 
   //Submit Form
   const handleSubmit = values => {

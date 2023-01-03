@@ -51,7 +51,7 @@ const AddressTable = ({ initialData, addresses, setAddresses, defaultAddressId, 
       .finally(() => {
         setNewInitialData(prev => ({ ...prev, loading: false }));
       });
-  });
+  }, []);
   const column = [
     {
       title: 'Country',

@@ -43,7 +43,7 @@ const ListEmail = () => {
       .finally(() => {
         setHeaderFooter(s => ({ ...s, loading: false }));
       });
-  });
+  }, []);
 
 
   const columns = [

@@ -108,7 +108,7 @@ export default function companyInfo() {
       .finally(() => {
         setInitialData(s => ({ ...s, isLoading: false }));
       });
-  });
+  }, []);
 
   const handleSubmit = values => {
     let check_point = true;
