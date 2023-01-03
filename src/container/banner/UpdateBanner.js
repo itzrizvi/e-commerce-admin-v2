@@ -75,7 +75,7 @@ const AddBanner = () => {
         console.log(err);
         setSingleBanner({ data: {}, loading: false, error: 'Something went worng' });
       });
-  });
+  }, []);
 
   //Submit Form
   const handleSubmit = values => {

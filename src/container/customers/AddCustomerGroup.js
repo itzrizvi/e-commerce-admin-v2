@@ -51,7 +51,7 @@ const AddCustomerGroup = () => {
       .finally(() => {
         setSingleCustomerGroup(s => ({ ...s, isLoading: false }));
       });
-  });
+  }, []);
 
   const handleSubmit = values => {
     const { customer_group_name, customergroup_description, customergroup_sortorder } = values;

@@ -118,7 +118,7 @@ const AddContent = () => {
         setHeader(s => ({ ...s, loading: false }));
         setFooter(s => ({ ...s, loading: false }));
       });
-  });
+  }, []);
 
   return (
     <>

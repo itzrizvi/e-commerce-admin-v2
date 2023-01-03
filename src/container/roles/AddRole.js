@@ -100,7 +100,7 @@ const AddRole = () => {
       .finally(() => {
         setAllPermission(s => ({ ...s, isLoading: false }));
       });
-  });
+  }, []);
 
   const handleSubmit = values => {
     setIsLoading(true);

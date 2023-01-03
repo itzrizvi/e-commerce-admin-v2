@@ -167,7 +167,7 @@ const ListRP = () => {
       .finally(() => {
         setRP(s => ({ ...s, isLoading: false }));
       });
-  });
+  }, []);
 
   const onChangeSearch = e => {
     const value = e.target.value;

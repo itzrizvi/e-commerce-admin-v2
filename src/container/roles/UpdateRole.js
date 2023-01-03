@@ -187,7 +187,7 @@ const UpdateRole = () => {
       .catch(err => {
         setAllPermissions(s => ({ ...s, error: 'Something went Wrong.!! ' }));
       });
-  });
+  }, []);
 
   // organize permission
   useEffect(() => {

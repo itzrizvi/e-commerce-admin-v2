@@ -45,7 +45,7 @@ const ListBrand = () => {
             setBrand(s => ({ ...s, loading: false }))
         })
 
-    });
+    }, []);
 
     const handleStatusChange = (record, checked) => {
         const variables = { data: { brand_id: record.id, brand_status: checked } }

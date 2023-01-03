@@ -53,7 +53,7 @@ const BillingAddress = ({ initialData, billingData, setBillingData, defaultAddre
       .finally(() => {
         setNewInitialData(prev => ({ ...prev, loading: false }));
       });
-  });
+  }, []);
 
   const column = [
     {

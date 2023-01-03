@@ -149,7 +149,7 @@ const AddProduct = () => {
 
 
 
-  });
+  }, []);
 
   // ================= 1.for General tab START =================
   const [longDescription, setLongDescription] = useState(RichTextEditor.createEmptyValue());
@@ -383,7 +383,7 @@ const AddProduct = () => {
       .finally(() => {
         setProducts(s => ({ ...s, isLoading: false }));
       });
-  });
+  }, []);
   // ================= 9.for Parts Of Product tab END =================
 
   // ================= 10.for Image tab START =================

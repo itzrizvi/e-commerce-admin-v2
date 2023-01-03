@@ -174,7 +174,7 @@ const Products = () => {
     setTimeout(() => {
       setProducts(s => ({ ...s, isLoading: false }));
     }, 5000);
-  });
+  }, []);
 
   const handleStatusChange = (record, checked) => {
     apolloClient

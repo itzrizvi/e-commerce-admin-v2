@@ -162,7 +162,7 @@ const ListVendor = () => {
       .finally(() => {
         setVendors(s => ({ ...s, isLoading: false }));
       });
-  });
+  }, []);
 
   const onChangeSearch = e => {
     const value = e.target.value;

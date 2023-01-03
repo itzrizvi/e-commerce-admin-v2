@@ -171,7 +171,7 @@ const AddPO = () => {
       .catch(err => {
         console.log(err);
       });
-  });
+  }, []);
 
   // LOAD Vendor List
   useEffect(() => {
@@ -196,7 +196,7 @@ const AddPO = () => {
       .finally(() => {
         setVendors(s => ({ ...s, isLoading: false }));
       });
-  });
+  }, []);
   /* --------------------------- product list fetch start --------------------------- */
   useEffect(() => {
     apolloClient
@@ -219,7 +219,7 @@ const AddPO = () => {
         setProductOption(options);
       })
       .catch(err => { });
-  });
+  }, []);
 
   /* -------------------------- End of product fetch -------------------------- */
 
