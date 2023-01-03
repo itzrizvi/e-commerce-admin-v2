@@ -20,7 +20,7 @@ const { RangePicker } = DatePicker;
 
 const Products = () => {
   viewPermission('product');
-  const [products, setProducts] = useState({ data: [], isLoading: true });
+  const [products, setProducts] = useState({ data: [], isLoading: false });
   const [backupProducts, setBackupProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [searchText, setSearchText] = useState('');
@@ -43,31 +43,6 @@ const Products = () => {
 
   // Load Product List
   useEffect(() => {
-    // return
-    apolloClient
-      .query({
-        query: productQuery.GET_PRODUCT_LIST,
-        context: {
-          headers: {
-            TENANTID: process.env.REACT_APP_TENANTID,
-            Authorization: Cookies.get('psp_t'),
-          },
-        },
-        fetchPolicy: 'cache-first',
-      })
-      .then(res => {
-        const data = res?.data?.getProductList;
-
-        if (!data?.status) return;
-        setBackupProducts(data?.data);
-      })
-      .catch(err => {
-        setProducts(s => ({ ...s, error: 'Something went Wrong.!! ' }));
-      })
-      .finally(() => {
-        setProducts(s => ({ ...s, isLoading: false }));
-      });
-
     // Load filter data
     // 1.load category
     apolloClient
@@ -106,7 +81,7 @@ const Products = () => {
         });
         setCategories({ data: arrData, isLoading: false });
       })
-      .catch(err => {});
+      .catch(err => { });
 
     // 2.load Arrributes
     apolloClient
@@ -170,11 +145,38 @@ const Products = () => {
         if (!data.status) return;
         setConditions({ data: data.data, isLoading: false });
       });
-    // Loader Of after 2 sec
-    setTimeout(() => {
-      setProducts(s => ({ ...s, isLoading: false }));
-    }, 5000);
+
   }, []);
+
+
+  const searchProductAdmin = () => {
+    setProducts(s => ({ ...s, isLoading: true }));
+    // return
+    apolloClient
+      .query({
+        query: productQuery.GET_PRODUCT_LIST,
+        context: {
+          headers: {
+            TENANTID: process.env.REACT_APP_TENANTID,
+            Authorization: Cookies.get('psp_t'),
+          },
+        },
+        fetchPolicy: 'cache-first',
+      })
+      .then(res => {
+        const data = res?.data?.getProductList;
+
+        if (!data?.status) return;
+        setBackupProducts(data?.data);
+      })
+      .catch(err => {
+        setProducts(s => ({ ...s, error: 'Something went Wrong.!! ' }));
+      })
+      .finally(() => {
+        setProducts(s => ({ ...s, isLoading: false }));
+        setSearchButton(!searchButton)
+      });
+  }
 
   const handleStatusChange = (record, checked) => {
     apolloClient
@@ -440,7 +442,7 @@ const Products = () => {
                       />
                     </Col>
                     <Col span={6}>
-                      <Button size="large" type="primary" onClick={() => setSearchButton(!searchButton)}>
+                      <Button size="large" type="primary" onClick={searchProductAdmin}>
                         Search
                       </Button>
                     </Col>

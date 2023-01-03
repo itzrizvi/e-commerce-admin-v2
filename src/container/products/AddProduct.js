@@ -74,9 +74,10 @@ const AddProduct = () => {
         setAttributesTableData(s => {
           // console.log(data?.data?.prod_attributes);
           const n = data?.data?.prod_attributes?.map(item => ({
-            id: new Date().getTime(),
+            id: item.id,
             attr_group_id: item.attribute_data?.attribute_group?.id,
             attribute_id: item?.attribute_data?.id,
+            attribute_name: item?.attribute_data?.attribute_name,
             attribute_type: item.attribute_type,
             attribute_value: item.attribute_value,
           }));
@@ -338,6 +339,7 @@ const AddProduct = () => {
     },
   ];
   const [attributesTableData, setAttributesTableData] = useState(initalData);
+  console.log(attributesTableData)
   // ================= 6.for Attribute tab END =================
 
   // ================= 8.for Discount tab START =================
@@ -393,10 +395,11 @@ const AddProduct = () => {
 
   const handleSubmit = () => {
     const values = form.getFieldsValue(true);
-    console.log(values)
+    // console.log(values)
     const { dimension_class, prod_regular_price, extended_warranty_value, prod_sale_price, cost, prod_weight, prod_weight_class, ...rest } = values;
     let isAttribute = true;
     let isAttrCorrect = true;
+    console.log(attributesTableData)
     const product_attributes = attributesTableData.map(item => {
       // TODO: show warning for missing value
       const { id, ...attributes } = item;
@@ -640,9 +643,9 @@ const AddProduct = () => {
       <Main>
         <Row gutter={25}>
           <Col sm={24} xs={24}>
-            <Cards headless>
+            <Cards headless={true}>
               {params.id && singleProduct.isLoading ? (
-                <div div className="spin">
+                <div div="true" className="spin">
                   <Spin />
                 </div>
               ) : (
@@ -693,7 +696,21 @@ const AddProduct = () => {
                 >
                   <Tabs>
                     <Tabs.TabPane tab="General" key="general">
+
                       <Row gutter={25}>
+                        <Col span={24}>
+                          <Form.Item
+                            name="prod_partnum"
+                            rules={[{ required: true, message: 'Part NO' }]}
+                            label="Part Number"
+                          >
+                            <Row>
+                              <Col span={6}>
+                                <Input defaultValue={singleProduct?.data?.prod_partnum} placeholder="Part No" />
+                              </Col>
+                            </Row>
+                          </Form.Item>
+                        </Col>
                         <Col span={24}>
                           <Form.Item
                             name="mfg_build_part_number"
@@ -701,22 +718,7 @@ const AddProduct = () => {
                           >
                             <Row>
                               <Col span={6}>
-                                <Input defaultValue={singleProduct?.data?.mfg_build_part_number} placeholder="Enter MFG Build Part Number" />
-                              </Col>
-                            </Row>
-                          </Form.Item>
-                        </Col>
-                      </Row>
-                      <Row gutter={25}>
-                        <Col span={24}>
-                          <Form.Item
-                            name="prod_partnum"
-                            rules={[{ required: true, message: 'Please enter Part NO' }]}
-                            label="Part Number"
-                          >
-                            <Row>
-                              <Col span={6}>
-                                <Input placeholder="Enter Part No" />
+                                <Input defaultValue={singleProduct?.data?.mfg_build_part_number} placeholder="MFG Build Part Number" />
                               </Col>
                             </Row>
                           </Form.Item>
@@ -725,7 +727,7 @@ const AddProduct = () => {
                           <Form.Item name="prod_sku" label="SKU">
                             <Row>
                               <Col span={6}>
-                                <Input placeholder="Enter Product SKU" />
+                                <Input defaultValue={singleProduct?.data?.prod_sku} placeholder=" Product SKU" />
                               </Col>
                             </Row>
                           </Form.Item>
@@ -736,7 +738,7 @@ const AddProduct = () => {
                             rules={[{ required: true, message: 'Please enter Product Name' }]}
                             label="Title"
                           >
-                            <Input placeholder="Enter Product Name" />
+                            <Input placeholder="Product Name" />
                           </Form.Item>
                         </Col>
                         <Col span={24}>
@@ -745,7 +747,7 @@ const AddProduct = () => {
                             rules={[{ required: true, message: 'Please enter n' }]}
                             label="Short Description"
                           >
-                            <TextArea rows={3} placeholder="Enter Short Description" />
+                            <TextArea rows={3} placeholder=" Short Description" />
                           </Form.Item>
                         </Col>
                         <Col span={24}>
@@ -766,7 +768,7 @@ const AddProduct = () => {
                             rules={[{ required: true, message: 'Please enter Meta Title' }]}
                             label="Meta Title"
                           >
-                            <Input placeholder="Enter Meta Title" />
+                            <Input placeholder=" Meta Title" />
                           </Form.Item>
                         </Col>
                         <Col span={24}>
@@ -775,7 +777,7 @@ const AddProduct = () => {
                             rules={[{ required: true, message: 'Please enter Meta Description' }]}
                             label="Meta Description"
                           >
-                            <Input placeholder="Enter Meta Description" />
+                            <Input placeholder=" Meta Description" />
                           </Form.Item>
                         </Col>
                         <Col span={24}>
@@ -784,7 +786,7 @@ const AddProduct = () => {
                             rules={[{ required: true, message: 'Please enter Meta Keywords' }]}
                             label="Meta Keywords"
                           >
-                            <Input placeholder="Enter comma separated Meta Keywords" />
+                            <Input placeholder="Comma separated Meta Keywords" />
                           </Form.Item>
                         </Col>
                         <Col span={24}>
@@ -793,7 +795,7 @@ const AddProduct = () => {
                             rules={[{ required: true, message: 'Please enter Tags' }]}
                             label="Tags"
                           >
-                            <Input placeholder="Enter comma separated Tags" />
+                            <Input placeholder="Comma separated Tags" />
                           </Form.Item>
                         </Col>
                         <Col span={24}>
@@ -808,128 +810,140 @@ const AddProduct = () => {
                     </Tabs.TabPane>
                     <Tabs.TabPane tab="Data" key="Data">
                       <Row gutter={25}>
-                        <Col span={24}>
-                          <Form.Item
-                            name="prod_condition"
-                            rules={[{ required: true, message: 'Product Condition Is Required' }]}
-                            label="Product Condition"
-                          >
-                            <Row>
-                              <Col span={6}>
-                                <Select
-                                  defaultValue={singleProduct?.data?.productCondition?.name}
-                                  placeholder={productcondition.loading ? 'Loading...' : 'Select Condition'}
-                                  options={productcondition?.data?.map(item => ({
-                                    label: item.name,
-                                    value: item.id,
-                                  }))}
-                                  onSelect={(val) => setSelectedConditionID(val)}
-                                />
+                        <Col span={12}>
+                          <Row gutter={25}>
+                            <Col span={24}>
+                              <Form.Item
+                                labelCol={{ style: { width: "40%" } }}
+                                name="prod_condition"
+                                rules={[{ required: true, message: 'Product Condition Is Required' }]}
+                                label="Product Condition"
+                              >
+                                <Row>
+                                  <Col span={12}>
+                                    <Select
+                                      defaultValue={singleProduct?.data?.productCondition?.name}
+                                      placeholder={productcondition.loading ? 'Loading...' : 'Select Condition'}
+                                      options={productcondition?.data?.map(item => ({
+                                        label: item.name,
+                                        value: item.id,
+                                      }))}
+                                      onSelect={(val) => setSelectedConditionID(val)}
+                                    />
+                                  </Col>
+                                </Row>
+                              </Form.Item>
+                            </Col>
+                          </Row>
+                          <Row gutter={25}>
+                            <Col span={24}>
+                              <Form.Item
+                                labelCol={{ style: { width: "40%" } }}
+                                name="location"
+                                label="Location"
+                              >
+                                <Row>
+                                  <Col span={16}>
+                                    <Input defaultValue={singleProduct?.data?.location} placeholder=" Product Location" />
+                                  </Col>
+                                </Row>
+                              </Form.Item>
+                            </Col>
+                          </Row>
+                          <Row gutter={25}>
+                            <Col span={24}>
+                              <Form.Item
+                                labelCol={{ style: { width: "40%" } }}
+                                name="hs_code"
+                                label="HS Code"
+                              >
+                                <Row>
+                                  <Col span={12}>
+                                    <Input defaultValue={singleProduct?.data?.hs_code} placeholder=" HS Code" />
+                                  </Col>
+                                </Row>
+                              </Form.Item>
+                            </Col>
+                          </Row>
+                          <Row gutter={25}>
+                            <Col span={24}>
+                              <Form.Item
+                                labelCol={{ style: { width: "40%" } }}
+                                name="product_rank"
+                                label="Product Rank"
+                              >
+                                <Row>
+                                  <Col span={12}>
+                                    <Input defaultValue={singleProduct?.data?.product_rank} placeholder=" Product Rank" />
+                                  </Col>
+                                </Row>
+                              </Form.Item>
+                            </Col>
+                          </Row>
+
+                          <Row gutter={25}>
+                            <Col span={24}>
+                              <Form.Item
+                                labelCol={{ style: { width: "40%" } }}
+                                name="product_rep"
+                                label="Product Representative"
+                              >
+                                <Row>
+                                  <Col span={12}>
+                                    <Select
+                                      defaultValue={`${singleProduct?.data?.representative?.first_name} ${singleProduct?.data?.representative?.last_name}`}
+                                      placeholder={representative.loading ? 'Loading...' : 'Select a Product Representative'}
+                                      options={representative?.data?.map(item => ({
+                                        label: item.first_name + ' ' + item.last_name,
+                                        value: item.id,
+                                      }))}
+                                      onSelect={(val) => setSelectedProductRepID(val)}
+                                    />
+
+                                    <ul>
+                                      {singleProduct?.data?.representative?.roles.map((item) =>
+                                        <li key={item.id}>{item.role}</li>
+                                      )}
+                                    </ul>
+
+                                  </Col>
+                                </Row>
+                              </Form.Item>
+                            </Col>
+                          </Row>
+                        </Col>
+
+                        <Col span={12}>
+                          <Form.Item labelCol={{ style: { width: "40%" } }} name="extended_warranty" label="Extended Warranty">
+                            <Switch defaultChecked={singleProduct.data.extended_warranty} onChange={(val) => setExtendedWarrantyEnable(val)} defaultValue={singleProduct.data.extended_warranty} />
+                          </Form.Item>
+                          {extendedWarrantyEnable && (
+                            <Row gutter={25}>
+                              <Col span={24}>
+                                <Form.Item labelCol={{ style: { width: "40%" } }} rules={[{ required: true, message: 'Extended Warranty Value' }]} name="extended_warranty_value" label="Extended Warranty Value">
+                                  <Row>
+                                    <Col span={8}>
+                                      <Input placeholder="Extended Warranty Value" defaultValue={singleProduct?.data?.extended_warranty_value} type="number" />
+                                    </Col>
+                                  </Row>
+
+                                </Form.Item>
                               </Col>
                             </Row>
+                          )}
+                          <Form.Item labelCol={{ style: { width: "40%" } }} name="is_sale" label="On Sale">
+                            <Switch defaultChecked={singleProduct.data.is_sale} defaultValue={singleProduct.data.is_sale} />
+                          </Form.Item>
+                          <Form.Item labelCol={{ style: { width: "40%" } }} name="is_featured" label="Featured">
+                            <Switch defaultChecked={singleProduct.data.is_featured} defaultValue={singleProduct.data.is_featured} />
+                          </Form.Item>
+                          <Form.Item labelCol={{ style: { width: "40%" } }} name="is_serial" label="Has Serial">
+                            <Switch defaultChecked={singleProduct.data.is_serial} defaultValue={singleProduct.data.is_serial} />
                           </Form.Item>
                         </Col>
                       </Row>
-                      <Row gutter={25}>
-                        <Col span={24}>
-                          <Form.Item
-                            name="location"
-                            label="Location"
-                          >
-                            <Row>
-                              <Col span={6}>
-                                <Input defaultValue={singleProduct?.data?.location} placeholder="Enter Product Location" />
-                              </Col>
-                            </Row>
-                          </Form.Item>
-                        </Col>
-                      </Row>
-                      <Row gutter={25}>
-                        <Col span={24}>
-                          <Form.Item
-                            name="hs_code"
-                            label="HS Code"
-                          >
-                            <Row>
-                              <Col span={6}>
-                                <Input defaultValue={singleProduct?.data?.hs_code} placeholder="Enter HS Code" />
-                              </Col>
-                            </Row>
-                          </Form.Item>
-                        </Col>
-                      </Row>
-                      <Row gutter={25}>
-                        <Col span={24}>
-                          <Form.Item
-                            name="product_rank"
-                            label="Product Rank"
-                          >
-                            <Row>
-                              <Col span={6}>
-                                <Input defaultValue={singleProduct?.data?.product_rank} placeholder="Enter Product Rank" />
-                              </Col>
-                            </Row>
-                          </Form.Item>
-                        </Col>
-                      </Row>
-
-                      <Row gutter={25}>
-                        <Col span={24}>
-                          <Form.Item
-                            name="product_rep"
-                            label="Product Representative"
-                          >
-                            <Row>
-                              <Col span={6}>
-                                <Select
-                                  defaultValue={`${singleProduct?.data?.representative?.first_name} ${singleProduct?.data?.representative?.last_name}`}
-                                  placeholder={representative.loading ? 'Loading...' : 'Select a Product Representative'}
-                                  options={representative?.data?.map(item => ({
-                                    label: item.first_name + ' ' + item.last_name,
-                                    value: item.id,
-                                  }))}
-                                  onSelect={(val) => setSelectedProductRepID(val)}
-                                />
-
-                                <ul>
-                                  {singleProduct?.data?.representative?.roles.map((item) =>
-                                    <li key={item.id}>{item.role}</li>
-                                  )}
-                                </ul>
-
-                              </Col>
-                            </Row>
-                          </Form.Item>
-                        </Col>
-                      </Row>
-
-                      {extendedWarrantyEnable && (
-                        <Row gutter={25}>
-                          <Col span={24}>
-                            <Form.Item rules={[{ required: true, message: 'Please Enter Extended Warranty Value' }]} name="extended_warranty_value" label="Extended Warranty Value">
-                              <Row>
-                                <Col span={6}>
-                                  <Input placeholder="Extended Warranty Value" defaultValue={singleProduct?.data?.extended_warranty_value} type="number" />
-                                </Col>
-                              </Row>
-
-                            </Form.Item>
-                          </Col>
-                        </Row>
-                      )}
-                      <Form.Item name="extended_warranty" label="Extended Warranty">
-                        <Switch defaultChecked={singleProduct.data.extended_warranty} onChange={(val) => setExtendedWarrantyEnable(val)} defaultValue={singleProduct.data.extended_warranty} />
-                      </Form.Item>
-                      <Form.Item name="is_sale" label="On Sale">
-                        <Switch defaultChecked={singleProduct.data.is_sale} defaultValue={singleProduct.data.is_sale} />
-                      </Form.Item>
-                      <Form.Item name="is_featured" label="Featured">
-                        <Switch defaultChecked={singleProduct.data.is_featured} defaultValue={singleProduct.data.is_featured} />
-                      </Form.Item>
-                      <Form.Item name="is_serial" label="Has Serial">
-                        <Switch defaultChecked={singleProduct.data.is_serial} defaultValue={singleProduct.data.is_serial} />
-                      </Form.Item>
                     </Tabs.TabPane>
+
                     <Tabs.TabPane tab="Links" key="Links">
 
                       <Row gutter={25}>
@@ -1089,7 +1103,7 @@ const AddProduct = () => {
                           >
                             <Row>
                               <Col span={7}>
-                                <Select style={{ height: '3.5em' }} placeholder="Enter Dimension Class">
+                                <Select style={{ height: '3.5em' }} placeholder="Dimension Class">
                                   <Option key={1} value="Centimeter">
                                     Centimeter
                                   </Option>
@@ -1110,7 +1124,7 @@ const AddProduct = () => {
                       <Form.Item name="prod_weight" label="Weight">
                         <Row>
                           <Col span={7}>
-                            <Input type="number" placeholder="Enter Weight" />
+                            <Input type="number" placeholder="Weight" />
                           </Col>
                         </Row>
                       </Form.Item>
@@ -1119,7 +1133,7 @@ const AddProduct = () => {
                           <Form.Item name="prod_weight_class" label="Weight Class">
                             <Row>
                               <Col span={7}>
-                                <Select placeholder="Enter Weight Class">
+                                <Select placeholder="Weight Class">
                                   <Option key={1} value="Kilogram">
                                     Kilogram
                                   </Option>
@@ -1176,12 +1190,12 @@ const AddProduct = () => {
                         <Col span={24}>
                           <Form.Item
                             name="prod_regular_price"
-                            rules={[{ required: true, message: 'Please Enter Regular Price' }]}
+                            rules={[{ required: true, message: 'MSRP' }]}
                             label="MSRP"
                           >
                             <Row>
                               <Col span={6}>
-                                <Input placeholder="Enter Regular Price" defaultValue={singleProduct.data.prod_regular_price} prefix="US$  " type="number" />
+                                <Input placeholder="MSRP" defaultValue={singleProduct.data.prod_regular_price} prefix="US$  " type="number" />
                               </Col>
                             </Row>
                           </Form.Item>
@@ -1190,7 +1204,7 @@ const AddProduct = () => {
                           <Form.Item name="prod_sale_price" label="Sales Price">
                             <Row>
                               <Col span={6}>
-                                <Input prefix="US$  " type="number" defaultValue={singleProduct.data.prod_sale_price} placeholder="Enter Sales Price" />
+                                <Input prefix="US$  " type="number" defaultValue={singleProduct.data.prod_sale_price} placeholder="Sales Price" />
                               </Col>
                             </Row>
                           </Form.Item>
@@ -1199,7 +1213,7 @@ const AddProduct = () => {
                           <Form.Item name="cost" label="Cost">
                             <Row>
                               <Col span={6}>
-                                <Input prefix="US$  " type="number" defaultValue={singleProduct.data.cost} placeholder="Enter Product Cost" />
+                                <Input prefix="US$  " type="number" defaultValue={singleProduct.data.cost} placeholder="Product Cost" />
                               </Col>
                             </Row>
                           </Form.Item>

@@ -6,78 +6,9 @@ import apolloClient, { attributeQuery } from '../../../utility/apollo';
 import Cookies from 'js-cookie';
 const { Option } = Select;
 
-// Component for Value column
-const Inputs = ({ index, setAttributesTableData, attribute_type, attribute_value }) => {
-    const [type, setType] = useState('')
-    const [file, setFile] = useState([])
-
-    const handleOnBlur = e => {
-        setAttributesTableData(state => {
-            let data = state[index];
-            const copy = [...state];
-            copy[index] = { ...data, attribute_value: e.target.value }
-            return copy;
-        })
-    }
-
-    return (
-        <>
-            <Select
-                style={{ width: '10em', marginRight: "1em" }}
-                placeholder="Select type"
-                defaultValue={attribute_type || null}
-                onChange={value => {
-                    setType(value)
-                    setAttributesTableData(arr => {
-                        let data = arr[index];
-                        const copy = [...arr];
-                        copy[index] = { ...data, attribute_type: value }
-                        return copy;
-                    })
-                }}
-            >
-                <Option value="text" >Text</Option>
-                <Option value="link" >Link</Option>
-                <Option value="file" >File</Option>
-                <Option value="none" >None</Option>
-            </Select>
-
-            {type === "text"
-                && < Input
-                    placeholder="Enter text"
-                    style={{ width: 'calc(100% - 12em)' }}
-                    size="middle"
-                    onBlur={handleOnBlur}
-                    defaultValue={attribute_value}
-                />
-            }
-            {type === "link"
-                && < Input placeholder="Enter Link" style={{ width: 'calc(100% - 12em)' }} size="middle" onBlur={handleOnBlur}
-                    defaultValue={attribute_value}
-                />
-            }
-            {type === "file"
-                && <Upload
-                    // style={{ marginTop: "2em" }}
-
-                    beforeUpload={(file) => {
-                        setFile([file]);
-                        return false;
-                    }
-                    }
-                    onRemove={() => setFile([])}
-                    fileList={file}
-                >
-                    <Button icon={<UploadOutlined />}>Select File</Button>
-                </Upload>
-            }
-        </>
-    )
-}
-
 const AttributeTab = ({ attributesTableData, setAttributesTableData }) => {
 
-
+    const [file, setFile] = useState({});
     const addNewRow = () => {
         const newData = {
             id: new Date().getTime(),
@@ -87,7 +18,6 @@ const AttributeTab = ({ attributesTableData, setAttributesTableData }) => {
             attribute_value: ''
         }
         setAttributesTableData(prevState => [...prevState, newData])
-        console.log(attributesTableData)
     }
     const removeRow = (id) => {
         setAttributesTableData(prevState => {
@@ -95,11 +25,9 @@ const AttributeTab = ({ attributesTableData, setAttributesTableData }) => {
         })
     }
 
-
     const [attributeGroups, setAttributeGroups] = useState({ data: [], isLoading: true })
     const [selectedGroup, setSelectedGroup] = useState({})
     const handleAttrGroupSelect = (val, item, index) => {
-        console.log(item)
         setSelectedGroup(item)
 
         setAttributesTableData(arr => {
@@ -110,7 +38,6 @@ const AttributeTab = ({ attributesTableData, setAttributesTableData }) => {
         })
     }
     const handleAttributeSelect = (val, item, index) => {
-        console.log(val)
         setAttributesTableData(arr => {
             let data = arr[index];
             const copy = [...arr];
@@ -154,7 +81,7 @@ const AttributeTab = ({ attributesTableData, setAttributesTableData }) => {
             render: (val, record, index) => <Select
                 style={{ width: "100%" }}
                 placeholder={attributeGroups.isLoading ? 'Loading...' : "Select Group..."}
-                defaultValue={val || null}
+                defaultValue={val}
                 options={attributeGroups.data.map(item => ({
                     label: item.attr_group_name,
                     value: item.id,
@@ -170,27 +97,100 @@ const AttributeTab = ({ attributesTableData, setAttributesTableData }) => {
             width: 200,
             render: (val, record, index) => <Select
                 style={{ width: "100%" }}
-                disabled={!selectedGroup.value}
-                defaultValue={val || null}
+                // disabled={!selectedGroup.value}
+                defaultValue={val}
                 placeholder={attributeGroups.isLoading ? 'Loading...'
-                    : "Select Group..."
+                    : "Select Attribute..."
                 }
-                options={selectedGroup?.attributes?.map(item => ({
+                options={attributeGroups?.data.filter(item => item.id === record.attr_group_id)[0]?.attributes?.map(item => ({
                     label: item.attribute_name,
                     value: item.id,
                 }))}
                 onSelect={(val, item) => handleAttributeSelect(val, item, index)}
-            // onSelect={val => {
-            //     console.log(val)
-            //     setSelectedAttribute(val)
-            // }}
             />
         },
         {
-            title: 'Values',
+            title: 'Value Type',
             dataIndex: 'value',
+            width: 80,
             key: 'value',
-            render: (text, record, index) => <Inputs {...{ index, setAttributesTableData, attribute_type: record.attribute_type, attribute_value: record.attribute_value }} />
+            render: (text, record, index) => <Select
+                style={{ width: '10em', marginRight: "1em" }}
+                placeholder="Select type"
+                defaultValue={record.attribute_type}
+                onChange={value => {
+                    setAttributesTableData(arr => {
+                        let data = arr[index];
+                        const copy = [...arr];
+                        copy[index] = { ...data, attribute_type: value }
+                        return copy;
+                    })
+                }}
+            >
+                <Option value="text" >Text</Option>
+                <Option value="link" >Link</Option>
+                <Option value="file" >File</Option>
+                <Option value="none" >None</Option>
+            </Select>
+        },
+        {
+            title: 'Attribute Value',
+            dataIndex: 'attribute_value',
+            width: 150,
+            key: 'attribute_value',
+            render: (text, record, index) => {
+                if (record.attribute_type === "text") {
+                    return < Input
+                        placeholder="Enter text"
+                        size="large"
+                        onBlur={value => {
+                            setAttributesTableData(arr => {
+                                let data = arr[index];
+                                const copy = [...arr];
+                                copy[index] = { ...data, attribute_value: value.target.value }
+                                return copy;
+                            })
+                        }}
+                        defaultValue={record.attribute_value}
+                    />
+                } else if (record.attribute_type === "link") {
+                    return < Input
+                        placeholder="Enter Link"
+                        size="large"
+                        onBlur={value => {
+                            setAttributesTableData(arr => {
+                                let data = arr[index];
+                                const copy = [...arr];
+                                copy[index] = { ...data, attribute_value: value.target.value }
+                                return copy;
+                            })
+                        }}
+                        defaultValue={record.attribute_value}
+                    />
+                } else if (record.attribute_type === "file") {
+
+                    return (
+                        <Upload
+                            multiple={false}
+                            onChange={e => {
+                                setFile(e.file)
+                                setAttributesTableData(state => {
+                                    let data = state[index];
+                                    const copy = [...state];
+                                    copy[index] = { ...data, attribute_value: e.file.originFileObj }
+                                    return copy;
+                                })
+                            }}
+                            onRemove={() => setFile({})}
+                        >
+                            <Button icon={<UploadOutlined />}>Select File</Button>
+                            <p style={{ fontSize: 12, marginTop: 10 }}>{record.attribute_value.name ? `${record.attribute_value.name}` : `${record.attribute_value}.pdf`}</p>
+
+                        </Upload>)
+                }
+
+            }
+
         },
         {
             title: 'Action',
@@ -204,8 +204,6 @@ const AttributeTab = ({ attributesTableData, setAttributesTableData }) => {
         },
     ];
 
-
-
     return (
 
         <>
@@ -213,11 +211,11 @@ const AttributeTab = ({ attributesTableData, setAttributesTableData }) => {
                 columns={column}
                 dataSource={attributesTableData}
                 pagination={false}
-                rowKey="id"
+                rowKey="attribute_value"
             />
 
             <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '10px', marginBottom: '10px', marginRight: '1em' }}>
-                <Button title="Add Banner" htmlType="button" type="primary" onClick={addNewRow}>
+                <Button title="Add Attribute" htmlType="button" type="primary" onClick={addNewRow}>
                     <FeatherIcon icon="plus" size={15} />
                 </Button>
             </div>
