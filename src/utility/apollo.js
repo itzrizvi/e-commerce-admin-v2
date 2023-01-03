@@ -527,8 +527,8 @@ export const productQuery = {
               prod_sku
               prod_status
               taxable
-              prod_weight
-              prod_weight_class
+              # prod_weight
+              # prod_weight_class
               prod_outofstock_status
               prod_thumbnail
             }
@@ -569,8 +569,8 @@ export const productQuery = {
               prod_sku
               prod_status
               taxable
-              prod_weight
-              prod_weight_class
+              # prod_weight
+              # prod_weight_class
               prod_outofstock_status
               prod_thumbnail
             }
