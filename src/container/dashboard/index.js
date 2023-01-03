@@ -464,10 +464,10 @@ const Dashboard = () => {
 
 								<Row gutter={25} style={{ marginTop: 10 }}>
 									<Col xs={12} sm={12} md={12} lg={12} >
-										<p style={styles.cardNumberTextStyles}>Today Shipped:<br /><CountUp style={{ fontSize: 15 }} duration={2} end={analytics.data.todayShippedOrder} /></p>
+										<p style={styles.cardNumberTextStyles}>Today Shipped:<br /><CountUp style={{ fontSize: 15 }} duration={2} end={analytics?.data?.todayShippedOrder} /></p>
 									</Col>
 									<Col xs={12} sm={12} md={12} lg={12}>
-										<p style={styles.cardNumberTextStyles}>In-Progress:<br /><CountUp style={{ fontSize: 15 }} duration={2} end={analytics.data.shippingInProgress} /></p>
+										<p style={styles.cardNumberTextStyles}>In-Progress:<br /><CountUp style={{ fontSize: 15 }} duration={2} end={analytics?.data?.shippingInProgress} /></p>
 									</Col>
 								</Row>
 							</Card>)}
@@ -484,7 +484,7 @@ const Dashboard = () => {
 								<Row gutter={25}>
 									<Col span={18}>
 										<h3 style={styles.cardHeadTextStyles}>Orders</h3>
-										<p style={styles.cardMainNumberTextStyles}><CountUp duration={2} end={analytics.data.orderCount} /></p>
+										<p style={styles.cardMainNumberTextStyles}><CountUp duration={2} end={analytics?.data?.orderCount} /></p>
 									</Col>
 									<Col span={6}>
 										<ShoppingCartOutlined style={styles.iconStyles2} />
@@ -493,7 +493,7 @@ const Dashboard = () => {
 
 								<Row gutter={25} style={{ marginTop: 10 }}>
 									<Col span={10}>
-										<p style={styles.cardNumberTextStyles}>New Order<br /><CountUp duration={2} style={{ fontSize: 15 }} end={analytics.data.newOrderCount} /></p>
+										<p style={styles.cardNumberTextStyles}>New Order<br /><CountUp duration={2} style={{ fontSize: 15 }} end={analytics?.data?.newOrderCount} /></p>
 									</Col>
 									<Col span={14}>
 										<Button style={styles.styledButton1} type="primary">Manage <br /> Today Orders</Button>
@@ -512,7 +512,7 @@ const Dashboard = () => {
 								<Row gutter={25}>
 									<Col span={18}>
 										<h3 style={styles.cardHeadTextStyles}>Quotes</h3>
-										<p style={styles.cardMainNumberTextStyles}><CountUp duration={2} end={analytics.data.totalQuotes} /></p>
+										<p style={styles.cardMainNumberTextStyles}><CountUp duration={2} end={analytics?.data?.totalQuotes} /></p>
 									</Col>
 									<Col span={6}>
 										<SnippetsOutlined style={styles.iconStyles3} />
@@ -521,7 +521,7 @@ const Dashboard = () => {
 
 								<Row gutter={25} style={{ marginTop: 10 }}>
 									<Col span={10}>
-										<p style={styles.cardNumberTextStyles}>New Quotes<br /><CountUp style={{ fontSize: 15 }} duration={2} end={analytics.data.todayQuotes} /></p>
+										<p style={styles.cardNumberTextStyles}>New Quotes<br /><CountUp style={{ fontSize: 15 }} duration={2} end={analytics?.data?.todayQuotes} /></p>
 									</Col>
 									<Col span={14}>
 										<Button style={styles.styledButton1} type="primary">Manage <br /> New Quotes</Button>
@@ -540,7 +540,7 @@ const Dashboard = () => {
 								<Row gutter={25}>
 									<Col span={18}>
 										<h3 style={styles.cardHeadTextStyles}>New Customers</h3>
-										<p style={styles.cardMainNumberTextStyles}><CountUp duration={2} end={analytics.data.newCustomer} /></p>
+										<p style={styles.cardMainNumberTextStyles}><CountUp duration={2} end={analytics?.data?.newCustomer} /></p>
 									</Col>
 									<Col span={6}>
 										<UsergroupAddOutlined style={styles.iconStyles4} />
@@ -549,10 +549,10 @@ const Dashboard = () => {
 
 								<Row gutter={25} style={{ marginTop: 10 }}>
 									<Col span={12}>
-										<p style={styles.cardNumberTextStyles}>Total<br /> <CountUp style={{ fontSize: 15 }} duration={2} end={analytics.data.totalCustomer} /></p>
+										<p style={styles.cardNumberTextStyles}>Total<br /> <CountUp style={{ fontSize: 15 }} duration={2} end={analytics?.data?.totalCustomer} /></p>
 									</Col>
 									<Col span={12}>
-										<p style={styles.cardNumberTextStyles}>Verified<br /> <CountUp style={{ fontSize: 15 }} duration={2} end={analytics.data.verifiedCustomer} /></p>
+										<p style={styles.cardNumberTextStyles}>Verified<br /> <CountUp style={{ fontSize: 15 }} duration={2} end={analytics?.data?.verifiedCustomer} /></p>
 									</Col>
 								</Row>
 							</Card>)}

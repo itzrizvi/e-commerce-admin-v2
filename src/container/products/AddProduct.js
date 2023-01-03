@@ -339,7 +339,6 @@ const AddProduct = () => {
     },
   ];
   const [attributesTableData, setAttributesTableData] = useState(initalData);
-  console.log(attributesTableData)
   // ================= 6.for Attribute tab END =================
 
   // ================= 8.for Discount tab START =================
