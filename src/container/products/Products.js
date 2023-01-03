@@ -565,7 +565,7 @@ const Products = () => {
                       size="small"
                       // dataSource={searchText ? filteredProducts : products.data}
                       dataSource={filteredProducts}
-                      rowClassName={(record, index) => (index % 2 == 0 ? '' : 'altTableClass')}
+                      rowClassName={(record, index) => (index % 2 === 0 ? '' : 'altTableClass')}
                       // pagination={false}
                       pagination={{
                         defaultPageSize: config.PRODUCTS_PER_PAGE,

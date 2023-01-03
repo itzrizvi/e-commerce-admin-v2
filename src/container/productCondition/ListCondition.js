@@ -130,7 +130,7 @@ const ListCondition = () => {
                                             rowKey={'id'}
                                             size="small"
                                             dataSource={searchText ? filteredCondition : condition.data}
-                                            rowClassName={(record, index) => (index % 2 == 0 ? "" : "altTableClass")}
+                                            rowClassName={(record, index) => (index % 2 === 0 ? "" : "altTableClass")}
                                             // pagination={false}
                                             pagination={{
                                                 defaultPageSize: config.PRODUCT_CONDITION_PER_PAGE,

@@ -151,7 +151,7 @@ const Messages = () => {
                                             rowKey={'id'}
                                             size="small"
                                             dataSource={searchText ? filteredMessages : messages.data}
-                                            rowClassName={(record, index) => (index % 2 == 0 ? "" : "altTableClass")}
+                                            rowClassName={(record, index) => (index % 2 === 0 ? "" : "altTableClass")}
                                             // pagination={false}
                                             pagination={{
                                                 defaultPageSize: config.CONTACT_US_MESSAGE_PER_PAGE,

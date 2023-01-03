@@ -169,7 +169,7 @@ const ListAttributes = () => {
                                             rowKey={'g_s'}
                                             size="small"
                                             dataSource={searchText ? filteredAttributes : attributes.data}
-                                            rowClassName={(record, index) => (index % 2 == 0 ? "" : "altTableClass")}
+                                            rowClassName={(record, index) => (index % 2 === 0 ? "" : "altTableClass")}
                                         // pagination={false}
                                         // pagination={{
                                         //     defaultPageSize: config.PERMISSIONS_PER_PAGE,

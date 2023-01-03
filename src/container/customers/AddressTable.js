@@ -210,7 +210,7 @@ const AddressTable = ({ initialData, addresses, setAddresses, defaultAddressId, 
       <Table
         className="table-responsive"
         columns={column}
-        rowClassName={(record, index) => (index % 2 == 0 ? '' : 'altTableClass')}
+        rowClassName={(record, index) => (index % 2 === 0 ? '' : 'altTableClass')}
         pagination={false}
         rowKey={'id'}
         size="small"

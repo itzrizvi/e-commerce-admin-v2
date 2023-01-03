@@ -248,7 +248,7 @@ const ListCoupon = () => {
                                             columns={columns}
                                             rowKey={'id'}
                                             dataSource={searchText ? filteredCoupons : coupons.data}
-                                            rowClassName={(record, index) => (index % 2 == 0 ? "" : "altTableClass")}
+                                            rowClassName={(record, index) => (index % 2 === 0 ? "" : "altTableClass")}
                                             // pagination={false}
                                             pagination={{
                                                 defaultPageSize: config.COUPON_GROUPS_PER_PAGE,

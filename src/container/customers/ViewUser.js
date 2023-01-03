@@ -193,7 +193,7 @@ const ViewUser = () => {
                         rowKey={'id'}
                         size="small"
                         dataSource={order}
-                        rowClassName={(record, index) => (index % 2 == 0 ? '' : 'altTableClass')}
+                        rowClassName={(record, index) => (index % 2 === 0 ? '' : 'altTableClass')}
                         pagination={false}
                       />
                     </Tabs.TabPane>
@@ -204,7 +204,7 @@ const ViewUser = () => {
                         rowKey={'date'}
                         size="small"
                         dataSource={rating}
-                        rowClassName={(record, index) => (index % 2 == 0 ? '' : 'altTableClass')}
+                        rowClassName={(record, index) => (index % 2 === 0 ? '' : 'altTableClass')}
                         pagination={false}
                       />
                     </Tabs.TabPane>

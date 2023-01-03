@@ -578,7 +578,7 @@ const Dashboard = () => {
 										rowKey={'id'}
 										size="small"
 										dataSource={analytics?.data?.recentOrders}
-										rowClassName={(record, index) => (index % 2 == 0 ? '' : 'altTableClass')}
+										rowClassName={(record, index) => (index % 2 === 0 ? '' : 'altTableClass')}
 										pagination={{
 											defaultPageSize: 5,
 											total: analytics?.data?.recentOrders?.length,
@@ -605,7 +605,7 @@ const Dashboard = () => {
 										rowKey={'id'}
 										size="small"
 										dataSource={analytics?.data?.recentPurchaseOrders}
-										rowClassName={(record, index) => (index % 2 == 0 ? '' : 'altTableClass')}
+										rowClassName={(record, index) => (index % 2 === 0 ? '' : 'altTableClass')}
 										pagination={{
 											defaultPageSize: 5,
 											total: analytics?.data?.recentPurchaseOrders?.length,
@@ -635,7 +635,7 @@ const Dashboard = () => {
 										rowKey={'id'}
 										size="small"
 										dataSource={messages.data}
-										rowClassName={(record, index) => (index % 2 == 0 ? "" : "altTableClass")}
+										rowClassName={(record, index) => (index % 2 === 0 ? "" : "altTableClass")}
 										pagination={{
 											defaultPageSize: 5,
 											total: messages?.data?.length,
@@ -661,7 +661,7 @@ const Dashboard = () => {
 										rowKey={'id'}
 										size="small"
 										dataSource={analytics?.data?.recentQuotes}
-										rowClassName={(record, index) => (index % 2 == 0 ? '' : 'altTableClass')}
+										rowClassName={(record, index) => (index % 2 === 0 ? '' : 'altTableClass')}
 										pagination={{
 											style: {},
 											defaultPageSize: 5,

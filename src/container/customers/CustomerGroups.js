@@ -184,7 +184,7 @@ const CustomerGroups = () => {
                                             rowKey={'g_s'}
                                             size="small"
                                             dataSource={searchText ? filteredCustomerGroups : customerGroups.data}
-                                            rowClassName={(record, index) => (index % 2 == 0 ? "" : "altTableClass")}
+                                            rowClassName={(record, index) => (index % 2 === 0 ? "" : "altTableClass")}
                                             // pagination={false}
                                             pagination={{
                                                 defaultPageSize: config.CUSTOMER_GROUPS_PER_PAGE,

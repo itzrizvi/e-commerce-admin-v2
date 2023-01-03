@@ -167,7 +167,7 @@ const ListPermission = () => {
                                                 rowKey={'id'}
                                                 size="small"
                                                 dataSource={searchText ? filteredPermissions : permissions.data}
-                                                rowClassName={(record, index) => (index % 2 == 0 ? "" : "altTableClass")}
+                                                rowClassName={(record, index) => (index % 2 === 0 ? "" : "altTableClass")}
                                                 pagination={{
                                                     defaultPageSize: config.PERMISSIONS_PER_PAGE,
                                                     total: searchText ? filteredPermissions.length : permissions.length,
