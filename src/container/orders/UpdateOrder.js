@@ -414,7 +414,10 @@ const UpdateOrder = () => {
         const data = res?.data?.getSingleCouponByCode;
         if (data.status) {
           if (data.data.coupon_type === 'percentage') {
-            setDiscount((total.price / 100) * data.data.coupon_amount);
+            setDiscount(
+              (selectedProduct.reduce((accumulator, item) => accumulator + item.quantity * item.price, 0) / 100) *
+                data.data.coupon_amount,
+            );
           } else {
             setDiscount(data.data.coupon_amount);
           }
