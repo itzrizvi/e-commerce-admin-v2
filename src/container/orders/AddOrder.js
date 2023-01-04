@@ -39,6 +39,7 @@ import Checkout from '../../components/stripe/Checkout';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements } from '@stripe/react-stripe-js';
 import { stripeSchema } from '../../apollo/stripe';
+import { useMemo } from 'react';
 
 const { Text, Paragraph } = Typography;
 const prod_initial = {
@@ -93,7 +94,7 @@ const AddOrder = () => {
   const [clientSecret, setClientSecret] = useState(null);
 
   // Stripe Code
-  const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
+  const stripePromise = useMemo(() => loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY), []);
   const paymentValidateCard = useRef(null);
   const finalPayment = useRef(null);
 
@@ -500,6 +501,7 @@ const AddOrder = () => {
           setWaitNext(true);
           const createToken = await paymentValidateCard.current();
           if (createToken.error) {
+            setWaitNext(false);
             return toast.error('Invalid Card Details');
           } else {
             setCreditCardLast4(createToken?.token.card.last4);

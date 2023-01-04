@@ -183,7 +183,7 @@ const AttributeTab = ({ attributesTableData, setAttributesTableData }) => {
                             onRemove={() => setFile({})}
                         >
                             <Button icon={<UploadOutlined />}>Select File</Button>
-                            <p style={{ fontSize: 12, marginTop: 10 }}>{record.attribute_value.name ? `${record.attribute_value.name}` : `${record.attribute_value}.pdf`}</p>
+                            <p style={{ fontSize: 12, marginTop: 10 }}>{record.attribute_value.name ? `${record.attribute_value.name}` : `${record.attribute_value}`}</p>
 
                         </Upload>)
                 }

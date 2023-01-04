@@ -24,6 +24,7 @@ import NotFound403 from '../../container/noFound/403';
 import SupportsRoutes from './supports';
 import EmailRoutes from './email';
 import ReportRoutes from './report';
+import Test from '../../container/test/Test';
 
 const Admin = () => {
   const { path } = useRouteMatch();
@@ -60,6 +61,7 @@ const Admin = () => {
         <Route path={`${path}/email`} component={EmailRoutes} />
         <Route path={`${path}/report`} component={ReportRoutes} />
         <Route path={`${path}/403`} component={NotFound403} />
+        <Route path={`${path}/test`} component={Test} />
       </Suspense>
     </Switch>
   );
