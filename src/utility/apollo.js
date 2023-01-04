@@ -415,8 +415,6 @@ export const productQuery = {
           is_serial
           taxable
           cost
-          # prod_weight
-          # prod_weight_class
           prod_outofstock_status
           prod_thumbnail
           createdAt
@@ -496,13 +494,26 @@ export const productQuery = {
             discount_startdate
             discount_enddate
           }
-          # dimensions {
-          #   id
-          #   length
-          #   width
-          #   height
-          #   dimension_class
-          # }
+          dimensions {
+            id
+            length
+            width
+            height
+            dimensionClass {
+              id
+              name
+              status
+            }
+          }
+          weight {
+            id
+            weight
+            weightClass {
+              id
+              name
+              status
+            }
+          }
           gallery {
             id
             prod_id
@@ -1191,6 +1202,32 @@ export const utilityQuery = {
           id
           name
           status
+        }
+      }
+    }
+  `,
+  GET_DIMENSION_CLASS_LIST: gql`
+    query getDimensionClassList {
+    getDimensionClassList{
+      message
+      status
+      tenant_id
+      data {
+        id
+        name
+      }
+    }
+  }
+  `,
+  GET_WEIGHT_CLASS_LIST: gql`
+    query getWeightClassList {
+      getWeightClassList{
+        message
+        status
+        tenant_id
+        data {
+          id
+          name
         }
       }
     }

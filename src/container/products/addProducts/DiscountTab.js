@@ -64,7 +64,6 @@ const DiscountTab = ({ discount, setDiscount }) => {
             width: 100,
             render: (val, record, index) => <Input defaultValue={val} type="number" placeholder="Quantity" style={{ width: "100px" }}
                 onBlur={e => {
-                    console.log(e.target.value)
                     setDiscount(state => {
                         let data = state[index];
                         const copy = [...state];
@@ -145,7 +144,6 @@ const DiscountTab = ({ discount, setDiscount }) => {
                         let data = state[index];
                         const copy = [...state];
                         copy[index] = { ...data, discount_enddate: dateGmt }
-                        console.log(copy)
                         return copy;
                     })
                 }}

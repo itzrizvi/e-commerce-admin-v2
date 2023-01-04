@@ -19,7 +19,6 @@ import { viewPermission } from '../../utility/utility';
 import { Link, useHistory, useLocation } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import queryString from 'query-string';
-const { Option } = Select;
 
 const AddProduct = () => {
   viewPermission('product');
@@ -60,7 +59,7 @@ const AddProduct = () => {
         setProd_long_desc(data?.data?.prod_long_desc);
         setDiscount(s => {
           const n = data?.data?.discount_type?.map(item => ({
-            id: new Date().getTime(),
+            id: item.id,
             customer_group_id: item.id,
             discount_quantity: item.discount_quantity,
             discount_priority: item.discount_priority,
@@ -72,7 +71,6 @@ const AddProduct = () => {
         });
 
         setAttributesTableData(s => {
-          // console.log(data?.data?.prod_attributes);
           const n = data?.data?.prod_attributes?.map(item => ({
             id: item.id,
             attr_group_id: item.attribute_data?.attribute_group?.id,
@@ -84,7 +82,6 @@ const AddProduct = () => {
           return n;
         });
         setSelectedPartsOfProducts(s => {
-          // console.log(data?.data?.part_of_products);
           const n = data?.data?.part_of_products?.map(item => ({
             label: item.part_product.prod_name,
             value: item.part_product.id,
@@ -94,7 +91,6 @@ const AddProduct = () => {
             sku: item.part_product.prod_sku,
             quantity: item.prod_quantity,
           }));
-          // console.log(n)
           return n;
         });
         setFeaturesImage(state => {
@@ -121,9 +117,6 @@ const AddProduct = () => {
           is_sale: data?.data.is_sale,
           brand_id: data?.data?.brand?.id,
           prod_category: data?.data?.category?.id,
-          dimension_class: data?.data?.dimensions?.dimension_class || 'Inch',
-          // prod_weight: data?.data?.prod_weight || '',
-          // prod_weight_class: data?.data?.prod_weight_class || 'Pound',
           prod_outofstock_status: data?.data?.productavailablitystatus?.id,
           prod_regular_price: data?.data?.prod_regular_price || '',
           prod_sale_price: data?.data?.prod_sale_price || '',
@@ -168,6 +161,8 @@ const AddProduct = () => {
   const [productcondition, setProductCondition] = useState({ data: [], loading: true, error: '' });
   const [representative, setRepresentative] = useState({ data: [], loading: true, error: '' });
   const [availabilitystatus, setAvailabilityStatus] = useState({ data: [], loading: true, error: '' });
+  const [dimensionClassList, setDimensionClassList] = useState({ data: [], loading: true, error: '' });
+  const [weightClassList, setWeightClassList] = useState({ data: [], loading: true, error: '' });
   const [categories, setCategories] = useState([]);
   const [relatedProducts, setRelatedProducts] = useState([]);
   const onManufactureSelect = (val, item) => {
@@ -320,14 +315,58 @@ const AddProduct = () => {
         setAvailabilityStatus(s => ({ ...s, loading: false }));
       });
 
+    //////////////////////////////////
+    apolloClient
+      .query({
+        query: utilityQuery.GET_WEIGHT_CLASS_LIST,
+        context: {
+          headers: {
+            TENANTID: process.env.REACT_APP_TENANTID,
+            Authorization: Cookies.get('psp_t'),
+          },
+        },
+      })
+      .then(res => {
+        const data = res?.data?.getWeightClassList;
+        setWeightClassList(data)
+      })
+      .catch(err => {
+        setWeightClassList(s => ({ ...s, error: 'Something went Wrong.!! ' }));
+      })
+      .finally(() => {
+        setWeightClassList(s => ({ ...s, loading: false }));
+      });
+
+    //////////////////////////////////
+    apolloClient
+      .query({
+        query: utilityQuery.GET_DIMENSION_CLASS_LIST,
+        context: {
+          headers: {
+            TENANTID: process.env.REACT_APP_TENANTID,
+            Authorization: Cookies.get('psp_t'),
+          },
+        },
+      })
+      .then(res => {
+        const data = res?.data?.getDimensionClassList;
+        setDimensionClassList(data)
+      })
+      .catch(err => {
+        setDimensionClassList(s => ({ ...s, error: 'Something went Wrong.!! ' }));
+      })
+      .finally(() => {
+        setDimensionClassList(s => ({ ...s, loading: false }));
+      });
+
   }, [singleProduct]);
 
   // ================= 3.for links tab END =================
 
   // ================= 4.for Specification tab START =================
   const [dimensions, setDimensions] = useState({});
+  const [weights, setWeights] = useState({});
   // ================= 4.for Specification tab END =================
-
   // ================= 6.for Attribute tab START =================
   const initalData = [
     {
@@ -394,18 +433,15 @@ const AddProduct = () => {
 
   const handleSubmit = () => {
     const values = form.getFieldsValue(true);
-    // console.log(values)
-    const { dimension_class,
+
+    const {
       prod_regular_price,
       extended_warranty_value,
       prod_sale_price,
       cost,
-      // prod_weight,
-      // prod_weight_class,
       ...rest } = values;
     let isAttribute = true;
     let isAttrCorrect = true;
-    console.log(attributesTableData)
     const product_attributes = attributesTableData.map(item => {
       // TODO: show warning for missing value
       const { id, ...attributes } = item;
@@ -483,14 +519,11 @@ const AddProduct = () => {
       prod_long_desc,
       related_product,
       prod_status,
-      // is_sale,
       partof_product,
       taxable: isTaxable,
       prod_condition: selectedConditionID,
       product_rep: selectedProductRepID,
       prod_outofstock_status: selectedavailabilitystatusID
-      // prod_thumbnail,
-      // prod_gallery,
     };
 
     if (prod_regular_price) {
@@ -511,22 +544,11 @@ const AddProduct = () => {
     if (isDiscount) {
       data.discount_type = discount_type;
     }
-    // if (prod_weight) {
-    //   data.prod_weight = prod_weight;
-    //   data.prod_weight_class = prod_weight_class;
-    // }
-    const { height, length, width } = dimensions;
-    if (height || length || width) {
-      let dimensions = { dimension_class };
-      if (height) {
-        dimensions.height = height;
-      }
-      if (length) {
-        dimensions.length = length;
-      }
-      if (width) {
-        dimensions.width = width;
-      }
+    if (weights) {
+      data.weight = weights
+    }
+
+    if (dimensions) {
       data.dimensions = dimensions;
     }
 
@@ -666,7 +688,7 @@ const AddProduct = () => {
                   }}
                   labelCol={{ span: 4 }}
                   initialValues={
-                    params.id ? {
+                    params.id && {
                       prod_name: singleProduct.data.prod_name,
                       prod_short_desc: singleProduct.data.prod_short_desc,
                       prod_meta_title: singleProduct.data.prod_meta_title,
@@ -681,9 +703,6 @@ const AddProduct = () => {
                       product_rep: singleProduct.data?.representative?.id || '',
                       prod_outofstock_status: singleProduct?.data?.productavailablitystatus?.id,
                       prod_category: singleProduct.data?.category?.id,
-                      dimension_class: singleProduct.data?.dimensions?.dimension_class || '',
-                      // prod_weight: singleProduct.data?.prod_weight || '',
-                      // prod_weight_class: singleProduct.data?.prod_weight_class || '',
                       prod_regular_price: singleProduct.data?.prod_regular_price || 0,
                       prod_sale_price: singleProduct.data?.prod_sale_price || 0,
                       cost: singleProduct.data?.cost || 0,
@@ -693,10 +712,6 @@ const AddProduct = () => {
                       hs_code: singleProduct.data?.hs_code || '',
                       product_rank: singleProduct.data?.product_rank || '',
                       mfg_build_part_number: singleProduct.data?.mfg_build_part_number || '',
-                    } : {
-                      dimension_class: 'Inch',
-                      // prod_weight_class: 'Pound',
-                      prod_outofstock_status: 'In Stock',
                     }
                   }
                 >
@@ -897,7 +912,7 @@ const AddProduct = () => {
                                 <Row>
                                   <Col span={12}>
                                     <Select
-                                      defaultValue={`${singleProduct?.data?.representative?.first_name} ${singleProduct?.data?.representative?.last_name}`}
+                                      defaultValue={singleProduct.data.representative ? `${singleProduct?.data?.representative?.first_name} ${singleProduct?.data?.representative?.last_name}` : null}
                                       placeholder={representative.loading ? 'Loading...' : 'Select a Product Representative'}
                                       options={representative?.data?.map(item => ({
                                         label: item.first_name + ' ' + item.last_name,
@@ -982,7 +997,7 @@ const AddProduct = () => {
                         <Col span={24}>
                           <Form.Item
                             name="prod_category"
-                            initialValue={selectedProdCategory}
+                            // defaultValue={selectedProdCategory}
                             rules={[{ required: true, message: 'Please Select a Category' }]}
                             label="Categories"
                           >
@@ -1041,10 +1056,11 @@ const AddProduct = () => {
                       </Row>
 
                     </Tabs.TabPane>
-                    {/* <Tabs.TabPane tab="Specifications" key="Specifications">
+                    <Tabs.TabPane tab="Specifications" key="Specifications">
                       <Row gutter={25}>
                         <Col span={24}>
                           <Form.Item
+                            rules={dimensions ? [{ required: true, message: 'Please Fill All Dimensions Correcty' }] : []}
                             label={
                               <p>
                                 Dimensions <br /> (L x W x H)
@@ -1053,10 +1069,10 @@ const AddProduct = () => {
                           >
                             <Input.Group compact>
                               <Input
-                                type="number"
-                                style={{ width: '20%' }}
+                                name='length'
+                                style={{ width: '10%' }}
                                 placeholder="Length"
-                                onBlur={e => setDimensions(state => ({ ...state, length: parseFloat(e.target.value) }))}
+                                onBlur={e => setDimensions(state => ({ ...state, length: e.target.value }))}
                                 defaultValue={
                                   !params.id
                                     ? ''
@@ -1066,10 +1082,10 @@ const AddProduct = () => {
                                 }
                               />
                               <Input
-                                type="number"
-                                style={{ width: '20%' }}
+                                name='width'
+                                style={{ width: '10%' }}
                                 placeholder="Width"
-                                onBlur={e => setDimensions(state => ({ ...state, width: parseFloat(e.target.value) }))}
+                                onBlur={e => setDimensions(state => ({ ...state, width: e.target.value }))}
                                 defaultValue={
                                   !params.id
                                     ? ''
@@ -1079,10 +1095,10 @@ const AddProduct = () => {
                                 }
                               />
                               <Input
-                                type="number"
-                                style={{ width: '20%' }}
+                                name='height'
+                                style={{ width: '10%' }}
                                 placeholder="Height"
-                                onBlur={e => setDimensions(state => ({ ...state, height: parseFloat(e.target.value) }))}
+                                onBlur={e => setDimensions(state => ({ ...state, height: e.target.value }))}
                                 defaultValue={
                                   !params.id
                                     ? ''
@@ -1099,7 +1115,7 @@ const AddProduct = () => {
                       <Row gutter={25}>
                         <Col span={24}>
                           <Form.Item
-                            name="dimension_class"
+                            rules={dimensions ? [{ required: true, message: 'Please Fill All Dimensions Correcty' }] : []}
                             label={
                               <p>
                                 Dimensions <br />
@@ -1108,17 +1124,16 @@ const AddProduct = () => {
                             }
                           >
                             <Row>
-                              <Col span={7}>
-                                <Select style={{ height: '3.5em' }} placeholder="Dimension Class">
-                                  <Option key={1} value="Centimeter">
-                                    Centimeter
-                                  </Option>
-                                  <Option key={2} value="Millimeter">
-                                    Millimeter
-                                  </Option>
-                                  <Option key={3} value="Inch">
-                                    Inch
-                                  </Option>
+                              <Col span={5}>
+                                <Select style={{ height: '3.5em' }} placeholder="Dimension Class"
+                                  defaultValue={singleProduct?.data?.dimensions?.dimensionClass?.name}
+                                  options={dimensionClassList?.data?.map(item => ({
+                                    label: item.name,
+                                    value: item.id
+                                  }))}
+                                  onSelect={(val) => setDimensions(state => ({ ...state, dimension_class_id: val }))}
+                                >
+
                                 </Select>
                               </Col>
                             </Row>
@@ -1127,31 +1142,42 @@ const AddProduct = () => {
                         </Col>
                       </Row>
 
-                      <Form.Item name="prod_weight" label="Weight">
+                      <Form.Item
+                        rules={weights ? [{ required: true, message: 'Please Fill All Weight Field Correcty' }] : []}
+                        name="weight"
+                        label="Weight">
                         <Row>
-                          <Col span={7}>
-                            <Input type="number" placeholder="Weight" />
+                          <Col span={5}>
+                            <Input
+                              style={{ width: '50%' }}
+                              defaultValue={
+                                !params.id
+                                  ? ''
+                                  : singleProduct?.data?.weight?.weight
+                                    ? singleProduct?.data?.weight?.weight
+                                    : ''
+                              }
+                              onBlur={e => setWeights(state => ({ ...state, weight: parseFloat(e.target.value) }))}
+                              type="number"
+                              placeholder="Weight" />
                           </Col>
                         </Row>
                       </Form.Item>
                       <Row gutter={25}>
                         <Col span={24}>
-                          <Form.Item name="prod_weight_class" label="Weight Class">
+                          <Form.Item
+                            rules={weights ? [{ required: true, message: 'Please Fill All Weight Field Correcty' }] : []}
+                            label="Weight Class">
                             <Row>
-                              <Col span={7}>
-                                <Select placeholder="Weight Class">
-                                  <Option key={1} value="Kilogram">
-                                    Kilogram
-                                  </Option>
-                                  <Option key={1} value="Gram">
-                                    Gram
-                                  </Option>
-                                  <Option key={2} value="Pound">
-                                    Pound
-                                  </Option>
-                                  <Option key={3} value="Ounce">
-                                    Ounce
-                                  </Option>
+                              <Col span={5}>
+                                <Select
+                                  placeholder="Weight Class"
+                                  defaultValue={singleProduct?.data?.weight?.weightClass?.name}
+                                  options={weightClassList?.data?.map(item => ({
+                                    label: item.name,
+                                    value: item.id
+                                  }))}
+                                  onSelect={(val) => setWeights(state => ({ ...state, weight_class_id: val }))}>
                                 </Select>
                               </Col>
                             </Row>
@@ -1159,7 +1185,7 @@ const AddProduct = () => {
                         </Col>
                       </Row>
 
-                    </Tabs.TabPane> */}
+                    </Tabs.TabPane>
                     <Tabs.TabPane tab="Stock" key="Stock">
                       <Row gutter={25}>
                         <Col span={24}>
@@ -1274,7 +1300,6 @@ const AddProduct = () => {
                       </Button>
                       <Link to="/admin/products/list">
                         <Button
-                          // className="btn-cancel"
                           type="white"
                           size="large"
                         >

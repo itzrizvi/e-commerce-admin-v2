@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { SearchOutlined } from '@ant-design/icons';
-import { Row, Col, Spin, Input, Table } from 'antd';
+import { Row, Col, Spin, Input, Table, Button, Select, DatePicker } from 'antd';
 import { PageHeader } from '../../../components/page-headers/page-headers';
 import { Main } from '../../styled';
 import { Cards } from '../../../components/cards/frame/cards-frame';
@@ -10,17 +10,30 @@ import apolloClient from '../../../apollo';
 import { quoteQuery } from '../../../apollo/quote';
 import { useSelector } from 'react-redux';
 import Moment from 'react-moment';
+import FeatherIcon from 'feather-icons-react';
+const { RangePicker } = DatePicker;
 import { viewPermission } from '../../../utility/utility';
 import config from '../../../config/config';
 
 const QuoteList = () => {
   viewPermission('quote');
-  const [quote, setQuote] = useState({ data: [], loading: true, error: '' });
+  const [quote, setQuote] = useState({ data: [], loading: false, error: '' });
   const [filteredQuote, setFilteredQuote] = useState([]);
-  const [isFilter, setIsFilter] = useState(false);
+  const [isFilter, setIsFilter] = useState(true);
   const token = useSelector(state => state.auth.token);
+  const [searchText, setSearchText] = useState('');
+  const [backupQuotes, setBackupQuotes] = useState([]);
+  const [searchButton, setSearchButton] = useState(false);
+  const [filterDate, setFilterDate] = useState({
+    status: [],
+    startDate: '',
+    endDate: ''
+  });
 
-  useEffect(() => {
+
+  const searchQuoteAdmin = () => {
+    setQuote(s => ({ ...s, loading: true }));
+    // return
     apolloClient
       .query({
         query: quoteQuery.GET_ALL_QUOTE,
@@ -33,15 +46,17 @@ const QuoteList = () => {
       })
       .then(res => {
         const data = res?.data?.getSubmittedQuoteList;
-        setQuote(s => ({ ...s, data: data?.data, error: '' }));
+        if (!data?.status) return;
+        setBackupQuotes(data?.data);
       })
       .catch(err => {
         setQuote(s => ({ ...s, error: 'Something went Wrong.!! ' }));
       })
       .finally(() => {
         setQuote(s => ({ ...s, loading: false }));
+        setSearchButton(!searchButton)
       });
-  }, []);
+  }
 
 
   const columns = [
@@ -74,7 +89,7 @@ const QuoteList = () => {
       dataIndex: 'status',
       key: 'status',
       align: 'right',
-      width: 100, 
+      width: 100,
       filters: [
         {
           text: 'New',
@@ -95,7 +110,7 @@ const QuoteList = () => {
       ],
       onFilter: (value, record) => record.status === value,
       sorter: (a, b) => a.status - b.status,
-      render: (text) => text.toUpperCase() 
+      render: (text) => text.toUpperCase()
     },
     {
       title: 'Note',
@@ -131,19 +146,57 @@ const QuoteList = () => {
     },
   ];
 
-  const onChangeSearch = e => {
-    const value = e.target.value;
-    setIsFilter(value);
-    setFilteredQuote(
-      quote.data.filter(quote =>
-        (quote?.quotedby?.email + quote?.id + quote?.status + quote?.grand_total + quote?.note).toLowerCase().includes(value.toLowerCase()),
-      ),
-    );
-  };
+  ////////////////////////
+  const quoteStatus = [
+    'submitted',
+    'in_progress',
+    'new',
+    'received',
+    'save'
+  ]
+
+
+  // All filter
+  useEffect(() => {
+    if (quote.loading) return;
+    let filteredData = backupQuotes;
+    if (searchText) {
+      filteredData = filteredData.filter(quote =>
+        (quote?.quotedby.email).toLowerCase().includes(searchText.toLowerCase()),
+      );
+    }
+    if (filterDate.startDate) {
+      const startDate = new Date(filterDate.startDate).valueOf();
+      const endDate = new Date(filterDate.endDate).valueOf();
+      filteredData = filteredData.filter(quote => {
+        const creeatedAt = parseInt(quote.createdAt);
+        const c1 = creeatedAt >= startDate;
+        const c2 = creeatedAt <= endDate;
+        return c1 && c2;
+      });
+    }
+
+    if (filterDate.status.length) {
+      filteredData = filteredData.filter(quote => filterDate.status.includes(quote.status));
+    }
+
+    setFilteredQuote(filteredData);
+  }, [searchButton]);
+
 
   return (
     <>
-      <PageHeader title="Quote List" />
+      <PageHeader
+        title="Quote List"
+        buttons={[
+          <div key="1" className="page-header-actions">
+            <Button size="small" type="white" onClick={() => setIsFilter(state => !state)}>
+              <FeatherIcon icon="filter" />
+              Filter
+            </Button>
+          </div>,
+        ]}
+      />
       <Main>
         <Row gutter={25}>
           <Col sm={24} xs={24}>
@@ -156,9 +209,67 @@ const QuoteList = () => {
                 <p>{quote.error}</p>
               ) : (
                 <>
-                  <Input placeholder="Search in Quote..." prefix={<SearchOutlined />} onChange={onChangeSearch} />
+                  <Row gutter={25}>
+                    <Col span={18}>
+                      <Input
+                        placeholder="Search Quotes..."
+                        prefix={<SearchOutlined />}
+                        onChange={e => {
+                          const value = e.target.value;
+                          setSearchText(value);
+                        }}
+                      />
+                    </Col>
+                    <Col span={6}>
+                      <Button
+                        size="large"
+                        type="primary"
+                        onClick={searchQuoteAdmin}
+                      >
+                        Search
+                      </Button>
+                    </Col>
+                  </Row>
                   <br />
-                  <br />
+                  {isFilter && (
+                    <div style={{ marginBottom: '2.5em' }}>
+                      <Row gutter={16}>
+                        <Col span={8}>
+                          Status: <br />
+                          <Select
+                            style={{ width: '100%' }}
+                            placeholder="Select status"
+                            size="middle"
+                            mode="multiple"
+                            onChange={val => {
+                              setFilterDate(s => ({ ...s, status: val }));
+                            }}
+                            options={quoteStatus.map(item => ({
+                              label: item.toUpperCase(),
+                              value: item,
+                            }))}
+                          />
+                        </Col>
+
+                        <Col span={8}>
+                          Date: <br />
+                          <RangePicker
+                            style={{ height: '40px', width: '100%' }}
+                            size="middle"
+                            onChange={val => {
+                              setFilterDate(s => {
+                                return {
+                                  ...s,
+                                  startDate: val ? val[0]?._d : null,
+                                  endDate: val ? val[1]?._d : null,
+                                };
+                              });
+                            }}
+                          />
+                        </Col>
+                      </Row>
+                    </div>
+                  )}
 
                   <span className={'psp_list'}>
                     <Table
@@ -166,12 +277,12 @@ const QuoteList = () => {
                       columns={columns}
                       pagination={{
                         defaultPageSize: config.QUOTE_PER_PAGE,
-                        total: isFilter ? quote?.data?.length : quote?.data?.length,
+                        total: filteredQuote.length,
                         showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`,
                       }}
                       rowKey={'id'}
                       size="small"
-                      dataSource={isFilter ? filteredQuote : quote.data}
+                      dataSource={filteredQuote}
                       rowClassName={(record, index) => (index % 2 === 0 ? '' : 'altTableClass')}
                     />
                   </span>

@@ -1,4 +1,4 @@
-import { AutoComplete, Button, Input, Select, Spin, Table, Upload } from 'antd';
+import { Button, Input, Select, Table, Upload } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { UploadOutlined } from '@ant-design/icons';
 import FeatherIcon from 'feather-icons-react';
@@ -97,7 +97,6 @@ const AttributeTab = ({ attributesTableData, setAttributesTableData }) => {
             width: 200,
             render: (val, record, index) => <Select
                 style={{ width: "100%" }}
-                // disabled={!selectedGroup.value}
                 defaultValue={val}
                 placeholder={attributeGroups.isLoading ? 'Loading...'
                     : "Select Attribute..."
