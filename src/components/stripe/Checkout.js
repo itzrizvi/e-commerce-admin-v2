@@ -43,13 +43,13 @@ export default function Checkout({
   finalPayment,
   clientSecret,
   setClientSecret,
+  cardHolderName,
+  setCardHolderName,
 }) {
   const stripe = useStripe();
   const elements = useElements();
   const options = useOptions();
-  const [form] = Form.useForm();
   const token = useSelector(state => state.auth.token);
-  const [cardHolderName, setCardHolderName] = useState('');
 
   useEffect(() => {
     paymentValidateCard.current = paymentValidateCardChild;
@@ -102,11 +102,23 @@ export default function Checkout({
     });
   };
 
+  function recreateNode(el) {
+    if (el) {
+      var newEl = el.cloneNode(false);
+      while (el.hasChildNodes()) newEl.appendChild(el.firstChild);
+      el.parentNode.replaceChild(newEl, el);
+    }
+  }
+
+  useEffect(() => {
+    recreateNode(document.querySelector('.creditcard'));
+  }, []);
+
   return (
     <>
       <Row gutter={25}>
         <Col span={24}>
-          <Form form={form} layout="horizontal" className="stripe-form">
+          <Form layout="horizontal" className="stripe-form">
             <Form.Item name="card_holder" label="Card Holder">
               <Input placeholder="Card Holder Name" onChange={e => setCardHolderName(e.target.value)} />
             </Form.Item>

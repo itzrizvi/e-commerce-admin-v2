@@ -92,6 +92,7 @@ const AddOrder = () => {
   const [waitNext, setWaitNext] = useState(false);
   const [shippingMethodAccountList, setShippingMethodAccountList] = useState([]);
   const [clientSecret, setClientSecret] = useState(null);
+  const [cardHolderName, setCardHolderName] = useState("");
 
   // Stripe Code
   const stripePromise = useMemo(() => loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY), []);
@@ -193,13 +194,14 @@ const AddOrder = () => {
     if (!form_data.customer_id) return toast.error('Please Select Customer.');
     if (!form_data.payment_id) return toast.error('Please Select Payment Method.');
     if (!form_data.shipping_method_id) return toast.error('Please Select Shipping Method.');
-    if (form_data.tax_exempt && !image) return toast.error('Please Upload Text Exempt File.');
+    if (form_data?.tax_exempt && !image) return toast.error('Please Upload Text Exempt File.');
     setIsLoading(true);
     apolloUploadClient
       .mutate({
         mutation: orderQuery.CREATE_ORDER,
         variables: {
           data: {
+            tax_exempt: !form_data?.tax_exempt ? false : true,
             ...form_data,
             coupon_id: selctedCouponCode,
             taxexempt_file: image,
@@ -244,6 +246,7 @@ const AddOrder = () => {
                       order_id: data?.id,
                       provider_id: selectedPaymentMethod?.id,
                       user_id: selectedCustomer?.id,
+                      card_holder: cardHolderName,
                     },
                   },
                   context: {
@@ -1119,6 +1122,9 @@ const AddOrder = () => {
                                   {paymentMethod.map(item => (
                                     <Radio
                                       key={item?.id}
+                                      className={selectedPaymentMethod?.name
+                                        ?.toLowerCase()
+                                        .replaceAll(" ", "")}
                                       style={{
                                         width: '100%',
                                         border: '1px solid #f0f0f0',
@@ -1149,6 +1155,8 @@ const AddOrder = () => {
                                             paymentValidateCard={paymentValidateCard}
                                             clientSecret={clientSecret}
                                             setClientSecret={setClientSecret}
+                                            cardHolderName={cardHolderName}
+                                            setCardHolderName={setCardHolderName}
                                           />
                                         )}
                                     </Radio>
@@ -1243,7 +1251,7 @@ const AddOrder = () => {
                                   <Form.Item name="note" label="Note">
                                     <Input.TextArea placeholder="Note" />
                                   </Form.Item>
-                                  <Form.Item name="tax_exempt" label="Tax Exempt">
+                                  <Form.Item name="tax_exempt" defaultValue={false} label="Tax Exempt">
                                     <Switch size="small" defaultChecked={textExempt} onChange={e => setTextExempt(e)} />
                                   </Form.Item>
                                   {textExempt && (
