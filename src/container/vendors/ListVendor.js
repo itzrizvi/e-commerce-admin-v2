@@ -9,9 +9,8 @@ import { Link } from 'react-router-dom';
 import FontAwesome from 'react-fontawesome';
 import { SearchOutlined } from '@ant-design/icons';
 import config from '../../config/config';
-import apolloClient, { customerMutation, customerQuery, vendorQuery } from '../../utility/apollo';
+import apolloClient, { customerMutation, vendorQuery } from '../../utility/apollo';
 import Cookies from 'js-cookie';
-import { toast } from 'react-toastify';
 import { viewPermission } from '../../utility/utility';
 
 const ListVendor = () => {
@@ -42,12 +41,11 @@ const ListVendor = () => {
       })
       .then(res => {
         const data = res?.data?.updateCustomerGroup;
-        if (!data.status) return toast.error(data.message);
-        toast.success(`${record.customer_group_name} Group Status Updated successfully`);
+        if (!data.status) return setMessage({ type: 'error', message: data.message });
+        setMessage({ type: 'success', message: `${record.customer_group_name} Group Status Updated successfully` });
       })
       .catch(err => {
         console.log('got error on updateStatus', err);
-        return toast.error('Something Went wrong !!');
       });
   };
 
@@ -126,10 +124,8 @@ const ListVendor = () => {
       align: 'right',
       render: (text, record) => (
         <>
-          <Link to={`/admin/vendor/add?id=${record.id}`}>
-            {/* <Button size="default" type="white" title='Edit'> */}
+          <Link to={`/admin/vendor/edit/${record.id}`}>
             <FontAwesome name="edit" style={{ margin: '.5em 1em' }} />
-            {/* </Button> */}
           </Link>
         </>
       ),

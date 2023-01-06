@@ -1208,20 +1208,20 @@ export const utilityQuery = {
   `,
   GET_DIMENSION_CLASS_LIST: gql`
     query getDimensionClassList {
-    getDimensionClassList{
-      message
-      status
-      tenant_id
-      data {
-        id
-        name
+      getDimensionClassList {
+        message
+        status
+        tenant_id
+        data {
+          id
+          name
+        }
       }
     }
-  }
   `,
   GET_WEIGHT_CLASS_LIST: gql`
     query getWeightClassList {
-      getWeightClassList{
+      getWeightClassList {
         message
         status
         tenant_id
@@ -1279,6 +1279,14 @@ export const vendorQuery = {
         data {
           id
           contact_person
+          contactPersons {
+            id
+            name
+            email
+            phone
+            fax
+            status
+          }
           company_name
           email
           description

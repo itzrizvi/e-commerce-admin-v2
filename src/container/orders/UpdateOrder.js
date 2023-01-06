@@ -77,6 +77,7 @@ const UpdateOrder = () => {
   const [countries, setCountries] = useState([]);
   const [states, setStates] = useState([]);
   const [shippingMethodAccountList, setShippingMethodAccountList] = useState([]);
+  const [productFound, setProductFound] = useState(true);
 
   useEffect(() => {
     // Load Shipping Method
@@ -284,6 +285,7 @@ const UpdateOrder = () => {
           optionFilterProp="label"
           style={{ width: 400 }}
           onSearch={val => {
+            setProductFound(true);
             if (val.length > 3) {
               apolloClient
                 .query({
@@ -302,6 +304,7 @@ const UpdateOrder = () => {
                 .then(res => {
                   const data = res?.data?.getSearchedProducts;
                   if (!data.status) return;
+                  if (data?.data.length === 0) return setProductFound(false);
                   setProductOption(
                     data.data.map(product => ({
                       label: product?.prod_name,
@@ -767,6 +770,7 @@ const UpdateOrder = () => {
                                     rowKey="id"
                                     rowClassName={(record, index) => (index % 2 === 0 ? '' : 'altTableClass')}
                                   />
+
                                   <div
                                     style={{
                                       display: 'flex',
@@ -776,6 +780,15 @@ const UpdateOrder = () => {
                                       paddingRight: '18px',
                                     }}
                                   >
+                                    {!productFound && (
+                                      <Alert
+                                        style={{ width: '30%', marginBottom: 10, marginRight: 10 }}
+                                        message="Product Not Found!"
+                                        type="info"
+                                        showIcon
+                                        closable
+                                      />
+                                    )}
                                     <Button
                                       onClick={() => {
                                         const new_id = new Date().getTime();
@@ -1178,21 +1191,21 @@ const UpdateOrder = () => {
                   </Col>
                 </Row>
                 <Form.Item
-                  rules={[{ required: true, message: 'Please Enter Address One' }]}
+                  rules={[{ required: true, message: 'Please Enter Address 1' }]}
                   name="address1"
-                  label="Address One"
+                  label="Address 1"
                   style={{ marginBottom: 5 }}
                   initialValue={editSelectedAddress?.address1 ?? ''}
                 >
-                  <Input placeholder="Address One" />
+                  <Input placeholder="Address 1" />
                 </Form.Item>
                 <Form.Item
                   name="address2"
-                  label="Address Two"
+                  label="Address 2"
                   style={{ marginBottom: 5 }}
                   initialValue={editSelectedAddress?.address2}
                 >
-                  <Input placeholder="Address Two" />
+                  <Input placeholder="Address 2" />
                 </Form.Item>
                 <Row gutter={25}>
                   <Col xs={24} md={12}>

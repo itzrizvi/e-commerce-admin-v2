@@ -397,7 +397,7 @@ const AddPO = () => {
                 <Form
                   style={{ width: '100%' }}
                   form={form}
-                  name="addVendor"
+                  name="addPO"
                   onFinish={handleSubmit}
                   onFinishFailed={errorInfo => console.log('form error info:\n', errorInfo)}
                   labelCol={{ span: 4 }}

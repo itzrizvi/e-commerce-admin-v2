@@ -16,6 +16,7 @@ import {
   Modal,
   Badge,
   Divider,
+  Alert,
 } from 'antd';
 import FeatherIcon from 'feather-icons-react';
 import { PageHeader } from '../../components/page-headers/page-headers';
@@ -24,7 +25,6 @@ import { Cards } from '../../components/cards/frame/cards-frame';
 import { Button } from '../../components/buttons/buttons';
 import { Link, useHistory } from 'react-router-dom';
 import apolloClient, { apolloUploadClient, customerQuery } from '../../utility/apollo';
-import { toast } from 'react-toastify';
 import { ellipsis, viewPermission } from '../../utility/utility';
 import { errorImageSrc, renderImage } from '../../utility/images';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
@@ -92,7 +92,11 @@ const AddOrder = () => {
   const [waitNext, setWaitNext] = useState(false);
   const [shippingMethodAccountList, setShippingMethodAccountList] = useState([]);
   const [clientSecret, setClientSecret] = useState(null);
-  const [cardHolderName, setCardHolderName] = useState("");
+  const [cardHolderName, setCardHolderName] = useState('');
+  const [customerFound, setCustomerFound] = useState(true);
+  const [productFound, setProductFound] = useState(true);
+  // Message
+  const [message, setMessage] = useState(null);
 
   // Stripe Code
   const stripePromise = useMemo(() => loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY), []);
@@ -188,13 +192,16 @@ const AddOrder = () => {
   const handleSubmit = () => {
     const form_data = form.getFieldsValue(true);
     const orderProducts = selectedProduct.map(item => ({ product_id: item.id, quantity: item.quantity }));
-    if (orderProducts.length === 0) return toast.error('Please Select at Least One Product.');
-    if (!form_data.billing_address_id) return toast.error('Please Select Billing Address.');
-    if (!form_data.shipping_address_id) return toast.error('Please Select Shipping Address.');
-    if (!form_data.customer_id) return toast.error('Please Select Customer.');
-    if (!form_data.payment_id) return toast.error('Please Select Payment Method.');
-    if (!form_data.shipping_method_id) return toast.error('Please Select Shipping Method.');
-    if (form_data?.tax_exempt && !image) return toast.error('Please Upload Text Exempt File.');
+    if (orderProducts.length === 0)
+      return setMessage({ type: 'error', message: 'Please Select at Least One Product.' });
+    if (!form_data.billing_address_id) return setMessage({ type: 'error', message: 'Please Select Billing Address.' });
+    if (!form_data.shipping_address_id)
+      return setMessage({ type: 'error', message: 'Please Select Shipping Address.' });
+    if (!form_data.customer_id) return setMessage({ type: 'error', message: 'Please Select Customer.' });
+    if (!form_data.payment_id) return setMessage({ type: 'error', message: 'Please Select Payment Method.' });
+    if (!form_data.shipping_method_id) return setMessage({ type: 'error', message: 'Please Select Shipping Method.' });
+    if (form_data?.tax_exempt && !image)
+      return setMessage({ type: 'error', message: 'Please Upload Text Exempt File.' });
     setIsLoading(true);
     apolloUploadClient
       .mutate({
@@ -230,7 +237,7 @@ const AddOrder = () => {
       })
       .then(async res => {
         const data = res?.data?.createOrderByAdmin;
-        if (!data?.status) return toast.error(data?.message);
+        if (!data?.status) return setMessage({ type: 'error', message: data?.message });
         if (selectedPaymentMethod?.name?.toLowerCase() === 'credit card') {
           const cardPayment = await finalPayment.current();
           if (cardPayment.error) {
@@ -259,7 +266,7 @@ const AddOrder = () => {
                 .then(res => {
                   const data = res?.data?.stripePaymentIntentFinalized;
                   if (!data?.status) return;
-                  toast.success(data?.message);
+                  setMessage({ type: 'success', message: data?.message });
                   setTimeout(() => {
                     history.push('/admin/order/list');
                   }, 3000);
@@ -270,14 +277,14 @@ const AddOrder = () => {
             }
           }
         } else {
-          toast.success(data?.message);
+          setMessage({ type: 'success', message: data?.message });
           setTimeout(() => {
             history.push('/admin/order/list');
           }, 3000);
         }
       })
       .catch(err => {
-        toast.error('Something Went wrong !!' + err);
+        setMessage({ type: 'error', message: err });
       })
       .finally(() => setIsLoading(false));
   };
@@ -298,6 +305,7 @@ const AddOrder = () => {
           optionFilterProp="label"
           style={{ width: 400 }}
           onSearch={val => {
+            setProductFound(true);
             if (val.length > 3) {
               apolloClient
                 .query({
@@ -316,6 +324,7 @@ const AddOrder = () => {
                 .then(res => {
                   const data = res?.data?.getSearchedProducts;
                   if (!data.status) return;
+                  if (data?.data.length === 0) return setProductFound(false);
                   setProductOption(
                     data.data.map(product => ({
                       label: product?.prod_name,
@@ -332,7 +341,7 @@ const AddOrder = () => {
             for (const item of selectedProduct) {
               if (item.id === data.id) {
                 setSelectedProduct(prevState => prevState.filter(value => value.id !== lastInitProductId));
-                return toast.info('Duplicate Product Found!');
+                return setMessage({ type: 'warning', message: 'Duplicate Product Found!' });
               }
             }
 
@@ -486,18 +495,19 @@ const AddOrder = () => {
         await form.validateFields(['customer_id']);
       } else if (current === 1) {
         if (selectedProduct.length === 0) {
-          return toast.warn('Please Select at Least One Product.');
+          return setMessage({ type: 'warning', message: 'Please Select at Least One Product.' });
         } else if (selectedProduct.some(item => item.prod_name === '')) {
-          return toast.warn('Please Fill Product Field Properly.');
+          return setMessage({ type: 'warning', message: 'Please Fill Product Field Properly.' });
         }
       } else if (current === 2) {
-        if (!selectedBillingAddress) return toast.warn('Please select billing address');
-        if (!selectedShippingAddress) return toast.warn('Please select shipping address');
+        if (!selectedBillingAddress) return setMessage({ type: 'warning', message: 'Please select billing address.' });
+        if (!selectedShippingAddress)
+          return setMessage({ type: 'warning', message: 'Please select shipping address.' });
       } else if (current === 3) {
         await form.validateFields(['shipping_method_id']);
       } else if (current === 4) {
         if (textExempt && !image) {
-          return toast.warn('Please attach Tax Exempt file.');
+          return setMessage({ type: 'warning', message: 'Please attach Tax Exempt file.' });
         }
       } else if (current === 5) {
         if (selectedPaymentMethod?.name?.toLowerCase() === 'credit card') {
@@ -505,7 +515,7 @@ const AddOrder = () => {
           const createToken = await paymentValidateCard.current();
           if (createToken.error) {
             setWaitNext(false);
-            return toast.error('Invalid Card Details');
+            return setMessage({ type: 'error', message: 'Invalid Card Details.' });
           } else {
             setCreditCardLast4(createToken?.token.card.last4);
             setWaitNext(false);
@@ -553,7 +563,7 @@ const AddOrder = () => {
             }
             setSelectedCouponCode(data?.data?.id);
           } else {
-            toast.error(data.message);
+            setMessage({ type: 'error', message: data.message });
           }
         });
     }
@@ -755,6 +765,17 @@ const AddOrder = () => {
       <PageHeader title={'Add Order'} />
       <Elements stripe={stripePromise}>
         <Main>
+          <Row align="middle" justify="center" style={{ margin: 0, padding: 0 }}>
+            {message && (
+              <Alert
+                style={{ width: '50%', marginBottom: 10 }}
+                message={message?.message}
+                type={message?.type}
+                showIcon
+                closable
+              />
+            )}
+          </Row>
           <Row gutter={25}>
             <Col sm={24} xs={24}>
               <Cards headless>
@@ -811,6 +832,7 @@ const AddOrder = () => {
                                   }}
                                   onSearch={val => {
                                     if (val.length > 3) {
+                                      setCustomerFound(true);
                                       apolloClient
                                         .query({
                                           query: productSchema.GET_SEARCH_CUSTOMER,
@@ -828,7 +850,10 @@ const AddOrder = () => {
                                         })
                                         .then(res => {
                                           const data = res.data.getSearchedCustomers;
-                                          if (!data.status) return toast.error(data.message);
+                                          if (!data.status) return setMessage({ type: 'error', message: data.message });
+                                          if (data.data.length === 0) {
+                                            setCustomerFound(false);
+                                          }
                                           const options = data?.data?.map(item => ({
                                             label: item.email,
                                             value: item.id,
@@ -890,6 +915,7 @@ const AddOrder = () => {
                                   </Paragraph>
                                 </Col>
                               </Row>
+                              {!customerFound && <Alert message="Customer Not Found!" type="info" showIcon closable />}
                             </Col>
                           </Row>
                         )}
@@ -914,6 +940,15 @@ const AddOrder = () => {
                                     paddingRight: '18px',
                                   }}
                                 >
+                                  {!productFound && (
+                                    <Alert
+                                      style={{ width: '30%', marginBottom: 10,  marginRight: 10 }}
+                                      message="Product Not Found!"
+                                      type="info"
+                                      showIcon
+                                      closable
+                                    />
+                                  )}
                                   <Button
                                     onClick={() => {
                                       const new_id = new Date().getTime();
@@ -1122,9 +1157,7 @@ const AddOrder = () => {
                                   {paymentMethod.map(item => (
                                     <Radio
                                       key={item?.id}
-                                      className={selectedPaymentMethod?.name
-                                        ?.toLowerCase()
-                                        .replaceAll(" ", "")}
+                                      className={selectedPaymentMethod?.name?.toLowerCase().replaceAll(' ', '')}
                                       style={{
                                         width: '100%',
                                         border: '1px solid #f0f0f0',
@@ -1497,7 +1530,6 @@ const AddOrder = () => {
                             style={{
                               margin: '0 8px',
                             }}
-                            onClick={() => prev()}
                           >
                             Cancel
                           </Button>
@@ -1586,21 +1618,21 @@ const AddOrder = () => {
                     </Col>
                   </Row>
                   <Form.Item
-                    rules={[{ required: true, message: 'Please Enter Address One' }]}
+                    rules={[{ required: true, message: 'Please Enter Address 1' }]}
                     name="address1"
-                    label="Address One"
+                    label="Address 1"
                     style={{ marginBottom: 5 }}
                     initialValue={editSelectedAddress?.address1 ?? ''}
                   >
-                    <Input placeholder="Address One" />
+                    <Input placeholder="Address 1" />
                   </Form.Item>
                   <Form.Item
                     name="address2"
-                    label="Address Two"
+                    label="Address 2"
                     style={{ marginBottom: 5 }}
                     initialValue={editSelectedAddress?.address2}
                   >
-                    <Input placeholder="Address Two" />
+                    <Input placeholder="Address 2" />
                   </Form.Item>
                   <Row gutter={25}>
                     <Col xs={24} md={12}>

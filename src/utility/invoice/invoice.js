@@ -62,8 +62,8 @@ const Invoice = () => {
 
     const billing = {
         id: 10001,
-        address1: "Address One",
-        address2: "Address Two",
+        address1: "Address 1",
+        address2: "Address 2",
         phone: "0655",
         fax: "ssaa@fjagjf.com",
         email: "test2@gmail.com",
