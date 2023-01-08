@@ -5,7 +5,7 @@ import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
 import { Cards } from '../../components/cards/frame/cards-frame';
 import { Button } from '../../components/buttons/buttons';
-import { SearchOutlined } from '@ant-design/icons';
+import { RetweetOutlined, SearchOutlined } from '@ant-design/icons';
 import { Link } from 'react-router-dom';
 import { viewPermission } from '../../utility/utility';
 import apolloClient, { productQuery, utilityQuery, productMutation } from '../../utility/apollo';
@@ -16,20 +16,19 @@ import { errorImageSrc, renderImage } from '../../utility/images';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
 import { gql } from '@apollo/client';
 import { toast } from 'react-toastify';
+import moment from 'moment';
 const { RangePicker } = DatePicker;
 
 const Products = () => {
   viewPermission('product');
   const [products, setProducts] = useState({ data: [], isLoading: false });
-  const [backupProducts, setBackupProducts] = useState([]);
-  const [filteredProducts, setFilteredProducts] = useState([]);
-  const [searchText, setSearchText] = useState('');
   const [searchButton, setSearchButton] = useState(false);
   const [isFilter, setIsFilter] = useState(true);
   const [categories, setCategories] = useState({ data: [], isLoading: true });
   const [attributes, setAttributes] = useState({ data: [], isLoading: true });
   const [availability, setAvailability] = useState({ data: [], isLoading: true });
   const [conditions, setConditions] = useState({ data: [], isLoading: true });
+  const [dateRange, setChangeDateRange] = useState(null);
   const [filterDate, setFilterDate] = useState({
     availability: [],
     categories: [],
@@ -39,6 +38,7 @@ const Products = () => {
     endDate: '',
     minPrice: '',
     maxPrice: '',
+    searchQuery: ''
   });
 
   // Load Product List
@@ -155,6 +155,19 @@ const Products = () => {
     apolloClient
       .query({
         query: productQuery.GET_PRODUCT_LIST,
+        variables: {
+          query: {
+            searchQuery: filterDate.searchQuery ?? '',
+            availability: filterDate.availability.length ? filterDate.availability : null,
+            attribute: filterDate.attributes.length ? filterDate.attributes : null,
+            category: filterDate.categories.length ? filterDate.categories : null,
+            condition: filterDate.condition.length ? filterDate.condition : null,
+            productEntryStartDate: filterDate.startDate ?? '',
+            productEntryEndDate: filterDate.endDate ?? '',
+            minPrice: parseFloat(filterDate.minPrice) ?? null,
+            maxPrice: parseFloat(filterDate.maxPrice) ?? null
+          }
+        },
         context: {
           headers: {
             TENANTID: process.env.REACT_APP_TENANTID,
@@ -167,7 +180,7 @@ const Products = () => {
         const data = res?.data?.getProductList;
 
         if (!data?.status) return;
-        setBackupProducts(data?.data);
+        setProducts(data);
       })
       .catch(err => {
         setProducts(s => ({ ...s, error: 'Something went Wrong.!! ' }));
@@ -354,53 +367,19 @@ const Products = () => {
     },
   ];
 
-  // All filter
-  useEffect(() => {
-    if (products.isLoading) return;
-    let filteredData = backupProducts;
-    if (searchText) {
-      filteredData = filteredData.filter(prod =>
-        (prod?.prod_name + prod?.prod_sku).toLowerCase().includes(searchText.toLowerCase()),
-      );
-    }
-    if (filterDate.startDate) {
-      const startDate = new Date(filterDate.startDate).valueOf();
-      const endDate = new Date(filterDate.endDate).valueOf();
-      filteredData = filteredData.filter(prod => {
-        const creeatedAt = parseInt(prod.createdAt);
-        const c1 = creeatedAt >= startDate;
-        const c2 = creeatedAt <= endDate;
-        return c1 && c2;
-      });
-    }
 
-    if (filterDate.attributes.length) {
-      filteredData = filteredData.filter(prod => {
-        return filterDate.attributes.find(element => {
-          const attrArray = prod.prod_attributes.map(attr => attr.attribute_data.id);
-          return attrArray.includes(element);
-        });
-      });
+  const onDateRangeChange = dateRange => {
+    if (dateRange) {
+      setFilterDate(s => ({ ...s, startDate: dateRange[0]._d ?? '', endDate: dateRange[1]._d ?? '' }))
+      setChangeDateRange(returnMomentDateRange(dateRange[0], dateRange[1]));
+    } else {
+      setChangeDateRange(null);
     }
+  };
+  const returnMomentDateRange = (start, finish) => {
+    return [moment(start, "YYYY-MM-DD"), moment(finish, "YYYY-MM-DD")];
+  };
 
-    if (filterDate.categories.length) {
-      filteredData = filteredData.filter(prod => filterDate.categories.includes(prod.category.id));
-    }
-    if (filterDate.availability.length) {
-      filteredData = filteredData.filter(prod => filterDate.availability.includes(prod.prod_outofstock_status));
-    }
-    if (filterDate.condition.length) {
-      filteredData = filteredData.filter(prod => filterDate.condition.includes(prod.prod_condition));
-    }
-    if (filterDate.minPrice) {
-      filteredData = filteredData.filter(prod => prod.prod_regular_price >= parseFloat(filterDate.minPrice));
-    }
-    if (filterDate.maxPrice) {
-      filteredData = filteredData.filter(prod => prod.prod_regular_price <= parseFloat(filterDate.maxPrice));
-    }
-
-    setFilteredProducts(filteredData);
-  }, [searchButton]);
 
   return (
     <>
@@ -411,6 +390,23 @@ const Products = () => {
             <Button size="small" type="white" onClick={() => setIsFilter(state => !state)}>
               <FeatherIcon icon="filter" />
               Filter
+            </Button>
+            <Button size="small" type="white" onClick={() => {
+              setChangeDateRange(null)
+              setFilterDate({
+                availability: [],
+                categories: [],
+                condition: [],
+                attributes: [],
+                startDate: '',
+                endDate: '',
+                minPrice: '',
+                maxPrice: '',
+                searchQuery: ''
+              })
+            }}>
+              <RetweetOutlined />
+              Reset Filter
             </Button>
             <Link to="/admin/products/add">
               <Button size="small" title="Add Product" type="primary">
@@ -431,17 +427,19 @@ const Products = () => {
               ) : (
                 <>
                   <Row gutter={25}>
-                    <Col span={18}>
+                    <Col span={15}>
                       <Input
                         placeholder="Search Products..."
                         prefix={<SearchOutlined />}
+                        value={filterDate?.searchQuery}
                         onChange={e => {
+                          e.persist()
                           const value = e.target.value;
-                          setSearchText(value);
+                          setFilterDate(s => ({ ...s, searchQuery: value }));
                         }}
                       />
                     </Col>
-                    <Col span={6}>
+                    <Col span={9}>
                       <Button size="large" type="primary" onClick={searchProductAdmin}>
                         Search
                       </Button>
@@ -460,12 +458,14 @@ const Products = () => {
                             placeholder="Select status"
                             size="middle"
                             mode="multiple"
-                            onChange={val => {
-                              setFilterDate(s => ({ ...s, availability: val }));
+                            value={filterDate?.availability}
+                            onDeselect={(val) => setFilterDate(prev => ({ ...prev, availability: prev.availability.filter(item => item !== val) }))}
+                            onSelect={val => {
+                              setFilterDate(s => ({ ...s, availability: filterDate.availability.concat(parseInt(val)) }));
                             }}
                             options={availability.data.map(item => ({
                               label: item.name,
-                              value: item.name,
+                              value: item.id,
                             }))}
                           />
                         </Col>
@@ -477,8 +477,10 @@ const Products = () => {
                             size="middle"
                             mode="multiple"
                             optionFilterProp="label"
-                            onChange={val => {
-                              setFilterDate(s => ({ ...s, categories: val }));
+                            value={filterDate?.categories}
+                            onDeselect={(val) => setFilterDate(prev => ({ ...prev, categories: prev.categories.filter(item => item !== val) }))}
+                            onSelect={val => {
+                              setFilterDate(s => ({ ...s, categories: filterDate.categories.concat(parseInt(val)) }));
                             }}
                             options={categories.data.map(item => ({
                               label: item.cat_name,
@@ -492,15 +494,10 @@ const Products = () => {
                           <RangePicker
                             style={{ height: '40px', width: '100%' }}
                             size="small"
-                            onChange={val => {
-                              setFilterDate(s => {
-                                return {
-                                  ...s,
-                                  startDate: val ? val[0]?._d : null,
-                                  endDate: val ? val[1]?._d : null,
-                                };
-                              });
-                            }}
+                            allowClear={true}
+                            picker="date"
+                            value={dateRange !== "" ? dateRange : ""}
+                            onChange={onDateRangeChange}
                           />
                         </Col>
                       </Row>
@@ -512,10 +509,14 @@ const Products = () => {
                             placeholder="Select Condition"
                             size="middle"
                             mode="multiple"
-                            onChange={value => setFilterDate(s => ({ ...s, condition: value }))}
+                            value={filterDate?.condition}
+                            onDeselect={(val) => setFilterDate(prev => ({ ...prev, condition: prev.condition.filter(item => item !== val) }))}
+                            onSelect={val => {
+                              setFilterDate(s => ({ ...s, condition: filterDate.condition.concat(parseInt(val)) }));
+                            }}
                             options={conditions.data.map(item => ({
                               label: item.name,
-                              value: item.name,
+                              value: item.id,
                             }))}
                           />
                         </Col>
@@ -526,7 +527,11 @@ const Products = () => {
                             placeholder={attributes.isLoading ? 'Loading..' : 'Select Attribute'}
                             size="middle"
                             mode="multiple"
-                            onChange={value => setFilterDate(s => ({ ...s, attributes: value }))}
+                            value={filterDate?.attributes}
+                            onDeselect={(val) => setFilterDate(prev => ({ ...prev, attributes: prev.attributes.filter(item => item !== val) }))}
+                            onSelect={val => {
+                              setFilterDate(s => ({ ...s, attributes: filterDate.attributes.concat(parseInt(val)) }));
+                            }}
                             options={attributes.data.map(item => ({
                               label: item.attribute_name,
                               value: item.id,
@@ -538,18 +543,22 @@ const Products = () => {
                           Price: <br />
                           <Input.Group compact size="default">
                             <Input
-                              type="number"
+                              type="text"
                               placeholder="Min"
                               style={{ width: '50%' }}
-                              onBlur={e => {
+                              value={filterDate?.minPrice ?? ''}
+                              onChange={e => {
+                                e.persist()
                                 setFilterDate(s => ({ ...s, minPrice: e?.target?.value }));
                               }}
                             />
                             <Input
-                              type="number"
+                              type="text"
                               placeholder="Max"
                               style={{ width: '50%' }}
-                              onBlur={e => {
+                              value={filterDate?.maxPrice ?? ''}
+                              onChange={e => {
+                                e.persist()
                                 setFilterDate(s => ({ ...s, maxPrice: e?.target?.value }));
                               }}
                             />
@@ -565,14 +574,12 @@ const Products = () => {
                       columns={columns}
                       rowKey={'id'}
                       size="small"
-                      // dataSource={searchText ? filteredProducts : products.data}
-                      dataSource={filteredProducts}
+                      dataSource={products.data ? products.data : []}
                       rowClassName={(record, index) => (index % 2 == 0 ? '' : 'altTableClass')}
                       // pagination={false}
                       pagination={{
                         defaultPageSize: config.PRODUCTS_PER_PAGE,
-                        // total: searchText ? filteredProducts.length : products.data.length,
-                        total: filteredProducts.length,
+                        total: products.data ? products.data.length : 0,
                         showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`,
                       }}
                     />

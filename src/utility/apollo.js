@@ -317,8 +317,8 @@ export const productQuery = {
     }
   `,
   GET_PRODUCT_LIST: gql`
-    query getProductList {
-      getProductList {
+    query getProductList($query:ProductListInput) {
+      getProductList(query:$query) {
         message
         status
         data {

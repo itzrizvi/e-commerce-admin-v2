@@ -216,7 +216,7 @@ const Dashboard = () => {
 			key: 'grand_total',
 			align: 'center',
 			width: 40,
-			render: val => `$${val}`,
+			render: val => val ? `$${val}` : '',
 			sorter: (a, b) => (a.grand_total > b.grand_total ? 1 : -1),
 		},
 		{
@@ -226,7 +226,8 @@ const Dashboard = () => {
 			align: 'center',
 			width: 40,
 			render: (text, record) => (
-				<span className={'status-text'}>{<Moment format="DD-MM-YYYY">{parseInt(text)}</Moment>}</span>
+				text && <span className={'status-text'}>{<Moment format="DD-MM-YYYY">{parseInt(text)}</Moment>}</span>
+
 			),
 		}
 	];
