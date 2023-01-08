@@ -183,12 +183,12 @@ const AddAdmin = () => {
           },
         })
         .then(res => {
-          const status = res?.data?.adminUpdate?.status;
-          if (!status) return toast.error(data.message);
+          const data = res?.data?.adminUpdate;
+          if (!data.status) return toast.error(data.message);
           setTimeout(() => {
             history.push('/admin/admin/admins');
           }, 1000);
-          toast.success(`${params.email} user Status updated successfully.`);
+          toast.success(data.message);
         })
         .catch(err => {
           console.log('Error on update admin', err);
@@ -270,9 +270,9 @@ const AddAdmin = () => {
                   initialValues={
                     params.id
                       ? {
-                          first_name: singleUser.data.first_name,
-                          last_name: singleUser.data.last_name,
-                        }
+                        first_name: singleUser.data.first_name,
+                        last_name: singleUser.data.last_name,
+                      }
                       : null
                   }
                 >

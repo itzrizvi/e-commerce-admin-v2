@@ -267,6 +267,32 @@ const QuoteList = () => {
                             }}
                           />
                         </Col>
+
+                        <Col span={8}>
+                          Amount: <br />
+                          <Input
+                            style={{ height: '40px', width: '50%' }}
+                            size="middle"
+                            type="text"
+                            placeholder="Min Amount"
+                          // value={filterDate?.minPrice ?? ''}
+                          // onChange={e => {
+                          //   e.persist()
+                          //   setFilterDate(s => ({ ...s, minPrice: e?.target?.value }));
+                          // }}
+                          />
+                          <Input
+                            style={{ height: '40px', width: '50%' }}
+                            size="middle"
+                            type="text"
+                            placeholder="Max Ampunt"
+                          // value={filterDate?.maxPrice ?? ''}
+                          // onChange={e => {
+                          //   e.persist()
+                          //   setFilterDate(s => ({ ...s, maxPrice: e?.target?.value }));
+                          // }}
+                          />
+                        </Col>
                       </Row>
                     </div>
                   )}

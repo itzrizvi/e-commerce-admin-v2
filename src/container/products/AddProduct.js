@@ -910,9 +910,9 @@ const AddProduct = () => {
                                 label="Product Representative"
                               >
                                 <Row>
-                                  <Col span={12}>
+                                  <Col span={20}>
                                     <Select
-                                      defaultValue={singleProduct.data.representative ? `${singleProduct?.data?.representative?.first_name} ${singleProduct?.data?.representative?.last_name}` : null}
+                                      defaultValue={singleProduct.data.representative ? `${singleProduct?.data?.representative?.first_name} ${singleProduct?.data?.representative?.last_name} - ${singleProduct?.data?.representative?.roles[0].role}` : null}
                                       placeholder={representative.loading ? 'Loading...' : 'Select a Product Representative'}
                                       options={representative?.data?.map(item => ({
                                         label: item.first_name + ' ' + item.last_name,
@@ -920,12 +920,6 @@ const AddProduct = () => {
                                       }))}
                                       onSelect={(val) => setSelectedProductRepID(val)}
                                     />
-
-                                    <ul>
-                                      {singleProduct?.data?.representative?.roles.map((item) =>
-                                        <li key={item.id}>{item.role}</li>
-                                      )}
-                                    </ul>
 
                                   </Col>
                                 </Row>
