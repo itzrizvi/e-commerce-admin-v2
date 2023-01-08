@@ -40,7 +40,6 @@ const AddVendor = () => {
   const [personType, setPersonType] = useState('Add');
   const token = useSelector(state => state.auth.token);
   const [personCheckBox, setPersonCheckBox] = useState(true);
-  const [selectedPersonID, setSelectedPersonID] = useState(null);
 
   /* -------------------------- Step From Data Start -------------------------- */
   const steps = [
@@ -268,20 +267,8 @@ const AddVendor = () => {
   const handleContactPerson = async () => {
     await personForm.validateFields(['email', 'name', 'phone']);
     const values = personForm.getFieldsValue();
-    let newData;
-    if (personType.toLowerCase() === 'add') {
-      newData = { ...values, id: new Date().getTime(), isNew: true };
-      setContactPersons(prev => [...prev, newData]);
-    } else {
-      setContactPersons(prev =>
-        prev.map(item => {
-          if (item.id === selectedPersonID) {
-            return { ...values, id: selectedPersonID, isNew: false };
-          }
-          return item;
-        }),
-      );
-    }
+    const newData = { ...values, id: new Date().getTime(), isNew: true };
+    setContactPersons(prev => [...prev, newData]);
     setPersonModalOpen(false);
     personForm.resetFields();
   };
@@ -296,23 +283,6 @@ const AddVendor = () => {
     });
     setPersonType('Add');
     setPersonCheckBox(true);
-    setPersonModalOpen(true);
-  };
-
-  const handleEditPerson = id => {
-    setSelectedPersonID(id);
-    const person = contactPersons.filter(item => item.id === id);
-    if (person) {
-      personForm.setFieldsValue({
-        name: person[0].name,
-        email: person[0].email,
-        status: person[0].status,
-        phone: person[0].phone,
-        fax: person[0].fax,
-      });
-    }
-    setPersonType('Update');
-    setPersonCheckBox(person[0].status);
     setPersonModalOpen(true);
   };
 
@@ -440,7 +410,7 @@ const AddVendor = () => {
                             <Col span={24}>
                               <Button
                                 size="small"
-                                style={{ float: 'right', marginBottom: 20, marginTop: -20 }}
+                                style={{ float: 'right', marginTop: -20 }}
                                 title="Add Person"
                                 htmlType="button"
                                 type="primary"
@@ -452,7 +422,7 @@ const AddVendor = () => {
                           </Row>
                           <Row gutter={25}>
                             {contactPersons.map(item => (
-                              <Col key={item.id} sm={24} md={12} lg={8}>
+                              <Col key={item.id} sm={24} md={12} lg={8} style={{marginTop: 20}}>
                                 <Card style={{ border: '1px solid #ddd' }}>
                                   <Typography.Paragraph>{item.name}</Typography.Paragraph>
                                   <Typography.Paragraph>{item.email}</Typography.Paragraph>

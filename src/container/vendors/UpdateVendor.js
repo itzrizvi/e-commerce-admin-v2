@@ -304,20 +304,14 @@ const UpdateVendor = () => {
   const handleContactPerson = async () => {
     await personForm.validateFields(['email', 'name', 'phone']);
     const values = personForm.getFieldsValue();
-    let newData;
-    if (personType.toLowerCase() === 'add') {
-      newData = { ...values, id: new Date().getTime(), isNew: true };
-      setContactPersons(prev => [...prev, newData]);
-    } else {
-      setContactPersons(prev =>
-        prev.map(item => {
-          if (item.id === selectedPersonID) {
-            return { ...values, id: selectedPersonID, isNew: false };
-          }
-          return item;
-        }),
-      );
-    }
+    setContactPersons(prev =>
+      prev.map(item => {
+        if (item.id === selectedPersonID) {
+          return { ...values, id: selectedPersonID, isNew: false };
+        }
+        return item;
+      }),
+    );
     setPersonModalOpen(false);
     personForm.resetFields();
   };

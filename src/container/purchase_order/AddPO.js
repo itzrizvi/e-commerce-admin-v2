@@ -652,7 +652,7 @@ const AddPO = () => {
                   >
                     <Form.Item>
                       <Button loading={isLoading} size="default" htmlType="submit" type="primary" raised>
-                        {isLoading ? 'Processing' : 'Save'}
+                        {isLoading ? 'Processing' : 'Create PO'}
                       </Button>
                       <Link to="/admin/po/list">
                         <Button style={{ marginLeft: 10 }} type="light" size="default">

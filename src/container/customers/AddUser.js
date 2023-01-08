@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Row, Col, Form, Input, Switch, Tabs } from 'antd';
+import { Row, Col, Form, Input, Switch, Tabs, Steps, Alert, Card, Modal, Typography, Badge } from 'antd';
 import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
 import { Cards } from '../../components/cards/frame/cards-frame';
@@ -13,6 +13,16 @@ import { viewPermission } from '../../utility/utility';
 import { customerMutation, customerQuery } from '../../apollo/customer';
 import AddressTable from './AddressTable';
 import { useEffect } from 'react';
+import { contactPersonsSchema } from '../../apollo/contactPerson';
+
+const formItemLayout = {
+  labelCol: {
+    span: 4,
+  },
+  wrapperCol: {
+    span: 18,
+  },
+};
 
 const AddUser = () => {
   viewPermission('customer');
@@ -24,7 +34,14 @@ const AddUser = () => {
   const [operation, setOperation] = useState(false);
   const [user_id, setUserId] = useState(null);
   const [form] = Form.useForm();
+  const [personForm] = Form.useForm();
+  const [personType, setPersonType] = useState('Add');
   const [isError, setIsError] = useState(false);
+  const [current, setCurrent] = useState(0);
+  const [message, setMessage] = useState(null);
+  const [contactPersons, setContactPersons] = useState([]);
+  const [personCheckBox, setPersonCheckBox] = useState(true);
+  const [personModalOpen, setPersonModalOpen] = useState(false);
 
   const initialAddress = {
     id: new Date().getTime(),
@@ -46,7 +63,7 @@ const AddUser = () => {
     // validate billingAddresses.
     const notValidate = billingAddress.find(item => {
       const { id, address1, country, city, state, zip_code } = item;
-      const checkFalse = !(id && address1 && country && city && state && zip_code );
+      const checkFalse = !(id && address1 && country && city && state && zip_code);
       return checkFalse;
     });
     if (notValidate?.id) return toast.warning('Enter Billing Address Correctly!');
@@ -119,52 +136,175 @@ const AddUser = () => {
         };
       });
 
-      ['billing', 'shipping'].forEach(type => {
+      ['person', 'billing', 'shipping'].forEach(type => {
         setIsLoading(true);
-        apolloClient
-          .mutate({
-            mutation:
-              type === 'billing'
-                ? customerMutation.ADD_CUSTOMER_BILLING_ADDRESS
-                : customerMutation.ADD_CUSTOMER_SHIPPING_ADDRESS,
-            variables: {
-              data: {
-                addresses: [...(type === 'billing' ? newBillingAddress : newShippingAddress)],
+        if (type === 'person') {
+          apolloClient
+            .mutate({
+              mutation: contactPersonsSchema.ADD_CONTACT_PERSON,
+              variables: {
+                data: {
+                  ref_id: vendor_id,
+                  type: 'customer',
+                  contact_persons: [
+                    ...contactPersons.map(item => ({
+                      name: item.name,
+                      email: item.email,
+                      phone: item.phone,
+                      fax: item.fax,
+                      status: item.status,
+                    })),
+                  ],
+                },
               },
-            },
-            context: {
-              headers: {
-                TENANTID: process.env.REACT_APP_TENANTID,
-                Authorization: token,
+              context: {
+                headers: {
+                  TENANTID: process.env.REACT_APP_TENANTID,
+                  Authorization: token,
+                },
               },
-            },
-          })
-          .then(res => {
-            const data = res?.data?.updateVendorAddress;
-            if (!data?.status) return;
-          })
-          .catch(err => {
-            setIsError(true);
-          })
-          .finally(res => {
-            setIsLoading(false);
-            if (type === 'shipping') {
-              if (!isError) {
-                toast.success('User Created Successfully.');
-                setTimeout(() => {
-                  history.push('/admin/customers/list');
-                }, [2000]);
+            })
+            .then(res => {
+              const data = res?.data?.createContactPerson;
+              if (!data?.status) return setIsError(true);
+            })
+            .catch(err => {
+              setIsError(true);
+            });
+        } else {
+          apolloClient
+            .mutate({
+              mutation:
+                type === 'billing'
+                  ? customerMutation.ADD_CUSTOMER_BILLING_ADDRESS
+                  : customerMutation.ADD_CUSTOMER_SHIPPING_ADDRESS,
+              variables: {
+                data: {
+                  addresses: [...(type === 'billing' ? newBillingAddress : newShippingAddress)],
+                },
+              },
+              context: {
+                headers: {
+                  TENANTID: process.env.REACT_APP_TENANTID,
+                  Authorization: token,
+                },
+              },
+            })
+            .then(res => {
+              const data = res?.data?.updateVendorAddress;
+              if (!data?.status) return;
+            })
+            .catch(err => {
+              setIsError(true);
+            })
+            .finally(res => {
+              setIsLoading(false);
+              if (type === 'shipping') {
+                if (!isError) {
+                  toast.success('User Created Successfully.');
+                  setTimeout(() => {
+                    history.push('/admin/customers/list');
+                  }, [2000]);
+                }
               }
-            }
-          });
+            });
+        }
       });
     }
   }, [operation, user_id]);
+
+  /* -------------------------- Step From Data Start -------------------------- */
+  const steps = [
+    {
+      title: 'General',
+      percent: 40,
+    },
+    {
+      title: 'Billing Address',
+      percent: 60,
+    },
+    {
+      title: 'Shipping Address',
+      percent: 80,
+    },
+    {
+      title: 'Persons',
+      percent: 100,
+    },
+  ];
+
+  const next = async () => {
+    try {
+      if (current === 0) {
+        await form.validateFields(['first_name', 'last_name', 'email']);
+      } else if (current === 1) {
+        // validate billingAddresses.
+        const notValidate = billingAddress.find(item => {
+          const { id, address1, country, city, state, zip_code, address2 } = item;
+          const checkFalse = !(id && address1 && country && city && state && zip_code && address2);
+          return checkFalse;
+        });
+        if (notValidate?.id) return setMessage({ type: 'warning', message: 'Enter Billing Address Correctly.' });
+      } else if (current === 2) {
+        // validate shippingAddresses.
+        const notValidate1 = shippingAddress.find(item => {
+          const { id, address1, country, city, state, zip_code, address2 } = item;
+          const checkFalse = !(id && address1 && country && city && state && zip_code && address2);
+          return checkFalse;
+        });
+        if (notValidate1?.id) return setMessage({ type: 'warning', message: 'Enter Shipping Address Correctly.' });
+      } else if (current === 3) {
+      }
+      setCurrent(current + 1);
+    } catch {}
+  };
+  const prev = () => {
+    setCurrent(current - 1);
+  };
+  const items = steps.map(item => ({
+    key: item.title,
+    title: item.title,
+    percent: item.percent,
+  }));
+  /* ---------------------------- tep Form Data end --------------------------- */
+
+  const handleContactPerson = async () => {
+    await personForm.validateFields(['email', 'name', 'phone']);
+    const values = personForm.getFieldsValue();
+    const newData = { ...values, id: new Date().getTime(), isNew: true };
+    setContactPersons(prev => [...prev, newData]);
+    setPersonModalOpen(false);
+    personForm.resetFields();
+  };
+
+  const handleAddPerson = () => {
+    personForm.setFieldsValue({
+      name: '',
+      email: '',
+      status: true,
+      phone: '',
+      fax: '',
+    });
+    setPersonType('Add');
+    setPersonCheckBox(true);
+    setPersonModalOpen(true);
+  };
 
   return (
     <>
       <PageHeader title="Add Customer" />
       <Main>
+        <Row align="middle" justify="center" style={{ margin: 0, padding: 0 }}>
+          {message && (
+            <Alert
+              style={{ width: '50%', marginBottom: 10 }}
+              message={message?.message}
+              type={message?.type}
+              showIcon
+              closable
+            />
+          )}
+        </Row>
         <Row gutter={25}>
           <Col sm={24} xs={24}>
             <Cards headless>
@@ -175,87 +315,218 @@ const AddUser = () => {
                 onFinish={handleSubmit}
                 onFinishFailed={errorInfo => console.log('form error info:\n', errorInfo)}
                 labelCol={{ span: 4 }}
-                // wrapperCol={{ span: 14 }}
-                // layout={'vertical'}
               >
-                <Tabs>
-                  <Tabs.TabPane tab="Information" key="general">
-                    <Form.Item
-                      rules={[{ required: true, max: maxLength, message: 'Please enter First Name' }]}
-                      name="first_name"
-                      label="First Name"
-                    >
-                      <Input placeholder="Enter First Name" />
-                    </Form.Item>
-                    <Form.Item
-                      rules={[{ required: true, message: 'Please enter Last Name' }]}
-                      name="last_name"
-                      label="Last Name"
-                    >
-                      <Input placeholder="Enter Last Name" />
-                    </Form.Item>
-                    <Form.Item
-                      rules={[
-                        {
-                          required: true,
-                          message: 'Please enter an email',
-                          max: maxLength,
-                        },
-                      ]}
-                      name="email"
-                      label="Email"
-                    >
-                      <Input type="email" placeholder="Enter Email Address" />
-                    </Form.Item>
-
-                    <Form.Item label="User Status">
-                      <Switch checked={userStatus} onChange={checked => setUserStatus(checked)} />
-                    </Form.Item>
-                  </Tabs.TabPane>
-
-                  <Tabs.TabPane tab="Shipping Address" key="sAddress">
-                    <AddressTable
-                      initialData={initialAddress}
-                      addresses={shippingAddress}
-                      setAddresses={setShippingAddress}
-                      defaultAddressId={defaultShippingId}
-                      setDefaultAddressId={setDefaultShippingId}
-                    />
-                  </Tabs.TabPane>
-
-                  <Tabs.TabPane tab="Billing Address" key="bAddress">
-                    <AddressTable
-                      initialData={initialAddress}
-                      addresses={billingAddress}
-                      setAddresses={setBillingAddress}
-                      defaultAddressId={defaultBillingId}
-                      setDefaultAddressId={setDefaultBillingId}
-                    />
-                  </Tabs.TabPane>
-                </Tabs>
-
-                <div
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'flex-end',
-                    marginTop: '3em',
-                  }}
-                >
-                  <Form.Item>
-                    <Button loading={isLoading} size="default" htmlType="submit" type="primary" raised>
-                      {isLoading ? 'Processing' : 'Save'}
-                    </Button>
-                    <Link to="/admin/customers/list">
-                      <Button style={{ marginLeft: 10 }} type="light" size="default">
-                        Cancel
-                      </Button>
-                    </Link>
-                  </Form.Item>
-                </div>
+                <Row style={{ marginBottom: 20 }}>
+                  <Steps
+                    current={current}
+                    items={items}
+                    percent={items[current].percent}
+                    responsive={true}
+                    size="small"
+                  />
+                </Row>
+                <Row gutter={25}>
+                  <Col span={24}>
+                    <div className="steps-content">
+                      {current === 0 && (
+                        <Row gutter={25}>
+                          <Col sm={24}>
+                            <Form.Item
+                              rules={[{ required: true, max: maxLength, message: 'Please enter First Name' }]}
+                              name="first_name"
+                              label="First Name"
+                            >
+                              <Input placeholder="Enter First Name" />
+                            </Form.Item>
+                            <Form.Item
+                              rules={[{ required: true, message: 'Please enter Last Name' }]}
+                              name="last_name"
+                              label="Last Name"
+                            >
+                              <Input placeholder="Enter Last Name" />
+                            </Form.Item>
+                            <Form.Item
+                              rules={[
+                                {
+                                  required: true,
+                                  message: 'Please enter an email',
+                                  max: maxLength,
+                                },
+                              ]}
+                              name="email"
+                              label="Email"
+                            >
+                              <Input type="email" placeholder="Enter Email Address" />
+                            </Form.Item>
+                            <Form.Item label="User Status">
+                              <Switch checked={userStatus} onChange={checked => setUserStatus(checked)} />
+                            </Form.Item>
+                          </Col>
+                        </Row>
+                      )}
+                      {current === 1 && (
+                        <AddressTable
+                          initialData={initialAddress}
+                          addresses={billingAddress}
+                          setAddresses={setBillingAddress}
+                          defaultAddressId={defaultBillingId}
+                          setDefaultAddressId={setDefaultBillingId}
+                        />
+                      )}
+                      {current === 2 && (
+                        <AddressTable
+                          initialData={initialAddress}
+                          addresses={shippingAddress}
+                          setAddresses={setShippingAddress}
+                          defaultAddressId={defaultShippingId}
+                          setDefaultAddressId={setDefaultShippingId}
+                        />
+                      )}
+                      {current === 3 && (
+                        <>
+                          <Row gutter={25}>
+                            <Col span={24}>
+                              <Button
+                                size="small"
+                                style={{ float: 'right' }}
+                                title="Add Person"
+                                htmlType="button"
+                                type="primary"
+                                onClick={handleAddPerson}
+                              >
+                                Add Person
+                              </Button>
+                            </Col>
+                          </Row>
+                          <Row gutter={25}>
+                            {contactPersons.map(item => (
+                              <Col key={item.id} sm={24} md={12} lg={8} style={{ marginTop: 20 }}>
+                                <Card style={{ border: '1px solid #ddd' }}>
+                                  <Typography.Paragraph>{item.name}</Typography.Paragraph>
+                                  <Typography.Paragraph>{item.email}</Typography.Paragraph>
+                                  <Typography.Paragraph>{item.phone}</Typography.Paragraph>
+                                  <Typography.Paragraph>{item.fax}</Typography.Paragraph>
+                                  <Typography.Paragraph>
+                                    {
+                                      <Badge
+                                        color={item.status ? 'cyan' : 'orange'}
+                                        count={item.status ? 'Active' : 'Inactive'}
+                                      />
+                                    }
+                                  </Typography.Paragraph>
+                                </Card>
+                              </Col>
+                            ))}
+                          </Row>
+                        </>
+                      )}
+                    </div>
+                  </Col>
+                </Row>
               </Form>
             </Cards>
           </Col>
         </Row>
+        <Row style={{ marginTop: 20 }}>
+          <Col span={24}>
+            <div className="steps-action" style={{ float: 'right' }}>
+              <Link to="/admin/customers/list">
+                <Button
+                  type="light"
+                  style={{
+                    margin: '0 8px',
+                  }}
+                >
+                  Cancel
+                </Button>
+              </Link>
+              {current > 0 && (
+                <Button
+                  type="light"
+                  style={{
+                    margin: '0 8px',
+                  }}
+                  onClick={() => prev()}
+                >
+                  Previous
+                </Button>
+              )}
+              {current < steps.length - 1 && (
+                <Button
+                  style={{
+                    margin: '0 8px',
+                  }}
+                  type="primary"
+                  onClick={() => next()}
+                >
+                  Next
+                </Button>
+              )}
+              {current === steps.length - 1 && (
+                <Button
+                  disabled={isLoading}
+                  raised
+                  htmlType="submit"
+                  style={{
+                    margin: '0 8px',
+                  }}
+                  type="primary"
+                >
+                  {isLoading ? 'processing...' : 'Create Customer'}
+                </Button>
+              )}
+            </div>
+          </Col>
+        </Row>
+        <Modal
+          title={`${personType} Person`}
+          style={{ top: 20 }}
+          width={600}
+          open={personModalOpen}
+          onOk={handleContactPerson}
+          onCancel={() => setPersonModalOpen(false)}
+          okText="Save"
+        >
+          <Form
+            preserve={false}
+            style={{ width: '100%' }}
+            form={personForm}
+            name="personForm"
+            layout="horizontal"
+            size="small"
+          >
+            <Form.Item
+              {...formItemLayout}
+              rules={[{ required: true, message: 'Please Enter Name' }]}
+              name="name"
+              label="Name"
+            >
+              <Input placeholder="Name" />
+            </Form.Item>
+            <Form.Item
+              {...formItemLayout}
+              rules={[{ required: true, message: 'Please Enter Email' }]}
+              name="email"
+              label="Email"
+            >
+              <Input placeholder="Email" />
+            </Form.Item>
+            <Form.Item
+              rules={[{ required: true, message: 'Please Enter Phone' }]}
+              {...formItemLayout}
+              name="phone"
+              label="Phone"
+            >
+              <Input placeholder="Phone" />
+            </Form.Item>
+            <Form.Item {...formItemLayout} name="fax" label="Fax">
+              <Input placeholder="Fax" />
+            </Form.Item>
+            <Form.Item {...formItemLayout} name="status" label="Status" initialValue={personCheckBox}>
+              <Switch checked={personCheckBox} />
+            </Form.Item>
+          </Form>
+        </Modal>
       </Main>
     </>
   );
