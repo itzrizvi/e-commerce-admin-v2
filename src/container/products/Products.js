@@ -545,7 +545,7 @@ const Products = () => {
                             <Input
                               type="text"
                               placeholder="Min"
-                              style={{ width: '50%' }}
+                              style={{ width: '50%', height: '40px' }}
                               value={filterDate?.minPrice ?? ''}
                               onChange={e => {
                                 e.persist()
@@ -555,7 +555,7 @@ const Products = () => {
                             <Input
                               type="text"
                               placeholder="Max"
-                              style={{ width: '50%' }}
+                              style={{ width: '50%', height: '40px' }}
                               value={filterDate?.maxPrice ?? ''}
                               onChange={e => {
                                 e.persist()
