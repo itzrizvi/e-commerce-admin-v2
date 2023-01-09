@@ -564,6 +564,7 @@ const UpdateOrder = () => {
 
   // Trigger Function when select an address finally
   const selectAddressHandler = (type, id) => {
+    console.log(type, id);
     if (!tempSelectedAddress) return;
     if (type === 'billing') {
       setSelectedBillingAddress(tempSelectedAddress);
