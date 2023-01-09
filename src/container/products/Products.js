@@ -19,6 +19,8 @@ import { toast } from 'react-toastify';
 import moment from 'moment';
 const { RangePicker } = DatePicker;
 
+let checkPoint = false;
+
 const Products = () => {
   viewPermission('product');
   const [products, setProducts] = useState({ data: [], isLoading: false });
@@ -29,6 +31,7 @@ const Products = () => {
   const [availability, setAvailability] = useState({ data: [], isLoading: true });
   const [conditions, setConditions] = useState({ data: [], isLoading: true });
   const [dateRange, setChangeDateRange] = useState(null);
+  const [searchDisable, setSearchDisable] = useState(true);
   const [filterDate, setFilterDate] = useState({
     availability: [],
     categories: [],
@@ -380,6 +383,25 @@ const Products = () => {
     return [moment(start, "YYYY-MM-DD"), moment(finish, "YYYY-MM-DD")];
   };
 
+  useEffect(() => {
+    if (checkPoint) {
+      if (filterDate.availability.length > 0 ||
+        filterDate.categories.length > 0 ||
+        filterDate.condition.length > 0 ||
+        filterDate.attributes.length > 0 ||
+        filterDate.searchQuery !== '' ||
+        filterDate.endDate !== '' ||
+        filterDate.startDate !== '' ||
+        filterDate.minPrice !== '' ||
+        filterDate.maxPrice !== '') {
+        setSearchDisable(false)
+      } else {
+        setSearchDisable(true)
+      }
+    }
+    checkPoint = true;
+  }, [filterDate]);
+
 
   return (
     <>
@@ -393,6 +415,7 @@ const Products = () => {
             </Button>
             <Button size="small" type="white" onClick={() => {
               setChangeDateRange(null)
+              setSearchDisable(true)
               setFilterDate({
                 availability: [],
                 categories: [],
@@ -440,7 +463,7 @@ const Products = () => {
                       />
                     </Col>
                     <Col span={9}>
-                      <Button size="large" type="primary" onClick={searchProductAdmin}>
+                      <Button size="large" disabled={searchDisable} type="primary" onClick={searchProductAdmin}>
                         Search
                       </Button>
                     </Col>
@@ -543,9 +566,9 @@ const Products = () => {
                           Price: <br />
                           <Input.Group compact size="default">
                             <Input
-                              type="text"
+                              type="number"
                               placeholder="Min"
-                              style={{ width: '50%' }}
+                              style={{ width: '50%', height: '40px' }}
                               value={filterDate?.minPrice ?? ''}
                               onChange={e => {
                                 e.persist()
@@ -553,9 +576,9 @@ const Products = () => {
                               }}
                             />
                             <Input
-                              type="text"
+                              type="number"
                               placeholder="Max"
-                              style={{ width: '50%' }}
+                              style={{ width: '50%', height: '40px' }}
                               value={filterDate?.maxPrice ?? ''}
                               onChange={e => {
                                 e.persist()

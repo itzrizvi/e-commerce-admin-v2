@@ -12,6 +12,7 @@ import FeatherIcon from 'feather-icons-react';
 import { viewPermission } from '../../../utility/utility';
 import 'react-lazy-load-image-component/src/effects/blur.css';
 import { quoteQuery } from '../../../apollo/quote';
+import Cookies from 'js-cookie';
 
 const EditQuote = () => {
   viewPermission('quote');
@@ -22,6 +23,7 @@ const EditQuote = () => {
   const [form] = Form.useForm();
   const [quoteData, setQuoteData] = useState([]);
   const [singleQuote, setSingleQuote] = useState({ data: {}, loading: true, error: '' });
+  const [quoteStatus, setQuoteStatus] = useState({ data: [], isLoading: true });
   const [total_price, setTotalPrice] = useState(0);
 
   useEffect(() => {
@@ -65,6 +67,25 @@ const EditQuote = () => {
         console.log(err);
         setSingleQuote({ data: {}, loading: false, error: 'Something went wrong' });
       });
+
+
+    apolloClient
+      .query({
+        query: quoteQuery.GET_ALL_QUOTE_STATUS,
+        context: {
+          headers: {
+            TENANTID: process.env.REACT_APP_TENANTID,
+            Authorization: Cookies.get('psp_t'),
+          },
+        },
+      })
+      .then(res => {
+        const data = res?.data?.getQuoteStatusList;
+        if (!data.status) return;
+        setQuoteStatus({ data: data.data, isLoading: false });
+      });
+
+
   }, []);
 
   //Submit Form
@@ -135,7 +156,7 @@ const EditQuote = () => {
       title: 'Name',
       dataIndex: 'prod_name',
       key: 'prod_name',
-      width: 300,
+      width: 400,
       ellipsis: true,
     },
     {
@@ -154,7 +175,7 @@ const EditQuote = () => {
       title: 'Price',
       dataIndex: 'price',
       key: 'price',
-      width: 150,
+      width: 100,
       render: (text, record) => (
         <Input
           type="number"
@@ -183,7 +204,7 @@ const EditQuote = () => {
       title: 'Quantity',
       dataIndex: 'quantity',
       key: 'quantity',
-      width: 150,
+      width: 100,
       render: (text, record) => (
         <Input
           defaultValue={record.quantity}
@@ -273,42 +294,16 @@ const EditQuote = () => {
                   name="edit-quote"
                   onFinish={handleSubmit}
                   onFinishFailed={errorInfo => console.log('form error info:\n', errorInfo)}
-                  labelCol={{ span: 4 }}
+                // labelCol={{ span: 4 }}
                 >
                   <Form.Item name="status" label="Status">
                     <Select
                       defaultValue={singleQuote?.data?.status}
-                      style={{ width: '50%' }}
-                      options={[
-                        {
-                          label: 'New',
-                          value: 'new',
-                          disabled: true,
-                        },
-                        {
-                          label: 'In Progress',
-                          value: 'in_progress',
-                          disabled: singleQuote?.data?.status !== 'new' ? true : false,
-                        },
-                        {
-                          label: 'Save',
-                          value: 'save',
-                          disabled:
-                            singleQuote?.data?.status !== 'new' && singleQuote?.data?.status !== 'in_progress'
-                              ? true
-                              : false,
-                        },
-                        {
-                          label: 'Submitted',
-                          value: 'submitted',
-                          disabled:
-                            singleQuote?.data?.status !== 'new' &&
-                            singleQuote?.data?.status !== 'in_progress' &&
-                            singleQuote?.data?.status !== 'save'
-                              ? true
-                              : false,
-                        },
-                      ]}
+                      style={{ width: '180px' }}
+                      options={quoteStatus?.data.map(item => ({
+                        label: item.name,
+                        value: item.slug,
+                      }))}
                     />
                   </Form.Item>
 
@@ -362,6 +357,10 @@ const EditQuote = () => {
                       </Link>
                     </Form.Item>
                   </div>
+
+
+
+
                 </Form>
               )}
             </Cards>
