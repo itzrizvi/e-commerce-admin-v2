@@ -95,6 +95,7 @@ const AddOrder = () => {
   const [cardHolderName, setCardHolderName] = useState('');
   const [customerFound, setCustomerFound] = useState(true);
   const [productFound, setProductFound] = useState(true);
+  const [contactPerson, setContactPerson] = useState([]);
   // Message
   const [message, setMessage] = useState(null);
 
@@ -829,6 +830,12 @@ const AddOrder = () => {
                                     });
                                     setBillingAddresses(billing);
                                     setShippingAddresses(shipping);
+                                    setContactPerson(
+                                      data?.item?.contactPersons?.map(item => ({
+                                        label: item.email + ' ( ' + item.name + ' )',
+                                        value: item.id,
+                                      })),
+                                    );
                                   }}
                                   onSearch={val => {
                                     if (val.length > 3) {
@@ -867,6 +874,10 @@ const AddOrder = () => {
                                   }}
                                 />
                               </Form.Item>
+                              <Form.Item name="person_id" label="Contact Person">
+                                <Select placeholder="Contact Person (optional)" options={contactPerson} />
+                              </Form.Item>
+                              {!customerFound && <Alert message="Customer Not Found!" type="info" showIcon closable />}
                             </Col>
                             <Col md={12} sm={24}>
                               <Row gutter={25}>
@@ -915,7 +926,6 @@ const AddOrder = () => {
                                   </Paragraph>
                                 </Col>
                               </Row>
-                              {!customerFound && <Alert message="Customer Not Found!" type="info" showIcon closable />}
                             </Col>
                           </Row>
                         )}
@@ -1017,28 +1027,29 @@ const AddOrder = () => {
                                 initialValue={selectedShippingAddress?.id}
                               >
                                 {!selectedShippingAddress?.id && shippingAddresses.length > 0 ? (
-                                  
-                                  <Button
-                                  size="small"
-                                  style={{ position: 'absolute', right: 14, zIndex: 1000 }}
-                                  title="Change Shipping Address"
-                                  htmlType="button"
-                                  type="info"
-                                  onClick={() => changeAddressHandler('shipping')}
-                                >
-                                  Change
-                                </Button>
-                                ) : (
                                   <Button
                                     size="small"
                                     style={{ position: 'absolute', right: 14, zIndex: 1000 }}
-                                    title={`Add shipping address`}
+                                    title="Change Shipping Address"
                                     htmlType="button"
-                                    type="primary"
-                                    onClick={() => addOrEditAddressHandler(null, 'shipping')}
+                                    type="info"
+                                    onClick={() => changeAddressHandler('shipping')}
                                   >
-                                    Add address
+                                    Select Address
                                   </Button>
+                                ) : (
+                                  !selectedShippingAddress?.id && (
+                                    <Button
+                                      size="small"
+                                      style={{ position: 'absolute', right: 14, zIndex: 1000 }}
+                                      title={`Add Shipping Address`}
+                                      htmlType="button"
+                                      type="primary"
+                                      onClick={() => addOrEditAddressHandler(null, 'shipping')}
+                                    >
+                                      Add address
+                                    </Button>
+                                  )
                                 )}
 
                                 <Radio.Group style={{ width: '100%', padding: 10 }}>
@@ -1053,7 +1064,7 @@ const AddOrder = () => {
                                           type="info"
                                           onClick={() => changeAddressHandler('shipping')}
                                         >
-                                          Select Address
+                                          Change
                                         </Button>
                                         <Radio
                                           style={{
@@ -1093,18 +1104,31 @@ const AddOrder = () => {
                                 label="Billing Addresses"
                                 initialValue={selectedBillingAddress?.id}
                               >
-                                {!selectedBillingAddress?.id ? (
+                                {!selectedBillingAddress?.id && billingAddresses.length > 0 ? (
                                   <Button
                                     size="small"
-                                    style={{ float: 'right', zIndex: 1000, marginTop: -25, marginBottom: 10 }}
-                                    title={`Add billing address`}
+                                    style={{ position: 'absolute', right: 14, zIndex: 1000 }}
+                                    title="Change Billing Address"
                                     htmlType="button"
-                                    type="primary"
-                                    onClick={() => addOrEditAddressHandler(null, 'billing')}
+                                    type="info"
+                                    onClick={() => changeAddressHandler('billing')}
                                   >
-                                    Add address
+                                    Select Address
                                   </Button>
-                                ) : null}
+                                ) : (
+                                  !selectedBillingAddress?.id && (
+                                    <Button
+                                      size="small"
+                                      style={{ position: 'absolute', right: 14, zIndex: 1000 }}
+                                      title={`Add Billing Address`}
+                                      htmlType="button"
+                                      type="primary"
+                                      onClick={() => addOrEditAddressHandler(null, 'billing')}
+                                    >
+                                      Add Address
+                                    </Button>
+                                  )
+                                )}
                                 <Radio.Group style={{ width: '100%', padding: 10 }}>
                                   <Row gutter={25}>
                                     {selectedBillingAddress && (

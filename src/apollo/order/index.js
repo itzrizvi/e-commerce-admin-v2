@@ -116,6 +116,16 @@ export const orderQuery = {
             description
             status
           }
+          contactperson {
+            id
+            name
+            email
+            phone
+            fax
+            status
+            createdAt
+            updatedAt
+          }
           customer {
             id
             first_name
@@ -124,6 +134,16 @@ export const orderQuery = {
             email_verified
             user_status
             image
+            contactPersons {
+              id
+              name
+              email
+              phone
+              fax
+              status
+              createdAt
+              updatedAt
+            }
             addresses {
               id
               address1

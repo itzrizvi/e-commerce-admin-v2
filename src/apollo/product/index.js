@@ -83,7 +83,7 @@ export const productSchema = {
             state
             zip_code
             country
-            countryCode{
+            countryCode {
               name
               code
             }
@@ -92,6 +92,16 @@ export const productSchema = {
             isDefault
             updatedAt
             createdAt
+          }
+          contactPersons {
+            id
+            name
+            email
+            phone
+            fax
+            status
+            createdAt
+            updatedAt
           }
         }
       }
