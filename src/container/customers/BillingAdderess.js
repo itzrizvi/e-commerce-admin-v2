@@ -1,4 +1,4 @@
-import { Button, Checkbox, Input, Select, Table } from 'antd';
+import { Button, Checkbox, Input, Select, Switch, Table } from 'antd';
 import React, { useEffect, useState } from 'react';
 import FeatherIcon from 'feather-icons-react';
 import { addressSchema } from '../../apollo/address';
@@ -146,6 +146,16 @@ const BillingAdderess = ({ defaultBilling, initialData, billingAddress, setBilli
           placeholder="Zip Code"
           onChange={e => (record.zip_code = e.target.value)}
         />
+      ),
+    },
+    {
+      title: 'Status',
+      dataIndex: 'status',
+      key: 'status',
+      align: 'right',
+      // width: 90,
+      render: (text, record) => (
+        <Switch defaultChecked={text} title="Status" onChange={checked => (record.status = checked)} />
       ),
     },
     {

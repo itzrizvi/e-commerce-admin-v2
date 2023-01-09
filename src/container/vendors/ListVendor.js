@@ -21,34 +21,6 @@ const ListVendor = () => {
   const [filteredVendors, setFilteredVendors] = useState([]);
   const [searchText, setSearchText] = useState('');
 
-  const handleStatusChange = (record, checked) => {
-    const variables = {
-      data: {
-        customer_group_id: record.customer_group_id,
-        customergroup_status: checked,
-      },
-    };
-    apolloClient
-      .mutate({
-        mutation: customerMutation.UPDATE_CUSTOMER_GROUP,
-        variables,
-        context: {
-          headers: {
-            TENANTID: process.env.REACT_APP_TENANTID,
-            Authorization: Cookies.get('psp_t'),
-          },
-        },
-      })
-      .then(res => {
-        const data = res?.data?.updateCustomerGroup;
-        if (!data.status) return setMessage({ type: 'error', message: data.message });
-        setMessage({ type: 'success', message: `${record.customer_group_name} Group Status Updated successfully` });
-      })
-      .catch(err => {
-        console.log('got error on updateStatus', err);
-      });
-  };
-
   const columns = [
     {
       title: 'Company Name',
@@ -94,29 +66,6 @@ const ListVendor = () => {
       ellipsis: true,
       sorter: (a, b) => (a.description.toUpperCase() > b.description.toUpperCase() ? 1 : -1),
     },
-    {
-      title: 'Status',
-      dataIndex: 'status',
-      key: 'status',
-      align: 'center',
-      width: 100,
-      sorter: (a, b) => (a.status === b.status ? 0 : a.status ? -1 : 1),
-      filters: [
-        {
-          text: 'Active',
-          value: true,
-        },
-        {
-          text: 'Inactive',
-          value: false,
-        },
-      ],
-      onFilter: (value, record) => record.status === value,
-      render: (value, record) => (
-        <Switch defaultChecked={value} title="Status" onChange={checked => handleStatusChange(record, checked)} />
-      ),
-    },
-
     {
       title: 'Action',
       dataIndex: 'action',

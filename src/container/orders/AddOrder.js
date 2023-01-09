@@ -942,7 +942,7 @@ const AddOrder = () => {
                                 >
                                   {!productFound && (
                                     <Alert
-                                      style={{ width: '30%', marginBottom: 10,  marginRight: 10 }}
+                                      style={{ width: '30%', marginBottom: 10, marginRight: 10 }}
                                       message="Product Not Found!"
                                       type="info"
                                       showIcon
@@ -1016,10 +1016,22 @@ const AddOrder = () => {
                                 label="Shipping Addresses"
                                 initialValue={selectedShippingAddress?.id}
                               >
-                                {!selectedShippingAddress?.id ? (
+                                {!selectedShippingAddress?.id && shippingAddresses.length > 0 ? (
+                                  
+                                  <Button
+                                  size="small"
+                                  style={{ position: 'absolute', right: 14, zIndex: 1000 }}
+                                  title="Change Shipping Address"
+                                  htmlType="button"
+                                  type="info"
+                                  onClick={() => changeAddressHandler('shipping')}
+                                >
+                                  Change
+                                </Button>
+                                ) : (
                                   <Button
                                     size="small"
-                                    style={{ float: 'right', zIndex: 1000, marginTop: -25, marginBottom: 10 }}
+                                    style={{ position: 'absolute', right: 14, zIndex: 1000 }}
                                     title={`Add shipping address`}
                                     htmlType="button"
                                     type="primary"
@@ -1027,7 +1039,7 @@ const AddOrder = () => {
                                   >
                                     Add address
                                   </Button>
-                                ) : null}
+                                )}
 
                                 <Radio.Group style={{ width: '100%', padding: 10 }}>
                                   <Row gutter={25}>
@@ -1041,7 +1053,7 @@ const AddOrder = () => {
                                           type="info"
                                           onClick={() => changeAddressHandler('shipping')}
                                         >
-                                          Change
+                                          Select Address
                                         </Button>
                                         <Radio
                                           style={{

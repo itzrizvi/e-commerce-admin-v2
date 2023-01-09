@@ -317,8 +317,8 @@ export const productQuery = {
     }
   `,
   GET_PRODUCT_LIST: gql`
-    query getProductList($query:ProductListInput) {
-      getProductList(query:$query) {
+    query getProductList($query: ProductListInput) {
+      getProductList(query: $query) {
         message
         status
         data {
@@ -1022,6 +1022,16 @@ export const customerQuery = {
           email_verified
           user_status
           image
+          contactPersons {
+            id
+            name
+            email
+            phone
+            fax
+            status
+            createdAt
+            updatedAt
+          }
           addresses {
             id
             address1

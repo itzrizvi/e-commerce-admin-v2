@@ -107,9 +107,6 @@ const AddVendor = () => {
     city: '',
     state: '',
     zip_code: '',
-    email: '',
-    fax: '',
-    phone: '',
     status: true,
     isDefault: false,
     isNew: true,
@@ -545,7 +542,7 @@ const AddVendor = () => {
               <Input placeholder="Fax" />
             </Form.Item>
             <Form.Item {...formItemLayout} name="status" label="Status" initialValue={personCheckBox}>
-              <Switch checked={personCheckBox} />
+              <Switch checked={personCheckBox} onChange={checked => setPersonCheckBox(checked)} />
             </Form.Item>
           </Form>
         </Modal>

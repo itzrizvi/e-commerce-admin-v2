@@ -7,7 +7,6 @@ import { Button } from '../../components/buttons/buttons';
 import { Link, useHistory } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import apolloClient from '../../utility/apollo';
-import { toast } from 'react-toastify';
 import { viewPermission } from '../../utility/utility';
 
 import { customerMutation, customerQuery } from '../../apollo/customer';
@@ -59,25 +58,10 @@ const AddUser = () => {
   const [defaultShippingId, setDefaultShippingId] = useState(null);
   const [defaultBillingId, setDefaultBillingId] = useState(null);
 
-  const handleSubmit = values => {
+  const handleSubmit = () => {
+    const values = form.getFieldsValue(true);
     // validate billingAddresses.
-    const notValidate = billingAddress.find(item => {
-      const { id, address1, country, city, state, zip_code } = item;
-      const checkFalse = !(id && address1 && country && city && state && zip_code);
-      return checkFalse;
-    });
-    if (notValidate?.id) return toast.warning('Enter Billing Address Correctly!');
-
-    // validate shippingAddresses.
-    const notValidate1 = shippingAddress.find(item => {
-      const { id, address1, country, city, state, zip_code } = item;
-      const checkFalse = !(id && address1 && country && city && state && zip_code);
-      return checkFalse;
-    });
-    if (notValidate1?.id) return toast.warning('Enter Shipping Address Correctly!');
-
     setIsLoading(true);
-
     const variables = {
       data: { ...values, status: userStatus, send_mail: true },
     };
@@ -107,13 +91,13 @@ const AddUser = () => {
       })
       .then(res => {
         const data = res?.data?.addCustomer;
-        if (!data.status) return toast.error(data.message);
+        if (!data.status) return setMessage({ type: 'error', message: data.message });
+
         setOperation(true);
         setUserId(data?.id);
       })
       .catch(err => {
         console.log('error on adding customer', err);
-        toast.error(`Something went wrong!!`);
         setIsError(true);
       })
       .finally(() => setIsLoading(false));
@@ -144,7 +128,7 @@ const AddUser = () => {
               mutation: contactPersonsSchema.ADD_CONTACT_PERSON,
               variables: {
                 data: {
-                  ref_id: vendor_id,
+                  ref_id: user_id,
                   type: 'customer',
                   contact_persons: [
                     ...contactPersons.map(item => ({
@@ -201,7 +185,7 @@ const AddUser = () => {
               setIsLoading(false);
               if (type === 'shipping') {
                 if (!isError) {
-                  toast.success('User Created Successfully.');
+                  setMessage({ type: 'success', message: 'User Created Successfully' });
                   setTimeout(() => {
                     history.push('/admin/customers/list');
                   }, [2000]);
@@ -305,17 +289,17 @@ const AddUser = () => {
             />
           )}
         </Row>
-        <Row gutter={25}>
-          <Col sm={24} xs={24}>
-            <Cards headless>
-              <Form
-                style={{ width: '100%' }}
-                form={form}
-                name="addProduct"
-                onFinish={handleSubmit}
-                onFinishFailed={errorInfo => console.log('form error info:\n', errorInfo)}
-                labelCol={{ span: 4 }}
-              >
+        <Form
+          style={{ width: '100%' }}
+          form={form}
+          name="addProduct"
+          onFinish={handleSubmit}
+          onFinishFailed={errorInfo => console.log('form error info:\n', errorInfo)}
+          labelCol={{ span: 4 }}
+        >
+          <Row gutter={25}>
+            <Col sm={24} xs={24}>
+              <Cards headless>
                 <Row style={{ marginBottom: 20 }}>
                   <Steps
                     current={current}
@@ -336,14 +320,14 @@ const AddUser = () => {
                               name="first_name"
                               label="First Name"
                             >
-                              <Input placeholder="Enter First Name" />
+                              <Input style={{ width: '50%' }} placeholder="Enter First Name" />
                             </Form.Item>
                             <Form.Item
                               rules={[{ required: true, message: 'Please enter Last Name' }]}
                               name="last_name"
                               label="Last Name"
                             >
-                              <Input placeholder="Enter Last Name" />
+                              <Input style={{ width: '50%' }} placeholder="Enter Last Name" />
                             </Form.Item>
                             <Form.Item
                               rules={[
@@ -356,7 +340,7 @@ const AddUser = () => {
                               name="email"
                               label="Email"
                             >
-                              <Input type="email" placeholder="Enter Email Address" />
+                              <Input style={{ width: '50%' }} type="email" placeholder="Enter Email Address" />
                             </Form.Item>
                             <Form.Item label="User Status">
                               <Switch checked={userStatus} onChange={checked => setUserStatus(checked)} />
@@ -423,61 +407,61 @@ const AddUser = () => {
                     </div>
                   </Col>
                 </Row>
-              </Form>
-            </Cards>
-          </Col>
-        </Row>
-        <Row style={{ marginTop: 20 }}>
-          <Col span={24}>
-            <div className="steps-action" style={{ float: 'right' }}>
-              <Link to="/admin/customers/list">
-                <Button
-                  type="light"
-                  style={{
-                    margin: '0 8px',
-                  }}
-                >
-                  Cancel
-                </Button>
-              </Link>
-              {current > 0 && (
-                <Button
-                  type="light"
-                  style={{
-                    margin: '0 8px',
-                  }}
-                  onClick={() => prev()}
-                >
-                  Previous
-                </Button>
-              )}
-              {current < steps.length - 1 && (
-                <Button
-                  style={{
-                    margin: '0 8px',
-                  }}
-                  type="primary"
-                  onClick={() => next()}
-                >
-                  Next
-                </Button>
-              )}
-              {current === steps.length - 1 && (
-                <Button
-                  disabled={isLoading}
-                  raised
-                  htmlType="submit"
-                  style={{
-                    margin: '0 8px',
-                  }}
-                  type="primary"
-                >
-                  {isLoading ? 'processing...' : 'Create Customer'}
-                </Button>
-              )}
-            </div>
-          </Col>
-        </Row>
+              </Cards>
+            </Col>
+          </Row>
+          <Row style={{ marginTop: 20 }}>
+            <Col span={24}>
+              <div className="steps-action" style={{ float: 'right' }}>
+                <Link to="/admin/customers/list">
+                  <Button
+                    type="light"
+                    style={{
+                      margin: '0 8px',
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                </Link>
+                {current > 0 && (
+                  <Button
+                    type="light"
+                    style={{
+                      margin: '0 8px',
+                    }}
+                    onClick={() => prev()}
+                  >
+                    Previous
+                  </Button>
+                )}
+                {current < steps.length - 1 && (
+                  <Button
+                    style={{
+                      margin: '0 8px',
+                    }}
+                    type="primary"
+                    onClick={() => next()}
+                  >
+                    Next
+                  </Button>
+                )}
+                {current === steps.length - 1 && (
+                  <Button
+                    disabled={isLoading}
+                    raised
+                    htmlType="submit"
+                    style={{
+                      margin: '0 8px',
+                    }}
+                    type="primary"
+                  >
+                    {isLoading ? 'processing...' : 'Create Customer'}
+                  </Button>
+                )}
+              </div>
+            </Col>
+          </Row>
+        </Form>
         <Modal
           title={`${personType} Person`}
           style={{ top: 20 }}

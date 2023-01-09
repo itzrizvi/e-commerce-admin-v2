@@ -111,7 +111,7 @@ const UpdateVendor = () => {
         if (!data?.status) return;
         initialAddressData.parent_id = data?.data?.id;
         setSingleVendor(s => ({ ...s, data: data?.data, error: '' }));
-
+        setStatus(data?.data?.status);
         let billings = [];
         let shippings = [];
         let contact_person = [];
@@ -225,25 +225,15 @@ const UpdateVendor = () => {
                 data: {
                   ref_id: vendor_id,
                   type: 'vendor',
-                  contact_persons: [
-                    ...(!params?.id
-                      ? contactPersons.map(item => ({
-                          name: item.name,
-                          email: item.email,
-                          phone: item.phone,
-                          fax: item.fax,
-                          status: item.status,
-                        }))
-                      : contactPersons.map(item => ({
-                          ...(!item.isNew && { id: item.id }),
-                          name: item.name,
-                          email: item.email,
-                          phone: item.phone,
-                          fax: item.fax,
-                          status: item.status,
-                          isNew: item.isNew,
-                        }))),
-                  ],
+                  contact_persons: contactPersons.map(item => ({
+                    ...(!item.isNew && { id: item.id }),
+                    name: item.name,
+                    email: item.email,
+                    phone: item.phone,
+                    fax: item.fax,
+                    status: item.status,
+                    isNew: item.isNew,
+                  })),
                 },
               },
               context: {
@@ -304,14 +294,18 @@ const UpdateVendor = () => {
   const handleContactPerson = async () => {
     await personForm.validateFields(['email', 'name', 'phone']);
     const values = personForm.getFieldsValue();
-    setContactPersons(prev =>
-      prev.map(item => {
-        if (item.id === selectedPersonID) {
-          return { ...values, id: selectedPersonID, isNew: false };
-        }
-        return item;
-      }),
-    );
+    if (!selectedPersonID) {
+      setContactPersons(prev => [...prev, { ...values, id: new Date().getTime(), isNew: true }]);
+    } else {
+      setContactPersons(prev =>
+        prev.map(item => {
+          if (item.id === selectedPersonID) {
+            return { ...values, id: selectedPersonID, isNew: false };
+          }
+          return item;
+        }),
+      );
+    }
     setPersonModalOpen(false);
     personForm.resetFields();
   };
@@ -482,7 +476,7 @@ const UpdateVendor = () => {
                             </Col>
                           </Row>
                         </Tabs.TabPane>
-                        <Tabs.TabPane tab="Persons" key="contact_person">
+                        <Tabs.TabPane tab="Contact Person" key="contact_person">
                           <Row gutter={25}>
                             <Col span={24}>
                               <Button
@@ -618,7 +612,7 @@ const UpdateVendor = () => {
               <Input placeholder="Fax" />
             </Form.Item>
             <Form.Item {...formItemLayout} name="status" label="Status" initialValue={personCheckBox}>
-              <Switch checked={personCheckBox} />
+              <Switch checked={personCheckBox} onChange={checked => setPersonCheckBox(checked)} />
             </Form.Item>
           </Form>
         </Modal>
