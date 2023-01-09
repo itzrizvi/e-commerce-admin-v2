@@ -1,9 +1,23 @@
 import { gql } from '@apollo/client';
 
 export const quoteQuery = {
+  GET_ALL_QUOTE_STATUS: gql`
+    query getQuoteStatusList {
+    getQuoteStatusList {
+      message
+      status
+      tenant_id
+      data {
+        id
+        name
+        slug
+        status
+      }
+    }
+  }`,
   GET_ALL_QUOTE: gql`
-    query getSubmittedQuoteList {
-      getSubmittedQuoteList {
+    query getSubmittedQuoteList($query:SubmittedQuoteListInput) {
+      getSubmittedQuoteList(query:$query) {
         message
         status
         data {
@@ -15,6 +29,8 @@ export const quoteQuery = {
           updatedAt
           quotedby {
             id
+            first_name
+            last_name
             email
           }
         }

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Col, Spin, Input, Table, Tooltip  } from 'antd';
+import { Row, Col, Spin, Input, Table, Tooltip } from 'antd';
 import FeatherIcon from 'feather-icons-react';
 import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
@@ -112,7 +112,7 @@ const ListOrder = () => {
           {val}
         </span>
       ),
-      sorter: (a, b) => (a.orderStatus.toUpperCase() > b.orderStatus.toUpperCase() ? 1 : -1),
+      sorter: (a, b) => (a.orderStatus > b.orderStatus ? 1 : -1),
     },
     {
       title: 'Payment Method',
@@ -162,9 +162,9 @@ const ListOrder = () => {
             </Link>
           </Tooltip>
           <Tooltip placement="topLeft" title="Make Purchase Order" color="cyan">
-          <Link to={`/admin/po/add?order_id=${record.id}`}>
-            <FontAwesome name="cart-plus" style={{ margin: '.5em 1em' }} />
-          </Link>
+            <Link to={`/admin/po/add?order_id=${record.id}`}>
+              <FontAwesome name="cart-plus" style={{ margin: '.5em 1em' }} />
+            </Link>
           </Tooltip>
         </>
       ),

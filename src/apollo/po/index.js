@@ -90,7 +90,6 @@ export const poQuery = {
           paymentmethod {
             id
             name
-            slug
             description
             status
           }
