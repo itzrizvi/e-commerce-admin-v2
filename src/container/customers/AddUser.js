@@ -46,7 +46,7 @@ const AddUser = () => {
     // validate billingAddresses.
     const notValidate = billingAddress.find(item => {
       const { id, address1, country, city, state, zip_code } = item;
-      const checkFalse = !(id && address1 && country && city && state && zip_code );
+      const checkFalse = !(id && address1 && country && city && state && zip_code);
       return checkFalse;
     });
     if (notValidate?.id) return toast.warning('Enter Billing Address Correctly!');
@@ -175,38 +175,67 @@ const AddUser = () => {
                 onFinish={handleSubmit}
                 onFinishFailed={errorInfo => console.log('form error info:\n', errorInfo)}
                 labelCol={{ span: 4 }}
-                // wrapperCol={{ span: 14 }}
-                // layout={'vertical'}
+              // wrapperCol={{ span: 14 }}
+              // layout={'vertical'}
               >
                 <Tabs>
                   <Tabs.TabPane tab="Information" key="general">
-                    <Form.Item
-                      rules={[{ required: true, max: maxLength, message: 'Please enter First Name' }]}
-                      name="first_name"
-                      label="First Name"
-                    >
-                      <Input placeholder="Enter First Name" />
-                    </Form.Item>
-                    <Form.Item
-                      rules={[{ required: true, message: 'Please enter Last Name' }]}
-                      name="last_name"
-                      label="Last Name"
-                    >
-                      <Input placeholder="Enter Last Name" />
-                    </Form.Item>
-                    <Form.Item
-                      rules={[
-                        {
-                          required: true,
-                          message: 'Please enter an email',
-                          max: maxLength,
-                        },
-                      ]}
-                      name="email"
-                      label="Email"
-                    >
-                      <Input type="email" placeholder="Enter Email Address" />
-                    </Form.Item>
+                    <Row gutter={25}>
+                      <Col span={10}>
+                        <Form.Item
+                          rules={[{ required: true, max: maxLength, message: 'Please Enter First Name' }]}
+                          name="first_name"
+                          label="First Name"
+                          labelCol={{ style: { width: "40%" } }}
+                        >
+                          <Row>
+                            <Col span={20}>
+                              <Input placeholder="Enter First Name" />
+                            </Col>
+                          </Row>
+
+                        </Form.Item>
+                      </Col>
+                    </Row>
+
+                    <Row gutter={25}>
+                      <Col span={10}>
+                        <Form.Item
+                          rules={[{ required: true, max: maxLength, message: 'Please Enter Last Name' }]}
+                          name="last_name"
+                          label="Last Name"
+                          labelCol={{ style: { width: "40%" } }}
+                        >
+                          <Row>
+                            <Col span={20}>
+                              <Input placeholder="Enter Last Name" />
+                            </Col>
+                          </Row>
+                        </Form.Item>
+                      </Col>
+                    </Row>
+
+                    <Row gutter={25}>
+                      <Col span={10}>
+                        <Form.Item
+                          rules={[
+                            {
+                              required: true,
+                              message: 'Please enter an email',
+                              max: maxLength,
+                            },
+                          ]}
+                          label="Email"
+                          name="email"
+                          labelCol={{ style: { width: "40%" } }}>
+                          <Row>
+                            <Col span={20}>
+                              <Input type="email" placeholder="Enter Email Address" />
+                            </Col>
+                          </Row>
+                        </Form.Item>
+                      </Col>
+                    </Row>
 
                     <Form.Item label="User Status">
                       <Switch checked={userStatus} onChange={checked => setUserStatus(checked)} />
