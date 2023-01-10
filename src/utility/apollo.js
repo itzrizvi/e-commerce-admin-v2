@@ -945,10 +945,10 @@ export const customerQuery = {
     }
   `,
   GET_ALL_CUSTOMER: gql`
-    query {
-      getAllCustomer {
-        status
+    query getAllCustomer($query:CustomerListInput) {
+      getAllCustomer(query:$query) {
         message
+        status
         data {
           id
           first_name
@@ -957,6 +957,8 @@ export const customerQuery = {
           email_verified
           user_status
           image
+          createdAt
+          updatedAt
           addresses {
             id
             address1
@@ -970,13 +972,13 @@ export const customerQuery = {
             country
             type
             status
+            isDefault
             updatedAt
             createdAt
           }
         }
       }
-    }
-  `,
+    }`,
   GET_ALL_CUSTOMER_FOR_ORDER: gql`
     query {
       getAllCustomer {
@@ -1067,7 +1069,6 @@ export const customerQuery = {
           paymentmethod {
             id
             name
-            slug
             description
             status
           }
@@ -1075,7 +1076,6 @@ export const customerQuery = {
           po_id
           po_number
           sub_total
-          shipping_cost
           discount_amount
           tax_amount
           orderStatus {

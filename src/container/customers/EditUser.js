@@ -353,25 +353,56 @@ const EditUser = () => {
                 >
                   <Tabs>
                     <Tabs.TabPane tab="Information" key="information">
-                      <Form.Item
-                        rules={[{ required: true, max: maxLength, message: 'Please Enter First Name' }]}
-                        name="first_name"
-                        label="First Name"
-                        initialValue={singleUser?.data?.first_name}
-                      >
-                        <Input placeholder="Enter First Name" defaultValue={singleUser?.data?.first_name} />
-                      </Form.Item>
-                      <Form.Item
-                        rules={[{ required: true, max: maxLength, message: 'Please Enter Last Name' }]}
-                        name="last_name"
-                        label="Last Name"
-                        initialValue={singleUser?.data?.last_name}
-                      >
-                        <Input placeholder="Enter Last Name" defaultValue={singleUser?.data?.last_name} />
-                      </Form.Item>
-                      <Form.Item label="Email">
-                        <Input type="email" disabled defaultValue={singleUser?.data?.email} />
-                      </Form.Item>
+                      <Row gutter={25}>
+                        <Col span={10}>
+                          <Form.Item
+                            rules={[{ required: true, max: maxLength, message: 'Please Enter First Name' }]}
+                            name="first_name"
+                            label="First Name"
+                            labelCol={{ style: { width: "40%" } }}
+                            initialValue={singleUser?.data?.first_name}
+                          >
+                            <Row>
+                              <Col span={20}>
+                                <Input placeholder="Enter First Name" defaultValue={singleUser?.data?.first_name} />
+                              </Col>
+                            </Row>
+
+                          </Form.Item>
+                        </Col>
+                      </Row>
+
+                      <Row gutter={25}>
+                        <Col span={10}>
+                          <Form.Item
+                            rules={[{ required: true, max: maxLength, message: 'Please Enter Last Name' }]}
+                            name="last_name"
+                            label="Last Name"
+                            labelCol={{ style: { width: "40%" } }}
+                            initialValue={singleUser?.data?.last_name}
+                          >
+                            <Row>
+                              <Col span={20}>
+                                <Input placeholder="Enter Last Name" defaultValue={singleUser?.data?.last_name} />
+                              </Col>
+                            </Row>
+                          </Form.Item>
+                        </Col>
+                      </Row>
+
+                      <Row gutter={25}>
+                        <Col span={10}>
+                          <Form.Item
+                            label="Email"
+                            labelCol={{ style: { width: "40%" } }}>
+                            <Row>
+                              <Col span={20}>
+                                <Input type="email" disabled defaultValue={singleUser?.data?.email} />
+                              </Col>
+                            </Row>
+                          </Form.Item>
+                        </Col>
+                      </Row>
 
                       <Form.Item label="User Status">
                         <Switch checked={userStatus} onChange={checked => setUserStatus(checked)} />
