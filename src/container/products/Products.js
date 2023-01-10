@@ -8,7 +8,7 @@ import { Button } from '../../components/buttons/buttons';
 import { RetweetOutlined, SearchOutlined } from '@ant-design/icons';
 import { Link } from 'react-router-dom';
 import { viewPermission } from '../../utility/utility';
-import apolloClient, { productQuery, utilityQuery, productMutation } from '../../utility/apollo';
+import apolloClient, { productQuery, utilityQuery, productMutation, authQuery } from '../../utility/apollo';
 import FontAwesome from 'react-fontawesome';
 import Cookies from 'js-cookie';
 import config from '../../config/config';
@@ -17,28 +17,47 @@ import { LazyLoadImage } from 'react-lazy-load-image-component';
 import { gql } from '@apollo/client';
 import { toast } from 'react-toastify';
 import moment from 'moment';
+import Moment from 'react-moment';
 const { RangePicker } = DatePicker;
 
 let checkPoint = false;
+const permissions_json = Cookies.get('permissions') ?? "[]";
+const permissions = JSON.parse(permissions_json);
+let permissionCheckForAllCondition = false
+// Check Permission
+permissions.forEach((permission) => {
+  if (permission.permission_name === "product-all") {
+    if (permission.read_access === true && permission.edit_access === true) {
+      permissionCheckForAllCondition = true;
+    }
+  }
+});
+
 
 const Products = () => {
   viewPermission('product');
   const [products, setProducts] = useState({ data: [], isLoading: false });
   const [searchButton, setSearchButton] = useState(false);
-  const [isFilter, setIsFilter] = useState(true);
+  const [isFilter, setIsFilter] = useState(false);
   const [categories, setCategories] = useState({ data: [], isLoading: true });
   const [attributes, setAttributes] = useState({ data: [], isLoading: true });
   const [availability, setAvailability] = useState({ data: [], isLoading: true });
   const [conditions, setConditions] = useState({ data: [], isLoading: true });
   const [dateRange, setChangeDateRange] = useState(null);
+  const [updatedDateRange, setChangeUpdatedDateRange] = useState(null);
   const [searchDisable, setSearchDisable] = useState(true);
+  const [representative, setRepresentative] = useState({ data: [], loading: true, error: '' });
+  const [viewallfilter, setViewAllFilter] = useState(false);
   const [filterDate, setFilterDate] = useState({
     availability: [],
     categories: [],
     condition: [],
     attributes: [],
+    productrep: [],
     startDate: '',
     endDate: '',
+    updatedStartDate: '',
+    updatedEndDate: '',
     minPrice: '',
     maxPrice: '',
     searchQuery: ''
@@ -165,8 +184,11 @@ const Products = () => {
             attribute: filterDate.attributes.length ? filterDate.attributes : null,
             category: filterDate.categories.length ? filterDate.categories : null,
             condition: filterDate.condition.length ? filterDate.condition : null,
+            productRep: filterDate.productrep.length ? filterDate.productrep : null,
             productEntryStartDate: filterDate.startDate ?? '',
             productEntryEndDate: filterDate.endDate ?? '',
+            updatedStartDate: filterDate.updatedStartDate ?? '',
+            updatedEndDate: filterDate.updatedEndDate ?? '',
             minPrice: parseFloat(filterDate.minPrice) ?? null,
             maxPrice: parseFloat(filterDate.maxPrice) ?? null
           }
@@ -273,6 +295,7 @@ const Products = () => {
     {
       title: 'Product SKU',
       dataIndex: 'prod_sku',
+      width: 150,
       key: 'prod_sku',
       ellipsis: true,
       sorter: (a, b) => (a.prod_sku.toUpperCase() > b.prod_sku.toUpperCase() ? 1 : -1),
@@ -280,32 +303,32 @@ const Products = () => {
     {
       title: 'Part NO',
       dataIndex: 'prod_partnum',
+      width: 150,
       key: 'prod_partnum',
       ellipsis: true,
       sorter: (a, b) => (a.prod_partnum.toUpperCase() > b.prod_partnum.toUpperCase() ? 1 : -1),
     },
-    {
-      title: 'Regular Price',
-      dataIndex: 'prod_regular_price',
-      key: 'prod_regular_price',
-      ellipsis: true,
-      align: 'center',
-      sorter: (a, b) => (a.prod_regular_price > b.prod_regular_price ? 1 : -1),
-    },
-    {
-      title: 'Sales Price',
-      dataIndex: 'prod_sale_price',
-      key: 'prod_sale_price',
-      ellipsis: true,
-      align: 'center',
-      sorter: (a, b) => (a.prod_sale_price > b.prod_sale_price ? 1 : -1),
-    },
-
+    // {
+    //   title: 'Regular Price',
+    //   dataIndex: 'prod_regular_price',
+    //   key: 'prod_regular_price',
+    //   ellipsis: true,
+    //   align: 'center',
+    //   sorter: (a, b) => (a.prod_regular_price > b.prod_regular_price ? 1 : -1),
+    // },
+    // {
+    //   title: 'Sales Price',
+    //   dataIndex: 'prod_sale_price',
+    //   key: 'prod_sale_price',
+    //   ellipsis: true,
+    //   align: 'center',
+    //   sorter: (a, b) => (a.prod_sale_price > b.prod_sale_price ? 1 : -1),
+    // },
     {
       title: 'Status',
       dataIndex: 'prod_status',
       key: 'prod_status',
-      width: 80,
+      width: 110,
       align: 'middle',
       sorter: (a, b) => (a.prod_status === b.prod_status ? 0 : a.prod_status ? -1 : 1),
       filters: [
@@ -328,7 +351,7 @@ const Products = () => {
       dataIndex: 'is_sale',
       key: 'is_sale',
       align: 'center',
-      width: 90,
+      width: 110,
       sorter: (a, b) => (a.is_sale === b.is_sale ? 0 : a.is_sale ? -1 : 1),
       filters: [
         {
@@ -347,6 +370,28 @@ const Products = () => {
           title="Is Sale"
           onChange={checked => handleIsSaleStatusChange(record, checked)}
         />
+      ),
+    },
+    {
+      title: 'Date of Entry',
+      dataIndex: 'createdAt',
+      key: 'createdAt',
+      width: 120,
+      align: 'center',
+      sorter: (a, b) => (a.createdAt === b.createdAt ? 0 : a.createdAt ? -1 : 1),
+      render: (text, record) => (
+        <span className={'status-text'}>{<Moment format="DD-MMM-YYYY">{parseInt(text)}</Moment>}</span>
+      ),
+    },
+    {
+      title: 'Date of Update',
+      dataIndex: 'updatedAt',
+      key: 'updatedAt',
+      width: 120,
+      align: 'center',
+      sorter: (a, b) => (a.updatedAt === b.updatedAt ? 0 : a.updatedAt ? -1 : 1),
+      render: (text, record) => (
+        <span className={'status-text'}>{<Moment format="DD-MMM-YYYY">{parseInt(text)}</Moment>}</span>
       ),
     },
     {
@@ -379,9 +424,21 @@ const Products = () => {
       setChangeDateRange(null);
     }
   };
+
+  const onDateUpdatedRangeChange = updatedDateRange => {
+    if (updatedDateRange) {
+      setFilterDate(s => ({ ...s, updatedStartDate: updatedDateRange[0]._d ?? '', updatedEndDate: updatedDateRange[1]._d ?? '' }))
+      setChangeUpdatedDateRange(returnMomentDateRange(updatedDateRange[0], updatedDateRange[1]));
+    } else {
+      setChangeUpdatedDateRange(null);
+    }
+  };
+
   const returnMomentDateRange = (start, finish) => {
     return [moment(start, "YYYY-MM-DD"), moment(finish, "YYYY-MM-DD")];
   };
+
+
 
   useEffect(() => {
     if (checkPoint) {
@@ -392,15 +449,47 @@ const Products = () => {
         filterDate.searchQuery !== '' ||
         filterDate.endDate !== '' ||
         filterDate.startDate !== '' ||
+        filterDate.updatedStartDate !== '' ||
+        filterDate.updatedStartDate !== '' ||
         filterDate.minPrice !== '' ||
-        filterDate.maxPrice !== '') {
+        filterDate.maxPrice !== '' ||
+        filterDate.productrep.length > 0) {
         setSearchDisable(false)
       } else {
         setSearchDisable(true)
       }
     }
     checkPoint = true;
+
+    //////////////////////////////////
+    apolloClient
+      .query({
+        query: authQuery.GET_ALL_STAFF,
+        context: {
+          headers: {
+            TENANTID: process.env.REACT_APP_TENANTID,
+            Authorization: Cookies.get('psp_t'),
+          },
+        },
+      })
+      .then(res => {
+        const data = res?.data?.getAllStaff;
+        setRepresentative(data)
+      })
+      .catch(err => {
+        setRepresentative(s => ({ ...s, error: 'Something went Wrong.!! ' }));
+      })
+      .finally(() => {
+        setRepresentative(s => ({ ...s, loading: false }));
+      });
+
+    if (permissionCheckForAllCondition) {
+      setViewAllFilter(true)
+    }
+
   }, [filterDate]);
+
+
 
 
   return (
@@ -415,17 +504,21 @@ const Products = () => {
             </Button>
             <Button size="small" type="white" onClick={() => {
               setChangeDateRange(null)
+              setChangeUpdatedDateRange(null)
               setSearchDisable(true)
               setFilterDate({
                 availability: [],
                 categories: [],
                 condition: [],
                 attributes: [],
+                productrep: [],
                 startDate: '',
                 endDate: '',
                 minPrice: '',
                 maxPrice: '',
-                searchQuery: ''
+                searchQuery: '',
+                updatedEndDate: '',
+                updatedStartDate: ''
               })
             }}>
               <RetweetOutlined />
@@ -513,7 +606,7 @@ const Products = () => {
                         </Col>
 
                         <Col span={8}>
-                          Date: <br />
+                          Date Added: <br />
                           <RangePicker
                             style={{ height: '40px', width: '100%' }}
                             size="small"
@@ -588,6 +681,66 @@ const Products = () => {
                           </Input.Group>
                         </Col>
                       </Row>
+                      {viewallfilter && (
+                        <Row gutter={16} style={{ marginTop: '.5em' }}>
+                          <Col span={8}>
+                            Product Rep: <br />
+                            <Select
+                              style={{ width: '100%' }}
+                              size="middle"
+                              mode="multiple"
+                              value={filterDate?.productrep}
+                              onDeselect={(val) => setFilterDate(prev => ({ ...prev, productrep: prev.productrep.filter(item => item !== val) }))}
+                              placeholder={representative.loading ? 'Loading...' : 'Select a Product Representative'}
+                              options={representative?.data?.map(item => ({
+                                label: item.first_name + ' ' + item.last_name,
+                                value: item.id,
+                              }))}
+                              onSelect={val => {
+                                setFilterDate(s => ({ ...s, productrep: filterDate.productrep.concat(parseInt(val)) }));
+                              }}
+                            />
+                          </Col>
+                          <Col span={8}>
+                            Date Updated: <br />
+                            <RangePicker
+                              style={{ height: '40px', width: '100%' }}
+                              size="small"
+                              allowClear={true}
+                              picker="date"
+                              value={updatedDateRange !== "" ? updatedDateRange : ""}
+                              onChange={onDateUpdatedRangeChange}
+                            />
+                          </Col>
+
+                          <Col span={8}>
+                            Quantity: <br />
+                            <Input.Group compact size="default">
+                              <Input
+                                type="number"
+                                placeholder="Min Amount"
+                                style={{ width: '50%', height: '40px' }}
+                              // value={filterDate?.minPrice ?? ''}
+                              // onChange={e => {
+                              //   e.persist()
+                              //   setFilterDate(s => ({ ...s, minPrice: e?.target?.value }));
+                              // }}
+                              />
+                              <Input
+                                type="number"
+                                placeholder="Max Amount"
+                                style={{ width: '50%', height: '40px' }}
+                              // value={filterDate?.maxPrice ?? ''}
+                              // onChange={e => {
+                              //   e.persist()
+                              //   setFilterDate(s => ({ ...s, maxPrice: e?.target?.value }));
+                              // }}
+                              />
+                            </Input.Group>
+                          </Col>
+                        </Row>
+                      )}
+
                     </div>
                   )}
 

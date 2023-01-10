@@ -22,7 +22,7 @@ let checkPoint = false;
 const QuoteList = () => {
   viewPermission('quote');
   const [quote, setQuote] = useState({ data: [], loading: false, error: '' });
-  const [isFilter, setIsFilter] = useState(true);
+  const [isFilter, setIsFilter] = useState(false);
   const token = useSelector(state => state.auth.token);
   const [searchButton, setSearchButton] = useState(false);
   const [quoteStatus, setQuoteStatus] = useState({ data: [], isLoading: true });
@@ -150,8 +150,6 @@ const QuoteList = () => {
           style={{
             borderRadius: '.5em',
             padding: '.5em 2.5em',
-            color: val === 'in-progress' ? '#feaf00' : val === 'submitted' ? '#2fb083' : val === 'new' ? '#d63031' : val === 'received' ? '#0984e3' : val === 'saved' ? '#dfe6e9' : '',
-            background: val === 'in-progress' ? '#fef6e6' : val === 'submitted' ? '#ebf9f4' : val === 'new' ? '#ffeaa7' : val === 'received' ? '#b2bec3' : val === 'saved' ? '#00cec9' : '',
           }}
         >
           {val}
@@ -174,7 +172,7 @@ const QuoteList = () => {
       width: 120,
       align: 'center',
       render: (text, record) => (
-        <span className={'status-text'}>{<Moment format="DD MMMM YYYY">{parseInt(text)}</Moment>}</span>
+        <span className={'status-text'}>{<Moment format="DD-MMM-YYYY">{parseInt(text)}</Moment>}</span>
       ),
     },
     {
@@ -205,10 +203,6 @@ const QuoteList = () => {
   const returnMomentDateRange = (start, finish) => {
     return [moment(start, "YYYY-MM-DD"), moment(finish, "YYYY-MM-DD")];
   };
-
-  // console.log(searchDisable)
-
-  // console.log(filterDate)
 
   return (
     <>
