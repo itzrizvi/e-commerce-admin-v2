@@ -327,7 +327,11 @@ const AddOrder = () => {
                   if (data?.data.length === 0) return setProductFound(false);
                   setProductOption(
                     data.data.map(product => ({
-                      label: product?.prod_name,
+                      label: product?.prod_name +
+                        product?.prod_slug +
+                        product?.prod_sku +
+                        product?.prod_partnum +
+                        product?.mfg_build_part_number,
                       value: product?.id,
                       ...product,
                     })),
@@ -523,7 +527,7 @@ const AddOrder = () => {
         }
       }
       setCurrent(current + 1);
-    } catch {}
+    } catch { }
   };
   const prev = () => {
     setCurrent(current - 1);
@@ -556,7 +560,7 @@ const AddOrder = () => {
             if (data.data.coupon_type === 'percentage') {
               setDiscount(
                 (selectedProduct.reduce((accumulator, item) => accumulator + item.quantity * item.price, 0) / 100) *
-                  data.data.coupon_amount,
+                data.data.coupon_amount,
               );
             } else {
               setDiscount(data.data.coupon_amount);
@@ -803,7 +807,7 @@ const AddOrder = () => {
                       <div className="steps-content">
                         {current === 0 && (
                           <Row gutter={25}>
-                            <Col md={12} sm={24}>
+                            <Col md={8} sm={24}>
                               <Form.Item
                                 rules={[{ required: true, message: 'Please select a customer' }]}
                                 name="customer_id"
@@ -855,7 +859,7 @@ const AddOrder = () => {
                                             setCustomerFound(false);
                                           }
                                           const options = data?.data?.map(item => ({
-                                            label: item.email,
+                                            label: item?.email + ' - ' + item?.first_name + ' ' + item?.last_name,
                                             value: item.id,
                                             item,
                                           }));
@@ -868,7 +872,7 @@ const AddOrder = () => {
                                 />
                               </Form.Item>
                             </Col>
-                            <Col md={12} sm={24}>
+                            <Col md={16} sm={24}>
                               <Row gutter={25}>
                                 <Col>
                                   {selectedCustomer?.image ? (
@@ -942,7 +946,7 @@ const AddOrder = () => {
                                 >
                                   {!productFound && (
                                     <Alert
-                                      style={{ width: '30%', marginBottom: 10,  marginRight: 10 }}
+                                      style={{ width: '30%', marginBottom: 10, marginRight: 10 }}
                                       message="Product Not Found!"
                                       type="info"
                                       showIcon
@@ -1140,7 +1144,7 @@ const AddOrder = () => {
                           </Row>
                         )}
                         {current === 5 ||
-                        (selectedPaymentMethod?.name?.toLowerCase() === 'credit card' && current > 5) ? (
+                          (selectedPaymentMethod?.name?.toLowerCase() === 'credit card' && current > 5) ? (
                           <Row
                             gutter={25}
                             align="middle"
@@ -1720,98 +1724,98 @@ const AddOrder = () => {
                 </Col>
                 {addressType === 'billing'
                   ? billingAddresses.map(item => (
-                      <Col key={item.id} xs={24}>
-                        <Button
-                          size="small"
-                          style={{ position: 'absolute', right: 14, zIndex: 1000 }}
-                          title="Edit Billing Address"
-                          htmlType="button"
-                          type="info"
-                          onClick={() => addOrEditAddressHandler(item.id, 'billing')}
-                        >
-                          Edit
-                        </Button>
-                        <Button
-                          size="small"
-                          style={{ position: 'absolute', right: 14, zIndex: 1000, top: 45 }}
-                          title="Edit Shipping Address"
-                          htmlType="button"
-                          type="info"
-                          onClick={() => selectAddressHandler(addressType, item.id)}
-                        >
-                          Select
-                        </Button>
+                    <Col key={item.id} xs={24}>
+                      <Button
+                        size="small"
+                        style={{ position: 'absolute', right: 14, zIndex: 1000 }}
+                        title="Edit Billing Address"
+                        htmlType="button"
+                        type="info"
+                        onClick={() => addOrEditAddressHandler(item.id, 'billing')}
+                      >
+                        Edit
+                      </Button>
+                      <Button
+                        size="small"
+                        style={{ position: 'absolute', right: 14, zIndex: 1000, top: 45 }}
+                        title="Edit Shipping Address"
+                        htmlType="button"
+                        type="info"
+                        onClick={() => selectAddressHandler(addressType, item.id)}
+                      >
+                        Select
+                      </Button>
 
-                        <Radio
-                          style={{
-                            width: '100%',
-                            border: '1px solid #f0f0f0',
-                            fontSize: 12,
-                            marginBottom: 10,
-                            padding: 10,
-                            borderRadius: 5,
-                          }}
-                          value={item.id}
-                          onChange={() => setTempSelectedAddress(item)}
-                        >
-                          <p>{item.address1 && ellipsis(item.address1, 35)}</p>
-                          <p>{item.address2 && ellipsis(item.address2, 35)}</p>
-                          <p>
-                            {item.city}, {item.state} - {item.zip_code}
-                          </p>
-                          <p>{item?.countryCode?.name}</p>
-                          {billingAddresses.filter(item => item.isDefault)[0]?.id === item.id && (
-                            <Badge count="Default billing address" color="#ddd" style={{ color: '#000' }} />
-                          )}
-                        </Radio>
-                      </Col>
-                    ))
+                      <Radio
+                        style={{
+                          width: '100%',
+                          border: '1px solid #f0f0f0',
+                          fontSize: 12,
+                          marginBottom: 10,
+                          padding: 10,
+                          borderRadius: 5,
+                        }}
+                        value={item.id}
+                        onChange={() => setTempSelectedAddress(item)}
+                      >
+                        <p>{item.address1 && ellipsis(item.address1, 35)}</p>
+                        <p>{item.address2 && ellipsis(item.address2, 35)}</p>
+                        <p>
+                          {item.city}, {item.state} - {item.zip_code}
+                        </p>
+                        <p>{item?.countryCode?.name}</p>
+                        {billingAddresses.filter(item => item.isDefault)[0]?.id === item.id && (
+                          <Badge count="Default billing address" color="#ddd" style={{ color: '#000' }} />
+                        )}
+                      </Radio>
+                    </Col>
+                  ))
                   : shippingAddresses.map(item => (
-                      <Col key={item.id} xs={24}>
-                        <Button
-                          size="small"
-                          style={{ position: 'absolute', right: 14, zIndex: 1000 }}
-                          title="Edit Shipping Address"
-                          htmlType="button"
-                          type="info"
-                          onClick={() => addOrEditAddressHandler(item.id, 'shipping')}
-                        >
-                          Edit
-                        </Button>
-                        <Button
-                          size="small"
-                          style={{ position: 'absolute', right: 14, zIndex: 1000, top: 45 }}
-                          title="Edit Shipping Address"
-                          htmlType="button"
-                          type="info"
-                          onClick={() => selectAddressHandler(addressType, item.id)}
-                        >
-                          Select
-                        </Button>
-                        <Radio
-                          style={{
-                            width: '100%',
-                            border: '1px solid #f0f0f0',
-                            fontSize: 12,
-                            marginBottom: 10,
-                            padding: 10,
-                            borderRadius: 5,
-                          }}
-                          value={item.id}
-                          onChange={() => setTempSelectedAddress(item)}
-                        >
-                          <p>{item.address1 && ellipsis(item.address1, 35)}</p>
-                          <p>{item.address2 && ellipsis(item.address2, 35)}</p>
-                          <p>
-                            {item.city}, {item.state} - {item.zip_code}
-                          </p>
-                          <p>{item?.countryCode?.name}</p>
-                          {shippingAddresses.filter(item => item.isDefault)[0]?.id === item.id && (
-                            <Badge count="Default shipping address" color="#ddd" style={{ color: '#000' }} />
-                          )}
-                        </Radio>
-                      </Col>
-                    ))}
+                    <Col key={item.id} xs={24}>
+                      <Button
+                        size="small"
+                        style={{ position: 'absolute', right: 14, zIndex: 1000 }}
+                        title="Edit Shipping Address"
+                        htmlType="button"
+                        type="info"
+                        onClick={() => addOrEditAddressHandler(item.id, 'shipping')}
+                      >
+                        Edit
+                      </Button>
+                      <Button
+                        size="small"
+                        style={{ position: 'absolute', right: 14, zIndex: 1000, top: 45 }}
+                        title="Edit Shipping Address"
+                        htmlType="button"
+                        type="info"
+                        onClick={() => selectAddressHandler(addressType, item.id)}
+                      >
+                        Select
+                      </Button>
+                      <Radio
+                        style={{
+                          width: '100%',
+                          border: '1px solid #f0f0f0',
+                          fontSize: 12,
+                          marginBottom: 10,
+                          padding: 10,
+                          borderRadius: 5,
+                        }}
+                        value={item.id}
+                        onChange={() => setTempSelectedAddress(item)}
+                      >
+                        <p>{item.address1 && ellipsis(item.address1, 35)}</p>
+                        <p>{item.address2 && ellipsis(item.address2, 35)}</p>
+                        <p>
+                          {item.city}, {item.state} - {item.zip_code}
+                        </p>
+                        <p>{item?.countryCode?.name}</p>
+                        {shippingAddresses.filter(item => item.isDefault)[0]?.id === item.id && (
+                          <Badge count="Default shipping address" color="#ddd" style={{ color: '#000' }} />
+                        )}
+                      </Radio>
+                    </Col>
+                  ))}
               </Row>
             </Radio.Group>
           </Modal>

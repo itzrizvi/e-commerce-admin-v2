@@ -559,7 +559,6 @@ const AddProduct = () => {
     if (!data.prod_partnum) return toast.warning('Please enter Part No');
     if (!data.brand_id) return toast.warning('Please select a Manufacture');
     if (!data.prod_category) return toast.warning('Please select a Category');
-    if (!data.product_rep) return toast.warning('Please select a Product Representative');
     if (!data.prod_outofstock_status && !params.id) return toast.warning('Please select an Availability Status');
     if (!data.prod_regular_price) return toast.warning('Please enter Regular Price');
     // All Validation End

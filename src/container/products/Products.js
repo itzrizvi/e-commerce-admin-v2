@@ -373,7 +373,7 @@ const Products = () => {
       ),
     },
     {
-      title: 'Date of Entry',
+      title: 'Date Added',
       dataIndex: 'createdAt',
       key: 'createdAt',
       width: 120,
@@ -384,7 +384,7 @@ const Products = () => {
       ),
     },
     {
-      title: 'Date of Update',
+      title: 'Date Updated',
       dataIndex: 'updatedAt',
       key: 'updatedAt',
       width: 120,
@@ -392,12 +392,12 @@ const Products = () => {
       sorter: (a, b) => (a.updatedAt === b.updatedAt ? 0 : a.updatedAt ? -1 : 1),
       render: (text, record) => (
         <span className={'status-text'}>{<Moment format="DD-MMM-YYYY">{parseInt(text)}</Moment>}</span>
-      ),
+      )
     },
     {
       title: 'Action',
       dataIndex: 'action',
-      width: 140,
+      width: 120,
       align: 'center',
       render: (text, record) => (
         <>
@@ -484,8 +484,9 @@ const Products = () => {
       });
 
     if (permissionCheckForAllCondition) {
-      setViewAllFilter(true)
+      setViewAllFilter(true);
     }
+    permissionCheckForAllCondition = false
 
   }, [filterDate]);
 
@@ -747,7 +748,7 @@ const Products = () => {
                   <span className={'psp_list'}>
                     <Table
                       className="table-responsive"
-                      columns={columns}
+                      columns={viewallfilter ? columns : columns.filter(col => col.dataIndex !== 'updatedAt')}
                       rowKey={'id'}
                       size="small"
                       dataSource={products.data ? products.data : []}
