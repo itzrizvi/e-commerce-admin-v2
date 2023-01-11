@@ -371,8 +371,7 @@ const ListUser = () => {
                                             <Table
                                                 className="table-responsive"
                                                 columns={columns}
-
-                                                rowKey={'uid'}
+                                                rowKey={'id'}
                                                 size="small"
                                                 dataSource={staffs.data ? staffs.data : []}
                                                 rowClassName={(record, index) => (index % 2 === 0 ? "" : "altTableClass")}

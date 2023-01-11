@@ -2,8 +2,8 @@ import { gql } from '@apollo/client';
 
 export const orderQuery = {
   GET_ALL_ORDER: gql`
-    query getOrderlistAdmin {
-      getOrderlistAdmin {
+    query getOrderlistAdmin($query:orderListInput) {
+      getOrderlistAdmin(query:$query) {
         message
         status
         data {
@@ -238,6 +238,20 @@ export const orderQuery = {
       }
     }
   `,
+  GET_ORDER_UPDATE_ADMIN_LIST: gql`
+    query getOrderUpdateAdminList {
+      getOrderUpdateAdminList {
+        message
+        status
+        tenant_id
+        data {
+          id
+          first_name
+          last_name
+          email
+        }
+      }
+    }`,
   CREATE_ORDER: gql`
     mutation createOrderByAdmin($data: createOrderByAdminInput) {
       createOrderByAdmin(data: $data) {
