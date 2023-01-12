@@ -314,9 +314,9 @@ const EditUser = () => {
     setPersonModalOpen(true);
   };
 
-  const handleRemovePerson = id => {
-    setContactPersons(prev => prev.filter(item => item.id !== id));
-  };
+  // const handleRemovePerson = id => {
+  //   setContactPersons(prev => prev.filter(item => item.id !== id));
+  // };
 
   return (
     <>
@@ -493,7 +493,7 @@ const EditUser = () => {
                                 >
                                   Edit
                                 </Button>
-                                <Button
+                                {/* <Button
                                   size="small"
                                   style={{ position: 'absolute', right: 14, top: 40, zIndex: 1000 }}
                                   title="Remove Person"
@@ -502,7 +502,7 @@ const EditUser = () => {
                                   onClick={() => handleRemovePerson(item.id)}
                                 >
                                   <FeatherIcon icon="trash-2" />
-                                </Button>
+                                </Button> */}
                               </>
                             )}
 

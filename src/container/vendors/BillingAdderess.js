@@ -189,16 +189,16 @@ const BillingAdderess = ({
         <Checkbox checked={defaultBilling === record.id ? true : false} onChange={e => setDefaultBilling(record.id)} />
       ),
     },
-    {
-      title: 'Action',
-      dataIndex: 'action',
-      key: 'action',
-      render: (text, record) => (
-        <Button size="" title="Remove" type="danger" onClick={() => removeRow(record.id)}>
-          <FeatherIcon icon="trash-2" />
-        </Button>
-      ),
-    },
+    // {
+    //   title: 'Action',
+    //   dataIndex: 'action',
+    //   key: 'action',
+    //   render: (text, record) => (
+    //     <Button size="" title="Remove" type="danger" onClick={() => removeRow(record.id)}>
+    //       <FeatherIcon icon="trash-2" />
+    //     </Button>
+    //   ),
+    // },
   ];
 
   // Adding new row on table

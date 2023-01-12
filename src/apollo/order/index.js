@@ -284,5 +284,61 @@ export const orderQuery = {
       }
     }
   `,
+  GET_SEARCH_ORDER: gql`
+    query getOrderBySearch($query: searchOrderInput) {
+      getOrderBySearch(query: $query) {
+        message
+        status
+        data {
+          id
+          total
+          po_id
+          po_number
+          sub_total
+          discount_amount
+          tax_amount
+          productCount
+          tax_exempt
+          createdAt
+          updatedAt
+          customer {
+            id
+            first_name
+            last_name
+            email
+            email_verified
+            user_status
+            image
+            contactPersons {
+              id
+              name
+              email
+              phone
+              fax
+              status
+              createdAt
+              updatedAt
+            }
+            addresses {
+              id
+              address1
+              address2
+              phone
+              fax
+              email
+              city
+              state
+              zip_code
+              country
+              type
+              status
+              updatedAt
+              createdAt
+            }
+          }
+        }
+      }
+    }
+  `,
 };
 export const orderMutation = {};
