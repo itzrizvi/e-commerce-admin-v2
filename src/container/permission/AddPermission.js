@@ -153,9 +153,8 @@ const AddPermission = () => {
       <PageHeader
         title={
           params.id
-            ? `Manage Permission | Edit Permission ${
-                singlePermission.isLoading ? '' : `(${singlePermission.data.roles_permission_name})`
-              }`
+            ? `Manage Permission | Edit Permission ${singlePermission.isLoading ? '' : `(${singlePermission.data.roles_permission_name})`
+            }`
             : 'Add Permission'
         }
       />
@@ -176,14 +175,24 @@ const AddPermission = () => {
                   onFinishFailed={errorInfo => console.log('form error info:\n', errorInfo)}
                   labelCol={{ span: 4 }}
                 >
-                  <Form.Item
-                    rules={[{ required: true, max: maxLength, message: 'Please enter Role Name' }]}
-                    name="permissionName"
-                    label="Name"
-                    initialValue={params.id ? singlePermission.data.roles_permission_name : ''}
-                  >
-                    <Input placeholder="Enter Permission Name" />
-                  </Form.Item>
+                  <Row gutter={25}>
+                    <Col span={10}>
+                      <Form.Item
+                        rules={[{ required: true, max: maxLength, message: 'Please enter Role Name' }]}
+                        name="permissionName"
+                        label="Name"
+                        initialValue={params.id ? singlePermission.data.roles_permission_name : ''}
+                        labelCol={{ style: { width: "40%" } }}
+                      >
+                        <Row>
+                          <Col span={22}>
+                            <Input placeholder="Enter Permission Name" />
+                          </Col>
+                        </Row>
+                      </Form.Item>
+                    </Col>
+                  </Row>
+
 
                   <Form.Item name="permissionStatus" label="Status">
                     <Switch checked={permissionStatus} onChange={checked => setPermissionStatus(checked)} />

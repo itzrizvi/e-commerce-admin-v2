@@ -29,7 +29,7 @@ const AddRole = () => {
 
   const columns = [
     {
-      title: '',
+      title: 'Permission Name',
       dataIndex: 'roles_permission_name',
     },
     {
@@ -148,36 +148,62 @@ const AddRole = () => {
                 onFinishFailed={errorInfo => console.log('form error info:\n', errorInfo)}
                 labelCol={{ span: 4 }}
               >
-                <Form.Item
-                  rules={[{ required: true, max: maxLength, message: 'Please enter Role Name' }]}
-                  name="role"
-                  label="Name"
-                >
-                  <Input placeholder="Enter Role Name" />
-                </Form.Item>
-                <Form.Item
-                  rules={[{ required: true, message: 'Please enter Role Description' }]}
-                  name="roleDescription"
-                  label="Description"
-                >
-                  <TextArea rows={4} placeholder="Enter Role Description" />
-                </Form.Item>
+
+                <Row gutter={25}>
+                  <Col span={10}>
+                    <Form.Item
+                      rules={[{ required: true, max: maxLength, message: 'Please enter Role Name' }]}
+                      name="role"
+                      label="Name"
+                      labelCol={{ style: { width: "40%" } }}
+                    >
+                      <Row>
+                        <Col span={22}>
+                          <Input placeholder="Enter Role Name" />
+                        </Col>
+                      </Row>
+                    </Form.Item>
+                  </Col>
+                </Row>
+
+                <Row gutter={25}>
+                  <Col span={18}>
+                    <Form.Item
+                      rules={[{ required: true, message: 'Please enter Role Description' }]}
+                      name="roleDescription"
+                      label="Description"
+                      labelCol={{ style: { width: "21.5%" } }}
+                    >
+                      <Row>
+                        <Col span={18}>
+                          <TextArea rows={4} placeholder="Enter Role Description" />
+                        </Col>
+                      </Row>
+                    </Form.Item>
+                  </Col>
+                </Row>
+
 
                 <Form.Item name="role_status" label="Status">
                   <Switch checked={role_status} onChange={checked => setRole_status(checked)} />
                 </Form.Item>
+                <Row gutter={25}>
+                  <Col span={24} >
+                    <h2 style={{ fontSize: "15px", fontWeight: "600" }}>Select Permissions For This Role:</h2>
+                    <Form.Item name="permissionsData">
+                      {allPermission.isLoading ? (
+                        <div className="spin">
+                          <Spin />
+                        </div>
+                      ) : allPermission.error ? (
+                        <p>{allPermission.error}</p>
+                      ) : (
+                        <Table pagination={false} columns={columns} rowKey={'id'} dataSource={allPermission.data} />
+                      )}
+                    </Form.Item>
+                  </Col>
+                </Row>
 
-                <Form.Item name="permissionsData" label="Permissions">
-                  {allPermission.isLoading ? (
-                    <div className="spin">
-                      <Spin />
-                    </div>
-                  ) : allPermission.error ? (
-                    <p>{allPermission.error}</p>
-                  ) : (
-                    <Table pagination={false} columns={columns} rowKey={'id'} dataSource={allPermission.data} />
-                  )}
-                </Form.Item>
 
                 <div
                   style={{

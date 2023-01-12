@@ -88,7 +88,7 @@ const AllAdmin = () => {
       key: 'id',
       width: 100,
       ellipsis: true,
-      sorter: (a, b) => (a.id.toUpperCase() > b.id.toUpperCase() ? 1 : -1),
+      sorter: (a, b) => (a.id > b.id ? 1 : -1),
     },
     {
       title: 'Image',
@@ -111,21 +111,21 @@ const AllAdmin = () => {
       key: 'email',
       width: 200,
       ellipsis: true,
-      sorter: (a, b) => (a.email.toUpperCase() > b.email.toUpperCase() ? 1 : -1),
+      sorter: (a, b) => (a.email > b.email ? 1 : -1),
     },
     {
       title: 'First Name',
       dataIndex: 'first_name',
       key: 'first_name',
       ellipsis: true,
-      sorter: (a, b) => (a.first_name.toUpperCase() > b.first_name.toUpperCase() ? 1 : -1),
+      sorter: (a, b) => (a.first_name > b.first_name ? 1 : -1),
     },
     {
       title: 'Last Name',
       dataIndex: 'last_name',
       key: 'last_name',
       ellipsis: true,
-      sorter: (a, b) => (a.last_name.toUpperCase() > b.last_name.toUpperCase() ? 1 : -1),
+      sorter: (a, b) => (a.last_name > b.last_name ? 1 : -1),
     },
     {
       title: 'Roles',
@@ -193,7 +193,7 @@ const AllAdmin = () => {
       render: (text, record) => (
         <>
           <Link to={`/admin/admin/add-admin?id=${record.id}`}>
-            <FontAwesome name="edit" />
+            <FontAwesome name="edit" style={{ color: '#5F63F2' }} />
           </Link>
         </>
       ),

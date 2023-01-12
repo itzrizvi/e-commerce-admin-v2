@@ -137,6 +137,8 @@ export const authQuery = {
           user_status
           email_verified
           email
+          phone
+          fax
           roles {
             id
             role

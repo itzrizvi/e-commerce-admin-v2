@@ -89,7 +89,8 @@ const ListPermission = () => {
             title: 'Status',
             dataIndex: 'roles_permission_status',
             key: 'roles_permission_status',
-            align: 'right',
+            align: 'middle',
+            width: 120,
             sorter: (a, b) => (a.roles_permission_status === b.roles_permission_status) ? 0 : a.roles_permission_status ? -1 : 1,
             filters: [
                 {
@@ -113,9 +114,7 @@ const ListPermission = () => {
             render: (text, record) => (
                 <>
                     <Link to={`/admin/permission/add?id=${record.id}`}>
-                        {/* <Button size="default" type="white" title='Edit'> */}
-                        <FontAwesome name="edit" style={{ margin: ".5em 1em" }} />
-                        {/* </Button> */}
+                        <FontAwesome name="edit" style={{ margin: ".5em 1em", color: '#5F63F2' }} />
                     </Link>
                 </>
             ),

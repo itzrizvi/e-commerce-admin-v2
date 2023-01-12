@@ -260,30 +260,54 @@ const UpdateRole = () => {
                     onFinishFailed={errorInfo => console.log('form error info:\n', errorInfo)}
                     labelCol={{ span: 4 }}
                   >
-                    <Form.Item
-                      rules={[{ required: true, max: maxLength, message: 'Please enter Role Name' }]}
-                      name="role"
-                      label="Name"
-                      initialValue={singleRole.data.role}
-                    >
-                      <Input placeholder="Enter Role Name" />
-                    </Form.Item>
-                    <Form.Item
-                      rules={[{ required: true, message: 'Please enter Role Description' }]}
-                      name="roleDescription"
-                      label="Description"
-                      initialValue={singleRole.data.role_description}
-                    >
-                      <TextArea rows={4} placeholder="Enter Role Description" />
-                    </Form.Item>
+                    <Row gutter={25}>
+                      <Col span={10}>
+                        <Form.Item
+                          rules={[{ required: true, max: maxLength, message: 'Please enter Role Name' }]}
+                          name="role"
+                          label="Name"
+                          initialValue={singleRole.data.role}
+                          labelCol={{ style: { width: "40%" } }}
+                        >
+                          <Row>
+                            <Col span={22}>
+                              <Input defaultValue={singleRole?.data?.role} placeholder="Enter Role Name" />
+                            </Col>
+                          </Row>
+                        </Form.Item>
+                      </Col>
+                    </Row>
+
+                    <Row gutter={25}>
+                      <Col span={18}>
+                        <Form.Item
+                          rules={[{ required: true, message: 'Please enter Role Description' }]}
+                          name="roleDescription"
+                          label="Description"
+                          initialValue={singleRole.data.role_description}
+                          labelCol={{ style: { width: "21.5%" } }}
+                        >
+                          <Row>
+                            <Col span={18}>
+                              <TextArea rows={4} defaultValue={singleRole?.data?.role_description} placeholder="Enter Role Description" />
+                            </Col>
+                          </Row>
+                        </Form.Item>
+                      </Col>
+                    </Row>
+
 
                     <Form.Item name="role_status" label="Status">
                       <Switch checked={role_status} onChange={checked => setRole_status(checked)} />
                     </Form.Item>
-
-                    <Form.Item name="permissionsData" label="Permissions">
-                      <Table pagination={false} columns={columns} rowKey={'id'} dataSource={permissionList} />
-                    </Form.Item>
+                    <Row gutter={25}>
+                      <Col span={24} >
+                        <h2 style={{ fontSize: "15px", fontWeight: "600" }}>Select Or Update Permissions For This Role:</h2>
+                        <Form.Item name="permissionsData">
+                          <Table pagination={false} columns={columns} rowKey={'id'} dataSource={permissionList} />
+                        </Form.Item>
+                      </Col>
+                    </Row>
 
                     <div
                       style={{

@@ -23,7 +23,6 @@ const RoleListTable = () => {
   });
 
 
-
   let rolesTableData = [];
   const [filteredRoles, setFilteredRoles] = useState([]);
 
@@ -138,7 +137,7 @@ const RoleListTable = () => {
       align: "center",
       render: (text, record) => (
         <Link to={`/admin/roles/update?id=${record.key}`} style={{ cursor: 'pointer' }} >
-          <FontAwesome name="edit" style={{ margin: ".5em 1em" }} />
+          <FontAwesome name="edit" style={{ margin: ".5em 1em", color: '#5F63F2' }} />
         </Link>
       ),
     },
