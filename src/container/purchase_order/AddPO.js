@@ -893,7 +893,7 @@ const AddPO = () => {
                         {current === 2 && (
                           <>
                             <Row gutter={25}>
-                              <Col xs={24} md={12}>
+                              <Col xs={24} md={16}>
                                 <Form.Item
                                   initialValue={selectedShippingMethod}
                                   rules={[{ required: true, message: 'Please Select Shipping Method' }]}
