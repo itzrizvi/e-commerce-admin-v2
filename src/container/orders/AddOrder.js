@@ -668,6 +668,8 @@ const AddOrder = () => {
         })
         .then(res => {
           const data = res?.data?.updateCustomerAddress;
+          setShippingAddresses(newShippingAddress);
+          setBillingAddresses(newBillingAddress);
           if (!data?.status) return;
           setChangeAddress(true);
           setAddressModalOpen(false);
@@ -697,6 +699,11 @@ const AddOrder = () => {
           const data =
             type === 'billing' ? res?.data?.addCustomerBillingAddress : res?.data?.addCustomerShippingAddress;
           if (!data?.status) return;
+          if (type === 'billing') {
+            setBillingAddresses(prev => prev.push(newBillingAddress));
+          } else {
+            setShippingAddresses(prev => prev.push(newShippingAddress));
+          }
           setChangeAddress(true);
           setAddressModalOpen(false);
         });

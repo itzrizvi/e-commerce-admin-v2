@@ -1343,15 +1343,15 @@ export const vendorMutation = {
     }
   `,
   ADD_VENDOR_BILLING_ADDRESS: gql`
-    mutation addVendorShippingAddress($data: AddVendorShippingAddressInput) {
-      addVendorShippingAddress(data: $data) {
+    mutation addVendorBillingAddress($data: AddVendorBillingAddressInput) {
+      addVendorBillingAddress(data: $data) {
         message
         status
       }
     }
   `,
   ADD_VENDOR_SHIPPING_ADDRESS: gql`
-    mutation addVendorShippingAddress($data: Address) {
+    mutation addVendorShippingAddress($data: AddVendorShippingAddressInput) {
       addVendorShippingAddress(data: $data) {
         message
         status

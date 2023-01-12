@@ -6,7 +6,7 @@ import { Cards } from '../../components/cards/frame/cards-frame';
 import { Button } from '../../components/buttons/buttons';
 import { Link, useHistory, useLocation } from 'react-router-dom';
 import queryString from 'query-string';
-import apolloClient, { vendorQuery } from '../../utility/apollo';
+import apolloClient, { vendorMutation, vendorQuery } from '../../utility/apollo';
 import { poQuery } from '../../apollo/po';
 import { toast } from 'react-toastify';
 import { ellipsis, viewPermission } from '../../utility/utility';
@@ -17,6 +17,7 @@ import { orderQuery } from '../../apollo/order';
 import { methodQuery } from '../../apollo/method';
 import { strCamelCase } from '../../utility/stringModify';
 import { addressSchema } from '../../apollo/address';
+import SelectNotFound from '../../components/esential/SelectNotFound';
 
 const AddPO = () => {
   viewPermission('purchase-order');
@@ -38,7 +39,6 @@ const AddPO = () => {
   const [shippingMethod, setShippingMethod] = useState([]);
   const [paymentMethod, setPaymentMethod] = useState([]);
   const [selectedShippingMethod, setSelectedShippingMethod] = useState(null);
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(null);
   const [addressType, setAddressType] = useState(null);
   const [listAddressModalOpen, setListAddressModalOpen] = useState(false);
   const [addressModalOpen, setAddressModalOpen] = useState(false);
@@ -50,6 +50,11 @@ const AddPO = () => {
   const [selectedCountryCode, setSelectedCountryCode] = useState('US');
   const [tempSelectedAddress, setTempSelectedAddress] = useState(null);
   const [contactPerson, setContactPerson] = useState([]);
+  const [searchOrderOption, setSearchOrderOption] = useState(false);
+  const [orderNotFoundContent, setOrderNotFoundContent] = useState('No Data!');
+  const [changeAddress, setChangeAddress] = useState(false);
+
+
   // ============+ for product START +====================
   const initialData = {
     id: '',
@@ -148,7 +153,6 @@ const AddPO = () => {
         const data = res?.data?.getPaymentMethodListPublic;
         if (!data.status) return;
         setPaymentMethod(data?.data);
-        setSelectedPaymentMethod(data?.data?.filter(item => item.isDefault === true)[0]?.id);
       })
       .catch(err => {
         console.log(err);
@@ -229,8 +233,10 @@ const AddPO = () => {
       });
   }, []);
 
-  const handleSubmit = values => {
+  const handleSubmit = () => {
+    const values = form.getFieldsValue(true);
     // validate Products.
+    if(products.length === 0) return  toast.warning('Please Select at Least One Product!');
     const notValidate = products.find(item => {
       const { id, price, quantity, recieved_quantity } = item;
       const checkFalse = !(id && price && quantity && recieved_quantity !== '');
@@ -290,6 +296,7 @@ const AddPO = () => {
 
   const handleVendorChange = e => {
     setVendors(s => ({ ...s, isLoading: true }));
+    const customer_id = selectedOrder?.customer?.id;
     apolloClient
       .query({
         query: vendorQuery.GET_SINGLE_VENDOR,
@@ -305,9 +312,14 @@ const AddPO = () => {
       })
       .then(async res => {
         const data = res?.data?.getSingleVendor;
-        if (!data?.status) return;
+        if (!data?.status) return;        
         let new_billing = [];
+        const contact_person = [];
         let new_shipping = [];
+        data.data.contactPersons.forEach(person => {
+          contact_person.push({ ...person, isNew: false, label: person.email, value: person.id  });
+        });
+        setContactPerson(contact_person);
         if (selectedType === 'drop_shipping') {
           await form.validateFields(['order_id']);
           apolloClient
@@ -326,30 +338,28 @@ const AddPO = () => {
               setSelectedBillingAddress(data?.data?.billingAddresses.filter(item => item.isDefault));
               setBillingAddresses(data?.data?.billingAddresses);
             });
-          const customer_id = selectedOrder?.customer?.id;
-          console.log(selectedOrder);
-          // apolloClient
-          //   .query({
-          //     query: poQuery.GET_ADDRESS_BY_CUSTOMER,
-          //     variables: {
-          //       query: {
-          //         customer_id,
-          //       },
-          //     },
-          //     context: {
-          //       headers: {
-          //         TENANTID: process.env.REACT_APP_TENANTID,
-          //         Authorization: token,
-          //       },
-          //     },
-          //   })
-          //   .then(res => {
-          //     const data = res?.data?.getAddressListByCustomerID;
-          //     if (!data?.status) return;
-          //     const shipping_address = data?.data.filter(item => item.type === 'shipping');
-          //     setShippingAddresses(shipping_address);
-          //     setSelectedShippingAddress(shipping_address.filter(item => item.isDefault));
-          //   });
+          apolloClient
+            .query({
+              query: poQuery.GET_ADDRESS_BY_CUSTOMER,
+              variables: {
+                query: {
+                  customer_id,
+                },
+              },
+              context: {
+                headers: {
+                  TENANTID: process.env.REACT_APP_TENANTID,
+                  Authorization: token,
+                },
+              },
+            })
+            .then(res => {
+              const data = res?.data?.getAddressListByCustomerID;
+              if (!data?.status) return;
+              const shipping_address = data?.data.filter(item => item.type === 'shipping');
+              setShippingAddresses(shipping_address);
+              setSelectedShippingAddress(shipping_address.filter(item => item.isDefault));
+            });
         } else {
           data?.data?.addresses.forEach(item => {
             if (item.type === 'billing') new_billing.push(item);
@@ -360,28 +370,6 @@ const AddPO = () => {
           setShippingAddresses(new_shipping);
           setSelectedShippingAddress(new_shipping.filter(item => item.isDefault)[0] ?? []);
         }
-
-        apolloClient
-          .query({
-            query: addressQuery.GET_CONTACT_PERSON_LIST_BY_CUSTOMER,
-            variables: { query: { customer_id: parseInt(user.id) } },
-            context: {
-              headers: { TENANTID: process.env.REACT_APP_TENANTID, Authorization: token },
-            },
-            fetchPolicy: 'network-only',
-          })
-          .then(res => {
-            const data = res.data.getContactPersonListByCustomerID;
-            if (!data.status) return;
-            const contact_person = [];
-            data?.data?.forEach(person => {
-              contact_person.push({ ...person, isNew: false });
-            });
-            setContactPerson(contact_person);
-          })
-          .catch(err => {
-            log('error', `${err.toString()}|${useRouter().pathname}|getContactPersonListByCustomerID`);
-          });
       })
       .catch(err => {
         console.log(err);
@@ -402,7 +390,6 @@ const AddPO = () => {
   };
 
   const chageOrderIdHandler = val => {
-    setSelectedOrder(val);
     setBillingAddresses([]);
     setShippingAddresses([]);
     form.setFieldsValue({
@@ -418,12 +405,12 @@ const AddPO = () => {
       if (type === 'billing') {
         setEditSelectedAddress(billingAddresses.filter(item => item.id === id)[0]);
         form.setFieldsValue({
-          billing_address_id: id,
+          vendor_billing_id: id,
         });
       } else {
         setEditSelectedAddress(shippingAddresses.filter(item => item.id === id)[0]);
         form.setFieldsValue({
-          shipping_address_id: id,
+          vendor_shipping_id: id,
         });
       }
     } else {
@@ -440,12 +427,12 @@ const AddPO = () => {
     if (type === 'billing') {
       setSelectedBillingAddress(tempSelectedAddress);
       form.setFieldsValue({
-        billing_address_id: id,
+        vendor_billing_id: id,
       });
     } else {
       setSelectedShippingAddress(tempSelectedAddress);
       form.setFieldsValue({
-        shipping_address_id: id,
+        vendor_shipping_id: id,
       });
     }
     setListAddressModalOpen(false);
@@ -459,8 +446,12 @@ const AddPO = () => {
       percent: 30,
     },
     {
+      title: 'Addresses',
+      percent: 50,
+    },
+    {
       title: 'Other Info',
-      percent: 60,
+      percent: 80,
     },
     {
       title: 'Products',
@@ -473,7 +464,7 @@ const AddPO = () => {
     try {
       if (current === 0) {
         await form.validateFields(['type', 'vendor_id']);
-      } else if (current === 1) {
+      } else if (current === 2) {
         await form.validateFields(['tax_amount', 'shipping_method_id', 'payment_method_id']);
       }
       setCurrent(current + 1);
@@ -492,6 +483,101 @@ const AddPO = () => {
   const changeAddressHandler = type => {
     setListAddressModalOpen(true);
     setAddressType(type);
+  };
+
+
+  // Handle Address Submit
+  const handleAddressSubmit = type => {
+    const values = addressForm.getFieldValue();
+    const vendor_id = form.getFieldValue('vendor_id')
+    setChangeAddress(false);
+    let newBillingAddress = [];
+    let newShippingAddress = [];
+    if (editSelectedAddress) {
+      if (type === 'billing') {
+        newBillingAddress = billingAddresses.map(item => {
+          let { id, createdAt, updatedAt, __typename, type, isDefault, countryCode, ...rest } = item;
+          if (values.isDefault) isDefault = false;
+          if (editSelectedAddress?.id === id) {
+            rest = values;
+          }
+          return {
+            parent_id: vendor_id,
+            isNew: false,
+            isDefault: isDefault,
+            id,
+            ...rest,
+          };
+        });
+      } else {
+        newShippingAddress = shippingAddresses.map(item => {
+          let { id, createdAt, updatedAt, __typename, type, isDefault, countryCode, ...rest } = item;
+          if (values.isDefault) isDefault = false;
+          if (editSelectedAddress?.id === id) {
+            rest = values;
+          }
+          return {
+            parent_id: vendor_id,
+            isDefault: isDefault,
+            isNew: false,
+            id,
+            ...rest,
+          };
+        });
+      }
+
+      apolloClient
+        .mutate({
+          mutation: vendorMutation.UPDATE_VENDOR_ADDRESS,
+          variables: {
+            data: {
+              ref_id: vendor_id,
+              type,
+              addresses: [...(type === 'billing' ? newBillingAddress : newShippingAddress)],
+            },
+          },
+          context: {
+            headers: {
+              TENANTID: process.env.REACT_APP_TENANTID,
+              Authorization: token,
+            },
+          },
+        })
+        .then(res => {
+          const data = res?.data?.updateVendorAddress;
+          if (!data?.status) return;
+          setChangeAddress(true);
+          setAddressModalOpen(false);
+        });
+    } else {
+      if (type === 'billing') newBillingAddress.push({ parent_id: vendor_id, ...values });
+      else newShippingAddress.push({ parent_id: vendor_id, ...values });
+      apolloClient
+        .mutate({
+          mutation:
+            type === 'billing'
+              ? vendorMutation.ADD_VENDOR_BILLING_ADDRESS
+              : vendorMutation.ADD_VENDOR_SHIPPING_ADDRESS,
+          variables: {
+            data: {
+              addresses: [...(type === 'billing' ? newBillingAddress : newShippingAddress)],
+            },
+          },
+          context: {
+            headers: {
+              TENANTID: process.env.REACT_APP_TENANTID,
+              Authorization: token,
+            },
+          },
+        })
+        .then(res => {
+          const data =
+            type === 'billing' ? res?.data?.addVendorBillingAddress : res?.data?.addVendorShippingAddress;
+          if (!data?.status) return;
+          setChangeAddress(true);
+          setAddressModalOpen(false);
+        });
+    }
   };
 
   return (
@@ -551,7 +637,7 @@ const AddPO = () => {
                                       <div className="demo-option-label-item">Drop Shipping</div>
                                     </Select.Option>
                                   </Select>
-                                </Form.Item>
+                                </Form.Item> 
                                 <Form.Item
                                   name="order_id"
                                   label="Order"
@@ -566,40 +652,52 @@ const AddPO = () => {
                                     placeholder="Select an order (optional)"
                                     style={{ width: '100%' }}
                                     options={orderList}
-                                    onChange={e => chageOrderIdHandler(e)}
-                                    onSearch={val => {
-                                      if (val.length >= 1) {
-                                        apolloClient
-                                          .query({
-                                            query: orderQuery.GET_SEARCH_ORDER,
-                                            variables: {
-                                              query: {
-                                                searchQuery: parseInt(val),
+                                    open={searchOrderOption}
+                                    onSelect={e => {
+                                      chageOrderIdHandler(e);
+                                      setSearchOrderOption(false);
+                                    }}
+                                    onBlur={() => setSearchOrderOption(false)}
+                                    onInputKeyDown={key => {
+                                      setOrderNotFoundContent('No Data!');
+                                      setSearchOrderOption(true);
+                                      if (key.keyCode === 13) {
+                                        const val = key.target.value;
+                                        if (val.length >= 1) {
+                                          apolloClient
+                                            .query({
+                                              query: orderQuery.GET_SEARCH_ORDER,
+                                              variables: {
+                                                query: {
+                                                  searchQuery: parseInt(val),
+                                                },
                                               },
-                                            },
-                                            context: {
-                                              headers: {
-                                                TENANTID: process.env.REACT_APP_TENANTID,
-                                                Authorization: token,
+                                              context: {
+                                                headers: {
+                                                  TENANTID: process.env.REACT_APP_TENANTID,
+                                                  Authorization: token,
+                                                },
                                               },
-                                            },
-                                          })
-                                          .then(res => {
-                                            const data = res?.data?.getOrderBySearch;
-                                            if (!data.status) return;
-                                            if (data?.data.length === 0) return;
-                                            setSelectedOrder(data?.data);
-                                            setOrderList(
-                                              data.data.map(order => ({
-                                                label: order?.id,
-                                                value: order?.id,
-                                              })),
-                                            );
-                                          });
-                                      } else {
-                                        setOrderList([]);
+                                            })
+                                            .then(res => {
+                                              const data = res?.data?.getOrderBySearch;
+                                              if (!data.status) return;
+                                              if (data?.data.length === 0)
+                                                return setOrderNotFoundContent('No Order Found!');
+                                              setSelectedOrder(data?.data[0]);
+                                              setOrderList(
+                                                data.data.map(order => ({
+                                                  label: order?.id,
+                                                  value: order?.id,
+                                                })),
+                                              );
+                                            });
+                                        } else {
+                                          setOrderList([]);
+                                        }
                                       }
                                     }}
+                                    notFoundContent={<SelectNotFound value={orderNotFoundContent} />}
                                   />
                                 </Form.Item>
                                 <Form.Item
@@ -610,7 +708,6 @@ const AddPO = () => {
                                   <Select
                                     size="middle"
                                     placeholder="Select Vendor"
-                                    initialvalues=""
                                     onChange={handleVendorChange}
                                     style={{ width: '100%' }}
                                     optionLabelProp="label"
@@ -632,168 +729,168 @@ const AddPO = () => {
                                   </Form.Item>
                                 )}
                               </Col>
-                              <Col md={12} xs={0}>
-                                <Row gutter={25}>
-                                  <Col sm={24}>
-                                    <Typography.Title level={5}>Shipping Addresses</Typography.Title>
-                                    <Form.Item
-                                      rules={[{ required: true, message: 'Please Select Shipping Address' }]}
-                                      name="shipping_address_id"
-                                      initialValue={selectedShippingAddress?.id}
+                            </Row>
+                          </>
+                        )}
+                        {current === 1 && (
+                          <Row gutter={25}>
+                            <Col sm={12}>
+                              <Typography.Title level={5}>Shipping Address</Typography.Title>
+                              <Form.Item
+                                rules={[{ required: true, message: 'Please Select Shipping Address' }]}
+                                name="vendor_shipping_id"
+                                initialValue={selectedShippingAddress?.id}
+                              >
+                                {!selectedShippingAddress?.id && shippingAddresses.length > 0 ? (
+                                  <Button
+                                    size="small"
+                                    style={{ position: 'absolute', right: 14, zIndex: 1000, top: -40 }}
+                                    title="Change Shipping Address"
+                                    htmlType="button"
+                                    type="info"
+                                    onClick={() => changeAddressHandler('shipping')}
+                                  >
+                                    Select Address
+                                  </Button>
+                                ) : (
+                                  !selectedShippingAddress?.id && (
+                                    <Button
+                                      size="small"
+                                      style={{ position: 'absolute', right: 14, zIndex: 1000, top: -40 }}
+                                      title={`Add Shipping Address`}
+                                      htmlType="button"
+                                      type="primary"
+                                      onClick={() => addOrEditAddressHandler(null, 'shipping')}
                                     >
-                                      {!selectedShippingAddress?.id && shippingAddresses.length > 0 ? (
+                                      Add address
+                                    </Button>
+                                  )
+                                )}
+
+                                <Radio.Group style={{ width: '100%', padding: 10 }}>
+                                  <Row gutter={25}>
+                                    {selectedShippingAddress && (
+                                      <Col key={selectedShippingAddress?.id} xs={24}>
                                         <Button
                                           size="small"
-                                          style={{ position: 'absolute', right: 14, zIndex: 1000, top: -40 }}
+                                          style={{ position: 'absolute', right: 14, zIndex: 1000 }}
                                           title="Change Shipping Address"
                                           htmlType="button"
                                           type="info"
                                           onClick={() => changeAddressHandler('shipping')}
                                         >
-                                          Select Address
+                                          Change
                                         </Button>
-                                      ) : (
-                                        !selectedShippingAddress?.id && (
-                                          <Button
-                                            size="small"
-                                            style={{ position: 'absolute', right: 14, zIndex: 1000, top: -40 }}
-                                            title={`Add Shipping Address`}
-                                            htmlType="button"
-                                            type="primary"
-                                            onClick={() => addOrEditAddressHandler(null, 'shipping')}
-                                          >
-                                            Add address
-                                          </Button>
-                                        )
-                                      )}
-
-                                      <Radio.Group style={{ width: '100%', padding: 10 }}>
-                                        <Row gutter={25}>
-                                          {selectedShippingAddress && (
-                                            <Col key={selectedShippingAddress?.id} xs={24}>
-                                              <Button
-                                                size="small"
-                                                style={{ position: 'absolute', right: 14, zIndex: 1000 }}
-                                                title="Change Shipping Address"
-                                                htmlType="button"
-                                                type="info"
-                                                onClick={() => changeAddressHandler('shipping')}
-                                              >
-                                                Change
-                                              </Button>
-                                              <Radio
-                                                style={{
-                                                  width: '100%',
-                                                  border: '1px solid #f0f0f0',
-                                                  fontSize: 12,
-                                                  marginBottom: 10,
-                                                  padding: 10,
-                                                  borderRadius: 5,
-                                                }}
-                                                defaultValue={selectedShippingAddress?.id}
-                                              >
-                                                <p>
-                                                  {selectedShippingAddress?.address1 &&
-                                                    ellipsis(selectedShippingAddress?.address1, 35)}
-                                                </p>
-                                                <p>
-                                                  {selectedShippingAddress?.address2 &&
-                                                    ellipsis(selectedShippingAddress?.address2, 35)}
-                                                </p>
-                                                <p>
-                                                  {selectedShippingAddress?.city}, {selectedShippingAddress?.state} -{' '}
-                                                  {selectedShippingAddress?.zip_code}
-                                                </p>
-                                                {/* Need To Add Country */}
-                                              </Radio>
-                                            </Col>
-                                          )}
-                                        </Row>
-                                      </Radio.Group>
-                                    </Form.Item>
-                                  </Col>
-                                  <Col sm={24}>
-                                    <Typography.Title level={5}>Billing Addresses</Typography.Title>
-                                    <Form.Item
-                                      rules={[{ required: true, message: 'Please Select Billing Address' }]}
-                                      name="billing_address_id"
-                                      initialValue={selectedBillingAddress?.id}
+                                        <Radio
+                                          style={{
+                                            width: '100%',
+                                            border: '1px solid #f0f0f0',
+                                            fontSize: 12,
+                                            marginBottom: 10,
+                                            padding: 10,
+                                            borderRadius: 5,
+                                          }}
+                                          defaultValue={selectedShippingAddress?.id}
+                                        >
+                                          <p>
+                                            {selectedShippingAddress?.address1 &&
+                                              ellipsis(selectedShippingAddress?.address1, 35)}
+                                          </p>
+                                          <p>
+                                            {selectedShippingAddress?.address2 &&
+                                              ellipsis(selectedShippingAddress?.address2, 35)}
+                                          </p>
+                                          <p>
+                                            {selectedShippingAddress?.city}, {selectedShippingAddress?.state} -{' '}
+                                            {selectedShippingAddress?.zip_code}
+                                          </p>
+                                          {/* Need To Add Country */}
+                                        </Radio>
+                                      </Col>
+                                    )}
+                                  </Row>
+                                </Radio.Group>
+                              </Form.Item>
+                            </Col>
+                            <Col sm={12}>
+                              <Typography.Title level={5}>Billing Address</Typography.Title>
+                              <Form.Item
+                                rules={[{ required: true, message: 'Please Select Billing Address' }]}
+                                name="vendor_billing_id"
+                                initialValue={selectedBillingAddress?.id}
+                              >
+                                {!selectedBillingAddress?.id && billingAddresses.length > 0 ? (
+                                  <Button
+                                    size="small"
+                                    style={{ position: 'absolute', right: 14, zIndex: 1000, top: -40 }}
+                                    title="Change Billing Address"
+                                    htmlType="button"
+                                    type="info"
+                                    onClick={() => changeAddressHandler('billing')}
+                                  >
+                                    Select Address
+                                  </Button>
+                                ) : (
+                                  !selectedBillingAddress?.id && (
+                                    <Button
+                                      size="small"
+                                      style={{ position: 'absolute', right: 14, zIndex: 1000, top: -40 }}
+                                      title={`Add Billing Address`}
+                                      htmlType="button"
+                                      type="primary"
+                                      onClick={() => addOrEditAddressHandler(null, 'billing')}
                                     >
-                                      {!selectedBillingAddress?.id && billingAddresses.length > 0 ? (
+                                      Add Address
+                                    </Button>
+                                  )
+                                )}
+                                <Radio.Group style={{ width: '100%', padding: 10 }}>
+                                  <Row gutter={25}>
+                                    {selectedBillingAddress && (
+                                      <Col key={selectedBillingAddress?.id} xs={24}>
                                         <Button
                                           size="small"
-                                          style={{ position: 'absolute', right: 14, zIndex: 1000, top: -40 }}
+                                          style={{ position: 'absolute', right: 14, zIndex: 1000 }}
                                           title="Change Billing Address"
                                           htmlType="button"
                                           type="info"
                                           onClick={() => changeAddressHandler('billing')}
                                         >
-                                          Select Address
+                                          Change
                                         </Button>
-                                      ) : (
-                                        !selectedBillingAddress?.id && (
-                                          <Button
-                                            size="small"
-                                            style={{ position: 'absolute', right: 14, zIndex: 1000, top: -40 }}
-                                            title={`Add Billing Address`}
-                                            htmlType="button"
-                                            type="primary"
-                                            onClick={() => addOrEditAddressHandler(null, 'billing')}
-                                          >
-                                            Add Address
-                                          </Button>
-                                        )
-                                      )}
-                                      <Radio.Group style={{ width: '100%', padding: 10 }}>
-                                        <Row gutter={25}>
-                                          {selectedBillingAddress && (
-                                            <Col key={selectedBillingAddress?.id} xs={24}>
-                                              <Button
-                                                size="small"
-                                                style={{ position: 'absolute', right: 14, zIndex: 1000 }}
-                                                title="Change Billing Address"
-                                                htmlType="button"
-                                                type="info"
-                                                onClick={() => changeAddressHandler('billing')}
-                                              >
-                                                Change
-                                              </Button>
-                                              <Radio
-                                                style={{
-                                                  width: '100%',
-                                                  border: '1px solid #f0f0f0',
-                                                  fontSize: 12,
-                                                  marginBottom: 10,
-                                                  padding: 10,
-                                                  borderRadius: 5,
-                                                }}
-                                                defaultValue={selectedBillingAddress?.id}
-                                              >
-                                                <p>
-                                                  {selectedBillingAddress?.address1 &&
-                                                    ellipsis(selectedBillingAddress?.address1, 35)}
-                                                </p>
-                                                <p>
-                                                  {selectedBillingAddress?.address2 &&
-                                                    ellipsis(selectedBillingAddress?.address2, 35)}
-                                                </p>
-                                                <p>
-                                                  {selectedBillingAddress?.city}, {selectedBillingAddress?.state} -{' '}
-                                                  {selectedBillingAddress?.zip_code}
-                                                </p>
-                                              </Radio>
-                                            </Col>
-                                          )}
-                                        </Row>
-                                      </Radio.Group>
-                                    </Form.Item>
-                                  </Col>
-                                </Row>
-                              </Col>
-                            </Row>
-                          </>
+                                        <Radio
+                                          style={{
+                                            width: '100%',
+                                            border: '1px solid #f0f0f0',
+                                            fontSize: 12,
+                                            marginBottom: 10,
+                                            padding: 10,
+                                            borderRadius: 5,
+                                          }}
+                                          defaultValue={selectedBillingAddress?.id}
+                                        >
+                                          <p>
+                                            {selectedBillingAddress?.address1 &&
+                                              ellipsis(selectedBillingAddress?.address1, 35)}
+                                          </p>
+                                          <p>
+                                            {selectedBillingAddress?.address2 &&
+                                              ellipsis(selectedBillingAddress?.address2, 35)}
+                                          </p>
+                                          <p>
+                                            {selectedBillingAddress?.city}, {selectedBillingAddress?.state} -{' '}
+                                            {selectedBillingAddress?.zip_code}
+                                          </p>
+                                        </Radio>
+                                      </Col>
+                                    )}
+                                  </Row>
+                                </Radio.Group>
+                              </Form.Item>
+                            </Col>
+                          </Row>
                         )}
-                        {current === 1 && (
+                        {current === 2 && (
                           <>
                             <Row gutter={25}>
                               <Col xs={24} md={12}>
@@ -819,7 +916,25 @@ const AddPO = () => {
                                 </Form.Item>
 
                                 <Form.Item
-                                  initialValue={selectedPaymentMethod}
+                                  rules={[{ required: true, message: 'Please Select Shipping Account' }]}
+                                  name="shipping_account_id"
+                                  label="Shipping Account"
+                                >
+                                  <Select
+                                    size="middle"
+                                    placeholder="Select Shipping Account (optional)"
+                                    style={{ width: '100%' }}
+                                    optionLabelProp="label"
+                                  >
+                                    {shippingMethodAccountList.map(item => (
+                                      <Select.Option key={item.id} value={item.id} label={item.name}>
+                                        <div className="demo-option-label-item">{item.name}</div>
+                                      </Select.Option>
+                                    ))}
+                                  </Select>
+                                </Form.Item>
+
+                                <Form.Item
                                   rules={[{ required: true, message: 'Please Select Payment Method' }]}
                                   name="payment_method_id"
                                   label="Payment Method"
@@ -827,7 +942,6 @@ const AddPO = () => {
                                   <Select
                                     size="middle"
                                     placeholder="Select Payment Method"
-                                    defaultValue={selectedPaymentMethod}
                                     style={{ width: '100%' }}
                                     optionLabelProp="label"
                                   >
@@ -840,9 +954,9 @@ const AddPO = () => {
                                 </Form.Item>
 
                                 <Form.Item
-                                  rules={[{ required: true, message: 'Please Enter Tax Amount' }]}
                                   label="Tax Amount"
                                   name="tax_amount"
+                                  rules={[{ required: true, message: 'Please Input Tax Amount' }]}
                                 >
                                   <Input placeholder="Enter Tax Amount" type="number" />
                                 </Form.Item>
@@ -854,7 +968,7 @@ const AddPO = () => {
                             </Row>
                           </>
                         )}
-                        {current === 2 && (
+                        {current === 3 && (
                           <>
                             <Products {...{ initialData, products, setProducts }} />
                           </>
