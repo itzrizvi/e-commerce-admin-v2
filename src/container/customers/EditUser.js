@@ -393,6 +393,21 @@ const EditUser = () => {
                       <Row gutter={25}>
                         <Col span={10}>
                           <Form.Item
+                            label="Company Name"
+                            name="company_name"
+                            labelCol={{ style: { width: "40%" } }}>
+                            <Row>
+                              <Col span={20}>
+                                <Input type="text" defaultValue={singleUser?.data?.company_name} placeholder="Enter Company Name" />
+                              </Col>
+                            </Row>
+                          </Form.Item>
+                        </Col>
+                      </Row>
+
+                      <Row gutter={25}>
+                        <Col span={10}>
+                          <Form.Item
                             label="Email"
                             labelCol={{ style: { width: "40%" } }}>
                             <Row>
@@ -428,21 +443,6 @@ const EditUser = () => {
                             <Row>
                               <Col span={20}>
                                 <Input type="text" defaultValue={singleUser?.data?.fax} placeholder="Enter Fax Number" />
-                              </Col>
-                            </Row>
-                          </Form.Item>
-                        </Col>
-                      </Row>
-
-                      <Row gutter={25}>
-                        <Col span={10}>
-                          <Form.Item
-                            label="Company Name"
-                            name="company_name"
-                            labelCol={{ style: { width: "40%" } }}>
-                            <Row>
-                              <Col span={20}>
-                                <Input type="text" defaultValue={singleUser?.data?.company_name} placeholder="Enter Company Name" />
                               </Col>
                             </Row>
                           </Form.Item>

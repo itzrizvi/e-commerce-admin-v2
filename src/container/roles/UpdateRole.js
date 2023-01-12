@@ -28,7 +28,7 @@ const UpdateRole = () => {
 
   const columns = [
     {
-      title: '',
+      title: 'Permission Name',
       dataIndex: 'roles_permission_name',
     },
     {

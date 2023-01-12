@@ -218,6 +218,21 @@ const AddUser = () => {
                     <Row gutter={25}>
                       <Col span={10}>
                         <Form.Item
+                          label="Company Name"
+                          name="company_name"
+                          labelCol={{ style: { width: "40%" } }}>
+                          <Row>
+                            <Col span={20}>
+                              <Input type="text" placeholder="Enter Company Name" />
+                            </Col>
+                          </Row>
+                        </Form.Item>
+                      </Col>
+                    </Row>
+
+                    <Row gutter={25}>
+                      <Col span={10}>
+                        <Form.Item
                           rules={[
                             {
                               required: true,
@@ -261,21 +276,6 @@ const AddUser = () => {
                           <Row>
                             <Col span={20}>
                               <Input type="text" placeholder="Enter Fax Number" />
-                            </Col>
-                          </Row>
-                        </Form.Item>
-                      </Col>
-                    </Row>
-
-                    <Row gutter={25}>
-                      <Col span={10}>
-                        <Form.Item
-                          label="Company Name"
-                          name="company_name"
-                          labelCol={{ style: { width: "40%" } }}>
-                          <Row>
-                            <Col span={20}>
-                              <Input type="text" placeholder="Enter Company Name" />
                             </Col>
                           </Row>
                         </Form.Item>

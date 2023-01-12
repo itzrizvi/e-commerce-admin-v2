@@ -28,7 +28,6 @@ const RoleListTable = () => {
 
   rolesData.map(roles => {
     const { id, role, createdAt, role_description, permissions, role_status, } = roles;
-
     return rolesTableData.push({
       key: id,
       name: role,
@@ -102,7 +101,8 @@ const RoleListTable = () => {
       ellipsis: true,
       sorter: (a, b) => a.permissions.length > b.permissions.length ? -1 : 1,
       render: (permissions) => {
-        const data = permissions.map(item => item.rolesPermission.roles_permission_name).join(", ")
+        const data = permissions.filter(item => item.read_access || item.edit_access).map(elem => elem.rolesPermission.roles_permission_name).join(", ")
+
         return (<p>{data}</p>)
       }
 
