@@ -846,7 +846,7 @@ const AddPO = () => {
                                 )}
                                 <Radio.Group style={{ width: '100%', padding: 10 }}>
                                   <Row gutter={25}>
-                                    {selectedBillingAddress && (
+                                    {selectedBillingAddress?.id && (
                                       <Col key={selectedBillingAddress?.id} xs={24}>
                                         <Button
                                           size="small"
