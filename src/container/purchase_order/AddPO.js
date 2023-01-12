@@ -724,7 +724,7 @@ const AddPO = () => {
                                   </Select>
                                 </Form.Item>
                                 {contactPerson.length > 0 && (
-                                  <Form.Item name="person_id" label="Contact Person">
+                                  <Form.Item name="contact_person_id" label="Contact Person">
                                     <Select placeholder="Contact Person (optional)" options={contactPerson} />
                                   </Form.Item>
                                 )}
@@ -846,7 +846,7 @@ const AddPO = () => {
                                 )}
                                 <Radio.Group style={{ width: '100%', padding: 10 }}>
                                   <Row gutter={25}>
-                                    {selectedBillingAddress && (
+                                    {selectedBillingAddress?.id && (
                                       <Col key={selectedBillingAddress?.id} xs={24}>
                                         <Button
                                           size="small"

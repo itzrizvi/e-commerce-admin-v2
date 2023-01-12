@@ -8,7 +8,7 @@ export const poQuery = {
         status
         data {
           id
-          po_id
+          po_number
           order_id
           type
           grandTotal_price
@@ -40,7 +40,7 @@ export const poQuery = {
         status
         data {
           id
-          po_id
+          po_number
           order_id
           type
           grandTotal_price
@@ -50,6 +50,19 @@ export const poQuery = {
           vendor {
             id
             contact_person
+            contactPersons {
+              id
+              ref_id
+              ref_model
+              name
+              email
+              phone
+              fax
+              status
+              tenant_id
+              createdAt
+              updatedAt
+            }
             company_name
             email
             description
@@ -105,6 +118,21 @@ export const poQuery = {
               id
               prod_name
             }
+          }
+          shippingAccount {
+            id
+            name
+            account
+            description
+            status
+          }
+          contactPerson {
+            id
+            name
+            email
+            phone
+            fax
+            status
           }
         }
       }
@@ -210,7 +238,7 @@ export const poQuery = {
     }
   `,
   GET_ADDRESS_BY_CUSTOMER: gql`
-    query getAddressListByCustomerID($query: GetAdressListByCustomerIDInput){
+    query getAddressListByCustomerID($query: GetAdressListByCustomerIDInput) {
       getAddressListByCustomerID(query: $query) {
         message
         status

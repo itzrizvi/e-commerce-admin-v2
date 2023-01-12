@@ -1,5 +1,5 @@
 import { Alert, Button, Card, Col, Input, Row, Select, Table, Typography } from 'antd';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import FeatherIcon from 'feather-icons-react';
 import { productSchema } from '../../apollo/product';
 import apolloClient from '../../apollo';
@@ -8,7 +8,13 @@ import { toast } from 'react-toastify';
 const Products = ({ initialData, products, setProducts }) => {
   const [productOption, setProductOption] = useState([]);
   const [productFound, setProductFound] = useState(true);
-  const [lastInitProductId, setLastInitProductId] = useState(null);
+
+  useEffect(() => {
+    setProductOption(products.map(item => ({
+      label: item.prod_name,
+      value: item.id
+    })))
+  }, [])
 
   const column = [
     {
@@ -20,7 +26,7 @@ const Products = ({ initialData, products, setProducts }) => {
         <Select
           placeholder="Select Product"
           options={productOption}
-          defaultValue={record.prod_name}
+          defaultValue={record.id}
           showSearch
           allowClear
           optionFilterProp="label"
@@ -66,7 +72,7 @@ const Products = ({ initialData, products, setProducts }) => {
           onSelect={(_, data) => {
             for (const item of products) {
               if (item.id === data.id) {
-                setProducts(prevState => prevState.filter(value => value.id !== lastInitProductId));
+                setProducts(prevState => prevState.filter(value => value.id !== data.id));
                 return toast.warning('Duplicate Product Found!');
               }
             }
