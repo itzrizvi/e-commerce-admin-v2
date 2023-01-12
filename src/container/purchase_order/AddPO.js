@@ -724,7 +724,7 @@ const AddPO = () => {
                                   </Select>
                                 </Form.Item>
                                 {contactPerson.length > 0 && (
-                                  <Form.Item name="person_id" label="Contact Person">
+                                  <Form.Item name="contact_person_id" label="Contact Person">
                                     <Select placeholder="Contact Person (optional)" options={contactPerson} />
                                   </Form.Item>
                                 )}
