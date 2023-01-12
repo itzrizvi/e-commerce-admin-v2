@@ -28,21 +28,21 @@ const ListRP = () => {
       dataIndex: 'id',
       key: 'id',
       width: 100,
-      sorter: (a, b) => (a.po_id.toUpperCase() > b.po_id.toUpperCase() ? 1 : -1),
+      sorter: (a, b) => (a.id > b.id ? 1 : -1),
     },
     {
-      title: 'PO ID',
-      dataIndex: 'po_id',
-      key: 'po_id',
+      title: 'PO Number',
+      dataIndex: 'po_number',
+      key: 'po_number',
       width: 100,
-      sorter: (a, b) => (a.po_id.toUpperCase() > b.po_id.toUpperCase() ? 1 : -1),
+      sorter: (a, b) => (a.po_number > b.po_number ? 1 : -1),
       render: (value, record) => {
         return <Link to={`/admin/po/edit?id=${record?.po_p_id}`}>{value}</Link>;
       },
     },
     {
       title: 'Contact Person',
-      dataIndex: [ 'vendor', 'contact_person'],
+      dataIndex: ['vendor', 'contact_person'],
       key: 'contact_person',
       width: 150,
       ellipsis: true,
@@ -153,7 +153,7 @@ const ListRP = () => {
             id: item.id,
             status: item.status,
             total_amount: item?.purchaseOrder.grandTotal_price,
-            po_id: item?.purchaseOrder.po_id,
+            po_number: item?.purchaseOrder.po_number,
             po_p_id: item?.purchaseOrder.id,
             type: item?.purchaseOrder.type,
             vendor: item?.purchaseOrder?.vendor,
@@ -174,7 +174,7 @@ const ListRP = () => {
     setSearchText(value);
     setFilteredRP(
       rp.data.filter(rp =>
-        (rp.id + rp.po_id + rp.status + rp.total_amount + rp.type + rp.vendor + rp.vendor.contact_person + rp.vendor.company_name + rp.vendor.email)
+        (rp.id + rp.po_number + rp.status + rp.total_amount + rp.type + rp.vendor + rp.vendor.contact_person + rp.vendor.company_name + rp.vendor.email)
           .toLowerCase()
           .includes(value.toLowerCase()),
       ),

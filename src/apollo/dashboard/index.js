@@ -38,7 +38,7 @@ export const dashboardAnalytics = {
         }
         recentPurchaseOrders {
           id
-          po_id
+          po_number
           order_id
           type
           grandTotal_price

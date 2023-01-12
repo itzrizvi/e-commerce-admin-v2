@@ -11,7 +11,7 @@ export const receivingProductQuery = {
           status
           purchaseOrder {
             id
-            po_id
+            po_number
             grandTotal_price
             order_id
             type
@@ -93,7 +93,7 @@ export const receivingProductQuery = {
           }
           purchaseOrder {
             id
-            po_id
+            po_number
             grandTotal_price
             tax_amount
             comment

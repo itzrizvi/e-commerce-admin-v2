@@ -137,12 +137,12 @@ const Dashboard = () => {
 
 	const recentPurchaseOrders = [
 		{
-			title: 'PO ID',
-			dataIndex: ['recentPurchaseOrders', 'po_id'],
-			key: 'po_id',
+			title: 'PO NUMBER',
+			dataIndex: ['recentPurchaseOrders', 'po_number'],
+			key: 'po_number',
 			width: 40,
 			ellipsis: true,
-			sorter: (a, b) => (a.po_id.toUpperCase() > b.po_id.toUpperCase() ? 1 : -1),
+			sorter: (a, b) => (a.po_number > b.po_number ? 1 : -1),
 		},
 		{
 			title: 'Order ID',

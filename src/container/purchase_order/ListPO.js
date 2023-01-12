@@ -26,11 +26,11 @@ const ListPO = () => {
 
   const columns = [
     {
-      title: 'PO ID',
-      dataIndex: 'po_id',
-      key: 'po_id',
+      title: 'PO NUMBER',
+      dataIndex: 'po_number',
+      key: 'po_number',
       width: 120,
-      sorter: (a, b) => (a.po_id.toUpperCase() > b.po_id.toUpperCase() ? 1 : -1),
+      sorter: (a, b) => (a.po_number > b.po_number ? 1 : -1),
     },
     {
       title: 'Order ID',
@@ -118,7 +118,7 @@ const ListPO = () => {
     setSearchText(value);
     setFilteredPO(
       po.data.filter(po =>
-        (po?.id + po?.comment + po.grandTotal_price + po.po_id + po.status).toLowerCase().includes(value.toLowerCase()),
+        (po?.id + po?.comment + po.grandTotal_price + po.po_number + po.status).toLowerCase().includes(value.toLowerCase()),
       ),
     );
   };

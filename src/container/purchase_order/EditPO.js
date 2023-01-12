@@ -117,7 +117,7 @@ const EditPO = () => {
         }));
         setProductOption(options);
       })
-      .catch(err => {});
+      .catch(err => { });
   }, []);
 
   /* -------------------------- End of product fetch -------------------------- */
@@ -277,7 +277,7 @@ const EditPO = () => {
       products: newProduct,
       tax_amount: parseFloat(values.tax_amount),
       id: singlePO.data.id,
-      po_id: singlePO.data.po_id,
+      po_number: singlePO.data.po_number,
     };
 
     // ADD NEW Vendor

@@ -8,7 +8,7 @@ export const poQuery = {
         status
         data {
           id
-          po_id
+          po_number
           order_id
           type
           grandTotal_price
@@ -40,7 +40,7 @@ export const poQuery = {
         status
         data {
           id
-          po_id
+          po_number
           order_id
           type
           grandTotal_price
