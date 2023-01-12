@@ -1023,6 +1023,9 @@ export const customerQuery = {
           email
           email_verified
           user_status
+          phone
+          fax
+          company_name
           image
           contactPersons {
             id
