@@ -63,7 +63,7 @@ const UpdateVendor = () => {
       percent: 80,
     },
     {
-      title: 'Persons',
+      title: 'Contact Persons',
       percent: 100,
     },
   ];
@@ -506,7 +506,7 @@ const UpdateVendor = () => {
                                     >
                                       Edit
                                     </Button>
-                                    <Button
+                                    {/* <Button
                                       size="small"
                                       style={{ position: 'absolute', right: 14, top: 40, zIndex: 1000 }}
                                       title="Remove Person"
@@ -515,7 +515,7 @@ const UpdateVendor = () => {
                                       onClick={() => handleRemovePerson(item.id)}
                                     >
                                       <FeatherIcon icon="trash-2" />
-                                    </Button>
+                                    </Button> */}
                                   </>
                                 )}
 

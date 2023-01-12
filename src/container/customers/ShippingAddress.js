@@ -171,16 +171,16 @@ const ShippingAddress = ({ defaultShipping, initialData, shippingAddress, setShi
         />
       ),
     },
-    {
-      title: 'Action',
-      dataIndex: 'action',
-      key: 'action',
-      render: (text, record) => (
-        <Button size="" title="Remove" type="danger" onClick={() => removeRow(record.id)}>
-          <FeatherIcon icon="trash-2" />
-        </Button>
-      ),
-    },
+    // {
+    //   title: 'Action',
+    //   dataIndex: 'action',
+    //   key: 'action',
+    //   render: (text, record) => (
+    //     <Button size="" title="Remove" type="danger" onClick={() => removeRow(record.id)}>
+    //       <FeatherIcon icon="trash-2" />
+    //     </Button>
+    //   ),
+    // },
   ];
 
   // Adding new row on table

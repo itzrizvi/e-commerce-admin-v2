@@ -56,7 +56,7 @@ const AddVendor = () => {
       percent: 80,
     },
     {
-      title: 'Persons',
+      title: 'Contact Persons',
       percent: 100,
     },
   ];
