@@ -35,12 +35,10 @@ const EditPO = () => {
   const [selectedShippingAddress, setSelectedShippingAddress] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [orderList, setOrderList] = useState([]);
-  const [orderData, setOrderData] = useState([]);
   const [selectedOrder, setSelectedOrder] = useState('');
   const [selectedType, setSelectedType] = useState('');
   const [searchOrderOption, setSearchOrderOption] = useState(false);
   const [orderNotFoundContent, setOrderNotFoundContent] = useState('No Data!');
-  const [changeAddress, setChangeAddress] = useState(false);
   const [contactPerson, setContactPerson] = useState([]);
   const [shippingMethod, setShippingMethod] = useState([]);
   const [paymentMethod, setPaymentMethod] = useState([]);
@@ -58,6 +56,7 @@ const EditPO = () => {
   // ============+ for product START +====================
   const initialData = {
     id: '',
+    key: '',
     prod_name: '',
     quantity: 1,
     price: 0,
@@ -208,11 +207,11 @@ const EditPO = () => {
           var po_selected_order = parseInt(data?.data?.order_id);
         }
         setSelectedOrder(parseInt(data?.data?.order_id));
-        setSelectedBillingAddress(data?.data.vendorBillingAddress)
-        setSelectedShippingAddress(data?.data.vendorShippingAddress)
-        const contact_person = []
+        setSelectedBillingAddress(data?.data.vendorBillingAddress);
+        setSelectedShippingAddress(data?.data.vendorShippingAddress);
+        const contact_person = [];
         data?.data?.vendor?.contactPersons?.forEach(person => {
-          contact_person.push({ ...person, isNew: false, label: person.email, value: person.id  });
+          contact_person.push({ ...person, isNew: false, label: person.email, value: person.id });
         });
         setContactPerson(contact_person);
         form.setFieldsValue({
@@ -232,7 +231,7 @@ const EditPO = () => {
         let new_product_list = [];
         new_product_list = data?.data?.poProductlist?.map(item => {
           return {
-            key: new Date().getTime(),
+            key: new Date().getTime()+ Math.floor(Math.random() * 100) + 1,
             id: item.product.id,
             price: item.price,
             quantity: item.quantity,
@@ -243,43 +242,42 @@ const EditPO = () => {
         });
         setProducts(new_product_list);
         /* ------------------------------- Set Address ------------------------------ */
-        apolloClient
-          .query({
-            query: vendorQuery.GET_SINGLE_VENDOR,
-            variables: {
-              query: { id: data?.data?.vendor?.id },
-            },
-            context: {
-              headers: {
-                TENANTID: process.env.REACT_APP_TENANTID,
-                Authorization: token,
+        if (data?.data?.vendor?.id) {
+          apolloClient
+            .query({
+              query: vendorQuery.GET_SINGLE_VENDOR,
+              variables: {
+                query: { id: data?.data?.vendor?.id },
               },
-            },
-          })
-          .then(res => {
-            const data = res?.data?.getSingleVendor;
-            if (!data?.status) return;
-            let new_billing = [];
-            let new_shipping = [];
-            if (po_order_type === 'drop_shipping') {
-              apolloClient
-                .query({
-                  query: poQuery.GET_COMPANY_BILLING,
-                  context: {
-                    headers: {
-                      TENANTID: process.env.REACT_APP_TENANTID,
-                      Authorization: token,
+              context: {
+                headers: {
+                  TENANTID: process.env.REACT_APP_TENANTID,
+                  Authorization: token,
+                },
+              },
+            })
+            .then(res => {
+              const data = res?.data?.getSingleVendor;
+              if (!data?.status) return;
+              let new_billing = [];
+              let new_shipping = [];
+              if (po_order_type === 'drop_shipping') {
+                apolloClient
+                  .query({
+                    query: poQuery.GET_COMPANY_BILLING,
+                    context: {
+                      headers: {
+                        TENANTID: process.env.REACT_APP_TENANTID,
+                        Authorization: token,
+                      },
                     },
-                  },
-                })
-                .then(res => {
-                  const data = res?.data?.getCompanyInfo;
-                  if (!data?.status) return;
-                  setBillingAddresses(data?.data?.billingAddresses);
-                });
-              if (orderData.length > 0) {
-                const get_actual_data = orderData.filter(item => item.id === po_selected_order);
-                const customer_id = parseInt(get_actual_data[0]?.customer.id);
+                  })
+                  .then(res => {
+                    const data = res?.data?.getCompanyInfo;
+                    if (!data?.status) return;
+                    setBillingAddresses(data?.data?.billingAddresses);
+                  });
+                const customer_id = selectedOrder?.customer?.id;
                 apolloClient
                   .query({
                     query: poQuery.GET_ADDRESS_BY_CUSTOMER,
@@ -301,19 +299,20 @@ const EditPO = () => {
                     const shipping_address = data?.data.filter(item => item.type === 'shipping');
                     setShippingAddresses(shipping_address);
                   });
+              } else {
+                data?.data?.addresses.forEach(item => {
+                  if (item.type === 'billing') new_billing.push(item);
+                  else if (item.type === 'shipping') new_shipping.push(item);
+                });
+                setBillingAddresses(new_billing);
+                setShippingAddresses(new_shipping);
               }
-            } else {
-              data?.data?.addresses.forEach(item => {
-                if (item.type === 'billing') new_billing.push(item);
-                else if (item.type === 'shipping') new_shipping.push(item);
-              });
-              setBillingAddresses(new_billing);
-              setShippingAddresses(new_shipping);
-            }
-          })
-          .catch(err => {
-            console.log(err);
-          });
+            })
+            .catch(err => {
+              console.log(err);
+            });
+        }
+
         /* ----------------------------- End set Address ---------------------------- */
       })
       .catch(err => {
@@ -323,7 +322,7 @@ const EditPO = () => {
       .finally(() => {
         setSinglePO(s => ({ ...s, isLoading: false }));
       });
-  }, [orderData]);
+  }, []);
   /* ------------------------- Get Single PO Order End ------------------------ */
 
   const handleSubmit = () => {
@@ -419,12 +418,12 @@ const EditPO = () => {
       })
       .then(async res => {
         const data = res?.data?.getSingleVendor;
-        if (!data?.status) return;        
+        if (!data?.status) return;
         let new_billing = [];
         const contact_person = [];
         let new_shipping = [];
         data.data.contactPersons.forEach(person => {
-          contact_person.push({ ...person, isNew: false, label: person.email, value: person.id  });
+          contact_person.push({ ...person, isNew: false, label: person.email, value: person.id });
         });
         setContactPerson(contact_person);
         if (selectedType === 'drop_shipping') {
@@ -515,7 +514,6 @@ const EditPO = () => {
   const handleAddressSubmit = type => {
     const values = addressForm.getFieldValue();
     const vendor_id = form.getFieldValue('vendor_id');
-    setChangeAddress(false);
     let newBillingAddress = [];
     let newShippingAddress = [];
     if (editSelectedAddress) {
@@ -571,7 +569,6 @@ const EditPO = () => {
         .then(res => {
           const data = res?.data?.updateVendorAddress;
           if (!data?.status) return;
-          setChangeAddress(true);
           setAddressModalOpen(false);
         });
     } else {
@@ -596,7 +593,6 @@ const EditPO = () => {
         .then(res => {
           const data = type === 'billing' ? res?.data?.addVendorBillingAddress : res?.data?.addVendorShippingAddress;
           if (!data?.status) return;
-          setChangeAddress(true);
           setAddressModalOpen(false);
         });
     }
@@ -821,7 +817,7 @@ const EditPO = () => {
 
                             <Radio.Group style={{ width: '100%', padding: 10 }}>
                               <Row gutter={25}>
-                                {selectedShippingAddress && (
+                                {selectedShippingAddress?.id && (
                                   <Col key={selectedShippingAddress?.id} xs={24}>
                                     <Button
                                       size="small"

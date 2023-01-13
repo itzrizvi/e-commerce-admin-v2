@@ -133,8 +133,8 @@ const Products = ({ initialData, products, setProducts }) => {
     },
     {
       title: 'Action',
-      dataIndex: 'id',
-      key: 'id',
+      dataIndex: 'key',
+      key: 'key',
       width: 100,
       align: 'center',
       render: val => (
@@ -143,7 +143,7 @@ const Products = ({ initialData, products, setProducts }) => {
           type="danger"
           onClick={() => {
             setProducts(prevState => {
-              return prevState.filter(value => value?.id !== val);
+              return prevState.filter(value => value?.key !== val);
             });
           }}
         >
@@ -156,7 +156,7 @@ const Products = ({ initialData, products, setProducts }) => {
   // Adding new row on table
   const addNewRow = () => {
     const key = new Date().getTime();
-    setProducts(prevState => [...prevState, { ...initialData, id: key }]);
+    setProducts(prevState => [...prevState, { ...initialData, key }]);
   };
 
   return (

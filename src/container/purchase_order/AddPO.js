@@ -58,6 +58,7 @@ const AddPO = () => {
   // ============+ for product START +====================
   const initialData = {
     id: '',
+    key: '',
     prod_name: '',
     quantity: 1,
     price: 0,
@@ -769,7 +770,7 @@ const AddPO = () => {
 
                                 <Radio.Group style={{ width: '100%', padding: 10 }}>
                                   <Row gutter={25}>
-                                    {selectedShippingAddress && (
+                                    {selectedShippingAddress?.id && (
                                       <Col key={selectedShippingAddress?.id} xs={24}>
                                         <Button
                                           size="small"
