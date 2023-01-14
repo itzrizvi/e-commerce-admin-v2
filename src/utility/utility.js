@@ -21,7 +21,11 @@ const viewPermission = (name) => {
 
 const ellipsis = (input, size = 30) => input.length > size ? `${input.substring(0, size)}...` : input;
 
+const randomUniqueNumber = () => {
+  return new Date().getTime() + Math.floor(Math.random() * 100) + 1;
+}
 
-export { ellipsis, menuPermission, viewPermission };
+
+export { ellipsis, menuPermission, viewPermission, randomUniqueNumber };
 
 

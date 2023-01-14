@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Col, Form, Input, Spin, Tabs, Select, Radio, Typography, Modal, Switch, Badge } from 'antd';
+import { Row, Col, Form, Input, Spin, Tabs, Select, Radio, Typography, Modal, Switch, Badge, Card } from 'antd';
 import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
 import { Cards } from '../../components/cards/frame/cards-frame';
@@ -8,7 +8,7 @@ import { Link, useHistory, useParams } from 'react-router-dom';
 import apolloClient, { vendorMutation, vendorQuery } from '../../utility/apollo';
 import { poQuery } from '../../apollo/po';
 import { toast } from 'react-toastify';
-import { ellipsis, viewPermission } from '../../utility/utility';
+import { ellipsis, viewPermission, randomUniqueNumber } from '../../utility/utility';
 import Products from './Products';
 import { useSelector } from 'react-redux';
 import SelectNotFound from '../../components/esential/SelectNotFound';
@@ -48,8 +48,8 @@ const EditPO = () => {
   const [countries, setCountries] = useState([]);
   const [editSelectedAddress, setEditSelectedAddress] = useState(null);
   const [states, setStates] = useState([]);
-  const [tempSelectedAddress, setTempSelectedAddress] = useState(null);
   const [selectedCountryCode, setSelectedCountryCode] = useState('US');
+  const [changeAddress, setChangeAddress] = useState(false);
 
   // ============+ for product START +====================
   const initialData = {
@@ -58,7 +58,6 @@ const EditPO = () => {
     prod_name: '',
     quantity: 1,
     price: 0,
-    recieved_quantity: 0,
     isNew: true,
   };
   const [products, setProducts] = useState([]);
@@ -200,13 +199,7 @@ const EditPO = () => {
         if (!data.status) return;
         setSinglePO({ data: data?.data, isLoading: false, message: data?.message });
         setSelectedType(data?.data?.type);
-        const po_order_type = data?.data?.type;
-        if (data?.data?.type === 'drop_shipping') {
-          var po_selected_order = parseInt(data?.data?.order_id);
-        }
         setSelectedOrder(parseInt(data?.data?.order_id));
-        setSelectedBillingAddress(data?.data.vendorBillingAddress);
-        setSelectedShippingAddress(data?.data.vendorShippingAddress);
         const contact_person = [];
         data?.data?.vendor?.contactPersons?.forEach(person => {
           contact_person.push({ ...person, isNew: false, label: person.email, value: person.id });
@@ -229,89 +222,16 @@ const EditPO = () => {
         let new_product_list = [];
         new_product_list = data?.data?.poProductlist?.map(item => {
           return {
-            key: new Date().getTime()+ Math.floor(Math.random() * 100) + 1,
+            key: randomUniqueNumber(),
             id: item.product.id,
             price: item.price,
             quantity: item.quantity,
             prod_name: item.product.prod_name,
-            received_quantity: item.received_quantity,
             isNew: false,
           };
         });
         setProducts(new_product_list);
-        /* ------------------------------- Set Address ------------------------------ */
-        if (data?.data?.vendor?.id) {
-          apolloClient
-            .query({
-              query: vendorQuery.GET_SINGLE_VENDOR,
-              variables: {
-                query: { id: data?.data?.vendor?.id },
-              },
-              context: {
-                headers: {
-                  TENANTID: process.env.REACT_APP_TENANTID,
-                  Authorization: token,
-                },
-              },
-            })
-            .then(res => {
-              const data = res?.data?.getSingleVendor;
-              if (!data?.status) return;
-              let new_billing = [];
-              let new_shipping = [];
-              if (po_order_type === 'drop_shipping') {
-                apolloClient
-                  .query({
-                    query: poQuery.GET_COMPANY_BILLING,
-                    context: {
-                      headers: {
-                        TENANTID: process.env.REACT_APP_TENANTID,
-                        Authorization: token,
-                      },
-                    },
-                  })
-                  .then(res => {
-                    const data = res?.data?.getCompanyInfo;
-                    if (!data?.status) return;
-                    setBillingAddresses(data?.data?.billingAddresses);
-                  });
-                const customer_id = selectedOrder?.customer?.id;
-                apolloClient
-                  .query({
-                    query: poQuery.GET_ADDRESS_BY_CUSTOMER,
-                    variables: {
-                      query: {
-                        customer_id,
-                      },
-                    },
-                    context: {
-                      headers: {
-                        TENANTID: process.env.REACT_APP_TENANTID,
-                        Authorization: token,
-                      },
-                    },
-                  })
-                  .then(res => {
-                    const data = res?.data?.getAddressListByCustomerID;
-                    if (!data?.status) return;
-                    const shipping_address = data?.data.filter(item => item.type === 'shipping');
-                    setShippingAddresses(shipping_address);
-                  });
-              } else {
-                data?.data?.addresses.forEach(item => {
-                  if (item.type === 'billing') new_billing.push(item);
-                  else if (item.type === 'shipping') new_shipping.push(item);
-                });
-                setBillingAddresses(new_billing);
-                setShippingAddresses(new_shipping);
-              }
-            })
-            .catch(err => {
-              console.log(err);
-            });
-        }
-
-        /* ----------------------------- End set Address ---------------------------- */
+        setChangeAddress(prev => !prev);
       })
       .catch(err => {
         console.log(err);
@@ -329,8 +249,8 @@ const EditPO = () => {
     if (values.vendor_billing_id === undefined || values.vendor_shipping_id === undefined)
       return toast.error('Please Select Billing and Shipping Address!'); // validate Products.
     const notValidate = products.find(item => {
-      const { id, price, quantity, recieved_quantity } = item;
-      const checkFalse = !(id && price && quantity && recieved_quantity !== '');
+      const { id, price, quantity } = item;
+      const checkFalse = !(id && price && quantity);
       return checkFalse;
     });
     if (notValidate?.key) return toast.warning('Please Fill Products All of Data!');
@@ -400,7 +320,10 @@ const EditPO = () => {
 
   const handleVendorChange = e => {
     setVendors(s => ({ ...s, isLoading: true }));
-    const customer_id = selectedOrder?.customer?.id;
+    form.setFieldsValue({
+      vendor_shipping_id: null,
+      vendor_billing_id: null,
+    });
     apolloClient
       .query({
         query: vendorQuery.GET_SINGLE_VENDOR,
@@ -417,63 +340,12 @@ const EditPO = () => {
       .then(async res => {
         const data = res?.data?.getSingleVendor;
         if (!data?.status) return;
-        let new_billing = [];
         const contact_person = [];
-        let new_shipping = [];
         data.data.contactPersons.forEach(person => {
           contact_person.push({ ...person, isNew: false, label: person.email, value: person.id });
         });
         setContactPerson(contact_person);
-        if (selectedType === 'drop_shipping') {
-          await form.validateFields(['order_id']);
-          apolloClient
-            .query({
-              query: poQuery.GET_COMPANY_BILLING,
-              context: {
-                headers: {
-                  TENANTID: process.env.REACT_APP_TENANTID,
-                  Authorization: token,
-                },
-              },
-            })
-            .then(res => {
-              const data = res?.data?.getCompanyInfo;
-              if (!data?.status) return;
-              setSelectedBillingAddress(data?.data?.billingAddresses.filter(item => item.isDefault));
-              setBillingAddresses(data?.data?.billingAddresses);
-            });
-          apolloClient
-            .query({
-              query: poQuery.GET_ADDRESS_BY_CUSTOMER,
-              variables: {
-                query: {
-                  customer_id,
-                },
-              },
-              context: {
-                headers: {
-                  TENANTID: process.env.REACT_APP_TENANTID,
-                  Authorization: token,
-                },
-              },
-            })
-            .then(res => {
-              const data = res?.data?.getAddressListByCustomerID;
-              if (!data?.status) return;
-              const shipping_address = data?.data.filter(item => item.type === 'shipping');
-              setShippingAddresses(shipping_address);
-              setSelectedShippingAddress(shipping_address.filter(item => item.isDefault));
-            });
-        } else {
-          data?.data?.addresses.forEach(item => {
-            if (item.type === 'billing') new_billing.push(item);
-            else if (item.type === 'shipping') new_shipping.push(item);
-          });
-          setBillingAddresses(new_billing);
-          setSelectedBillingAddress(new_billing.filter(item => item.isDefault)[0] ?? []);
-          setShippingAddresses(new_shipping);
-          setSelectedShippingAddress(new_shipping.filter(item => item.isDefault)[0] ?? []);
-        }
+        setChangeAddress(prev => !prev);
       })
       .catch(err => {
         console.log(err);
@@ -567,6 +439,7 @@ const EditPO = () => {
         .then(res => {
           const data = res?.data?.updateVendorAddress;
           if (!data?.status) return;
+          setChangeAddress(prev => !prev);
           setAddressModalOpen(false);
         });
     } else {
@@ -592,6 +465,7 @@ const EditPO = () => {
           const data = type === 'billing' ? res?.data?.addVendorBillingAddress : res?.data?.addVendorShippingAddress;
           if (!data?.status) return;
           setAddressModalOpen(false);
+          setChangeAddress(prev => !prev);
         });
     }
   };
@@ -622,21 +496,112 @@ const EditPO = () => {
 
   // Trigger Function when select an address finally
   const selectAddressHandler = (type, id) => {
-    if (!tempSelectedAddress) return;
     if (type === 'billing') {
-      setSelectedBillingAddress(tempSelectedAddress);
+      setSelectedBillingAddress(billingAddresses.filter(item => item.id === id)[0]);
       form.setFieldsValue({
         vendor_billing_id: id,
       });
     } else {
-      setSelectedShippingAddress(tempSelectedAddress);
+      setSelectedShippingAddress(shippingAddresses.filter(item => item.id === id)[0]);
       form.setFieldsValue({
         vendor_shipping_id: id,
       });
     }
     setListAddressModalOpen(false);
-    setTempSelectedAddress(null);
   };
+
+  useEffect(() => {
+    const vendor_id = form.getFieldValue('vendor_id');
+    if (!vendor_id) return;
+    if (selectedType === 'drop_shipping') {
+      apolloClient
+        .query({
+          query: poQuery.GET_COMPANY_BILLING,
+          context: {
+            headers: {
+              TENANTID: process.env.REACT_APP_TENANTID,
+              Authorization: token,
+            },
+          },
+          fetchPolicy: 'network-only',
+        })
+        .then(res => {
+          const data = res?.data?.getCompanyInfo;
+          if (!data?.status) return;
+          setBillingAddresses(data?.data?.billingAddresses);
+          const selected_billing_address = data?.data?.billingAddresses?.filter(item => item.isDefault)[0];
+          setSelectedBillingAddress(selected_billing_address);
+          form.setFieldsValue({
+            vendor_billing_id: selected_billing_address?.id,
+          });
+        });
+      apolloClient
+        .query({
+          query: poQuery.GET_ADDRESS_BY_CUSTOMER,
+          variables: {
+            query: {
+              customer_id: selectedOrder?.customer?.id,
+            },
+          },
+          context: {
+            headers: {
+              TENANTID: process.env.REACT_APP_TENANTID,
+              Authorization: token,
+            },
+          },
+          fetchPolicy: 'network-only',
+        })
+        .then(res => {
+          const data = res?.data?.getAddressListByCustomerID;
+          if (!data?.status) return;
+          const shipping_address = data?.data.filter(item => item.type === 'shipping');
+          setShippingAddresses(shipping_address);
+          const selected_shipping_address = shipping_address.filter(item => item.isDefault)[0];
+          setSelectedShippingAddress(selected_shipping_address);
+          form.setFieldsValue({
+            vendor_shipping_id: selected_shipping_address?.id,
+          });
+        });
+    } else {
+      apolloClient
+        .query({
+          query: addressSchema.GET_ADDRESS_LIST_BY_VENDOR_ID,
+          variables: {
+            query: {
+              vendor_id,
+            },
+          },
+          context: {
+            headers: {
+              TENANTID: process.env.REACT_APP_TENANTID,
+              Authorization: token,
+            },
+          },
+          fetchPolicy: 'network-only',
+        })
+        .then(res => {
+          const data = res?.data?.getAddressListByVendorID;
+          if (!data?.status) return;
+          let new_billing = [];
+          let new_shipping = [];
+          data?.data?.forEach(item => {
+            if (item.type === 'billing') new_billing.push(item);
+            else if (item.type === 'shipping') new_shipping.push(item);
+          });
+          setBillingAddresses(new_billing);
+          setShippingAddresses(new_shipping);
+          const selected_billing_address = new_billing.filter(item => item.isDefault)[0];
+          const selected_shipping_address = new_shipping.filter(item => item.isDefault)[0];
+          setSelectedBillingAddress(selected_billing_address);
+          setSelectedShippingAddress(selected_shipping_address);
+          form.setFieldsValue({
+            vendor_shipping_id: selected_shipping_address?.id,
+            vendor_billing_id: selected_billing_address?.id,
+          });
+        });
+    }
+  }, [changeAddress]);
+
   return (
     <>
       <PageHeader title={`Manage Purchase Order | Edit Purchase Order `} />
@@ -1167,116 +1132,92 @@ const EditPO = () => {
           footer={null}
           onCancel={() => setListAddressModalOpen(false)}
         >
-          <Radio.Group style={{ width: '100%', padding: 10 }}>
-            <Row gutter={25}>
-              <Col span={24}>
-                <Button
-                  size="small"
-                  style={{ float: 'right', zIndex: 1000, marginTop: -25, marginBottom: 10 }}
-                  title={`Add ${addressType} address`}
-                  htmlType="button"
-                  type="primary"
-                  onClick={() => addOrEditAddressHandler(null, addressType)}
-                >
-                  Add new address
-                </Button>
-              </Col>
-              {addressType === 'billing'
-                ? billingAddresses.map(item => (
-                    <Col key={item.id} xs={24}>
-                      <Button
-                        size="small"
-                        style={{ position: 'absolute', right: 14, zIndex: 1000 }}
-                        title="Edit Billing Address"
-                        htmlType="button"
-                        type="info"
-                        onClick={() => addOrEditAddressHandler(item.id, 'billing')}
-                      >
-                        Edit
-                      </Button>
-                      <Button
-                        size="small"
-                        style={{ position: 'absolute', right: 14, zIndex: 1000, top: 45 }}
-                        title="Edit Shipping Address"
-                        htmlType="button"
-                        type="info"
-                        onClick={() => selectAddressHandler(addressType, item.id)}
-                      >
-                        Select
-                      </Button>
+          <Row gutter={25}>
+            <Col span={24}>
+              <Button
+                size="small"
+                style={{ float: 'right', zIndex: 1000, marginTop: -15, marginBottom: 10 }}
+                title={`Add ${addressType} address`}
+                htmlType="button"
+                type="primary"
+                onClick={() => addOrEditAddressHandler(null, addressType)}
+              >
+                Add new address
+              </Button>
+            </Col>
+            {addressType === 'billing'
+              ? billingAddresses.map(item => (
+                  <Col key={item.id} xs={24}>
+                    <Button
+                      size="small"
+                      style={{ position: 'absolute', right: 14, zIndex: 1000 }}
+                      title="Edit Billing Address"
+                      htmlType="button"
+                      type="info"
+                      onClick={() => addOrEditAddressHandler(item.id, 'billing')}
+                    >
+                      Edit
+                    </Button>
+                    <Button
+                      size="small"
+                      style={{ position: 'absolute', right: 14, zIndex: 1000, top: 45 }}
+                      title="Select Billing Address"
+                      htmlType="button"
+                      type="info"
+                      onClick={() => selectAddressHandler(addressType, item.id)}
+                    >
+                      Select
+                    </Button>
 
-                      <Radio
-                        style={{
-                          width: '100%',
-                          border: '1px solid #f0f0f0',
-                          fontSize: 12,
-                          marginBottom: 10,
-                          padding: 10,
-                          borderRadius: 5,
-                        }}
-                        value={item.id}
-                        onChange={() => setTempSelectedAddress(item)}
-                      >
-                        <p>{item.address1 && ellipsis(item.address1, 35)}</p>
-                        <p>{item.address2 && ellipsis(item.address2, 35)}</p>
-                        <p>
-                          {item.city}, {item.state} - {item.zip_code}
-                        </p>
-                        <p>{item?.countryCode?.name}</p>
-                        {billingAddresses.filter(item => item.isDefault)[0]?.id === item.id && (
-                          <Badge count="Default billing address" color="#ddd" style={{ color: '#000' }} />
-                        )}
-                      </Radio>
-                    </Col>
-                  ))
-                : shippingAddresses.map(item => (
-                    <Col key={item.id} xs={24}>
-                      <Button
-                        size="small"
-                        style={{ position: 'absolute', right: 14, zIndex: 1000 }}
-                        title="Edit Shipping Address"
-                        htmlType="button"
-                        type="info"
-                        onClick={() => addOrEditAddressHandler(item.id, 'shipping')}
-                      >
-                        Edit
-                      </Button>
-                      <Button
-                        size="small"
-                        style={{ position: 'absolute', right: 14, zIndex: 1000, top: 45 }}
-                        title="Edit Shipping Address"
-                        htmlType="button"
-                        type="info"
-                        onClick={() => selectAddressHandler(addressType, item.id)}
-                      >
-                        Select
-                      </Button>
-                      <Radio
-                        style={{
-                          width: '100%',
-                          border: '1px solid #f0f0f0',
-                          fontSize: 12,
-                          marginBottom: 10,
-                          padding: 10,
-                          borderRadius: 5,
-                        }}
-                        value={item.id}
-                        onChange={() => setTempSelectedAddress(item)}
-                      >
-                        <p>{item.address1 && ellipsis(item.address1, 35)}</p>
-                        <p>{item.address2 && ellipsis(item.address2, 35)}</p>
-                        <p>
-                          {item.city}, {item.state} - {item.zip_code}
-                        </p>
-                        <p>{item?.countryCode?.name}</p>
-                        {shippingAddresses.filter(item => item.isDefault)[0]?.id === item.id && (
-                          <Badge count="Default shipping address" color="#ddd" style={{ color: '#000' }} />
-                        )}
-                      </Radio>
-                    </Col>
-                  ))}
-            </Row>
-          </Radio.Group>
+                    <Card style={{ marginBottom: 10 }}>
+                      <p>{item.address1 && ellipsis(item.address1, 35)}</p>
+                      <p>{item.address2 && ellipsis(item.address2, 35)}</p>
+                      <p>
+                        {item.city}, {item.state} - {item.zip_code}
+                      </p>
+                      <p>{item?.countryCode?.name}</p>
+                      {billingAddresses.filter(item => item.isDefault)[0]?.id === item.id && (
+                        <Badge count="Default billing address" color="#ddd" style={{ color: '#000' }} />
+                      )}
+                    </Card>
+                  </Col>
+                ))
+              : shippingAddresses.map(item => (
+                  <Col key={item.id} xs={24}>
+                    <Button
+                      size="small"
+                      style={{ position: 'absolute', right: 14, zIndex: 1000 }}
+                      title="Edit Shipping Address"
+                      htmlType="button"
+                      type="info"
+                      onClick={() => addOrEditAddressHandler(item.id, 'shipping')}
+                    >
+                      Edit
+                    </Button>
+                    <Button
+                      size="small"
+                      style={{ position: 'absolute', right: 14, zIndex: 1000, top: 45 }}
+                      title="Select Shipping Address"
+                      htmlType="button"
+                      type="info"
+                      onClick={() => selectAddressHandler(addressType, item.id)}
+                    >
+                      Select
+                    </Button>
+                    <Card style={{ marginBottom: 10 }}>
+                      <p>{item.address1 && ellipsis(item.address1, 35)}</p>
+                      <p>{item.address2 && ellipsis(item.address2, 35)}</p>
+                      <p>
+                        {item.city}, {item.state} - {item.zip_code}
+                      </p>
+                      <p>{item?.countryCode?.name}</p>
+                      {shippingAddresses.filter(item => item.isDefault)[0]?.id === item.id && (
+                        <Badge count="Default shipping address" color="#ddd" style={{ color: '#000' }} />
+                      )}
+                    </Card>
+                  </Col>
+                ))}
+          </Row>
         </Modal>
         {/* Modal For Add / Update Address */}
       </Main>

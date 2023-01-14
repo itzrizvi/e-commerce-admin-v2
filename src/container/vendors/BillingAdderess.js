@@ -157,19 +157,6 @@ const BillingAdderess = ({
       ),
     },
     {
-      title: 'Country',
-      dataIndex: 'country ',
-      key: 'country ',
-      render: (text, record) => (
-        <Input
-          defaultValue={record.country}
-          type="text"
-          placeholder="Country"
-          onChange={e => (record.country = e.target.value)}
-        />
-      ),
-    },
-    {
       title: 'Status',
       dataIndex: 'status',
       key: 'status',

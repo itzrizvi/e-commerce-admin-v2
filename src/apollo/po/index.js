@@ -245,20 +245,20 @@ export const poQuery = {
         shippingDefaultID
         data {
           id
-          ref_id
-          ref_model
           address1
           address2
-          phone
-          fax
-          email
           city
           state
           zip_code
           country
+          countryCode {
+            name
+            code
+            status
+          }
           type
+          isDefault
           status
-          tenant_id
         }
       }
     }

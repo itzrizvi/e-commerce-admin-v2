@@ -38,8 +38,7 @@ const ListPO = () => {
       key: 'order_id',
       width: 150,
       ellipsis: true,
-      sorter: (a, b) => (a.order_id.toUpperCase() > b.order_id.toUpperCase() ? 1 : -1),
-      render: value => value ?? 'Order ID Not Found ',
+      sorter: (a, b) => (a.order_id.toUpperCase() > b.order_id.toUpperCase() ? 1 : -1)
     },
     {
       title: 'Type',
@@ -62,8 +61,7 @@ const ListPO = () => {
       key: 'comment',
       width: 250,
       ellipsis: true,
-      sorter: (a, b) => (a.comment.toUpperCase() > b.comment.toUpperCase() ? 1 : -1),
-      render: value => value ?? 'No Comment Found!',
+      sorter: (a, b) => (a.comment.toUpperCase() > b.comment.toUpperCase() ? 1 : -1)
     },
     {
       title: 'Action',

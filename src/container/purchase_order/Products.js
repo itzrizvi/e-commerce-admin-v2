@@ -84,7 +84,7 @@ const Products = ({ initialData, products, setProducts }) => {
                 .map(item => ({
                   ...item,
                   id: data.id,
-                  price: data.prod_sale_price === 0 ? data.prod_regular_price : data.prod_sale_price,
+                  price: data.cost,
                   prod_name: data.prod_name,
                   quantity: 1,
                 })),

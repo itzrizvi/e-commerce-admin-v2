@@ -10,6 +10,7 @@ export const productSchema = {
           id
           prod_name
           prod_slug
+          cost
           prod_regular_price
           prod_sale_price
           prod_thumbnail

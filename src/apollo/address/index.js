@@ -46,4 +46,30 @@ export const addressSchema = {
       }
     }
   `,
+  GET_ADDRESS_LIST_BY_VENDOR_ID: gql`
+    query getAddressListByVendorID($query: GetAddressListByVendorIDInput) {
+      getAddressListByVendorID(query: $query) {
+        message
+        status
+        shippingDefaultID
+        data {
+          id
+          address1
+          address2
+          city
+          state
+          zip_code
+          country
+          countryCode {
+            name
+            code
+            status
+          }
+          type
+          isDefault
+          status
+        }
+      }
+    }
+  `,
 };
