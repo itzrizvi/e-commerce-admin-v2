@@ -79,7 +79,7 @@ const ListPO = () => {
               style={{ margin: '.5em', color: '#ADB4D2', cursor: 'pointer' }}
             />
           </Tooltip>
-          <Link to={`/admin/po/edit?id=${record.id}`}>
+          <Link to={`/admin/po/edit/${record.id}`}>
             <FontAwesome name="edit" style={{ margin: '.5em' }} />
           </Link>
         </>

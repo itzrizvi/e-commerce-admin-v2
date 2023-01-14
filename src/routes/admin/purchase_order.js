@@ -11,7 +11,7 @@ const PORoutes = () => {
     <Switch>
       <Route path={`${path}/list`} component={ListPO} />
       <Route path={`${path}/add`} component={AddPO} />
-      <Route path={`${path}/edit`} component={EditPO} />
+      <Route path={`${path}/edit/:id`} component={EditPO} />
     </Switch>
   );
 };
