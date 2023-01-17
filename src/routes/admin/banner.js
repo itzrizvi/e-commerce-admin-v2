@@ -11,7 +11,7 @@ const BannerRoutes = () => {
     <Switch>
       <Route path={`${path}/list`} component={ListBanner} />
       <Route path={`${path}/add`} component={AddBanner} />
-      <Route path={`${path}/edit`} component={UpdateBanner} />
+      <Route path={`${path}/edit/:id`} component={UpdateBanner} />
     </Switch>
   );
 };

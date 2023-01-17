@@ -99,6 +99,7 @@ const HeaderFooterEdit = () => {
   };
 
   useEffect(() => {
+    if(!parseInt(params?.id)) return;
     apolloClient
       .query({
         query: EmailTemplateQuery.SINGLE_EMAIL_TEMPLATE_HEADER_FOOTER,
@@ -131,7 +132,7 @@ const HeaderFooterEdit = () => {
         console.log(err);
         setSingleHeaderFooter({ data: {}, loading: false, error: 'Something went worng' });
       });
-  }, []);
+  }, [params?.id]);
 
   return (
     <>

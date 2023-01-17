@@ -6,20 +6,7 @@ export const bannerQuery = {
       addBanner(data: $data) {
         message
         status
-        data {
-          id
-        }
-      }
-    }
-  `,
-  BANNER_ITEM_ADD: gql`
-    mutation addBannerItem($data: BannerItemInput!) {
-      addBannerItem(data: $data) {
-        message
-        status
-        data {
-          id
-        }
+        id
       }
     }
   `,
@@ -28,13 +15,14 @@ export const bannerQuery = {
       getAllBanners {
         message
         status
-        tenant_id
         data {
           id
           name
           slug
+          content
           status
           createdAt
+          updatedAt
         }
       }
     }
@@ -43,25 +31,16 @@ export const bannerQuery = {
     query getSingleBanner($banner_id: Int!) {
       getSingleBanner(query: { banner_id: $banner_id }) {
         message
-        tenant_id
         status
         data {
           id
           name
+          slug
+          content
+          layout_type
           status
-          banner_items {
-            id
-            title
-            sub_title
-            link
-            price
-            sale_price
-            button_text
-            option_1
-            option_2
-            image
-            sort_order
-          }
+          createdAt
+          updatedAt
         }
       }
     }
@@ -71,23 +50,6 @@ export const bannerQuery = {
       updateBanner(data: $data) {
         message
         status
-      }
-    }
-  `,
-  BANNER_ITEM_UPDATE: gql`
-    mutation updateBannerItem($data: UpdateBannerItemInput) {
-      updateBannerItem(data: $data) {
-        message
-        status
-      }
-    }
-  `,
-  BANNER_ITEM_DELETE: gql`
-    mutation deleteBannerItem($banner_id: Int!) {
-      deleteBannerItem(data: { banner_id: $banner_id }) {
-        message
-        status
-        tenant_id
       }
     }
   `,

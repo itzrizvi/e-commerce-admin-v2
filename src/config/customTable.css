@@ -4,7 +4,7 @@
 }
 
 .altTableClass {
-    background-color: #cfd0fb54;
+    background-color: #6f70b354;
 }
 
 /* for from lable */
@@ -27,7 +27,7 @@
 
 .productTable .ant-table-thead .ant-table-cell {
     background-color: #cfd4d5;
-    padding: 10px 16px;
+    padding: 6px 10px;
 }
 
 .productTable .ant-table-cell:first-child {
@@ -38,8 +38,5 @@
     padding-right: 2em;
 }
 
-.altTableClass {
-    background-color: #cfd0fb54;
-}
 
 /* ------for order view END ------*/

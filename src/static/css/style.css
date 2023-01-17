@@ -3,9 +3,11 @@
 :root {
   --primary: #4bacf5;
   --secondary: #77838f;
+  --modal-header: #5f63f24d;
+  --table-header-color: #5f63f24d;
 }
 
-body>iframe {
+body > iframe {
   display: none;
 }
 
@@ -271,7 +273,7 @@ ul {
   justify-content: center;
 }
 
-.revenue-doughnut>div {
+.revenue-doughnut > div {
   width: 100%;
   display: flex;
   flex-direction: column;
@@ -299,7 +301,7 @@ ul {
   align-items: center;
 }
 
-.ant-progress>div {
+.ant-progress > div {
   display: flex;
   flex-direction: column;
 }
@@ -513,11 +515,11 @@ ul {
 
 /* input styles */
 
-.ant-form-item-label>label {
+.ant-form-item-label > label {
   font-weight: 500;
 }
 
-.ant-picker-input>input::placeholder {
+.ant-picker-input > input::placeholder {
   color: #adb4d2 !important;
 }
 
@@ -610,7 +612,10 @@ ul {
   color: #5a5f7d;
 }
 
-.ant-pagination .ant-select-single:not(.ant-select-customize-input) .ant-select-selector .ant-select-selection-search-input {
+.ant-pagination
+  .ant-select-single:not(.ant-select-customize-input)
+  .ant-select-selector
+  .ant-select-selection-search-input {
   height: 100% !important;
 }
 
@@ -672,7 +677,9 @@ ul {
   line-height: 40px;
 }
 
-.ant-tree-select.ant-select-single:not(.ant-select-customize-input) .ant-select-selector .ant-select-selection-search-input {
+.ant-tree-select.ant-select-single:not(.ant-select-customize-input)
+  .ant-select-selector
+  .ant-select-selection-search-input {
   height: 100% !important;
 }
 
@@ -1415,7 +1422,7 @@ ul {
 
 /* Input Affix */
 
-.ant-input-affix-wrapper>input.ant-input {
+.ant-input-affix-wrapper > input.ant-input {
   padding-left: 5px;
 }
 
@@ -1569,16 +1576,16 @@ html[dir='rtl'] .sDash_upload-basic .sDash_upload-browse {
 
 /* Table Bordered*/
 
-.table-bordered .ant-table-tbody>tr.ant-table-row:hover>td {
+.table-bordered .ant-table-tbody > tr.ant-table-row:hover > td {
   background: #f8f9fb !important;
 }
 
-.table-bordered .ant-table-thead>tr>th {
+.table-bordered .ant-table-thead > tr > th {
   background: #fff;
   border-top: 1px solid #f1f2f6;
 }
 
-.table-bordered .ant-table-tbody>tr>td {
+.table-bordered .ant-table-tbody > tr > td {
   border-color: #f1f2f6 !important;
 }
 
@@ -1629,7 +1636,7 @@ html[dir='rtl'] .sDash_upload-basic .sDash_upload-browse {
   color: #5a5f7d;
 }
 
-.full-width-table .top-seller-table .ant-table-tbody>tr>td {
+.full-width-table .top-seller-table .ant-table-tbody > tr > td {
   text-align: right;
 }
 
@@ -2032,7 +2039,13 @@ html[dir='rtl'] .sDash_task-details .ant-modal-body .sDash_checklist-block .addC
   margin-right: 15px;
 }
 
-html[dir='rtl'] .sDash_task-details .ant-modal-body .sDash_checklist-block .addChecklist-form .addChecklist-form-action .btn-add {
+html[dir='rtl']
+  .sDash_task-details
+  .ant-modal-body
+  .sDash_checklist-block
+  .addChecklist-form
+  .addChecklist-form-action
+  .btn-add {
   margin-left: 15px;
   margin-right: 0;
 }
@@ -2068,7 +2081,12 @@ html[dir='rtl'] .sDash_task-details .ant-modal-body .sDash_checklist-block .addC
   margin-bottom: 0;
 }
 
-.sDash_task-details .ant-modal-body .sDash_checklist-row .sDash_checklist__progress .ant-progress-inner .ant-progress-bg {
+.sDash_task-details
+  .ant-modal-body
+  .sDash_checklist-row
+  .sDash_checklist__progress
+  .ant-progress-inner
+  .ant-progress-bg {
   height: 5px !important;
   background-color: #20c997;
 }
@@ -2080,7 +2098,13 @@ html[dir='rtl'] .sDash_task-details .ant-modal-body .sDash_checklist-block .addC
   margin: 0 10px 0 0;
 }
 
-html[dir='rtl'] .sDash_task-details .ant-modal-body .sDash_checklist-row .sDash_checklist__progress .ant-progress .ant-progress-text {
+html[dir='rtl']
+  .sDash_task-details
+  .ant-modal-body
+  .sDash_checklist-row
+  .sDash_checklist__progress
+  .ant-progress
+  .ant-progress-text {
   margin: 0 0 0 10px;
 }
 
@@ -2094,7 +2118,12 @@ html[dir='rtl'] .sDash_task-details .ant-modal-body .sDash_checklist-row .sDash_
   border-color: #c6d0dc;
 }
 
-.sDash_task-details .ant-modal-body .sDash_checklist-tasks .ant-checkbox-wrapper .ant-checkbox-checked .ant-checkbox-inner {
+.sDash_task-details
+  .ant-modal-body
+  .sDash_checklist-tasks
+  .ant-checkbox-wrapper
+  .ant-checkbox-checked
+  .ant-checkbox-inner {
   background-color: #20c997;
 }
 
@@ -2138,7 +2167,7 @@ html[dir='rtl'] .sDash_task-details .ant-modal-body .sDash_checklist-row .sDash_
   background-color: #fff !important;
 }
 
-.page-header-actions button+button {
+.page-header-actions button + button {
   margin-left: 8px;
 }
 
@@ -2240,7 +2269,9 @@ html[dir='rtl'] .sDash_task-details .ant-modal-body .sDash_checklist-row .sDash_
   visibility: visible;
 }
 
-.ant-table-thead>tr>th:not(:last-child):not(.ant-table-selection-column):not(.ant-table-row-expand-icon-cell):not([colspan])::before {
+.ant-table-thead
+  > tr
+  > th:not(:last-child):not(.ant-table-selection-column):not(.ant-table-row-expand-icon-cell):not([colspan])::before {
   display: none;
 }
 
@@ -2403,7 +2434,6 @@ html[dir='rtl'] .sDash_task-details .ant-modal-body .sDash_checklist-row .sDash_
 }
 
 @media only screen and (max-width: 575px) {
-
   .btn-inc,
   .btn-dec {
     height: 30px;
@@ -2452,7 +2482,7 @@ html[dir='rtl'] .sDash_task-details .ant-modal-body .sDash_checklist-row .sDash_
     flex-flow: column;
   }
 
-  .ant-card-head-wrapper .ant-card-extra .ant-dropdown-trigger+.card-nav {
+  .ant-card-head-wrapper .ant-card-extra .ant-dropdown-trigger + .card-nav {
     margin-bottom: 8px;
   }
 
@@ -2468,13 +2498,13 @@ html[dir='rtl'] .sDash_task-details .ant-modal-body .sDash_checklist-row .sDash_
     display: none;
   }
 
-  .ant-card-head-title>div {
+  .ant-card-head-title > div {
     display: flex;
     flex-flow: column;
     align-items: center;
   }
 
-  .ant-card-head-title>div span {
+  .ant-card-head-title > div span {
     margin: 8px 0 0;
   }
 }
@@ -2752,7 +2782,7 @@ html[dir='rtl'] .sDash_task-details .ant-modal-body .sDash_checklist-row .sDash_
 
 /* Style your items */
 
-.my-masonry-grid_column>div {
+.my-masonry-grid_column > div {
   /* change div to reference your elements you put in <Masonry> */
   background: grey;
   margin-bottom: 30px;
@@ -2767,7 +2797,7 @@ html[dir='rtl'] .sDash_task-details .ant-modal-body .sDash_checklist-row .sDash_
   display: none;
 }
 
-li.active>.display {
+li.active > .display {
   display: block;
 }
 
@@ -2822,4 +2852,50 @@ html[dir='rtl'] .ant-menu-vertical .ant-menu-submenu-title {
 
 .ant-form-item {
   margin: 0 0 10px !important;
+}
+
+.ant-table-tbody > tr > td {
+  padding: 6px 10px;
+}
+
+.purchase-order-table .ant-table-cell {
+  text-align: center;
+}
+
+.ant-table {
+  border: 1px solid #bfc9d1;
+}
+
+.ant-table .ant-table-thead > tr > th {
+  padding: 10px 12px;
+}
+
+.ant-table-thead > tr > th {
+  background: var(--table-header-color);
+  font-weight: 700;
+}
+.ant-modal .ant-modal-header {
+  background: var(--modal-header);
+}
+
+.purchase_order_vendor_table {
+  margin-top: 20px;
+  width: 100%;
+  text-align: left;
+}
+.purchase_order_vendor_table thead {
+  background: var(--table-header-color);
+}
+.purchase_order_vendor_table thead tr th {
+  padding: 10px 12px;
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
+}
+.purchase_order_vendor_table tbody {
+  border: 1px solid #bfc9d1;
+  padding: 10px;
+}
+
+.purchase_order_vendor_table tbody tr td {
+  padding: 0 12px;
 }

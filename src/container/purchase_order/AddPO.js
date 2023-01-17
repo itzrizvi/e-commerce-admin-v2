@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Col, Form, Input, Spin, Typography, Select, Card, Steps, Modal, Switch, Badge, Radio } from 'antd';
+import { Row, Col, Form, Input, Spin, Typography, Select, Card, Steps, Modal, Switch, Badge, Radio, Table } from 'antd';
 import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
 import { Cards } from '../../components/cards/frame/cards-frame';
@@ -18,6 +18,9 @@ import { methodQuery } from '../../apollo/method';
 import { strCamelCase } from '../../utility/stringModify';
 import { addressSchema } from '../../apollo/address';
 import SelectNotFound from '../../components/esential/SelectNotFound';
+import ProductSearch from '../../components/searchModule/ProductSearch';
+import { SelectOutlined } from '@ant-design/icons';
+import VendorSearch from '../../components/searchModule/VendorSearch';
 
 const AddPO = () => {
   viewPermission('purchase-order');
@@ -27,13 +30,13 @@ const AddPO = () => {
   const [addressForm] = Form.useForm();
   const { search } = useLocation();
   const params = queryString.parse(search);
-  const [vendors, setVendors] = useState({ data: [], isLoading: true });
   const [billingAddresses, setBillingAddresses] = useState([]);
   const [selectedBillingAddress, setSelectedBillingAddress] = useState(null);
   const [shippingAddresses, setShippingAddresses] = useState([]);
   const [selectedShippingAddress, setSelectedShippingAddress] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [orderList, setOrderList] = useState([]);
+  const [vendorOptionList, setVendorOptionList] = useState([]);
   const [selectedOrder, setSelectedOrder] = useState('');
   const [selectedType, setSelectedType] = useState('');
   const [shippingMethod, setShippingMethod] = useState([]);
@@ -50,19 +53,19 @@ const AddPO = () => {
   const [selectedCountryCode, setSelectedCountryCode] = useState('US');
   const [contactPerson, setContactPerson] = useState([]);
   const [searchOrderOption, setSearchOrderOption] = useState(false);
+  const [searchVendorOption, setSearchVendorOption] = useState(false);
   const [orderNotFoundContent, setOrderNotFoundContent] = useState('Write order number and press enter');
+  const [vendorNotFoundContent, setVendorNotFoundContent] = useState('Write vendor company name and press enter');
   const [changeAddress, setChangeAddress] = useState(false);
 
-  // ============+ for product START +====================
-  const initialData = {
-    id: '',
-    key: '',
-    prod_name: '',
-    quantity: 1,
-    price: 0,
-  };
+  // Product Search Module State Start
+  const [productSearchModalOpen, setProductSearchModalOpen] = useState(false);
   const [products, setProducts] = useState([]);
-  // ============+ for product END +====================
+  //Product Search Module State End
+
+  // Vendor Search State Start
+  const [vendorSearchModalOpen, setVendorSearchModalOpen] = useState(false)
+  // Vendor Search State End
 
   let check_post = true;
   useEffect(() => {
@@ -102,10 +105,9 @@ const AddPO = () => {
               product: { id },
             } = item;
             return {
-              key: randomUniqueNumber(),
               id,
               price,
-              quantity
+              quantity,
             };
           });
           setProducts(prods);
@@ -179,28 +181,6 @@ const AddPO = () => {
 
   // LOAD Vendor List
   useEffect(() => {
-    apolloClient
-      .query({
-        query: vendorQuery.GET_ALL_VENDOR,
-        context: {
-          headers: {
-            TENANTID: process.env.REACT_APP_TENANTID,
-            Authorization: token,
-          },
-        },
-      })
-      .then(res => {
-        const data = res?.data?.getAllVendor;
-        if (!data?.status) return;
-        setVendors(s => ({ ...s, data: data?.data, error: '' }));
-      })
-      .catch(err => {
-        setVendors(s => ({ ...s, error: 'Something went Wrong.!! ' }));
-      })
-      .finally(() => {
-        setVendors(s => ({ ...s, isLoading: false }));
-      });
-
     // Get Country List
     apolloClient
       .query({
@@ -240,7 +220,7 @@ const AddPO = () => {
     });
     if (notValidate) return toast.warning('Please Fill Products All of Data!');
     const newProduct = products.map(item => {
-      const { key, ...newItem } = item;
+      const { ...newItem } = item;
       return newItem;
     });
     const variables = {
@@ -291,12 +271,11 @@ const AddPO = () => {
   };
 
   const handleVendorChange = e => {
-    setVendors(s => ({ ...s, isLoading: true }));
     form.setFieldsValue({
       vendor_shipping_id: null,
-      vendor_billing_id: null
+      vendor_billing_id: null,
     });
-    
+
     apolloClient
       .query({
         query: vendorQuery.GET_SINGLE_VENDOR,
@@ -322,9 +301,6 @@ const AddPO = () => {
       })
       .catch(err => {
         console.log(err);
-      })
-      .finally(() => {
-        setVendors(s => ({ ...s, isLoading: false }));
       });
   };
 
@@ -389,6 +365,10 @@ const AddPO = () => {
   /* -------------------------- Step From Data Start -------------------------- */
   const steps = [
     {
+      title: 'Products',
+      percent: 100,
+    },
+    {
       title: 'Vendor Info',
       percent: 30,
     },
@@ -400,10 +380,6 @@ const AddPO = () => {
       title: 'Other Info',
       percent: 80,
     },
-    {
-      title: 'Products',
-      percent: 100,
-    },
   ];
 
   const [current, setCurrent] = useState(0);
@@ -411,10 +387,9 @@ const AddPO = () => {
     try {
       if (current === 0) {
         await form.validateFields(['type', 'vendor_id']);
-      }else if(current === 1){
-        await form.validateFields(['vendor_billing_id', 'vendor_shipping_id'])
-      } 
-      else if (current === 2) {
+      } else if (current === 1) {
+        await form.validateFields(['vendor_billing_id', 'vendor_shipping_id']);
+      } else if (current === 2) {
         await form.validateFields(['tax_amount', 'shipping_method_id', 'payment_method_id']);
       }
       setCurrent(current + 1);
@@ -545,10 +520,10 @@ const AddPO = () => {
           const data = res?.data?.getCompanyInfo;
           if (!data?.status) return;
           setBillingAddresses(data?.data?.billingAddresses);
-          const selected_billing_address = data?.data?.billingAddresses?.filter(item => item.isDefault)[0]
+          const selected_billing_address = data?.data?.billingAddresses?.filter(item => item.isDefault)[0];
           setSelectedBillingAddress(selected_billing_address);
           form.setFieldsValue({
-            vendor_billing_id: selected_billing_address?.id
+            vendor_billing_id: selected_billing_address?.id,
           });
         });
       apolloClient
@@ -572,7 +547,7 @@ const AddPO = () => {
           if (!data?.status) return;
           const shipping_address = data?.data.filter(item => item.type === 'shipping');
           setShippingAddresses(shipping_address);
-          const selected_shipping_address = shipping_address.filter(item => item.isDefault)[0]
+          const selected_shipping_address = shipping_address.filter(item => item.isDefault)[0];
           setSelectedShippingAddress(selected_shipping_address);
           form.setFieldsValue({
             vendor_shipping_id: selected_shipping_address?.id,
@@ -606,13 +581,13 @@ const AddPO = () => {
           });
           setBillingAddresses(new_billing);
           setShippingAddresses(new_shipping);
-          const selected_billing_address = new_billing.filter(item => item.isDefault)[0]
-          const selected_shipping_address = new_shipping.filter(item => item.isDefault)[0]
+          const selected_billing_address = new_billing.filter(item => item.isDefault)[0];
+          const selected_shipping_address = new_shipping.filter(item => item.isDefault)[0];
           setSelectedBillingAddress(selected_billing_address);
           setSelectedShippingAddress(selected_shipping_address);
           form.setFieldsValue({
             vendor_shipping_id: selected_shipping_address?.id,
-            vendor_billing_id: selected_billing_address?.id
+            vendor_billing_id: selected_billing_address?.id,
           });
         });
     }
@@ -625,441 +600,446 @@ const AddPO = () => {
         <Row gutter={25}>
           <Col sm={24} xs={24}>
             <Cards headless>
-              {vendors.isLoading && params?.order_id ? (
-                <div div className="spin">
-                  <Spin />
-                </div>
-              ) : (
-                <Form
-                  style={{ width: '100%' }}
-                  form={form}
-                  name="addPO"
-                  onFinish={handleSubmit}
-                  onFinishFailed={errorInfo => console.log('form error info:\n', errorInfo)}
-                  labelCol={{ span: 6 }}
-                >
-                  <Row style={{ marginBottom: 20 }}>
-                    <Steps
-                      current={current}
-                      items={items}
-                      percent={items[current].percent}
-                      responsive={true}
-                      size="small"
-                    />
-                  </Row>
-                  <Row style={{ marginTop: 40 }}>
-                    <Col span={24}>
-                      <div className="steps-content">
-                        {current === 0 && (
-                          <>
-                            <Row gutter={25}>
-                              <Col xs={24} md={12}>
-                                <Form.Item
-                                  initialValue="default"
-                                  rules={[{ required: true, message: 'Please Select Type' }]}
-                                  name="type"
-                                  label="Type"
-                                >
-                                  <Select
-                                    size="middle"
-                                    placeholder="Select Type"
-                                    defaultValue="default"
-                                    onChange={handleTypeChange}
-                                    style={{ width: '100%' }}
-                                    optionLabelProp="label"
-                                  >
-                                    <Select.Option key="default" value="default" label="Default">
-                                      <div className="demo-option-label-item">Default</div>
-                                    </Select.Option>
-                                    <Select.Option key="drop_shipping" value="drop_shipping" label="Drop Shipping">
-                                      <div className="demo-option-label-item">Drop Shipping</div>
-                                    </Select.Option>
-                                  </Select>
-                                </Form.Item>
-                                <Form.Item
-                                  name="order_id"
-                                  label="Order"
-                                  {...(selectedType === 'drop_shipping' && {
-                                    rules: [{ required: true, message: 'Please Select Order' }],
-                                  })}
-                                >
-                                  <Select
-                                    size="middle"
-                                    type="number"
-                                    showSearch
-                                    placeholder="Select an order (optional)"
-                                    style={{ width: '100%' }}
-                                    options={orderList}
-                                    open={searchOrderOption}
-                                    onSelect={e => {
-                                      chageOrderIdHandler(e);
-                                      setSearchOrderOption(false);
-                                    }}
-                                    onBlur={() => setSearchOrderOption(false)}
-                                    onInputKeyDown={key => {
-                                      setOrderNotFoundContent('Write order number and press enter');
-                                      setSearchOrderOption(true);
-                                      if (key.keyCode === 13) {
-                                        const val = key.target.value;
-                                        if (val.length >= 1) {
-                                          apolloClient
-                                            .query({
-                                              query: orderQuery.GET_SEARCH_ORDER,
-                                              variables: {
-                                                query: {
-                                                  searchQuery: parseInt(val),
-                                                },
-                                              },
-                                              context: {
-                                                headers: {
-                                                  TENANTID: process.env.REACT_APP_TENANTID,
-                                                  Authorization: token,
-                                                },
-                                              },
-                                            })
-                                            .then(res => {
-                                              const data = res?.data?.getOrderBySearch;
-                                              if (!data.status) return;
-                                              if (data?.data.length === 0)
-                                                return setOrderNotFoundContent('No order found');
-                                              setSelectedOrder(data?.data[0]);
-                                              setOrderList(
-                                                data.data.map(order => ({
-                                                  label: order?.id,
-                                                  value: order?.id,
-                                                })),
-                                              );
-                                            });
-                                        } else {
-                                          setOrderList([]);
-                                        }
-                                      }
-                                    }}
-                                    notFoundContent={<SelectNotFound value={orderNotFoundContent} />}
-                                  />
-                                </Form.Item>
-                                <Form.Item
-                                  rules={[{ required: true, message: 'Please Select Vendor' }]}
-                                  name="vendor_id"
-                                  label="Vendor"
-                                >
-                                  <Select
-                                    size="middle"
-                                    placeholder="Select Vendor"
-                                    onChange={handleVendorChange}
-                                    style={{ width: '100%' }}
-                                    optionLabelProp="label"
-                                  >
-                                    {vendors.data.map(val => {
-                                      return (
-                                        <Select.Option key={val.id} value={val.id} label={val.company_name}>
-                                          <div className="demo-option-label-item">
-                                            {val.company_name} - {val.contact_person}
-                                          </div>
-                                        </Select.Option>
-                                      );
-                                    })}
-                                  </Select>
-                                </Form.Item>
-                                {contactPerson.length > 0 && (
-                                  <Form.Item name="contact_person_id" label="Contact Person">
-                                    <Select placeholder="Contact Person (optional)" options={contactPerson} />
-                                  </Form.Item>
-                                )}
-                              </Col>
-                            </Row>
-                          </>
-                        )}
-                        {current === 1 && (
+              <Form
+                style={{ width: '100%' }}
+                form={form}
+                name="addPO"
+                onFinish={handleSubmit}
+                onFinishFailed={errorInfo => console.log('form error info:\n', errorInfo)}
+                labelCol={{ span: 4 }}
+              >
+                <Row style={{ marginBottom: 20 }}>
+                  <Steps
+                    current={current}
+                    items={items}
+                    percent={items[current].percent}
+                    responsive={true}
+                    size="small"
+                  />
+                </Row>
+                <Row style={{ marginTop: 40 }}>
+                  <Col span={24}>
+                    <div className="steps-content">
+                      {current === 1 && (
+                        <>
                           <Row gutter={25}>
-                            <Col sm={12}>
-                              <Typography.Title level={5}>Shipping Address</Typography.Title>
+                            <Col xs={24} md={12}>
                               <Form.Item
-                                rules={[{ required: true, message: 'Please Select Shipping Address' }]}
-                                name="vendor_shipping_id"
-                                initialValue={selectedShippingAddress?.id}
+                                initialValue="default"
+                                rules={[{ required: true, message: 'Please Select Type' }]}
+                                name="type"
+                                label="Type"
                               >
-                                {!selectedShippingAddress?.id && shippingAddresses.length > 0 ? (
-                                  <Button
-                                    size="small"
-                                    style={{ position: 'absolute', right: 14, zIndex: 1000, top: -40 }}
-                                    title="Change Shipping Address"
-                                    htmlType="button"
-                                    type="info"
-                                    onClick={() => changeAddressHandler('shipping')}
-                                  >
-                                    Select Address
-                                  </Button>
-                                ) : (
-                                  !selectedShippingAddress?.id && (
-                                    <Button
-                                      size="small"
-                                      style={{ position: 'absolute', right: 14, zIndex: 1000, top: -40 }}
-                                      title={`Add Shipping Address`}
-                                      htmlType="button"
-                                      type="primary"
-                                      onClick={() => addOrEditAddressHandler(null, 'shipping')}
-                                    >
-                                      Add address
-                                    </Button>
-                                  )
-                                )}
-
-                                <Radio.Group style={{ width: '100%', padding: 10 }}>
-                                  <Row gutter={25}>
-                                    {selectedShippingAddress?.id && (
-                                      <Col key={selectedShippingAddress?.id} xs={24}>
-                                        <Button
-                                          size="small"
-                                          style={{ position: 'absolute', right: 14, zIndex: 1000 }}
-                                          title="Change Shipping Address"
-                                          htmlType="button"
-                                          type="info"
-                                          onClick={() => changeAddressHandler('shipping')}
-                                        >
-                                          Change
-                                        </Button>
-                                        <Radio
-                                          style={{
-                                            width: '100%',
-                                            border: '1px solid #f0f0f0',
-                                            fontSize: 12,
-                                            marginBottom: 10,
-                                            padding: 10,
-                                            borderRadius: 5,
-                                          }}
-                                          defaultValue={selectedShippingAddress?.id}
-                                        >
-                                          <p>
-                                            {selectedShippingAddress?.address1 &&
-                                              ellipsis(selectedShippingAddress?.address1, 35)}
-                                          </p>
-                                          <p>
-                                            {selectedShippingAddress?.address2 &&
-                                              ellipsis(selectedShippingAddress?.address2, 35)}
-                                          </p>
-                                          <p>
-                                            {selectedShippingAddress?.city}, {selectedShippingAddress?.state} -{' '}
-                                            {selectedShippingAddress?.zip_code}
-                                          </p>
-                                          {/* Need To Add Country */}
-                                        </Radio>
-                                      </Col>
-                                    )}
-                                  </Row>
-                                </Radio.Group>
+                                <Select
+                                  size="middle"
+                                  placeholder="Select Type"
+                                  defaultValue="default"
+                                  onChange={handleTypeChange}
+                                  style={{ width: '100%' }}
+                                  optionLabelProp="label"
+                                >
+                                  <Select.Option key="default" value="default" label="Default">
+                                    <div className="demo-option-label-item">Default</div>
+                                  </Select.Option>
+                                  <Select.Option key="drop_shipping" value="drop_shipping" label="Drop Shipping">
+                                    <div className="demo-option-label-item">Drop Shipping</div>
+                                  </Select.Option>
+                                </Select>
                               </Form.Item>
-                            </Col>
-                            <Col sm={12}>
-                              <Typography.Title level={5}>Billing Address</Typography.Title>
                               <Form.Item
-                                rules={[{ required: true, message: 'Please Select Billing Address' }]}
-                                name="vendor_billing_id"
-                                initialValue={selectedBillingAddress?.id}
+                                name="order_id"
+                                label="Order"
+                                {...(selectedType === 'drop_shipping' && {
+                                  rules: [{ required: true, message: 'Please Select Order' }],
+                                })}
                               >
-                                {!selectedBillingAddress?.id && billingAddresses.length > 0 ? (
-                                  <Button
-                                    size="small"
-                                    style={{ position: 'absolute', right: 14, zIndex: 1000, top: -40 }}
-                                    title="Change Billing Address"
-                                    htmlType="button"
-                                    type="info"
-                                    onClick={() => changeAddressHandler('billing')}
-                                  >
-                                    Select Address
-                                  </Button>
-                                ) : (
-                                  !selectedBillingAddress?.id && (
-                                    <Button
-                                      size="small"
-                                      style={{ position: 'absolute', right: 14, zIndex: 1000, top: -40 }}
-                                      title={`Add Billing Address`}
-                                      htmlType="button"
-                                      type="primary"
-                                      onClick={() => addOrEditAddressHandler(null, 'billing')}
-                                    >
-                                      Add Address
-                                    </Button>
-                                  )
-                                )}
-                                <Radio.Group style={{ width: '100%', padding: 10 }}>
-                                  <Row gutter={25}>
-                                    {selectedBillingAddress?.id && (
-                                      <Col key={selectedBillingAddress?.id} xs={24}>
-                                        <Button
-                                          size="small"
-                                          style={{ position: 'absolute', right: 14, zIndex: 1000 }}
-                                          title="Change Billing Address"
-                                          htmlType="button"
-                                          type="info"
-                                          onClick={() => changeAddressHandler('billing')}
-                                        >
-                                          Change
-                                        </Button>
-                                        <Radio
-                                          style={{
-                                            width: '100%',
-                                            border: '1px solid #f0f0f0',
-                                            fontSize: 12,
-                                            marginBottom: 10,
-                                            padding: 10,
-                                            borderRadius: 5,
-                                          }}
-                                          defaultValue={selectedBillingAddress?.id}
-                                        >
-                                          <p>
-                                            {selectedBillingAddress?.address1 &&
-                                              ellipsis(selectedBillingAddress?.address1, 35)}
-                                          </p>
-                                          <p>
-                                            {selectedBillingAddress?.address2 &&
-                                              ellipsis(selectedBillingAddress?.address2, 35)}
-                                          </p>
-                                          <p>
-                                            {selectedBillingAddress?.city}, {selectedBillingAddress?.state} -{' '}
-                                            {selectedBillingAddress?.zip_code}
-                                          </p>
-                                        </Radio>
-                                      </Col>
-                                    )}
-                                  </Row>
-                                </Radio.Group>
+                                <Select
+                                  size="middle"
+                                  type="number"
+                                  showSearch
+                                  placeholder="Select an order (optional)"
+                                  style={{ width: '100%' }}
+                                  options={orderList}
+                                  open={searchOrderOption}
+                                  onSelect={e => {
+                                    chageOrderIdHandler(e);
+                                    setSearchOrderOption(false);
+                                  }}
+                                  onBlur={() => setSearchOrderOption(false)}
+                                  onInputKeyDown={key => {
+                                    setOrderNotFoundContent('Write order number and press enter');
+                                    setSearchOrderOption(true);
+                                    if (key.keyCode === 13) {
+                                      const val = key.target.value;
+                                      if (val.length >= 1) {
+                                        apolloClient
+                                          .query({
+                                            query: orderQuery.GET_SEARCH_ORDER,
+                                            variables: {
+                                              query: {
+                                                searchQuery: parseInt(val),
+                                              },
+                                            },
+                                            context: {
+                                              headers: {
+                                                TENANTID: process.env.REACT_APP_TENANTID,
+                                                Authorization: token,
+                                              },
+                                            },
+                                          })
+                                          .then(res => {
+                                            const data = res?.data?.getOrderBySearch;
+                                            if (!data.status) return;
+                                            if (data?.data.length === 0)
+                                              return setOrderNotFoundContent('No order found');
+                                            setSelectedOrder(data?.data[0]);
+                                            setOrderList(
+                                              data.data.map(order => ({
+                                                label: order?.id,
+                                                value: order?.id,
+                                              })),
+                                            );
+                                          });
+                                      } else {
+                                        setOrderList([]);
+                                      }
+                                    }
+                                  }}
+                                  notFoundContent={<SelectNotFound value={orderNotFoundContent} />}
+                                />
                               </Form.Item>
                             </Col>
                           </Row>
-                        )}
-                        {current === 2 && (
-                          <>
-                            <Row gutter={25}>
-                              <Col xs={24} md={16}>
-                                <Form.Item
-                                  initialValue={selectedShippingMethod}
-                                  rules={[{ required: true, message: 'Please Select Shipping Method' }]}
-                                  name="shipping_method_id"
-                                  label="Shipping Method"
+                        </>
+                      )}
+                      {current === 2 && (
+                        <Row gutter={25}>
+                          <Col sm={12}>
+                            <Typography.Title level={5}>Shipping Address</Typography.Title>
+                            <Form.Item
+                              rules={[{ required: true, message: 'Please Select Shipping Address' }]}
+                              name="vendor_shipping_id"
+                              initialValue={selectedShippingAddress?.id}
+                            >
+                              {!selectedShippingAddress?.id && shippingAddresses.length > 0 ? (
+                                <Button
+                                  size="small"
+                                  style={{ position: 'absolute', right: 14, zIndex: 1000, top: -40 }}
+                                  title="Change Shipping Address"
+                                  htmlType="button"
+                                  type="info"
+                                  onClick={() => changeAddressHandler('shipping')}
                                 >
-                                  <Select
-                                    size="middle"
-                                    placeholder="Select Shipping Method"
-                                    defaultValue={selectedShippingMethod}
-                                    style={{ width: '100%' }}
-                                    optionLabelProp="label"
+                                  Select Address
+                                </Button>
+                              ) : (
+                                !selectedShippingAddress?.id && (
+                                  <Button
+                                    size="small"
+                                    style={{ position: 'absolute', right: 14, zIndex: 1000, top: -40 }}
+                                    title={`Add Shipping Address`}
+                                    htmlType="button"
+                                    type="primary"
+                                    onClick={() => addOrEditAddressHandler(null, 'shipping')}
                                   >
-                                    {shippingMethod.map(item => (
-                                      <Select.Option key={item.id} value={item.id} label={item.name}>
-                                        <div className="demo-option-label-item">{item.name}</div>
-                                      </Select.Option>
-                                    ))}
-                                  </Select>
-                                </Form.Item>
+                                    Add address
+                                  </Button>
+                                )
+                              )}
 
-                                <Form.Item
-                                  rules={[{ required: true, message: 'Please Select Shipping Account' }]}
-                                  name="shipping_account_id"
-                                  label="Shipping Account"
+                              <Radio.Group style={{ width: '100%', padding: 10 }}>
+                                <Row gutter={25}>
+                                  {selectedShippingAddress?.id && (
+                                    <Col key={selectedShippingAddress?.id} xs={24}>
+                                      <Button
+                                        size="small"
+                                        style={{ position: 'absolute', right: 14, zIndex: 1000 }}
+                                        title="Change Shipping Address"
+                                        htmlType="button"
+                                        type="info"
+                                        onClick={() => changeAddressHandler('shipping')}
+                                      >
+                                        Change
+                                      </Button>
+                                      <Radio
+                                        style={{
+                                          width: '100%',
+                                          border: '1px solid #f0f0f0',
+                                          fontSize: 12,
+                                          marginBottom: 10,
+                                          padding: 10,
+                                          borderRadius: 5,
+                                        }}
+                                        defaultValue={selectedShippingAddress?.id}
+                                      >
+                                        <p>
+                                          {selectedShippingAddress?.address1 &&
+                                            ellipsis(selectedShippingAddress?.address1, 35)}
+                                        </p>
+                                        <p>
+                                          {selectedShippingAddress?.address2 &&
+                                            ellipsis(selectedShippingAddress?.address2, 35)}
+                                        </p>
+                                        <p>
+                                          {selectedShippingAddress?.city}, {selectedShippingAddress?.state} -{' '}
+                                          {selectedShippingAddress?.zip_code}
+                                        </p>
+                                        {/* Need To Add Country */}
+                                      </Radio>
+                                    </Col>
+                                  )}
+                                </Row>
+                              </Radio.Group>
+                            </Form.Item>
+                          </Col>
+                          <Col sm={12}>
+                            <Typography.Title level={5}>Billing Address</Typography.Title>
+                            <Form.Item
+                              rules={[{ required: true, message: 'Please Select Billing Address' }]}
+                              name="vendor_billing_id"
+                              initialValue={selectedBillingAddress?.id}
+                            >
+                              {!selectedBillingAddress?.id && billingAddresses.length > 0 ? (
+                                <Button
+                                  size="small"
+                                  style={{ position: 'absolute', right: 14, zIndex: 1000, top: -40 }}
+                                  title="Change Billing Address"
+                                  htmlType="button"
+                                  type="info"
+                                  onClick={() => changeAddressHandler('billing')}
                                 >
-                                  <Select
-                                    size="middle"
-                                    placeholder="Select Shipping Account (optional)"
-                                    style={{ width: '100%' }}
-                                    optionLabelProp="label"
+                                  Select Address
+                                </Button>
+                              ) : (
+                                !selectedBillingAddress?.id && (
+                                  <Button
+                                    size="small"
+                                    style={{ position: 'absolute', right: 14, zIndex: 1000, top: -40 }}
+                                    title={`Add Billing Address`}
+                                    htmlType="button"
+                                    type="primary"
+                                    onClick={() => addOrEditAddressHandler(null, 'billing')}
                                   >
-                                    {shippingMethodAccountList.map(item => (
-                                      <Select.Option key={item.id} value={item.id} label={item.name}>
-                                        <div className="demo-option-label-item">{item.name}</div>
-                                      </Select.Option>
-                                    ))}
-                                  </Select>
-                                </Form.Item>
-
-                                <Form.Item
-                                  rules={[{ required: true, message: 'Please Select Payment Method' }]}
-                                  name="payment_method_id"
-                                  label="Payment Method"
+                                    Add Address
+                                  </Button>
+                                )
+                              )}
+                              <Radio.Group style={{ width: '100%', padding: 10 }}>
+                                <Row gutter={25}>
+                                  {selectedBillingAddress?.id && (
+                                    <Col key={selectedBillingAddress?.id} xs={24}>
+                                      <Button
+                                        size="small"
+                                        style={{ position: 'absolute', right: 14, zIndex: 1000 }}
+                                        title="Change Billing Address"
+                                        htmlType="button"
+                                        type="info"
+                                        onClick={() => changeAddressHandler('billing')}
+                                      >
+                                        Change
+                                      </Button>
+                                      <Radio
+                                        style={{
+                                          width: '100%',
+                                          border: '1px solid #f0f0f0',
+                                          fontSize: 12,
+                                          marginBottom: 10,
+                                          padding: 10,
+                                          borderRadius: 5,
+                                        }}
+                                        defaultValue={selectedBillingAddress?.id}
+                                      >
+                                        <p>
+                                          {selectedBillingAddress?.address1 &&
+                                            ellipsis(selectedBillingAddress?.address1, 35)}
+                                        </p>
+                                        <p>
+                                          {selectedBillingAddress?.address2 &&
+                                            ellipsis(selectedBillingAddress?.address2, 35)}
+                                        </p>
+                                        <p>
+                                          {selectedBillingAddress?.city}, {selectedBillingAddress?.state} -{' '}
+                                          {selectedBillingAddress?.zip_code}
+                                        </p>
+                                      </Radio>
+                                    </Col>
+                                  )}
+                                </Row>
+                              </Radio.Group>
+                            </Form.Item>
+                          </Col>
+                        </Row>
+                      )}
+                      {current === 3 && (
+                        <>
+                          <Row gutter={25}>
+                            <Col xs={24} md={16}>
+                              <Form.Item
+                                initialValue={selectedShippingMethod}
+                                rules={[{ required: true, message: 'Please Select Shipping Method' }]}
+                                name="shipping_method_id"
+                                label="Shipping Method"
+                              >
+                                <Select
+                                  size="middle"
+                                  placeholder="Select Shipping Method"
+                                  defaultValue={selectedShippingMethod}
+                                  style={{ width: '100%' }}
+                                  optionLabelProp="label"
                                 >
-                                  <Select
-                                    size="middle"
-                                    placeholder="Select Payment Method"
-                                    style={{ width: '100%' }}
-                                    optionLabelProp="label"
-                                  >
-                                    {paymentMethod.map(item => (
-                                      <Select.Option key={item.id} value={item.id} label={item.name}>
-                                        <div className="demo-option-label-item">{item.name}</div>
-                                      </Select.Option>
-                                    ))}
-                                  </Select>
-                                </Form.Item>
+                                  {shippingMethod.map(item => (
+                                    <Select.Option key={item.id} value={item.id} label={item.name}>
+                                      <div className="demo-option-label-item">{item.name}</div>
+                                    </Select.Option>
+                                  ))}
+                                </Select>
+                              </Form.Item>
 
-                                <Form.Item
-                                  label="Tax Amount"
-                                  name="tax_amount"
-                                  rules={[{ required: true, message: 'Please Input Tax Amount' }]}
+                              <Form.Item
+                                rules={[{ required: true, message: 'Please Select Shipping Account' }]}
+                                name="shipping_account_id"
+                                label="Shipping Account"
+                              >
+                                <Select
+                                  size="middle"
+                                  placeholder="Select Shipping Account (optional)"
+                                  style={{ width: '100%' }}
+                                  optionLabelProp="label"
                                 >
-                                  <Input placeholder="Enter Tax Amount" type="number" />
-                                </Form.Item>
-                                <Form.Item name="comment" label="Comment">
-                                  <TextArea rows={4} placeholder="Enter Comment" />
-                                </Form.Item>
-                              </Col>
-                              <Col xs={24} md={12}></Col>
-                            </Row>
-                          </>
-                        )}
-                        {current === 3 && (
-                          <>
-                            <Products {...{ initialData, products, setProducts }} />
-                          </>
-                        )}
-                      </div>
-                    </Col>
-                  </Row>
+                                  {shippingMethodAccountList.map(item => (
+                                    <Select.Option key={item.id} value={item.id} label={item.name}>
+                                      <div className="demo-option-label-item">{item.name}</div>
+                                    </Select.Option>
+                                  ))}
+                                </Select>
+                              </Form.Item>
 
-                  <Row style={{ marginTop: 20 }}>
-                    <Col span={24}>
-                      <div className="steps-action" style={{ float: 'right' }}>
-                        <Link to="/admin/po/list">
-                          <Button
-                            type="light"
-                            style={{
-                              margin: '0 8px',
-                            }}
-                          >
-                            Cancel
-                          </Button>
-                        </Link>
-                        {current > 0 && (
-                          <Button
-                            type="light"
-                            style={{
-                              margin: '0 8px',
-                            }}
-                            onClick={() => prev()}
-                          >
-                            Previous
-                          </Button>
-                        )}
-                        {current < steps.length - 1 && (
-                          <Button
-                            style={{
-                              margin: '0 8px',
-                            }}
-                            type="primary"
-                            onClick={() => next()}
-                          >
-                            Next
-                          </Button>
-                        )}
-                        {current === steps.length - 1 && (
-                          <Button loading={isLoading} disabled={isLoading} htmlType="submit" type="primary" raised>
-                            {isLoading ? 'Processing' : 'Create PO'}
-                          </Button>
-                        )}
-                      </div>
-                    </Col>
-                  </Row>
-                </Form>
-              )}
+                              <Form.Item
+                                rules={[{ required: true, message: 'Please Select Payment Method' }]}
+                                name="payment_method_id"
+                                label="Payment Method"
+                              >
+                                <Select
+                                  size="middle"
+                                  placeholder="Select Payment Method"
+                                  style={{ width: '100%' }}
+                                  optionLabelProp="label"
+                                >
+                                  {paymentMethod.map(item => (
+                                    <Select.Option key={item.id} value={item.id} label={item.name}>
+                                      <div className="demo-option-label-item">{item.name}</div>
+                                    </Select.Option>
+                                  ))}
+                                </Select>
+                              </Form.Item>
+
+                              <Form.Item
+                                label="Tax Amount"
+                                name="tax_amount"
+                                rules={[{ required: true, message: 'Please Input Tax Amount' }]}
+                              >
+                                <Input placeholder="Enter Tax Amount" type="number" />
+                              </Form.Item>
+                              <Form.Item name="comment" label="Comment">
+                                <TextArea rows={4} placeholder="Enter Comment" />
+                              </Form.Item>
+                            </Col>
+                            <Col xs={24} md={12}></Col>
+                          </Row>
+                        </>
+                      )}
+                      {current === 0 && (
+                        <>
+                          <Products {...{ products, setProducts, setProductSearchModalOpen }} />
+                          <table className="table table-responsive purchase_order_vendor_table">
+                            <thead>
+                              <tr>
+                                <th>Vendor</th>
+                                <th></th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <tr>
+                                <td>
+                                  <Form.Item label="Vendor" labelAlign="left">
+                                    Select Vendor{' '}
+                                    <SelectOutlined
+                                      style={{
+                                        cursor: 'pointer',
+                                        color: 'var(--primary)',
+                                        marginRight: 10,
+                                        float: 'right',
+                                      }}
+                                      onClick={() => setVendorSearchModalOpen(true)}
+                                    />
+                                  </Form.Item>
+                                </td>
+                                <td>
+                                  <Form.Item label="Vendor" labelAlign="left">
+                                    Select Vendor{' '}
+                                    <SelectOutlined
+                                      style={{
+                                        cursor: 'pointer',
+                                        color: 'var(--primary)',
+                                        marginRight: 10,
+                                        float: 'right',
+                                      }}
+                                    />
+                                  </Form.Item>
+                                </td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </>
+                      )}
+                    </div>
+                  </Col>
+                </Row>
+
+                <Row style={{ marginTop: 20 }}>
+                  <Col span={24}>
+                    <div className="steps-action" style={{ float: 'right' }}>
+                      <Link to="/admin/po/list">
+                        <Button
+                          type="light"
+                          style={{
+                            margin: '0 8px',
+                          }}
+                        >
+                          Cancel
+                        </Button>
+                      </Link>
+                      {current > 0 && (
+                        <Button
+                          type="light"
+                          style={{
+                            margin: '0 8px',
+                          }}
+                          onClick={() => prev()}
+                        >
+                          Previous
+                        </Button>
+                      )}
+                      {current < steps.length - 1 && (
+                        <Button
+                          style={{
+                            margin: '0 8px',
+                          }}
+                          type="primary"
+                          onClick={() => next()}
+                        >
+                          Next
+                        </Button>
+                      )}
+                      {current === steps.length - 1 && (
+                        <Button loading={isLoading} disabled={isLoading} htmlType="submit" type="primary" raised>
+                          {isLoading ? 'Processing' : 'Create PO'}
+                        </Button>
+                      )}
+                    </div>
+                  </Col>
+                </Row>
+              </Form>
             </Cards>
           </Col>
         </Row>
@@ -1278,6 +1258,10 @@ const AddPO = () => {
           </Row>
         </Modal>
         {/* Modal For Add / Update Address */}
+
+        {/* Modal For Product Search */}
+        <ProductSearch {...{ productSearchModalOpen, setProductSearchModalOpen, products, setProducts }} />
+        <VendorSearch{...{vendorSearchModalOpen, setVendorSearchModalOpen}} />
       </Main>
     </>
   );

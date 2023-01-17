@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { SearchOutlined } from '@ant-design/icons';
-import { Row, Col, Spin, Input, Table, Switch } from 'antd';
+import { Row, Col, Spin, Input, Table } from 'antd';
 import FeatherIcon from 'feather-icons-react';
 import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
@@ -12,7 +12,6 @@ import apolloClient from '../../apollo';
 import { bannerQuery } from '../../apollo/banner';
 import { useSelector } from 'react-redux';
 import Moment from 'react-moment';
-import { toast } from 'react-toastify';
 import { viewPermission } from '../../utility/utility';
 import config from '../../config/config';
 
@@ -47,32 +46,6 @@ const ListBanner = () => {
       });
   }, []);
 
-  const handleStatusChange = (record, checked) => {
-    const variables = { data: { banner_id: record.id, status: checked } };
-
-    apolloClient
-      .mutate({
-        mutation: bannerQuery.BANNER_UPDATE,
-        variables,
-        context: {
-          headers: {
-            TENANTID: process.env.REACT_APP_TENANTID,
-            Authorization: token,
-          },
-        },
-      })
-      .then(res => {
-        const status = res?.data?.updateBanner?.status;
-        console.log(record);
-        if (!status) return toast.error(res?.data?.message);
-        toast.success(`${record.name} Status updated.`);
-      })
-      .catch(err => {
-        console.log(err);
-        toast.error(`Something went wrong!!`);
-      });
-  };
-
   const columns = [
     {
       title: 'ID',
@@ -99,28 +72,6 @@ const ListBanner = () => {
       sorter: (a, b) => (a.slug.toUpperCase() > b.slug.toUpperCase() ? 1 : -1),
     },
     {
-      title: 'Status',
-      dataIndex: 'status',
-      key: 'status',
-      align: 'right',
-      width: 120,
-      render: (text, record) => (
-        <Switch defaultChecked={text} title="Status" onChange={checked => handleStatusChange(record, checked)} />
-      ),
-      filters: [
-        {
-          text: 'Enable',
-          value: true,
-        },
-        {
-          text: 'Disable',
-          value: false,
-        },
-      ],
-      onFilter: (value, record) => record.status === value,
-      sorter: (a, b) => a.status - b.status,
-    },
-    {
       title: 'Date',
       dataIndex: 'createdAt',
       key: 'createdAt',
@@ -138,7 +89,7 @@ const ListBanner = () => {
       width: 100,
       render: (text, record) => (
         <>
-          <Link to={`/admin/banner/edit?id=${record.id}`}>
+          <Link to={`/admin/banner/edit/${record.id}`}>
             <FontAwesome name="edit" />
           </Link>
         </>

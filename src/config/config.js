@@ -2,6 +2,8 @@ import { theme, darkTheme } from './theme/themeVariables';
 
 const config = {
   darkMode: false,
+  DECIMAL_DIGIT: 2,
+  CURRENCY_SYMBOL: "$",
   topMenu: false,
   rtl: false,
   theme,

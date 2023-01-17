@@ -947,8 +947,8 @@ export const customerQuery = {
     }
   `,
   GET_ALL_CUSTOMER: gql`
-    query getAllCustomer($query:CustomerListInput) {
-      getAllCustomer(query:$query) {
+    query getAllCustomer($query: CustomerListInput) {
+      getAllCustomer(query: $query) {
         message
         status
         data {
@@ -980,7 +980,8 @@ export const customerQuery = {
           }
         }
       }
-    }`,
+    }
+  `,
   GET_ALL_CUSTOMER_FOR_ORDER: gql`
     query {
       getAllCustomer {
@@ -1314,9 +1315,52 @@ export const vendorQuery = {
             id
             address1
             address2
+            city
+            state
+            zip_code
+            country
+            countryCode {
+              name
+              code
+            }
+            status
+            isDefault
+            updatedAt
+            createdAt
+            type
+          }
+        }
+      }
+    }
+  `,
+  GET_SEARCHED_VENDOR: gql`
+    query getSearchedVendors($query: VendorSearchInput) {
+      getSearchedVendors(query: $query) {
+        message
+        status
+        data {
+          id
+          contact_person
+          contactPersons {
+            id
+            name
+            email
             phone
             fax
-            email
+            status
+          }
+          company_name
+          email
+          description
+          phone_number
+          EIN_no
+          TAX_ID
+          FAX_no
+          status
+          addresses {
+            id
+            address1
+            address2
             city
             state
             zip_code

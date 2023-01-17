@@ -103,73 +103,67 @@ const HeaderFooterAdd = () => {
         <Row gutter={25}>
           <Col sm={24} xs={24}>
             <Cards headless>
-              {isLoading ? (
-                <div style={{ textAlign: 'center' }}>
-                  <Spin tip="processing..." />
-                </div>
-              ) : (
-                <Form
-                  style={{ width: '100%' }}
-                  form={form}
-                  name="addEmailHeaderFooter"
-                  onFinish={handleSubmit}
-                  onFinishFailed={errorInfo => console.log('form error info:\n', errorInfo)}
-                  labelCol={{ span: 4 }}
+              <Form
+                style={{ width: '100%' }}
+                form={form}
+                name="addEmailHeaderFooter"
+                onFinish={handleSubmit}
+                onFinishFailed={errorInfo => console.log('form error info:\n', errorInfo)}
+                labelCol={{ span: 4 }}
+              >
+                <Form.Item
+                  rules={[{ required: true, max: 100, message: 'Please Enter Email Header/Footer Name' }]}
+                  name="name"
+                  label="Name"
                 >
-                  <Form.Item
-                    rules={[{ required: true, max: 100, message: 'Please Enter Email Header/Footer Name' }]}
-                    name="name"
-                    label="Name"
-                  >
-                    <Input placeholder="Enter Header/Footer Name" />
+                  <Input placeholder="Enter Header/Footer Name" />
+                </Form.Item>
+                <Form.Item name="type" label="Type" required>
+                  <Select style={{ width: '100%' }} placeholder="Select Header/Footer Type" optionLabelProp="label">
+                    <Select.Option value="header" label="Header">
+                      <div className="demo-option-label-item">Header</div>
+                    </Select.Option>
+                    <Select.Option value="footer" label="Footer">
+                      <div className="demo-option-label-item">Footer</div>
+                    </Select.Option>
+                  </Select>
+                </Form.Item>
+                <Form.Item label="Custom HTML">
+                  <Switch defaultChecked={false} onChange={e => setCustomHtmlSwitch(e)} />
+                </Form.Item>
+                {!customHtmlSwitch && (
+                  <Form.Item label="Content">
+                    <ReactQuill
+                      theme="snow"
+                      modules={modules}
+                      placeholder="Content goes here..."
+                      onChange={setContent}
+                    />
                   </Form.Item>
-                  <Form.Item name="type" label="Type" required>
-                    <Select style={{ width: '100%' }} placeholder="Select Header/Footer Type" optionLabelProp="label">
-                      <Select.Option value="header" label="Header">
-                        <div className="demo-option-label-item">Header</div>
-                      </Select.Option>
-                      <Select.Option value="footer" label="Footer">
-                        <div className="demo-option-label-item">Footer</div>
-                      </Select.Option>
-                    </Select>
-                  </Form.Item>
+                )}
+
+                {customHtmlSwitch && (
                   <Form.Item label="Custom HTML">
-                    <Switch defaultChecked={false} onChange={e => setCustomHtmlSwitch(e)} />
+                    <TextArea
+                      onChange={e => setHTMLContent(e.target.value)}
+                      placeholder="Paste your HTML Code Here..."
+                    />
                   </Form.Item>
-                  {!customHtmlSwitch && (
-                    <Form.Item label="Content">
-                      <ReactQuill
-                        theme="snow"
-                        modules={modules}
-                        placeholder="Content goes here..."
-                        onChange={setContent}
-                      />
-                    </Form.Item>
-                  )}
+                )}
 
-                  {customHtmlSwitch && (
-                    <Form.Item label="Custom HTML">
-                      <TextArea
-                        onChange={e => setHTMLContent(e.target.value)}
-                        placeholder="Paste your HTML Code Here..."
-                      />
-                    </Form.Item>
-                  )}
-
-                  <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                    <Form.Item>
-                      <Button loading={isLoading} size="default" htmlType="submit" type="primary" raised>
-                        {isLoading ? 'Processing' : 'Save'}
+                <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                  <Form.Item>
+                    <Button loading={isLoading} size="default" htmlType="submit" type="primary" raised>
+                      {isLoading ? 'Processing' : 'Save'}
+                    </Button>
+                    <Link to="/admin/email/header-footer/list">
+                      <Button style={{ marginLeft: 10 }} type="light" size="default">
+                        Cancel
                       </Button>
-                      <Link to="/admin/email/header-footer/list">
-                        <Button style={{ marginLeft: 10 }} type="light" size="default">
-                          Cancel
-                        </Button>
-                      </Link>
-                    </Form.Item>
-                  </div>
-                </Form>
-              )}
+                    </Link>
+                  </Form.Item>
+                </div>
+              </Form>
             </Cards>
           </Col>
         </Row>

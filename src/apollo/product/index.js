@@ -9,11 +9,18 @@ export const productSchema = {
         data {
           id
           prod_name
+          prod_partnum
           prod_slug
           cost
           prod_regular_price
           prod_sale_price
+          prod_condition
           prod_thumbnail
+          representative{
+            first_name
+            last_name
+            email
+          }
         }
       }
     }
