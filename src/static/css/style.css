@@ -2898,4 +2898,5 @@ html[dir='rtl'] .ant-menu-vertical .ant-menu-submenu-title {
 
 .purchase_order_vendor_table tbody tr td {
   padding: 0 12px;
+  vertical-align: baseline;
 }

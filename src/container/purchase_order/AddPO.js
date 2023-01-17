@@ -19,8 +19,11 @@ import { strCamelCase } from '../../utility/stringModify';
 import { addressSchema } from '../../apollo/address';
 import SelectNotFound from '../../components/esential/SelectNotFound';
 import ProductSearch from '../../components/searchModule/ProductSearch';
-import { SelectOutlined } from '@ant-design/icons';
+import { PlusCircleOutlined, SelectOutlined } from '@ant-design/icons';
 import VendorSearch from '../../components/searchModule/VendorSearch';
+import AddContactPerson from '../../components/contactPerson/AddContactPerson';
+import ContactPersonList from '../../components/contactPerson/ContactPersonList';
+import { contactPersonsSchema } from '../../apollo/contactPerson';
 
 const AddPO = () => {
   viewPermission('purchase-order');
@@ -36,7 +39,6 @@ const AddPO = () => {
   const [selectedShippingAddress, setSelectedShippingAddress] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [orderList, setOrderList] = useState([]);
-  const [vendorOptionList, setVendorOptionList] = useState([]);
   const [selectedOrder, setSelectedOrder] = useState('');
   const [selectedType, setSelectedType] = useState('');
   const [shippingMethod, setShippingMethod] = useState([]);
@@ -53,9 +55,7 @@ const AddPO = () => {
   const [selectedCountryCode, setSelectedCountryCode] = useState('US');
   const [contactPerson, setContactPerson] = useState([]);
   const [searchOrderOption, setSearchOrderOption] = useState(false);
-  const [searchVendorOption, setSearchVendorOption] = useState(false);
   const [orderNotFoundContent, setOrderNotFoundContent] = useState('Write order number and press enter');
-  const [vendorNotFoundContent, setVendorNotFoundContent] = useState('Write vendor company name and press enter');
   const [changeAddress, setChangeAddress] = useState(false);
 
   // Product Search Module State Start
@@ -64,8 +64,16 @@ const AddPO = () => {
   //Product Search Module State End
 
   // Vendor Search State Start
-  const [vendorSearchModalOpen, setVendorSearchModalOpen] = useState(false)
+  const [vendorSearchModalOpen, setVendorSearchModalOpen] = useState(false);
+  const [selectedVendor, setSelectedVendor] = useState(null);
   // Vendor Search State End
+
+  // Contact person Add State Start
+  const [contactPersonAddModalOpen, setContactPersonAddModalOpen] = useState(false);
+  const [cpSuccess, setCPSuccess] = useState(false);
+  const [selectedContactPerson, setSelectedContactPerson] = useState(null);
+  const [contactSelectModalOpen, setContactSelectModalOpen] = useState(false);
+  // Contact Person Add state End
 
   let check_post = true;
   useEffect(() => {
@@ -208,6 +216,30 @@ const AddPO = () => {
         setShippingMethodAccountList(data?.data);
       });
   }, []);
+
+  // Trigger After Contact Person Add
+  useEffect(() => {
+    if (!selectedVendor?.id) return;
+    apolloClient
+      .query({
+        query: contactPersonsSchema.GET_CONTACT_PERSON_BY_ID,
+        variables: {
+          query: {
+            id: selectedVendor?.id,
+            type: 'vendor',
+            status: true,
+          },
+        },
+        context: {
+          headers: { TENANTID: process.env.REACT_APP_TENANTID, Authorization: token },
+        },
+      })
+      .then(res => {
+        const data = res.data.getContactPerson;
+        if (!data.status) return;
+        setSelectedVendor(prev => ({ ...prev, contactPersons: data?.data }));
+      });
+  }, [cpSuccess]);
 
   const handleSubmit = () => {
     const values = form.getFieldsValue(true);
@@ -606,7 +638,7 @@ const AddPO = () => {
                 name="addPO"
                 onFinish={handleSubmit}
                 onFinishFailed={errorInfo => console.log('form error info:\n', errorInfo)}
-                labelCol={{ span: 4 }}
+                labelCol={{ span: 6 }}
               >
                 <Row style={{ marginBottom: 20 }}>
                   <Steps
@@ -960,9 +992,18 @@ const AddPO = () => {
                             </thead>
                             <tbody>
                               <tr>
-                                <td>
-                                  <Form.Item label="Vendor" labelAlign="left">
-                                    Select Vendor{' '}
+                                <td width="50%" style={{ borderRight: '1px solid #ddd' }}>
+                                  <Form.Item label="Vendor" labelAlign="left" style={{ margin: 0 }}>
+                                    {selectedVendor ? (
+                                      selectedVendor?.company_name
+                                    ) : (
+                                      <Typography.Text
+                                        style={{ cursor: 'pointer' }}
+                                        onClick={() => setVendorSearchModalOpen(true)}
+                                      >
+                                        Select Vendor
+                                      </Typography.Text>
+                                    )}
                                     <SelectOutlined
                                       style={{
                                         cursor: 'pointer',
@@ -973,10 +1014,41 @@ const AddPO = () => {
                                       onClick={() => setVendorSearchModalOpen(true)}
                                     />
                                   </Form.Item>
+                                  <Form.Item label="Vendor Contact" labelAlign="left" style={{ margin: 0 }}>
+                                    <Row gutter={10}>
+                                      <Col span={24}>
+                                        {selectedContactPerson ? (
+                                          selectedContactPerson?.email
+                                        ) : (
+                                          <Typography.Text
+                                            style={{ cursor: 'pointer' }}
+                                            onClick={() => {
+                                              if (!selectedVendor?.id) return;
+                                              setContactSelectModalOpen(true);
+                                            }}
+                                          >
+                                            Select Contact
+                                          </Typography.Text>
+                                        )}
+                                        <SelectOutlined
+                                          style={{
+                                            cursor: 'pointer',
+                                            color: 'var(--primary)',
+                                            marginRight: 10,
+                                            float: 'right',
+                                          }}
+                                          onClick={() => {
+                                            if(!selectedVendor?.id) return;
+                                            setContactSelectModalOpen(true);
+                                          }}
+                                        />
+                                      </Col>
+                                    </Row>
+                                  </Form.Item>
                                 </td>
-                                <td>
+                                <td width="50%">
                                   <Form.Item label="Vendor" labelAlign="left">
-                                    Select Vendor{' '}
+                                    Select Vendor
                                     <SelectOutlined
                                       style={{
                                         cursor: 'pointer',
@@ -1261,7 +1333,26 @@ const AddPO = () => {
 
         {/* Modal For Product Search */}
         <ProductSearch {...{ productSearchModalOpen, setProductSearchModalOpen, products, setProducts }} />
-        <VendorSearch{...{vendorSearchModalOpen, setVendorSearchModalOpen}} />
+        <VendorSearch {...{ vendorSearchModalOpen, setVendorSearchModalOpen, selectedVendor, setSelectedVendor }} />
+        <AddContactPerson
+          {...{
+            contactPersonAddModalOpen,
+            setContactPersonAddModalOpen,
+            parent: 'vendor',
+            id: selectedVendor?.id,
+            setCPSuccess,
+          }}
+        />
+        <ContactPersonList
+          {...{
+            contactPersons: selectedVendor?.contactPersons,
+            setContactSelectModalOpen,
+            contactSelectModalOpen,
+            selectedContactPerson,
+            setSelectedContactPerson,
+            setContactPersonAddModalOpen,
+          }}
+        />
       </Main>
     </>
   );

@@ -6,7 +6,6 @@ export const contactPersonsSchema = {
       createContactPerson(data: $data) {
         message
         status
-        tenant_id
       }
     }
   `,
@@ -15,9 +14,25 @@ export const contactPersonsSchema = {
       updateContactPerson(data: $data) {
         message
         status
-        tenant_id
+      }
+    }
+  `,
+  GET_CONTACT_PERSON_BY_ID: gql`
+    query getContactPerson($query: GetContactPersonInput) {
+      getContactPerson(query: $query) {
+        message
+        status
+        data {
+          id
+          name
+          email
+          phone
+          fax
+          status
+          createdAt
+          updatedAt
+        }
       }
     }
   `,
 };
- 
