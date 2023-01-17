@@ -24,6 +24,8 @@ import VendorSearch from '../../components/searchModule/VendorSearch';
 import AddContactPerson from '../../components/contactPerson/AddContactPerson';
 import ContactPersonList from '../../components/contactPerson/ContactPersonList';
 import { contactPersonsSchema } from '../../apollo/contactPerson';
+import PaymentMethodList from '../../components/common-modal/PaymentMethodList';
+import ShippingTypeList from '../../components/common-modal/ShippingTypeList';
 
 const AddPO = () => {
   viewPermission('purchase-order');
@@ -41,9 +43,7 @@ const AddPO = () => {
   const [orderList, setOrderList] = useState([]);
   const [selectedOrder, setSelectedOrder] = useState('');
   const [selectedType, setSelectedType] = useState('');
-  const [shippingMethod, setShippingMethod] = useState([]);
   const [paymentMethod, setPaymentMethod] = useState([]);
-  const [selectedShippingMethod, setSelectedShippingMethod] = useState(null);
   const [addressType, setAddressType] = useState(null);
   const [listAddressModalOpen, setListAddressModalOpen] = useState(false);
   const [addressModalOpen, setAddressModalOpen] = useState(false);
@@ -74,6 +74,17 @@ const AddPO = () => {
   const [selectedContactPerson, setSelectedContactPerson] = useState(null);
   const [contactSelectModalOpen, setContactSelectModalOpen] = useState(false);
   // Contact Person Add state End
+
+  // Payment Method Select List State Start
+  const [paymentMethodSelectModalOpen, setPaymentMethodSelectModalOpen] = useState(false);
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(null);
+  // Payment Method Select List State END
+
+  // Shipping Method Select List State Start
+  const [selectedShippingMethod, setSelectedShippingMethod] = useState(null);
+  const [shippingMethodSelectModalOpen, setShippingMethodSelectModalOpen] = useState(null);
+  const [shippingMethod, setShippingMethod] = useState([]);
+  // Shipping Method Select List State End
 
   let check_post = true;
   useEffect(() => {
@@ -655,92 +666,7 @@ const AddPO = () => {
                       {current === 1 && (
                         <>
                           <Row gutter={25}>
-                            <Col xs={24} md={12}>
-                              <Form.Item
-                                initialValue="default"
-                                rules={[{ required: true, message: 'Please Select Type' }]}
-                                name="type"
-                                label="Type"
-                              >
-                                <Select
-                                  size="middle"
-                                  placeholder="Select Type"
-                                  defaultValue="default"
-                                  onChange={handleTypeChange}
-                                  style={{ width: '100%' }}
-                                  optionLabelProp="label"
-                                >
-                                  <Select.Option key="default" value="default" label="Default">
-                                    <div className="demo-option-label-item">Default</div>
-                                  </Select.Option>
-                                  <Select.Option key="drop_shipping" value="drop_shipping" label="Drop Shipping">
-                                    <div className="demo-option-label-item">Drop Shipping</div>
-                                  </Select.Option>
-                                </Select>
-                              </Form.Item>
-                              <Form.Item
-                                name="order_id"
-                                label="Order"
-                                {...(selectedType === 'drop_shipping' && {
-                                  rules: [{ required: true, message: 'Please Select Order' }],
-                                })}
-                              >
-                                <Select
-                                  size="middle"
-                                  type="number"
-                                  showSearch
-                                  placeholder="Select an order (optional)"
-                                  style={{ width: '100%' }}
-                                  options={orderList}
-                                  open={searchOrderOption}
-                                  onSelect={e => {
-                                    chageOrderIdHandler(e);
-                                    setSearchOrderOption(false);
-                                  }}
-                                  onBlur={() => setSearchOrderOption(false)}
-                                  onInputKeyDown={key => {
-                                    setOrderNotFoundContent('Write order number and press enter');
-                                    setSearchOrderOption(true);
-                                    if (key.keyCode === 13) {
-                                      const val = key.target.value;
-                                      if (val.length >= 1) {
-                                        apolloClient
-                                          .query({
-                                            query: orderQuery.GET_SEARCH_ORDER,
-                                            variables: {
-                                              query: {
-                                                searchQuery: parseInt(val),
-                                              },
-                                            },
-                                            context: {
-                                              headers: {
-                                                TENANTID: process.env.REACT_APP_TENANTID,
-                                                Authorization: token,
-                                              },
-                                            },
-                                          })
-                                          .then(res => {
-                                            const data = res?.data?.getOrderBySearch;
-                                            if (!data.status) return;
-                                            if (data?.data.length === 0)
-                                              return setOrderNotFoundContent('No order found');
-                                            setSelectedOrder(data?.data[0]);
-                                            setOrderList(
-                                              data.data.map(order => ({
-                                                label: order?.id,
-                                                value: order?.id,
-                                              })),
-                                            );
-                                          });
-                                      } else {
-                                        setOrderList([]);
-                                      }
-                                    }
-                                  }}
-                                  notFoundContent={<SelectNotFound value={orderNotFoundContent} />}
-                                />
-                              </Form.Item>
-                            </Col>
+                            <Col xs={24} md={12}></Col>
                           </Row>
                         </>
                       )}
@@ -993,6 +919,28 @@ const AddPO = () => {
                             <tbody>
                               <tr>
                                 <td width="50%" style={{ borderRight: '1px solid #ddd' }}>
+                                  {/* <Form.Item
+                                    initialValue="default"
+                                    rules={[{ required: true, message: 'Please Select Type' }]}
+                                    name="type"
+                                    label="Type"
+                                  >
+                                    <Select
+                                      size="middle"
+                                      placeholder="Select Type"
+                                      defaultValue="default"
+                                      onChange={handleTypeChange}
+                                      style={{ width: '100%' }}
+                                      optionLabelProp="label"
+                                    >
+                                      <Select.Option key="default" value="default" label="Default">
+                                        <div className="demo-option-label-item">Default</div>
+                                      </Select.Option>
+                                      <Select.Option key="drop_shipping" value="drop_shipping" label="Drop Shipping">
+                                        <div className="demo-option-label-item">Drop Shipping</div>
+                                      </Select.Option>
+                                    </Select>
+                                  </Form.Item> */}
                                   <Form.Item label="Vendor" labelAlign="left" style={{ margin: 0 }}>
                                     {selectedVendor ? (
                                       selectedVendor?.company_name
@@ -1038,25 +986,131 @@ const AddPO = () => {
                                             float: 'right',
                                           }}
                                           onClick={() => {
-                                            if(!selectedVendor?.id) return;
+                                            if (!selectedVendor?.id) return;
                                             setContactSelectModalOpen(true);
                                           }}
                                         />
                                       </Col>
                                     </Row>
                                   </Form.Item>
+                                  <Form.Item
+                                    name="order_id"
+                                    label="Order"
+                                    {...(selectedType === 'drop_shipping' && {
+                                      rules: [{ required: true, message: 'Please Select Order' }],
+                                    })}
+                                    labelAlign="left"
+                                  >
+                                    <Select
+                                      size="middle"
+                                      type="number"
+                                      showSearch
+                                      placeholder="Select an order (optional)"
+                                      style={{ width: '100%' }}
+                                      options={orderList}
+                                      open={searchOrderOption}
+                                      onSelect={e => {
+                                        chageOrderIdHandler(e);
+                                        setSearchOrderOption(false);
+                                      }}
+                                      onBlur={() => setSearchOrderOption(false)}
+                                      onInputKeyDown={key => {
+                                        setOrderNotFoundContent('Write order number and press enter');
+                                        setSearchOrderOption(true);
+                                        if (key.keyCode === 13) {
+                                          const val = key.target.value;
+                                          if (val.length >= 1) {
+                                            apolloClient
+                                              .query({
+                                                query: orderQuery.GET_SEARCH_ORDER,
+                                                variables: {
+                                                  query: {
+                                                    searchQuery: parseInt(val),
+                                                  },
+                                                },
+                                                context: {
+                                                  headers: {
+                                                    TENANTID: process.env.REACT_APP_TENANTID,
+                                                    Authorization: token,
+                                                  },
+                                                },
+                                              })
+                                              .then(res => {
+                                                const data = res?.data?.getOrderBySearch;
+                                                if (!data.status) return;
+                                                if (data?.data.length === 0)
+                                                  return setOrderNotFoundContent('No order found');
+                                                setSelectedOrder(data?.data[0]);
+                                                setOrderList(
+                                                  data.data.map(order => ({
+                                                    label: order?.id,
+                                                    value: order?.id,
+                                                  })),
+                                                );
+                                              });
+                                          } else {
+                                            setOrderList([]);
+                                          }
+                                        }
+                                      }}
+                                      notFoundContent={<SelectNotFound value={orderNotFoundContent} />}
+                                    />
+                                  </Form.Item>
                                 </td>
                                 <td width="50%">
-                                  <Form.Item label="Vendor" labelAlign="left">
-                                    Select Vendor
-                                    <SelectOutlined
-                                      style={{
-                                        cursor: 'pointer',
-                                        color: 'var(--primary)',
-                                        marginRight: 10,
-                                        float: 'right',
-                                      }}
-                                    />
+                                  <Form.Item label="Payment Method" labelAlign="left" style={{ margin: 0 }}>
+                                    <Row gutter={10}>
+                                      <Col span={24}>
+                                        {selectedPaymentMethod ? (
+                                          selectedPaymentMethod?.name
+                                        ) : (
+                                          <Typography.Text
+                                            style={{ cursor: 'pointer' }}
+                                            onClick={() => setPaymentMethodSelectModalOpen(true)}
+                                          >
+                                            Select Payment Method
+                                          </Typography.Text>
+                                        )}
+                                        <SelectOutlined
+                                          style={{
+                                            cursor: 'pointer',
+                                            color: 'var(--primary)',
+                                            marginRight: 10,
+                                            float: 'right',
+                                          }}
+                                          onClick={() => {
+                                            setPaymentMethodSelectModalOpen(true);
+                                          }}
+                                        />
+                                      </Col>
+                                    </Row>
+                                  </Form.Item>
+                                  <Form.Item label="Shipping Method" labelAlign="left" style={{ margin: 0 }}>
+                                    <Row gutter={10}>
+                                      <Col span={24}>
+                                        {selectedShippingMethod ? (
+                                          selectedShippingMethod?.name
+                                        ) : (
+                                          <Typography.Text
+                                            style={{ cursor: 'pointer' }}
+                                            onClick={() => setShippingMethodSelectModalOpen(true)}
+                                          >
+                                            Select Shipping Method
+                                          </Typography.Text>
+                                        )}
+                                        <SelectOutlined
+                                          style={{
+                                            cursor: 'pointer',
+                                            color: 'var(--primary)',
+                                            marginRight: 10,
+                                            float: 'right',
+                                          }}
+                                          onClick={() => {
+                                            setShippingMethodSelectModalOpen(true);
+                                          }}
+                                        />
+                                      </Col>
+                                    </Row>
                                   </Form.Item>
                                 </td>
                               </tr>
@@ -1351,6 +1405,24 @@ const AddPO = () => {
             selectedContactPerson,
             setSelectedContactPerson,
             setContactPersonAddModalOpen,
+          }}
+        />
+        <PaymentMethodList
+          {...{
+            paymentMethodSelectModalOpen,
+            setPaymentMethodSelectModalOpen,
+            selectedPaymentMethod,
+            setSelectedPaymentMethod,
+            paymentMethod,
+          }}
+        />
+        <ShippingTypeList
+          {...{
+            shippingMethodSelectModalOpen,
+            setShippingMethodSelectModalOpen,
+            selectedShippingMethod,
+            setSelectedShippingMethod,
+            shippingMethod,
           }}
         />
       </Main>

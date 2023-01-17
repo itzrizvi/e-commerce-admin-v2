@@ -6,14 +6,12 @@ export const methodQuery = {
       getPaymentMethodListPublic {
         message
         status
-        tenant_id
         data {
           id
           name
           description
           status
           isDefault
-          tenant_id
         }
       }
     }
