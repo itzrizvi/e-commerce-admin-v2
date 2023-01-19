@@ -1252,8 +1252,8 @@ export const utilityQuery = {
 
 export const vendorQuery = {
   GET_ALL_VENDOR: gql`
-    query getAllVendor {
-      getAllVendor {
+    query getAllVendor($query:VendorFilterInput) {
+      getAllVendor(query:$query) {
         message
         status
         data {
@@ -1267,6 +1267,8 @@ export const vendorQuery = {
           TAX_ID
           FAX_no
           status
+          createdAt
+          updatedAt
           addresses {
             id
             address1
@@ -1410,6 +1412,14 @@ export const vendorMutation = {
   UPDATE_VENDOR: gql`
     mutation updateVendor($data: UpdateVendorInput) {
       updateVendor(data: $data) {
+        message
+        status
+      }
+    }
+  `,
+  UPDATE_VENDOR_STATUS: gql`
+    mutation updateVendorStatus($data: UpdateVendorStatusInput) {
+      updateVendorStatus(data: $data) {
         message
         status
       }
