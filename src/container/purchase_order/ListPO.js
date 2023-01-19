@@ -1,13 +1,20 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Col, Spin, Input, Table, Select, Tooltip, DatePicker, Checkbox } from 'antd';
+import { Row, Col, Spin, Input, Table, Select, Tooltip, DatePicker, Checkbox, Modal } from 'antd';
 import FeatherIcon from 'feather-icons-react';
 import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
 import { Cards } from '../../components/cards/frame/cards-frame';
 import { Button } from '../../components/buttons/buttons';
 import { Link, useHistory } from 'react-router-dom';
-import FontAwesome from 'react-fontawesome';
-import { RetweetOutlined, SearchOutlined } from '@ant-design/icons';
+const { confirm } = Modal;
+import {
+  CheckCircleOutlined,
+  CloseCircleOutlined,
+  PauseCircleOutlined,
+  RetweetOutlined,
+  SearchOutlined,
+  SendOutlined,
+} from '@ant-design/icons';
 import config from '../../config/config';
 import apolloClient from '../../utility/apollo';
 import { toast } from 'react-toastify';
@@ -19,7 +26,6 @@ import Moment from 'react-moment';
 import moment from 'moment';
 const { RangePicker } = DatePicker;
 import { productSchema } from '../../apollo/product';
-
 
 let checkPoint = false;
 const ListPO = () => {
@@ -46,7 +52,7 @@ const ListPO = () => {
     poEntryStartDate: '',
     poEntryEndDate: '',
     poUpdatedStartDate: '',
-    poUpdatedEndDate: ''
+    poUpdatedEndDate: '',
   });
 
   const columns = [
@@ -64,11 +70,7 @@ const ListPO = () => {
       width: 100,
       ellipsis: true,
       sorter: (a, b) => (a.order_id > b.order_id ? 1 : -1),
-      render: value => (
-        <span>
-          {value ?? "N/A"}
-        </span>
-      ),
+      render: value => <span>{value ?? 'N/A'}</span>,
     },
     {
       title: 'Type',
@@ -83,7 +85,7 @@ const ListPO = () => {
       dataIndex: 'grandTotal_price',
       key: 'grandTotal_price',
       width: 120,
-      align: "center",
+      align: 'center',
       sorter: (a, b) => parseFloat(a.grandTotal_price) > parseFloat(b.grandTotal_price),
     },
     {
@@ -92,11 +94,7 @@ const ListPO = () => {
       key: 'name',
       align: 'center',
       width: 100,
-      render: val => (
-        <span>
-          {val}
-        </span>
-      ),
+      render: val => <span>{val}</span>,
       sorter: (a, b) => (a.name > b.name ? 1 : -1),
     },
     {
@@ -105,7 +103,7 @@ const ListPO = () => {
       key: 'comment',
       width: 150,
       ellipsis: true,
-      sorter: (a, b) => (a.comment.toUpperCase() > b.comment.toUpperCase() ? 1 : -1)
+      sorter: (a, b) => (a.comment.toUpperCase() > b.comment.toUpperCase() ? 1 : -1),
     },
     {
       title: 'Date Added',
@@ -132,20 +130,38 @@ const ListPO = () => {
     {
       title: 'Action',
       dataIndex: 'action',
-      width: 70,
+      width: 120,
       align: 'right',
       render: (text, record) => (
         <>
-          <Tooltip placement="topLeft" title="Create Receiving Product">
+          {/* <Tooltip placement="topLeft" title="Create Receiving Product">
             <FontAwesome
               onClick={() => handleCreateReceivingProduct(record.id)}
               name="anchor"
               style={{ margin: '.5em', color: '#e67e22', cursor: 'pointer' }}
             />
-          </Tooltip>
-          <Link to={`/admin/po/edit/${record.id}`}>
+          </Tooltip> */}
+          {/* <Link to={`/admin/po/edit/${record.id}`}>
             <FontAwesome name="edit" style={{ margin: '.5em', color: '#5F63F2', cursor: 'pointer' }} />
-          </Link>
+          </Link> */}
+          <Tooltip placement="topLeft" title="Send to vendor">
+            <SendOutlined
+              onClick={() => poStatus(record, 'send')}
+              style={{ margin: '.5em', color: 'rgb(34 121 230)', cursor: 'pointer' }}
+            />
+          </Tooltip>
+          <Tooltip placement="topLeft" title="Hold PO">
+            <PauseCircleOutlined
+              onClick={() => poStatus(record, 'hold')}
+              style={{ margin: '.5em', color: 'rgb(165 77 0)', cursor: 'pointer' }}
+            />
+          </Tooltip>
+          <Tooltip placement="topLeft" title="Cancel PO">
+            <CloseCircleOutlined
+              onClick={() => poStatus(record, 'cancel')}
+              style={{ margin: '.5em', color: 'rgb(255 0 0)', cursor: 'pointer' }}
+            />
+          </Tooltip>
         </>
       ),
       key: 'id',
@@ -153,7 +169,6 @@ const ListPO = () => {
   ];
 
   useEffect(() => {
-
     // Load PO Status
     apolloClient
       .query({
@@ -169,7 +184,8 @@ const ListPO = () => {
         const data = res?.data?.getPOStatusList;
         if (!data.status) return;
         setPOStatus(data);
-      }).catch(err => {
+      })
+      .catch(err => {
         setPOStatus(s => ({ ...s, error: 'Something went Wrong.!! ' }));
       })
       .finally(() => {
@@ -191,16 +207,17 @@ const ListPO = () => {
         const data = res?.data?.getPONumbers;
         if (!data.status) return;
         setPONumbers(data);
-      }).catch(err => {
+      })
+      .catch(err => {
         setPONumbers(s => ({ ...s, error: 'Something went Wrong.!! ' }));
       })
       .finally(() => {
         setPONumbers(s => ({ ...s, loading: false }));
       });
 
-
     if (checkPoint) {
-      if (filterParams.ponumbers.length > 0 ||
+      if (
+        filterParams.ponumbers.length > 0 ||
         filterParams.productIDS.length > 0 ||
         filterParams.statuses.length > 0 ||
         filterParams.types.length > 0 ||
@@ -209,10 +226,11 @@ const ListPO = () => {
         filterParams.poEntryStartDate !== '' ||
         filterParams.poEntryEndDate !== '' ||
         filterParams.poUpdatedStartDate !== '' ||
-        filterParams.poUpdatedEndDate !== '') {
-        setSearchDisable(false)
+        filterParams.poUpdatedEndDate !== ''
+      ) {
+        setSearchDisable(false);
       } else {
-        setSearchDisable(true)
+        setSearchDisable(true);
       }
     }
     checkPoint = true;
@@ -234,8 +252,8 @@ const ListPO = () => {
             poEntryStartDate: filterParams.poEntryStartDate ?? '',
             poEntryEndDate: filterParams.poEntryEndDate ?? '',
             poUpdatedStartDate: filterParams.poUpdatedStartDate ?? '',
-            poUpdatedEndDate: filterParams.poUpdatedEndDate ?? ''
-          }
+            poUpdatedEndDate: filterParams.poUpdatedEndDate ?? '',
+          },
         },
         context: {
           headers: {
@@ -243,7 +261,7 @@ const ListPO = () => {
             Authorization: token,
           },
         },
-        fetchPolicy: 'network-only'
+        fetchPolicy: 'network-only',
       })
       .then(res => {
         const data = res?.data?.getPurchaseOrderList;
@@ -255,9 +273,9 @@ const ListPO = () => {
       })
       .finally(() => {
         setPO(s => ({ ...s, loading: false }));
-        setSearchButton(!searchButton)
+        setSearchButton(!searchButton);
       });
-  }
+  };
 
   const handleCreateReceivingProduct = id => {
     apolloClient
@@ -301,7 +319,7 @@ const ListPO = () => {
 
   const onDateRangeChange = dateRange => {
     if (dateRange) {
-      setFilterParams(s => ({ ...s, poEntryStartDate: dateRange[0]._d ?? '', poEntryEndDate: dateRange[1]._d ?? '' }))
+      setFilterParams(s => ({ ...s, poEntryStartDate: dateRange[0]._d ?? '', poEntryEndDate: dateRange[1]._d ?? '' }));
       setChangeDateRange(returnMomentDateRange(dateRange[0], dateRange[1]));
     } else {
       setChangeDateRange(null);
@@ -310,7 +328,11 @@ const ListPO = () => {
 
   const onDateUpdatedRangeChange = updatedDateRange => {
     if (updatedDateRange) {
-      setFilterParams(s => ({ ...s, poUpdatedStartDate: updatedDateRange[0]._d ?? '', poUpdatedEndDate: updatedDateRange[1]._d ?? '' }))
+      setFilterParams(s => ({
+        ...s,
+        poUpdatedStartDate: updatedDateRange[0]._d ?? '',
+        poUpdatedEndDate: updatedDateRange[1]._d ?? '',
+      }));
       setChangeUpdatedDateRange(returnMomentDateRange(updatedDateRange[0], updatedDateRange[1]));
     } else {
       setChangeUpdatedDateRange(null);
@@ -318,9 +340,73 @@ const ListPO = () => {
   };
 
   const returnMomentDateRange = (start, finish) => {
-    return [moment(start, "YYYY-MM-DD"), moment(finish, "YYYY-MM-DD")];
+    return [moment(start, 'YYYY-MM-DD'), moment(finish, 'YYYY-MM-DD')];
   };
 
+  // Confirmation status change
+  const poStatus = (record, type) => {
+    if (POStatus.data.length === 0) return;
+    let status_id;
+    let title;
+    if (type === 'send') {
+      status_id = POStatus.data.filter(item => item.slug === 'submitted')[0].id;
+      title = `Do you want to send PO to vendor ?`;
+    } else if (type === 'hold') {
+      status_id = POStatus.data.filter(item => item.slug === 'hold')[0].id;
+      title = `Do you want to hold PO?`;
+    } else if (type === 'cancel') {
+      status_id = POStatus.data.filter(item => item.slug === 'canceled')[0].id;
+      title = `Do you want to cancel PO?`;
+    }
+
+    confirm({
+      title,
+      icon: <CheckCircleOutlined />,
+      content: `PO Number: ${record.po_number}`,
+      onOk() {
+        apolloClient
+          .mutate({
+            mutation: poQuery.UPDATE_PO_STATUS,
+            variables: {
+              data: {
+                id: record.id,
+                status: status_id,
+              },
+            },
+            context: {
+              headers: {
+                TENANTID: process.env.REACT_APP_TENANTID,
+                Authorization: token,
+              },
+            },
+          })
+          .then(res => {
+            const data = res?.data?.updatePOStatus;
+            if (!data.status) return toast.error(data.message);
+            statusUpdate(record.po_number);
+          })
+          .catch(err => {
+            console.log('got error on add vendor', err);
+          })
+          .finally(() => {
+            setIsLoading(false);
+            setCreatingPO(true);
+          });
+      },
+      okText: 'Yes',
+      cancelText: 'No',
+    });
+  };
+
+  // Success Message
+  const statusUpdate = id => {
+    Modal.success({
+      content: `${id} status has been changed successfully.`,
+      onOk: () => {
+        searchPOAdmin();
+      },
+    });
+  };
 
   return (
     <>
@@ -328,37 +414,37 @@ const ListPO = () => {
         title="Purchase Order"
         buttons={[
           <div key="1" className="page-header-actions">
-            <Button
-              size="small"
-              type="white"
-              onClick={() => setIsFilter(state => !state)}
-            >
+            <Button size="small" type="white" onClick={() => setIsFilter(state => !state)}>
               <FeatherIcon icon="filter" />
               Filter
             </Button>
-            <Button size="small" type="white" onClick={() => {
-              setChangeDateRange(null)
-              setSearchDisable(true)
-              setChangeUpdatedDateRange(null)
-              setHasOrder(false)
-              setFilterParams({
-                ponumbers: [],
-                productIDS: [],
-                statuses: [],
-                types: [],
-                searchQuery: '',
-                poEntryStartDate: '',
-                poEntryEndDate: '',
-                poUpdatedStartDate: '',
-                poUpdatedEndDate: ''
-              })
-            }}>
+            <Button
+              size="small"
+              type="white"
+              onClick={() => {
+                setChangeDateRange(null);
+                setSearchDisable(true);
+                setChangeUpdatedDateRange(null);
+                setHasOrder(false);
+                setFilterParams({
+                  ponumbers: [],
+                  productIDS: [],
+                  statuses: [],
+                  types: [],
+                  searchQuery: '',
+                  poEntryStartDate: '',
+                  poEntryEndDate: '',
+                  poUpdatedStartDate: '',
+                  poUpdatedEndDate: '',
+                });
+              }}
+            >
               <RetweetOutlined />
               Reset Filter
             </Button>
             <Link to="/admin/po/add">
               <Button size="small" title="Add Purchase Order" type="primary">
-                <FeatherIcon icon="plus" />
+                <FeatherIcon icon="plus" /> Create PO
               </Button>
             </Link>
           </div>,
@@ -368,220 +454,239 @@ const ListPO = () => {
         <Row gutter={25}>
           <Col sm={24} xs={24}>
             <Cards headless>
-              {po.loading ?
+              {po.loading ? (
                 <div className="spin">
                   <Spin />
                 </div>
-                :
-                po.error ?
-                  <p>{po.error}</p>
-                  :
-                  <>
-                    <Row gutter={25}>
-                      <Col span={18}>
-                        <Input
-                          style={{ height: "42px" }}
-                          placeholder="Search PO By Vendor Details..."
-                          prefix={<SearchOutlined />}
-                          value={filterParams?.searchQuery}
-                          onChange={e => {
-                            e.persist()
-                            const value = e.target.value;
-                            setFilterParams(s => ({ ...s, searchQuery: value }));
-                          }}
-                        />
-                      </Col>
-                      <Col span={6}>
-                        <Button
-                          style={{ height: "42px" }}
-                          size="large"
-                          type="primary"
-                          disabled={searchDisable}
-                          onClick={searchPOAdmin}
-                        >
-                          Search
-                        </Button>
-                      </Col>
-                    </Row>
-                    <br />
-                    <br />
-
-                    {isFilter && (
-                      <div style={{ marginBottom: '2.5em' }}>
-                        <Row gutter={16} style={{ marginBottom: '2.5em' }}>
-                          <Col span={8}>
-                            <Checkbox
-                              checked={hasOrder}
-                              onChange={e => {
-                                setFilterParams(s => ({ ...s, has_order: e.target.checked }))
-                                setHasOrder(e.target.checked)
-                              }}
-                            >Has Order</Checkbox>
-                          </Col>
-                        </Row>
-                        <Row gutter={16}>
-                          <Col span={8}>
-                            Product: <br />
-                            <Select
-                              style={{ width: '100%' }}
-                              placeholder="Select Product"
-                              options={productOption}
-                              showSearch
-                              allowClear
-                              optionFilterProp="label"
-                              size="middle"
-                              mode="multiple"
-                              value={filterParams?.productIDS}
-                              onDeselect={(val) => setFilterParams(prev => ({ ...prev, productIDS: prev.productIDS.filter(item => item !== val) }))}
-                              onSelect={val => {
-                                setFilterParams(s => ({ ...s, productIDS: filterParams.productIDS.concat(parseInt(val)) }));
-                              }}
-                              onSearch={val => {
-                                if (val.length > 3) {
-                                  apolloClient
-                                    .query({
-                                      query: productSchema.SEARCH_PRODUCT,
-                                      variables: {
-                                        query: {
-                                          searchQuery: val,
-                                        },
-                                      },
-                                      context: {
-                                        headers: {
-                                          TENANTID: process.env.REACT_APP_TENANTID,
-                                        },
-                                      },
-                                    })
-                                    .then(res => {
-                                      const data = res?.data?.getSearchedProducts;
-                                      if (!data.status) return;
-                                      setProductOption(
-                                        data.data.map(product => ({
-                                          label: product?.prod_name +
-                                            product?.prod_slug +
-                                            product?.prod_sku +
-                                            product?.prod_partnum +
-                                            product?.mfg_build_part_number,
-                                          value: product?.id,
-                                          ...product,
-                                        })),
-                                      );
-                                    });
-                                } else {
-                                  setProductOption([]);
-                                }
-                              }}
-                            />
-                          </Col>
-                          <Col span={8}>
-                            PO Status : <br />
-                            <Select
-                              style={{ width: '100%' }}
-                              placeholder={POStatus.loading ? 'Loading..' : 'Select PO Status'}
-                              size="middle"
-                              mode="multiple"
-                              optionFilterProp="label"
-                              value={filterParams?.statuses}
-                              onDeselect={(val) => setFilterParams(prev => ({ ...prev, statuses: prev.statuses.filter(item => item !== val) }))}
-                              onSelect={val => {
-                                setFilterParams(s => ({ ...s, statuses: filterParams.statuses.concat(parseInt(val)) }));
-                              }}
-                              options={POStatus?.data.map(item => ({
-                                label: item.name,
-                                value: item.id,
-                              }))}
-                            />
-                          </Col>
-                          <Col span={8}>
-                            PO Numbers : <br />
-                            <Select
-                              style={{ width: '100%' }}
-                              placeholder={PONumbers.loading ? 'Loading..' : 'Select PO Numbers'}
-                              size="middle"
-                              mode="multiple"
-                              optionFilterProp="label"
-                              value={filterParams?.ponumbers}
-                              onDeselect={(val) => setFilterParams(prev => ({ ...prev, ponumbers: prev.ponumbers.filter(item => item !== val) }))}
-                              onSelect={val => {
-                                setFilterParams(s => ({ ...s, ponumbers: filterParams.ponumbers.concat(val) }));
-                              }}
-                              options={PONumbers?.data.map(item => ({
-                                label: item.po_number,
-                                value: item.po_number,
-                              }))}
-                            />
-                          </Col>
-                        </Row>
-                        <Row gutter={16} style={{ marginTop: '.5em' }}>
-                          <Col span={8}>
-                            Types: <br />
-                            <Select
-                              style={{ width: '100%' }}
-                              size="middle"
-                              mode="multiple"
-                              value={filterParams?.types}
-                              onDeselect={(val) => setFilterParams(prev => ({ ...prev, types: prev.types.filter(item => item !== val) }))}
-                              placeholder={'Select Types..'}
-                              options={[
-                                {
-                                  label: "Default",
-                                  value: "default"
-                                },
-                                {
-                                  label: "Drop Shipping",
-                                  value: "drop_shipping"
-                                },
-                              ]}
-                              onSelect={val => {
-                                setFilterParams(s => ({ ...s, types: filterParams.types.concat(val) }));
-                              }}
-                            />
-                          </Col>
-                          <Col span={8}>
-                            Date Added: <br />
-                            <RangePicker
-                              style={{ height: '40px', width: '100%' }}
-                              size="small"
-                              allowClear={true}
-                              picker="date"
-                              value={dateRange !== "" ? dateRange : ""}
-                              onChange={onDateRangeChange}
-                            />
-                          </Col>
-                          <Col span={8}>
-                            Date Updated: <br />
-                            <RangePicker
-                              style={{ height: '40px', width: '100%' }}
-                              size="small"
-                              allowClear={true}
-                              picker="date"
-                              value={updatedDateRange !== "" ? updatedDateRange : ""}
-                              onChange={onDateUpdatedRangeChange}
-                            />
-                          </Col>
-
-
-                        </Row>
-
-                      </div>
-                    )}
-                    <span className={'psp_list'}>
-                      <Table
-                        className="table-responsive"
-                        columns={columns}
-                        rowKey={'id'}
-                        size="small"
-                        dataSource={po?.data ? po.data : []}
-                        rowClassName={(record, index) => (index % 2 === 0 ? '' : 'altTableClass')}
-                        pagination={{
-                          defaultPageSize: config.PO_PER_PAGE,
-                          total: po?.data ? po.data.length : 0,
-                          showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`,
+              ) : po.error ? (
+                <p>{po.error}</p>
+              ) : (
+                <>
+                  <Row gutter={25}>
+                    <Col span={18}>
+                      <Input
+                        style={{ height: '42px' }}
+                        placeholder="Search PO By Vendor Details..."
+                        prefix={<SearchOutlined />}
+                        value={filterParams?.searchQuery}
+                        onChange={e => {
+                          e.persist();
+                          const value = e.target.value;
+                          setFilterParams(s => ({ ...s, searchQuery: value }));
                         }}
                       />
-                    </span>
-                  </>
-              }
+                    </Col>
+                    <Col span={6}>
+                      <Button
+                        style={{ height: '42px' }}
+                        size="large"
+                        type="primary"
+                        disabled={searchDisable}
+                        onClick={searchPOAdmin}
+                      >
+                        Search
+                      </Button>
+                    </Col>
+                  </Row>
+                  <br />
+                  <br />
+
+                  {isFilter && (
+                    <div style={{ marginBottom: '2.5em' }}>
+                      <Row gutter={16} style={{ marginBottom: '2.5em' }}>
+                        <Col span={8}>
+                          <Checkbox
+                            checked={hasOrder}
+                            onChange={e => {
+                              setFilterParams(s => ({ ...s, has_order: e.target.checked }));
+                              setHasOrder(e.target.checked);
+                            }}
+                          >
+                            Has Order
+                          </Checkbox>
+                        </Col>
+                      </Row>
+                      <Row gutter={16}>
+                        <Col span={8}>
+                          Product: <br />
+                          <Select
+                            style={{ width: '100%' }}
+                            placeholder="Select Product"
+                            options={productOption}
+                            showSearch
+                            allowClear
+                            optionFilterProp="label"
+                            size="middle"
+                            mode="multiple"
+                            value={filterParams?.productIDS}
+                            onDeselect={val =>
+                              setFilterParams(prev => ({
+                                ...prev,
+                                productIDS: prev.productIDS.filter(item => item !== val),
+                              }))
+                            }
+                            onSelect={val => {
+                              setFilterParams(s => ({
+                                ...s,
+                                productIDS: filterParams.productIDS.concat(parseInt(val)),
+                              }));
+                            }}
+                            onSearch={val => {
+                              if (val.length > 3) {
+                                apolloClient
+                                  .query({
+                                    query: productSchema.SEARCH_PRODUCT,
+                                    variables: {
+                                      query: {
+                                        searchQuery: val,
+                                      },
+                                    },
+                                    context: {
+                                      headers: {
+                                        TENANTID: process.env.REACT_APP_TENANTID,
+                                      },
+                                    },
+                                  })
+                                  .then(res => {
+                                    const data = res?.data?.getSearchedProducts;
+                                    if (!data.status) return;
+                                    setProductOption(
+                                      data.data.map(product => ({
+                                        label:
+                                          product?.prod_name +
+                                          product?.prod_slug +
+                                          product?.prod_sku +
+                                          product?.prod_partnum +
+                                          product?.mfg_build_part_number,
+                                        value: product?.id,
+                                        ...product,
+                                      })),
+                                    );
+                                  });
+                              } else {
+                                setProductOption([]);
+                              }
+                            }}
+                          />
+                        </Col>
+                        <Col span={8}>
+                          PO Status : <br />
+                          <Select
+                            style={{ width: '100%' }}
+                            placeholder={POStatus.loading ? 'Loading..' : 'Select PO Status'}
+                            size="middle"
+                            mode="multiple"
+                            optionFilterProp="label"
+                            value={filterParams?.statuses}
+                            onDeselect={val =>
+                              setFilterParams(prev => ({
+                                ...prev,
+                                statuses: prev.statuses.filter(item => item !== val),
+                              }))
+                            }
+                            onSelect={val => {
+                              setFilterParams(s => ({ ...s, statuses: filterParams.statuses.concat(parseInt(val)) }));
+                            }}
+                            options={POStatus?.data.map(item => ({
+                              label: item.name,
+                              value: item.id,
+                            }))}
+                          />
+                        </Col>
+                        <Col span={8}>
+                          PO Numbers : <br />
+                          <Select
+                            style={{ width: '100%' }}
+                            placeholder={PONumbers.loading ? 'Loading..' : 'Select PO Numbers'}
+                            size="middle"
+                            mode="multiple"
+                            optionFilterProp="label"
+                            value={filterParams?.ponumbers}
+                            onDeselect={val =>
+                              setFilterParams(prev => ({
+                                ...prev,
+                                ponumbers: prev.ponumbers.filter(item => item !== val),
+                              }))
+                            }
+                            onSelect={val => {
+                              setFilterParams(s => ({ ...s, ponumbers: filterParams.ponumbers.concat(val) }));
+                            }}
+                            options={PONumbers?.data.map(item => ({
+                              label: item.po_number,
+                              value: item.po_number,
+                            }))}
+                          />
+                        </Col>
+                      </Row>
+                      <Row gutter={16} style={{ marginTop: '.5em' }}>
+                        <Col span={8}>
+                          Types: <br />
+                          <Select
+                            style={{ width: '100%' }}
+                            size="middle"
+                            mode="multiple"
+                            value={filterParams?.types}
+                            onDeselect={val =>
+                              setFilterParams(prev => ({ ...prev, types: prev.types.filter(item => item !== val) }))
+                            }
+                            placeholder={'Select Types..'}
+                            options={[
+                              {
+                                label: 'Default',
+                                value: 'default',
+                              },
+                              {
+                                label: 'Drop Shipping',
+                                value: 'drop_shipping',
+                              },
+                            ]}
+                            onSelect={val => {
+                              setFilterParams(s => ({ ...s, types: filterParams.types.concat(val) }));
+                            }}
+                          />
+                        </Col>
+                        <Col span={8}>
+                          Date Added: <br />
+                          <RangePicker
+                            style={{ height: '40px', width: '100%' }}
+                            size="small"
+                            allowClear={true}
+                            picker="date"
+                            value={dateRange !== '' ? dateRange : ''}
+                            onChange={onDateRangeChange}
+                          />
+                        </Col>
+                        <Col span={8}>
+                          Date Updated: <br />
+                          <RangePicker
+                            style={{ height: '40px', width: '100%' }}
+                            size="small"
+                            allowClear={true}
+                            picker="date"
+                            value={updatedDateRange !== '' ? updatedDateRange : ''}
+                            onChange={onDateUpdatedRangeChange}
+                          />
+                        </Col>
+                      </Row>
+                    </div>
+                  )}
+                  <span className={'psp_list'}>
+                    <Table
+                      className="table-responsive"
+                      columns={columns}
+                      rowKey={'id'}
+                      size="small"
+                      dataSource={po?.data ? po.data : []}
+                      rowClassName={(record, index) => (index % 2 === 0 ? '' : 'altTableClass')}
+                      pagination={{
+                        defaultPageSize: config.PO_PER_PAGE,
+                        total: po?.data ? po.data.length : 0,
+                        showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`,
+                      }}
+                    />
+                  </span>
+                </>
+              )}
             </Cards>
           </Col>
         </Row>

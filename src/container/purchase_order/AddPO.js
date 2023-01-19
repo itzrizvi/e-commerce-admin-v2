@@ -290,7 +290,7 @@ const AddPO = () => {
   // Confirmation for Cancel Po
   const cancelConfirm = () => {
     confirm({
-      title: 'Do you Want to cancel this PO?',
+      title: 'Do you want to cancel this PO?',
       icon: <ExclamationCircleFilled />,
       content: null,
       onOk() {
@@ -303,7 +303,7 @@ const AddPO = () => {
   // Confirmation For Create PO
   const createConfirm = () => {
     confirm({
-      title: 'Do you Want to create this PO?',
+      title: 'Do you want to create this PO?',
       icon: <CheckCircleOutlined />,
       content: null,
       onOk() {

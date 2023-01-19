@@ -2,53 +2,56 @@ import { gql } from '@apollo/client';
 
 export const poQuery = {
   GET_ALL_PO: gql`
-    query getPurchaseOrderList($query:POListFilters) {
-    getPurchaseOrderList(query:$query) {
-      message
-      tenant_id
-      status
-      data {
-        id
-        po_number
-        rec_id
-        grandTotal_price
-        comment
-        type
-        order_id
-        createdAt
-        updatedAt
-        postatus {
+    query getPurchaseOrderList($query: POListFilters) {
+      getPurchaseOrderList(query: $query) {
+        message
+        tenant_id
+        status
+        data {
+          id
+          po_number
+          rec_id
+          grandTotal_price
+          comment
+          type
+          order_id
+          createdAt
+          updatedAt
+          postatus {
+            id
+            name
+            slug
+          }
+        }
+      }
+    }
+  `,
+  GET_PO_STATUS_LIST: gql`
+    query getPOStatusList {
+      getPOStatusList {
+        message
+        status
+        tenant_id
+        data {
           id
           name
           slug
         }
       }
     }
-  }`,
-  GET_PO_STATUS_LIST: gql`
-    query getPOStatusList{
-    getPOStatusList{
-      message
-      status
-      tenant_id
-      data {
-        id
-        name
-        slug
-      }
-    }
-  }`,
+  `,
   GET_PO_NUMBER_LIST: gql`
-    query getPONumbers{
-    getPONumbers{
-      message
-      status
-      tenant_id
-      data {
-        po_number
+    query getPONumbers {
+      getPONumbers {
+        message
+        status
+        tenant_id
+        data {
+          po_number
+        }
       }
     }
-  }`,
+  `,
   UPDATE_PO_STATUS: gql`
     mutation updatePOStatus($data: POStatusChangeInput) {
       updatePOStatus(data: $data) {
@@ -293,6 +296,15 @@ export const poQuery = {
           isDefault
           status
         }
+      }
+    }
+  `,
+  UPDATE_PO_STATUS: gql`
+    mutation updatePOStatus($data: POStatusChangeInput) {
+      updatePOStatus(data: $data) {
+        message
+        status
+        tenant_id
       }
     }
   `,
