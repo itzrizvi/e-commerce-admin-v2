@@ -26,6 +26,7 @@ import ContactPersonList from '../../components/contactPerson/ContactPersonList'
 import { contactPersonsSchema } from '../../apollo/contactPerson';
 import PaymentMethodList from '../../components/common-modal/PaymentMethodList';
 import ShippingTypeList from '../../components/common-modal/ShippingTypeList';
+import ShippingAccountList from '../../components/common-modal/ShippingAccountList';
 
 const AddPO = () => {
   viewPermission('purchase-order');
@@ -49,7 +50,6 @@ const AddPO = () => {
   const [addressModalOpen, setAddressModalOpen] = useState(false);
   const [isAddressEdit, setIsAddressEdit] = useState(false);
   const [countries, setCountries] = useState([]);
-  const [shippingMethodAccountList, setShippingMethodAccountList] = useState([]);
   const [editSelectedAddress, setEditSelectedAddress] = useState(null);
   const [states, setStates] = useState([]);
   const [selectedCountryCode, setSelectedCountryCode] = useState('US');
@@ -85,6 +85,12 @@ const AddPO = () => {
   const [shippingMethodSelectModalOpen, setShippingMethodSelectModalOpen] = useState(null);
   const [shippingMethod, setShippingMethod] = useState([]);
   // Shipping Method Select List State End
+
+  //Shipping Account List State Start
+  const [selectedShippingAccount, setSelectedShippingAccount] = useState(null);
+  const [shippingAccountModalOpen, setShippingAccountModalOpen] = useState(null);
+  const [shippingMethodAccountList, setShippingMethodAccountList] = useState([]);
+  // Shipping Account List State End
 
   let check_post = true;
   useEffect(() => {
@@ -1112,6 +1118,47 @@ const AddPO = () => {
                                       </Col>
                                     </Row>
                                   </Form.Item>
+                                  <Form.Item label="Shipping Account" labelAlign="left" style={{ margin: 0 }}>
+                                    <Row gutter={10}>
+                                      <Col span={24}>
+                                        {selectedShippingAccount ? (
+                                          selectedShippingAccount?.name
+                                        ) : (
+                                          <Typography.Text
+                                            style={{ cursor: 'pointer' }}
+                                            onClick={() => setShippingAccountModalOpen(true)}
+                                          >
+                                            Select Shipping Account
+                                          </Typography.Text>
+                                        )}
+                                        <SelectOutlined
+                                          style={{
+                                            cursor: 'pointer',
+                                            color: 'var(--primary)',
+                                            marginRight: 10,
+                                            float: 'right',
+                                          }}
+                                          onClick={() => {
+                                            setShippingAccountModalOpen(true);
+                                          }}
+                                        />
+                                      </Col>
+                                    </Row>
+                                  </Form.Item>
+                                </td>
+                              </tr>
+                            </tbody>
+                          </table>
+                          <table style={{ margin: 0 }} className="table table-responsive purchase_order_vendor_table">
+                            <tbody>
+                              <tr>
+                                <td>
+                                  <Form.Item size="small" label="Comments" labelAlign="left" style={{marginTop: 10, marginBottom: 0}}>
+                                    <TextArea style={{minHeight: 35, lineHeight: 0.5}} placeholder="Comments (optional)" autoSize />
+                                  </Form.Item>
+                                  <Form.Item size="small" label="Receiving Instruction" labelAlign="left">
+                                    <TextArea style={{minHeight: 35, lineHeight: 0.5}} placeholder="Receiving Instruction (optional)" autoSize />
+                                  </Form.Item>
                                 </td>
                               </tr>
                             </tbody>
@@ -1423,6 +1470,15 @@ const AddPO = () => {
             selectedShippingMethod,
             setSelectedShippingMethod,
             shippingMethod,
+          }}
+        />
+        <ShippingAccountList
+          {...{
+            shippingAccountModalOpen,
+            setShippingAccountModalOpen,
+            selectedShippingAccount,
+            setSelectedShippingAccount,
+            shippingMethodAccountList,
           }}
         />
       </Main>
