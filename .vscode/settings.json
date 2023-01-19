@@ -3,5 +3,8 @@
         "**/build": true,
         "**/out": true
     },
-    "bookmarks.saveBookmarksInProject": true
+    "bookmarks.saveBookmarksInProject": true,
+    "cSpell.words": [
+        "Popconfirm"
+    ]
 }

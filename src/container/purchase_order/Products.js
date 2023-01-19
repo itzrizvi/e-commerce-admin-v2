@@ -24,7 +24,8 @@ const Products = ({ products, setProducts, setProductSearchModalOpen }) => {
       title: 'Price',
       dataIndex: 'cost',
       key: 'cost',
-      width: 120,
+      width: 80,
+      align: 'left',
       render: (val, record) => (
         <Input
           min={0}
@@ -49,7 +50,8 @@ const Products = ({ products, setProducts, setProductSearchModalOpen }) => {
       title: 'Quantity',
       dataIndex: 'quantity',
       key: 'quantity',
-      width: 100,
+      width: 60,
+      align: 'left',
       render: (val, record) => (
         <Input
           min={0}

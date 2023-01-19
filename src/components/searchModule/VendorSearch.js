@@ -9,6 +9,7 @@ export default function VendorSearch({
   setVendorSearchModalOpen,
   selectedVendor,
   setSelectedVendor,
+  setSelectedVendorBillingAddress
 }) {
   const [searchString, setSearchString] = useState(null);
   const [searchedVendor, setSearchedVendor] = useState([]);
@@ -41,6 +42,7 @@ export default function VendorSearch({
   };
 
   const addVendorHandler = record => {
+    setSelectedVendorBillingAddress(record.addresses.filter(item => item.type === 'billing' && item.isDefault)[0] ?? null);
     setSelectedVendor(record);
     setVendorSearchModalOpen(false);
   };

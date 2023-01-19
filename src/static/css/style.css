@@ -2833,13 +2833,14 @@ html[dir='rtl'] .ant-menu-vertical .ant-menu-submenu-title {
   padding-right: 15px !important;
 }
 
-.orderAddressModal .ant-modal-header {
+.orderAddressModal .ant-modal-header, .globalAddressModal .ant-modal-header {
   background: var(--primary);
 }
 
-.orderAddressModal .ant-modal-header .ant-modal-title {
+.orderAddressModal .ant-modal-header .ant-modal-title, .globalAddressModal .ant-modal-header .ant-modal-title {
   color: #fff;
 }
+
 
 .ant-radio {
   border-color: var(--primary) !important;
@@ -2903,4 +2904,19 @@ html[dir='rtl'] .ant-menu-vertical .ant-menu-submenu-title {
 
 .ant-select-selector{
   padding: 0;
+}
+
+.ant-spin-nested-loading > div > .ant-spin{
+  position: fixed;
+}
+
+.billing_address_card .ant-card-body{
+  padding: 10px !important;
+  padding-bottom: 0px !important;
+  padding-top: 15px !important;
+  min-height: 50px;
+}
+
+.global-address-list-card .ant-card-body{
+  line-height: 0.6;
 }
