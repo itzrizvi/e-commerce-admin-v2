@@ -267,10 +267,7 @@ const AddPO = () => {
       .then(res => {
         const data = res?.data?.createPurchaseOrder;
         if (!data.status) return toast.error(data.message);
-        setTimeout(() => {
-          history.push('/admin/po/list');
-        }, 2000);
-        toast.success(data.message);
+        successPO(data?.po_number);
       })
       .catch(err => {
         console.log('got error on add vendor', err);
@@ -286,8 +283,9 @@ const AddPO = () => {
       vendor_id: selectedVendor?.id,
       payment_method_id: selectedPaymentMethod?.id,
       shipping_method_id: selectedShippingMethod?.id,
+      vendor_billing_address_id: selectedVendorBillingAddress?.id,
     });
-  }, [selectedVendor?.id, selectedPaymentMethod?.id, selectedShippingMethod?.id]);
+  }, [selectedVendor?.id, selectedPaymentMethod?.id, selectedShippingMethod?.id, selectedVendorBillingAddress?.id]);
 
   // Confirmation for Cancel Po
   const cancelConfirm = () => {
@@ -441,6 +439,16 @@ const AddPO = () => {
       });
   }, [changeAddress]);
 
+  // Success Message
+  const successPO = po_number => {
+    Modal.success({
+      content: `${po_number} has been created successfully.`,
+      onOk: () => {
+        history.push('/admin/po/list?status=new');
+      },
+    });
+  };
+
   return (
     <>
       <PageHeader title="Add Purchase Order" />
@@ -507,7 +515,7 @@ const AddPO = () => {
                                     label="Vendor Address"
                                     labelAlign="left"
                                     style={{ margin: 0 }}
-                                    rules={[{ required: true, message: 'Vendor is required' }]}
+                                    rules={[{ required: true, message: 'Vendor address is required' }]}
                                   >
                                     <Row gutter={25}>
                                       <Col xs={24}>
@@ -577,6 +585,7 @@ const AddPO = () => {
                                   </Form.Item>
                                   <Form.Item name="order_id" label="Order" labelAlign="left">
                                     <Input
+                                      disabled={selectedType === 'drop_shipping'}
                                       style={{ width: '50%', height: 36, margin: 0 }}
                                       name="order_id"
                                       type="number"

@@ -61,6 +61,7 @@ export const poQuery = {
     mutation createPurchaseOrder($data: CreatePurchaseOrderInput) {
       createPurchaseOrder(data: $data) {
         message
+        po_number
         status
       }
     }
