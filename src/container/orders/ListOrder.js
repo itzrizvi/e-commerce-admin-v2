@@ -91,7 +91,7 @@ const ListOrder = () => {
       key: 'id',
       width: 100,
       ellipsis: true,
-      sorter: (a, b) => (a.id.toUpperCase() > b.id.toUpperCase() ? 1 : -1),
+      sorter: (a, b) => (a.id > b.id ? 1 : -1),
     },
     {
       title: 'Customer',
@@ -203,7 +203,6 @@ const ListOrder = () => {
       ),
     },
   ];
-
 
   const onDateRangeChange = dateRange => {
     if (dateRange) {
