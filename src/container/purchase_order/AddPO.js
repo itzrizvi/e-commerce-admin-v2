@@ -225,7 +225,7 @@ const AddPO = () => {
       return { id: item.id, price: item.cost, quantity: item.quantity };
     });
 
-    const { order_id, shipping_cost, ...newValues } = values;
+    const { order_id, shipping_cost, tax_amount, ...newValues } = values;
 
     const variables = {
       ...newValues,
@@ -233,6 +233,7 @@ const AddPO = () => {
       ...(selectedContactPerson?.id && { contact_person_id: selectedContactPerson.id }),
       ...(selectedShippingAccount?.id && { shipping_account_id: selectedShippingAccount.id }),
       ...(shipping_cost && { shipping_cost: parseFloat(shipping_cost) }),
+      ...(tax_amount && { tax_amount: parseFloat(tax_amount) }),
       products: newProduct,
       type: selectedType,
     };
@@ -556,7 +557,7 @@ const AddPO = () => {
                                     <Row gutter={10}>
                                       <Col span={24}>
                                         {selectedContactPerson ? (
-                                          selectedContactPerson?.email
+                                          selectedContactPerson?.name
                                         ) : (
                                           <Typography.Text
                                             style={{ cursor: 'pointer' }}
@@ -708,6 +709,21 @@ const AddPO = () => {
                                       type="number"
                                       name="shipping_cost"
                                       placeholder="Shipping Cost"
+                                    />
+                                  </Form.Item>
+                                  <Form.Item
+                                    labelCol={{ xl: 4, xxl: 3 }}
+                                    size="small"
+                                    label="Tax Amount"
+                                    labelAlign="left"
+                                    name="tax_amount"
+                                    style={{ marginTop: 10 }}
+                                  >
+                                    <Input
+                                      style={{ width: '19%', height: 36, margin: 0 }}
+                                      type="number"
+                                      name="tax_amount"
+                                      placeholder="Tax Amount"
                                     />
                                   </Form.Item>
                                 </td>
