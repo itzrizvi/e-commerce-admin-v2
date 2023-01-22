@@ -81,7 +81,9 @@ export const poQuery = {
           type
           grandTotal_price
           tax_amount
+          shipping_cost
           comment
+          receiving_instruction
           shipping_method_id
           vendor {
             id
@@ -107,6 +109,12 @@ export const poQuery = {
             TAX_ID
             FAX_no
             status
+          }
+          POCreated_by {
+            first_name
+            last_name
+            email
+            phone
           }
           vendorBillingAddress {
             id
@@ -142,6 +150,12 @@ export const poQuery = {
             description
             status
           }
+          shippingMethod {
+            name
+            description
+            status
+            sort_order
+          }
           poProductlist {
             id
             purchase_order_id
@@ -153,6 +167,7 @@ export const poQuery = {
             product {
               id
               prod_name
+              prod_partnum
             }
           }
           shippingAccount {
@@ -305,6 +320,34 @@ export const poQuery = {
         message
         status
         tenant_id
+      }
+    }
+  `,
+  GET_PO_REASON_LIST: gql`
+    query getPORejectReasonList {
+      getPORejectReasonList {
+        message
+        tenant_id
+        status
+        data {
+          id
+          reason
+          status
+        }
+      }
+    }
+  `,
+    GET_PO_STATUS_LIST: gql`
+    query getPOStatusList {
+      getPOStatusList {
+        message
+        status
+        tenant_id
+        data {
+          id
+          name
+          slug
+        }
       }
     }
   `,

@@ -737,12 +737,12 @@ const AddPO = () => {
                                   <Form.Item
                                     labelCol={{ xl: 4, xxl: 3 }}
                                     size="small"
-                                    label="Comments"
+                                    label="Comment"
                                     labelAlign="left"
                                     name="comment"
                                     style={{ marginTop: 10, marginBottom: 0 }}
                                   >
-                                    <TextArea style={{ minHeight: 35 }} placeholder="Comments" autoSize />
+                                    <TextArea style={{ minHeight: 35 }} placeholder="Comment" autoSize />
                                   </Form.Item>
                                   <Form.Item
                                     labelCol={{ xl: 4, xxl: 3 }}

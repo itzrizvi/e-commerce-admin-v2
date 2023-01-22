@@ -2920,3 +2920,6 @@ html[dir='rtl'] .ant-menu-vertical .ant-menu-submenu-title {
 .global-address-list-card .ant-card-body{
   line-height: 0.6;
 }
+.po-address{
+  margin-bottom: 0px !important;
+}

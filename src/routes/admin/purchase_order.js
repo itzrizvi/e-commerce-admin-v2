@@ -4,6 +4,7 @@ import { useRouteMatch } from 'react-router-dom/cjs/react-router-dom.min';
 import AddPO from '../../container/purchase_order/AddPO';
 import EditPO from '../../container/purchase_order/EditPO';
 import ListPO from '../../container/purchase_order/ListPO';
+import ViewPO from '../../container/purchase_order/ViewPO';
 
 const PORoutes = () => {
   const { path } = useRouteMatch();
@@ -11,6 +12,7 @@ const PORoutes = () => {
     <Switch>
       <Route path={`${path}/list`} component={ListPO} />
       <Route path={`${path}/add`} component={AddPO} />
+      <Route path={`${path}/view-po/:id`} component={ViewPO} />
       <Route path={`${path}/edit/:id`} component={EditPO} />
     </Switch>
   );
