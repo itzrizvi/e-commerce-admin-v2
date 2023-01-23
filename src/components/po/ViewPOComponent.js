@@ -1,4 +1,4 @@
-import { Button, Card, Col, Row, Table, Typography } from 'antd';
+import { Button, Card, Col, Divider, Row, Table, Typography } from 'antd';
 import React, { useState } from 'react';
 import Moment from 'react-moment';
 import config from '../../config/config';
@@ -17,7 +17,14 @@ export default function ViewPOComponent({ purchaseOrder }) {
         }}
       >
         <Row gutter={25}>
-          <Col xs={{ span: 24, order: 2 }} md={{ span: 16, order: 1 }}>
+          <Col xs={24} md={9}>
+            <Typography.Title level={4}>Issued To</Typography.Title>
+            <Typography.Paragraph className="po-address">{purchaseOrder?.vendor?.company_name}</Typography.Paragraph>
+            <Typography.Paragraph className="po-address">{purchaseOrder?.vendor?.contact_person}</Typography.Paragraph>
+            <Typography.Paragraph className="po-address">{purchaseOrder?.vendor?.email}</Typography.Paragraph>
+            {purchaseOrder?.vendor?.phone_number && (
+              <Typography.Paragraph className="po-address">{purchaseOrder?.vendor?.phone_number}</Typography.Paragraph>
+            )}
             <Typography.Paragraph className="po-address">
               {purchaseOrder?.vendorBillingAddress?.address1}
             </Typography.Paragraph>
@@ -29,27 +36,7 @@ export default function ViewPOComponent({ purchaseOrder }) {
               {purchaseOrder?.vendorBillingAddress?.countryCode?.name}
             </Typography.Paragraph>
           </Col>
-          <Col xs={{ span: 24, order: 1 }} md={{ span: 8, order: 2 }} className="mt-sm-5 mt-md-0">
-            <Typography.Paragraph className="po-address">
-              <strong>Purchase Order:</strong> {purchaseOrder?.po_number}
-            </Typography.Paragraph>
-            <Typography.Paragraph className="po-address" style={{ marginBottom: 20 }}>
-              <strong>Date:</strong>{' '}
-              <Moment format="DD - MMM - YYYY">{new Date(parseInt(purchaseOrder?.createdAt))}</Moment>
-            </Typography.Paragraph>
-          </Col>
-        </Row>
-        <Row gutter={25} style={{ marginTop: 20 }}>
-          <Col xs={24} md={16}>
-            <Typography.Title level={4}>Issued To</Typography.Title>
-            <Typography.Paragraph className="po-address">{purchaseOrder?.vendor?.company_name}</Typography.Paragraph>
-            <Typography.Paragraph className="po-address">{purchaseOrder?.vendor?.contact_person}</Typography.Paragraph>
-            <Typography.Paragraph className="po-address">{purchaseOrder?.vendor?.email}</Typography.Paragraph>
-            {purchaseOrder?.vendor?.phone_number && (
-              <Typography.Paragraph className="po-address">{purchaseOrder?.vendor?.phone_number}</Typography.Paragraph>
-            )}
-          </Col>
-          <Col xs={24} md={8}>
+          <Col xs={24} md={9}>
             <Typography.Title level={4}>Ship To</Typography.Title>
             <Typography.Paragraph className="po-address">
               {purchaseOrder?.vendorShippingAddress?.address1}
@@ -62,8 +49,21 @@ export default function ViewPOComponent({ purchaseOrder }) {
               {purchaseOrder?.vendorShippingAddress?.countryCode?.name}
             </Typography.Paragraph>
           </Col>
+          <Col xs={24} md={6}>
+            <Typography.Paragraph className="po-address">
+              <strong>Purchase Order:</strong> {purchaseOrder?.po_number}
+            </Typography.Paragraph>
+            <Typography.Paragraph className="po-address" style={{ marginBottom: 20 }}>
+              <strong>Date:</strong>{' '}
+              <Moment format="DD - MMM - YYYY">{new Date(parseInt(purchaseOrder?.createdAt))}</Moment>
+            </Typography.Paragraph>
+            <Typography.Paragraph className="po-address">
+              <strong>Status:</strong> {purchaseOrder?.status}
+            </Typography.Paragraph>
+          </Col>
         </Row>
-        <Row gutter={25} style={{ marginTop: 10 }}>
+        <Divider />
+        <Row gutter={25} style={{ marginTop: 10}}>
           <Col xs={24} md={6}>
             <Typography.Title level={5}>Rep</Typography.Title>
             <Typography.Paragraph className="po-address">
@@ -154,7 +154,7 @@ export default function ViewPOComponent({ purchaseOrder }) {
               <Row>
                 <Col xs={{ span: 12, offset: 12 }} md={{ span: 16, offset: 8 }}>
                   <div className="mb-10">
-                    <table className="table table-striped" style={{marginTop: 10}} cellSpacing={'0'}>
+                    <table className="table table-striped" style={{ marginTop: 10 }} cellSpacing={'0'}>
                       <tbody>
                         <tr>
                           <td>
@@ -205,15 +205,14 @@ export default function ViewPOComponent({ purchaseOrder }) {
               </Row>
             </Col>
             <Col xs={{ span: 24, order: 2 }} md={{ span: 16, order: 1 }} style={{ marginTop: 10 }}>
-
-                <Typography.Title level={5}>Comment: </Typography.Title>
-                <Typography.Paragraph className="po-address">
-                  {ellipsis(purchaseOrder?.comment ?? '', 255)}
-                </Typography.Paragraph>
-                <Typography.Title level={5}>Receiving Instruction: </Typography.Title>
-                <Typography.Paragraph className="po-address">
-                  {ellipsis(purchaseOrder?.receiving_instruction ?? '', 255)}
-                </Typography.Paragraph>
+              <Typography.Title level={5}>Comment: </Typography.Title>
+              <Typography.Paragraph className="po-address">
+                {ellipsis(purchaseOrder?.comment ?? '', 255)}
+              </Typography.Paragraph>
+              <Typography.Title level={5}>Receiving Instruction: </Typography.Title>
+              <Typography.Paragraph className="po-address">
+                {ellipsis(purchaseOrder?.receiving_instruction ?? '', 255)}
+              </Typography.Paragraph>
             </Col>
           </Row>
         </Col>

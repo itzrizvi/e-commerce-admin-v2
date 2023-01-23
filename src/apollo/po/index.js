@@ -52,6 +52,14 @@ export const poQuery = {
       }
     }
   `,
+  SEND_TO_PO: gql`
+    mutation poSendToVendor($data: POStatusChangeInput) {
+      poSendToVendor(data: $data) {
+        message
+        status
+      }
+    }
+  `,
   UPDATE_PO_STATUS: gql`
     mutation updatePOStatus($data: POStatusChangeInput) {
       updatePOStatus(data: $data) {
@@ -337,7 +345,7 @@ export const poQuery = {
       }
     }
   `,
-    GET_PO_STATUS_LIST: gql`
+  GET_PO_STATUS_LIST: gql`
     query getPOStatusList {
       getPOStatusList {
         message
@@ -347,6 +355,55 @@ export const poQuery = {
           id
           name
           slug
+        }
+      }
+    }
+  `,
+  GET_PO_INVOICE_LIST: gql`
+    query getPOInvoiceList($query: GetPOInvoiceListInput) {
+      getPOInvoiceList(query: $query) {
+        message
+        status
+        data {
+          invoice_no
+          invoice_date
+          invoice_path
+          createdAt
+          updatedAt
+        }
+      }
+    }
+  `,
+  CREATE_PO_INVOICE: gql`
+    mutation createPOInvoice($data: POInvoiceInput) {
+      createPOInvoice(data: $data) {
+        message
+        status
+      }
+    }
+  `,
+  GET_PO_MFG_DOC_LIST: gql`
+    query getPOMFGDOCList($query: GetPOMFGDOCListInput) {
+      getPOMFGDOCList(query: $query) {
+        message
+        status
+        data {
+          doc_file
+          createdAt
+          updatedAt
+        }
+      }
+    }
+  `,
+  GET_ACTIVITY_HISTORY_LIST: gql`
+    query getPOActivityList($query: GetPOActivityListInput) {
+      getPOActivityList(query: $query) {
+        message
+        status
+        data {
+          comment
+          createdAt
+          updatedAt
         }
       }
     }

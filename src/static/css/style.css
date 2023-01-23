@@ -5,6 +5,7 @@
   --secondary: #77838f;
   --modal-header: #5f63f24d;
   --table-header-color: #5f63f24d;
+  --danger: #ff4d4f;
 }
 
 body > iframe {
@@ -2922,4 +2923,7 @@ html[dir='rtl'] .ant-menu-vertical .ant-menu-submenu-title {
 }
 .po-address{
   margin-bottom: 0px !important;
+}
+.avatar-uploader-po .ant-upload.ant-upload-select-picture-card {
+  width: 260px;
 }

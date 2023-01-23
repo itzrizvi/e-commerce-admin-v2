@@ -146,7 +146,7 @@ const ListPO = () => {
           </Link> */}
           <Tooltip placement="topLeft" title="Send to vendor">
             <SendOutlined
-              onClick={() => poStatus(record, 'send')}
+              onClick={() => poSendToVendor(record)}
               style={{ margin: '.5em', color: 'rgb(34 121 230)', cursor: 'pointer' }}
             />
           </Tooltip>
@@ -391,6 +391,41 @@ const ListPO = () => {
           .finally(() => {
             setIsLoading(false);
             setCreatingPO(true);
+          });
+      },
+      okText: 'Yes',
+      cancelText: 'No',
+    });
+  };
+  const poSendToVendor = record => {
+    if (POStatus.data.length === 0) return;
+    const status_id = POStatus.data.filter(item => item.slug === 'submitted')[0].id;
+
+    confirm({
+      title: 'Do you want to send PO to vendor ?',
+      icon: <CheckCircleOutlined />,
+      content: `PO Number: ${record.po_number}`,
+      onOk() {
+        apolloClient
+          .mutate({
+            mutation: poQuery.SEND_TO_PO,
+            variables: {
+              data: {
+                id: record.id,
+                status: status_id,
+              },
+            },
+            context: {
+              headers: {
+                TENANTID: process.env.REACT_APP_TENANTID,
+                Authorization: token,
+              },
+            },
+          })
+          .then(res => {
+            const data = res?.data?.poSendToVendor;
+            if (!data.status) return;
+            statusUpdate(record.po_number);
           });
       },
       okText: 'Yes',
