@@ -14,6 +14,7 @@ import {
   RetweetOutlined,
   SearchOutlined,
   SendOutlined,
+  StopOutlined,
 } from '@ant-design/icons';
 import config from '../../config/config';
 import apolloClient from '../../utility/apollo';
@@ -62,6 +63,7 @@ const ListPO = () => {
       key: 'po_number',
       width: 120,
       sorter: (a, b) => (a.po_number > b.po_number ? 1 : -1),
+      render: (text, record) => <Link to={`/admin/po/view-po/${record.id}`}>{text}</Link>,
     },
     {
       title: 'Order ID',
@@ -134,6 +136,7 @@ const ListPO = () => {
       align: 'right',
       render: (text, record) => (
         <>
+
           {/* <Tooltip placement="topLeft" title="Create Receiving Product">
             <FontAwesome
               onClick={() => handleCreateReceivingProduct(record.id)}
@@ -144,24 +147,41 @@ const ListPO = () => {
           {/* <Link to={`/admin/po/edit/${record.id}`}>
             <FontAwesome name="edit" style={{ margin: '.5em', color: '#5F63F2', cursor: 'pointer' }} />
           </Link> */}
-          <Tooltip placement="topLeft" title="Send to vendor">
-            <SendOutlined
-              onClick={() => poSendToVendor(record)}
-              style={{ margin: '.5em', color: 'rgb(34 121 230)', cursor: 'pointer' }}
-            />
-          </Tooltip>
-          <Tooltip placement="topLeft" title="Hold PO">
-            <PauseCircleOutlined
-              onClick={() => poStatus(record, 'hold')}
-              style={{ margin: '.5em', color: 'rgb(165 77 0)', cursor: 'pointer' }}
-            />
-          </Tooltip>
-          <Tooltip placement="topLeft" title="Cancel PO">
-            <CloseCircleOutlined
-              onClick={() => poStatus(record, 'cancel')}
-              style={{ margin: '.5em', color: 'rgb(255 0 0)', cursor: 'pointer' }}
-            />
-          </Tooltip>
+          {(record.postatus.slug === 'new' || record.postatus.slug === 'canceled') && (
+            <Tooltip placement="topLeft" title="Send to vendor">
+              <SendOutlined
+                onClick={() => poSendToVendor(record)}
+                style={{ margin: '.5em', color: 'rgb(34 121 230)', cursor: 'pointer' }}
+              />
+            </Tooltip>
+          )}
+
+          {(record.postatus.slug === 'submitted' ||
+            record.postatus.slug === 'new' ||
+            record.postatus.slug === 'view') && (
+            <Tooltip placement="topLeft" title="Cancel PO">
+              <CloseCircleOutlined
+                onClick={() => poStatus(record, 'cancel')}
+                style={{ margin: '.5em', color: 'rgb(255 0 0)', cursor: 'pointer' }}
+              />
+            </Tooltip>
+          )}
+          {record.postatus.slug === 'new' && (
+            <Tooltip placement="topLeft" title="Hold PO">
+              <PauseCircleOutlined
+                onClick={() => poStatus(record, 'hold')}
+                style={{ margin: '.5em', color: 'rgb(165 77 0)', cursor: 'pointer' }}
+              />
+            </Tooltip>
+          )}
+          {record.postatus.slug === 'canceled' && (
+            <Tooltip placement="topLeft" title="Kill PO">
+              <StopOutlined
+                onClick={() => poStatus(record, 'kill')}
+                style={{ margin: '.5em', color: 'rgb(255 0 0)', cursor: 'pointer' }}
+              />
+            </Tooltip>
+          )}
         </>
       ),
       key: 'id',
@@ -357,6 +377,9 @@ const ListPO = () => {
     } else if (type === 'cancel') {
       status_id = POStatus.data.filter(item => item.slug === 'canceled')[0].id;
       title = `Do you want to cancel PO?`;
+    }else if (type === 'kill') {
+      status_id = POStatus.data.filter(item => item.slug === 'kill')[0].id;
+      title = `Do you want to kill PO?`;
     }
 
     confirm({

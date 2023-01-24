@@ -2927,3 +2927,6 @@ html[dir='rtl'] .ant-menu-vertical .ant-menu-submenu-title {
 .avatar-uploader-po .ant-upload.ant-upload-select-picture-card {
   width: 260px;
 }
+.ant-typography{
+  margin-bottom: 0;
+}

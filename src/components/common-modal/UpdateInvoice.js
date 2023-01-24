@@ -1,9 +1,10 @@
+import { InboxOutlined } from '@ant-design/icons';
 import { Button, Col, Form, Input, Modal, Row, Upload } from 'antd';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
-import apolloClient from '../../apollo';
 import { poQuery } from '../../apollo/po';
+import { apolloUploadClient } from '../../utility/apollo';
 
 export default function UpdateInvoice({
   invoice,
@@ -21,15 +22,17 @@ export default function UpdateInvoice({
     await invoiceForm.validateFields(['invoice_no']);
     const values = await invoiceForm.getFieldsValue(true);
     const { invoice_no } = values;
+    const { id, po_id } = invoice
     setSubmitting(true);
-    apolloClient
+    apolloUploadClient
       .mutate({
-        mutation: poQuery.CREATE_PO_INVOICE,
+        mutation: poQuery.UPDATE_PO_INVOICE,
         variables: {
           data: {
+            id,
             po_id,
             invoice_no,
-            invoice_file: invoiceFile,
+            invoicefile: invoiceFile,
           },
         },
         context: {
@@ -40,13 +43,10 @@ export default function UpdateInvoice({
         },
       })
       .then(res => {
-        const data = res?.data?.createPOInvoice;
-        if (!data.status) return;
+        const data = res?.data?.updatePOInvoice;
+        if (!data.status) return toast.error(data.message);
         setChangeInvoice(prev => !prev);
-        setAddInvoiceModalOpen(false);
-      })
-      .catch(err => {
-        console.log(err);
+        setUpdateInvoiceModalOpen(false);
       })
       .finally(() => {
         setSubmitting(false);
@@ -56,11 +56,13 @@ export default function UpdateInvoice({
   // Assign File
   const beforeImageUpload = file => {
     const isPDF = file.type === 'application/pdf';
-    if (!isPDF) toast.error('You can only upload PDF file.');
+    if (!isPDF) {
+      toast.error('You can only upload PDF file.');
+      return false;
+    }
     if (isPDF) setInvoiceFile(file);
     return false;
   };
-
 
   return (
     <Modal
@@ -85,22 +87,22 @@ export default function UpdateInvoice({
       >
         <Row gutter={25}>
           <Col md={24}>
-            <Form.Item name="invoice_no" label="Invoice No" style={{ marginBottom: 15 }} initialValue={invoice?.invoice_no}>
+            <Form.Item
+              name="invoice_no"
+              label="Invoice No"
+              style={{ marginBottom: 15 }}
+              initialValue={invoice?.invoice_no}
+            >
               <Input placeholder="Invoice No" defaultValue={invoice?.invoice_no} />
             </Form.Item>
 
             <Form.Item label="Invoice File">
-              <Upload
-                listType="picture-card"
-                className="avatar-uploader-po"
-                name="invoice_file"
-                beforeUpload={beforeImageUpload}
-                showUploadList={false}
-                fileList={[]}
-              >
-                {invoiceFile?.name ? invoiceFile?.name : <Button type="link">Drag or browse file to upload</Button>}
-              </Upload>
-              {}
+              <Upload.Dragger beforeUpload={beforeImageUpload} multiple={false} maxCount={1} onRemove={() => setInvoiceFile(null)}>
+                <p className="ant-upload-drag-icon">
+                  <InboxOutlined />
+                </p>
+                <Button type="link">Drag or browse file to upload</Button>
+              </Upload.Dragger>
             </Form.Item>
           </Col>
         </Row>

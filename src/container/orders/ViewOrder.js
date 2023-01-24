@@ -190,14 +190,13 @@ const ViewOrder = () => {
                   <br />
                   <br />
                   <br />
-                  <div className={'productTable'}>
-                    <Table
-                      columns={column}
-                      dataSource={products}
-                      pagination={false}
-                      rowClassName={(record, index) => (index % 2 === 0 ? '' : 'altTableClass')}
-                    />
-                  </div>
+
+                  <Table
+                    columns={column}
+                    dataSource={products}
+                    pagination={false}
+                    rowClassName={(record, index) => (index % 2 === 0 ? '' : 'altTableClass')}
+                  />
 
                   <div className={style.tableFooter}>
                     <div>
@@ -237,64 +236,33 @@ const ViewOrder = () => {
 
                   <div className={style.addresses}>
                     <div className={style.billing}>
-                      <p>
+                      <Typography.Paragraph>
                         <b>BILL TO:</b>
-                      </p>
-                      {/* <p><b>Full Name:</b> Test Customer</p> */}
-                      <p>
-                        <b>Email:</b> {singleOrder?.data?.payment?.billingAddress?.email}
-                      </p>
-                      <p>
-                        <b>Phone:</b> {singleOrder?.data?.payment?.billingAddress?.phone}
-                      </p>
-                      <p>
-                        <b>Address 1:</b> {singleOrder?.data?.payment?.billingAddress?.address1}
-                      </p>
-                      <p>
-                        <b>Address 2:</b> {singleOrder?.data?.payment?.billingAddress?.address2}
-                      </p>
-                      <p>
-                        <b>country:</b> {singleOrder?.data?.payment?.billingAddress?.country}
-                      </p>
-                      <p>
-                        <b>City:</b> {singleOrder?.data?.payment?.billingAddress?.city}
-                      </p>
-                      <p>
-                        <b>State:</b> {singleOrder?.data?.payment?.billingAddress?.state}
-                      </p>
-                      <p>
-                        <b>Zip:</b> {singleOrder?.data?.payment?.billingAddress?.zip_code}
-                      </p>
+                      </Typography.Paragraph>
+                      <Typography.Paragraph>{singleOrder?.data?.payment?.billingAddress?.address1}</Typography.Paragraph>
+                      {singleOrder?.data?.payment?.billingAddress?.address2 && (
+                        <Typography.Paragraph>{singleOrder?.data?.payment?.billingAddress?.address2}</Typography.Paragraph>
+                      )}
+                      <Typography.Paragraph>
+                        {singleOrder?.data?.payment?.billingAddress?.city},{' '}
+                        {singleOrder?.data?.payment?.billingAddress?.state} -{' '}
+                        {singleOrder?.data?.payment?.billingAddress?.zip_code}
+                      </Typography.Paragraph>
+                      <Typography.Paragraph>{singleOrder?.data?.payment?.billingAddress?.country}</Typography.Paragraph>
                     </div>
                     <div className={style.billing}>
-                      <p>
+                      <Typography.Paragraph>
                         <b>SHIP TO:</b>
-                      </p>
-                      {/* <p><b>Full Name:</b> Test Customer</p> */}
-                      <p>
-                        <b>Email:</b> {singleOrder?.data?.shippingAddress?.email}
-                      </p>
-                      <p>
-                        <b>Phone:</b> {singleOrder?.data?.shippingAddress?.phone}
-                      </p>
-                      <p>
-                        <b>Address 1:</b> {singleOrder?.data?.shippingAddress?.address1}
-                      </p>
-                      <p>
-                        <b>Address 2:</b> {singleOrder?.data?.shippingAddress?.address2}
-                      </p>
-                      <p>
-                        <b>country:</b> {singleOrder?.data?.shippingAddress?.country}
-                      </p>
-                      <p>
-                        <b>City:</b> {singleOrder?.data?.shippingAddress?.city}
-                      </p>
-                      <p>
-                        <b>State:</b> {singleOrder?.data?.shippingAddress?.state}
-                      </p>
-                      <p>
-                        <b>Zip:</b> {singleOrder?.data?.shippingAddress?.zip_code}
-                      </p>
+                      </Typography.Paragraph>
+                      <Typography.Paragraph>{singleOrder?.data?.shippingAddress?.address1}</Typography.Paragraph>
+                      {singleOrder?.data?.shippingAddress?.address2 && (
+                        <Typography.Paragraph>{singleOrder?.data?.shippingAddress?.address2}</Typography.Paragraph>
+                      )}
+                      <Typography.Paragraph>
+                        {singleOrder?.data?.shippingAddress?.city}, {singleOrder?.data?.shippingAddress?.state} -{' '}
+                        {singleOrder?.data?.shippingAddress?.zip_code}
+                      </Typography.Paragraph>
+                      <Typography.Paragraph>{singleOrder?.data?.shippingAddress?.country}</Typography.Paragraph>
                     </div>
                   </div>
                   <Divider />

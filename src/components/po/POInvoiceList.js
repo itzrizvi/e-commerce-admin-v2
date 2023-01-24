@@ -1,11 +1,20 @@
 import { CheckCircleOutlined, DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import { Modal, Table, Tooltip } from 'antd';
 import React, { useState } from 'react';
+import { useSelector } from 'react-redux';
+import { Link } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import apolloClient from '../../apollo';
+import { poQuery } from '../../apollo/po';
+import config from '../../config/config';
+import { getFile } from '../../utility/images';
 import UpdateInvoice from '../common-modal/UpdateInvoice';
 
 export default function POInvoiceList({ invoiceList, setChangeInvoice }) {
   const [updateInvoiceModalOpen, setUpdateInvoiceModalOpen] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
+  const token = useSelector(state => state.auth.token);
   const column = [
     {
       title: 'Invoice No',
@@ -16,10 +25,11 @@ export default function POInvoiceList({ invoiceList, setChangeInvoice }) {
     },
     {
       title: 'File Name',
-      dataIndex: 'file_name',
-      key: 'file_name',
+      dataIndex: 'invoice_file',
+      key: 'invoice_file',
       width: 200,
       ellipsis: true,
+      render: (text, record) => <Link to={{ pathname: getFile(`${config.ADMIN_DOC_BUCKET_NAME}/PO/${record.purchaseOrder.po_number}/invoice/${record.id}/${text}`)}} target="_blank">{text}</Link>,
     },
     {
       title: 'Action',
@@ -54,8 +64,31 @@ export default function POInvoiceList({ invoiceList, setChangeInvoice }) {
       title: 'Do you want to remove invoice?',
       icon: <CheckCircleOutlined />,
       content: `Invoice No: ${record.invoice_no}`,
+      confirmLoading: submitting,
       onOk() {
-        // To Do Remove Query
+        apolloClient
+          .mutate({
+            mutation: poQuery.DELETE_PO_INVOICE,
+            variables: {
+              data: {
+                id: record.id,
+              },
+            },
+            context: {
+              headers: {
+                TENANTID: process.env.REACT_APP_TENANTID,
+                Authorization: token,
+              },
+            },
+          })
+          .then(res => {
+            const data = res?.data?.deletePOInvoice;
+            if (!data.status) return toast.error(data.message);
+            setChangeInvoice(prev => !prev);
+          })
+          .finally(() => {
+            setSubmitting(false);
+          });
       },
       okText: 'Yes',
       cancelText: 'No',

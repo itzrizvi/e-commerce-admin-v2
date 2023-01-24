@@ -1,16 +1,12 @@
+import { InboxOutlined } from '@ant-design/icons';
 import { Button, Col, Form, Input, Modal, Row, Upload } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
-import apolloClient from '../../apollo';
 import { poQuery } from '../../apollo/po';
+import { apolloUploadClient } from '../../utility/apollo';
 
-export default function AddMFG({
-  po_id,
-  addMfgModalOpen,
-  setAddMfgModalOpen,
-  setChangeMfg,
-}) {
+export default function AddMFG({ po_id, addMfgModalOpen, setAddMfgModalOpen, setChangeMfg }) {
   const [mfgForm] = Form.useForm();
   const [mfgFile, setMfgFile] = useState(null);
   const [submitting, setSubmitting] = useState(false);
@@ -18,16 +14,15 @@ export default function AddMFG({
 
   /* ------------------------- Add Address Form Submit ------------------------ */
   const handleSubmit = async () => {
-    if(!mfgFile) return toast.error("Please select mfg doc file first.")
+    if (!mfgFile) return toast.error('Please select Mfg doc file first.');
     setSubmitting(true);
-    apolloClient
+    apolloUploadClient
       .mutate({
-        mutation: poQuery.CREATE_PO_INVOICE,
+        mutation: poQuery.CREATE_MFG_DOC,
         variables: {
           data: {
             po_id,
-            invoice_no,
-            invoice_file: invoiceFile,
+            pomfgfile: mfgFile,
           },
         },
         context: {
@@ -38,10 +33,11 @@ export default function AddMFG({
         },
       })
       .then(res => {
-        const data = res?.data?.createPOInvoice;
-        if (!data.status) return;
+        const data = res?.data?.createMFGDOC;
+        if (!data.status) return toast.error(data.message);
         setChangeMfg(prev => !prev);
         setAddMfgModalOpen(false);
+        setMfgFile(null);
       })
       .catch(err => {
         console.log(err);
@@ -54,20 +50,22 @@ export default function AddMFG({
   // Assign File
   const beforeImageUpload = file => {
     const isPDF = file.type === 'application/pdf';
-    if (!isPDF) toast.error('You can only upload PDF file.');
-    if (isPDF) setInvoiceFile(file);
+    if (!isPDF) {
+      toast.error('You can only upload PDF file.');
+      return false;
+    }
+    if (isPDF) setMfgFile(file);
     return false;
   };
 
-
   return (
     <Modal
-      title="Add MFG DOC"
+      title="Add Mfg Doc"
       style={{ top: 20 }}
       width={400}
       open={addMfgModalOpen}
       destroyOnClose={true}
-      okText="Add MFG"
+      okText="Add Mfg Doc"
       onOk={() => mfgForm.submit()}
       onCancel={() => setAddMfgModalOpen(false)}
       confirmLoading={submitting}
@@ -83,18 +81,18 @@ export default function AddMFG({
       >
         <Row gutter={25}>
           <Col md={24}>
-            <Form.Item label="MFG Doc File">
-              <Upload
-                listType="picture-card"
-                className="avatar-uploader-po"
-                name="mfg_doc"
+            <Form.Item label="Mfg Doc File">
+              <Upload.Dragger
                 beforeUpload={beforeImageUpload}
-                showUploadList={false}
-                fileList={[]}
+                multiple={false}
+                maxCount={1}
+                onRemove={() => setMfgFile(null)}
               >
-                {mfgFile?.name ? mfgFile?.name : <Button type="link">Drag or browse file to upload</Button>}
-              </Upload>
-              {}
+                <p className="ant-upload-drag-icon">
+                  <InboxOutlined />
+                </p>
+                <Button type="link">Drag or browse file to upload</Button>
+              </Upload.Dragger>
             </Form.Item>
           </Col>
         </Row>

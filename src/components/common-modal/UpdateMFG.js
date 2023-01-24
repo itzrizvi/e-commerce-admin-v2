@@ -1,16 +1,12 @@
+import { InboxOutlined } from '@ant-design/icons';
 import { Button, Col, Form, Input, Modal, Row, Upload } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
-import apolloClient from '../../apollo';
+import { apolloUploadClient } from '../../apollo';
 import { poQuery } from '../../apollo/po';
 
-export default function UpdateMFG({
-  mfg,
-  updateMfgModalOpen,
-  setUpdateMfgModalOpen,
-  setChangeMfg,
-}) {
+export default function UpdateMFG({ mfg, updateMfgModalOpen, setUpdateMfgModalOpen, setChangeMfg }) {
   const [mfgForm] = Form.useForm();
   const [mfgFile, setMfgFile] = useState(null);
   const [submitting, setSubmitting] = useState(false);
@@ -18,16 +14,17 @@ export default function UpdateMFG({
 
   /* ------------------------- Add Address Form Submit ------------------------ */
   const handleSubmit = async () => {
-    if(!mfgFile) return toast.error("Please select mfg doc file first.")
+    if (!mfgFile) return toast.error('Please select mfg doc file first.');
     setSubmitting(true);
-    apolloClient
+    const { id, po_id } = mfg;
+    apolloUploadClient
       .mutate({
-        mutation: poQuery.CREATE_PO_INVOICE,
+        mutation: poQuery.UPDATE_MFG_DOC,
         variables: {
           data: {
+            id,
             po_id,
-            invoice_no,
-            invoice_file: invoiceFile,
+            pomfgfile: mfgFile,
           },
         },
         context: {
@@ -38,13 +35,11 @@ export default function UpdateMFG({
         },
       })
       .then(res => {
-        const data = res?.data?.createPOInvoice;
-        if (!data.status) return;
+        const data = res?.data?.updatePOMFGDOC;
+        if (!data.status) return toast.error(data.message);
         setChangeMfg(prev => !prev);
         setUpdateMfgModalOpen(false);
-      })
-      .catch(err => {
-        console.log(err);
+        setMfgFile(null);
       })
       .finally(() => {
         setSubmitting(false);
@@ -54,11 +49,13 @@ export default function UpdateMFG({
   // Assign File
   const beforeImageUpload = file => {
     const isPDF = file.type === 'application/pdf';
-    if (!isPDF) toast.error('You can only upload PDF file.');
-    if (isPDF) setInvoiceFile(file);
+    if (!isPDF) {
+      toast.error('You can only upload PDF file.');
+      return false;
+    }
+    if (isPDF) setMfgFile(file);
     return false;
   };
-
 
   return (
     <Modal
@@ -67,7 +64,7 @@ export default function UpdateMFG({
       width={400}
       open={updateMfgModalOpen}
       destroyOnClose={true}
-      okText="Update Invoice"
+      okText="Update Mfg Doc"
       onOk={() => mfgForm.submit()}
       onCancel={() => setUpdateMfgModalOpen(false)}
       confirmLoading={submitting}
@@ -84,17 +81,17 @@ export default function UpdateMFG({
         <Row gutter={25}>
           <Col md={24}>
             <Form.Item label="MFG Doc File">
-              <Upload
-                listType="picture-card"
-                className="avatar-uploader-po"
-                name="mfg_file"
+              <Upload.Dragger
                 beforeUpload={beforeImageUpload}
-                showUploadList={false}
-                fileList={[]}
+                multiple={false}
+                maxCount={1}
+                onRemove={() => setMfgFile(null)}
               >
-                {mfgFile?.name ? mfgFile?.name : <Button type="link">Drag or browse file to upload</Button>}
-              </Upload>
-              {}
+                <p className="ant-upload-drag-icon">
+                  <InboxOutlined />
+                </p>
+                <Button type="link">Drag or browse file to upload</Button>
+              </Upload.Dragger>
             </Form.Item>
           </Col>
         </Row>

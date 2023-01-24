@@ -26,6 +26,7 @@ const config = {
   QUOTE_PER_PAGE: 10,
   CONTACT_US_MESSAGE_PER_PAGE: 10,
   EMAIL_TEMPLATE_PER_PAGE: 10,
+  ADMIN_DOC_BUCKET_NAME: "psp-admin-doc"
 };
 
 export default config;

@@ -38,6 +38,23 @@ export default function ViewPOComponent({ purchaseOrder }) {
           </Col>
           <Col xs={24} md={9}>
             <Typography.Title level={4}>Ship To</Typography.Title>
+            {purchaseOrder?.type?.toUpperCase() === 'DROP_SHIPPING' && (
+              <>
+                {purchaseOrder?.customer?.company_name && (
+                  <Typography.Paragraph className="po-address">
+                    {purchaseOrder?.customer?.company_name}
+                  </Typography.Paragraph>
+                )}
+
+                <Typography.Paragraph className="po-address">
+                  {nameFormat(purchaseOrder?.customer)}
+                </Typography.Paragraph>
+                <Typography.Paragraph className="po-address">{purchaseOrder?.customer?.email}</Typography.Paragraph>
+                {purchaseOrder?.customer?.phone && (
+                  <Typography.Paragraph className="po-address">{purchaseOrder?.customer?.phone}</Typography.Paragraph>
+                )}
+              </>
+            )}
             <Typography.Paragraph className="po-address">
               {purchaseOrder?.vendorShippingAddress?.address1}
             </Typography.Paragraph>
@@ -58,12 +75,15 @@ export default function ViewPOComponent({ purchaseOrder }) {
               <Moment format="DD - MMM - YYYY">{new Date(parseInt(purchaseOrder?.createdAt))}</Moment>
             </Typography.Paragraph>
             <Typography.Paragraph className="po-address">
-              <strong>Status:</strong> {purchaseOrder?.status}
+              <strong>Order Type:</strong> {purchaseOrder?.type?.toUpperCase()}
+            </Typography.Paragraph>
+            <Typography.Paragraph className="po-address">
+              <strong>Status:</strong> {purchaseOrder?.postatus?.name}
             </Typography.Paragraph>
           </Col>
         </Row>
         <Divider />
-        <Row gutter={25} style={{ marginTop: 10}}>
+        <Row gutter={25} style={{ marginTop: 10 }}>
           <Col xs={24} md={6}>
             <Typography.Title level={5}>Rep</Typography.Title>
             <Typography.Paragraph className="po-address">
@@ -82,7 +102,7 @@ export default function ViewPOComponent({ purchaseOrder }) {
             <Typography.Title level={5}>Tax Rate</Typography.Title>
             <Typography.Paragraph className="po-address">
               {config.CURRENCY_SYMBOL}
-              {purchaseOrder?.tax_amount.toFixed(config.DECIMAL_DIGIT)}
+              {purchaseOrder?.tax_amount?.toFixed(config.DECIMAL_DIGIT)}
             </Typography.Paragraph>
           </Col>
         </Row>
@@ -152,55 +172,28 @@ export default function ViewPOComponent({ purchaseOrder }) {
           <Row gutter={25} justify="space-between">
             <Col xs={{ span: 24, order: 1 }} md={{ span: 8, order: 2 }}>
               <Row>
-                <Col xs={{ span: 12, offset: 12 }} md={{ span: 16, offset: 8 }}>
-                  <div className="mb-10">
-                    <table className="table table-striped" style={{ marginTop: 10 }} cellSpacing={'0'}>
-                      <tbody>
-                        <tr>
-                          <td>
-                            <b>Tax: </b>
-                          </td>
-                          <td
-                            style={{
-                              textAlign: 'right',
-                              paddingRight: 0,
-                            }}
-                          >
-                            {config.CURRENCY_SYMBOL}
-                            {purchaseOrder?.tax_amount.toFixed(config.DECIMAL_DIGIT)}
-                          </td>
-                        </tr>
-                        <tr>
-                          <td>
-                            <b>Shipping Cost: </b>
-                          </td>
-                          <td
-                            style={{
-                              textAlign: 'right',
-                              paddingRight: 0,
-                            }}
-                          >
-                            {config.CURRENCY_SYMBOL}
-                            {purchaseOrder?.shipping_cost.toFixed(config.DECIMAL_DIGIT)}
-                          </td>
-                        </tr>
-                        <tr>
-                          <td>
-                            <b>Total: </b>
-                          </td>
-                          <td
-                            style={{
-                              textAlign: 'right',
-                              paddingRight: 0,
-                            }}
-                          >
-                            {config.CURRENCY_SYMBOL}
-                            {purchaseOrder?.grandTotal_price.toFixed(config.DECIMAL_DIGIT)}
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
+                <Col xs={{ span: 24 }} md={{ span: 20, offset: 2 }}>
+                  <Row gutter={25} justify="end"> 
+                    <Col span={{span: 16}} style={{textAlign: 'right'}}>
+                      <Typography.Title level={5}>Tax: </Typography.Title>
+                      <Typography.Title level={5}>Shipping Cost: </Typography.Title>
+                      <Typography.Title level={5}>Total: </Typography.Title>
+                    </Col>
+                    <Col span={8} style={{textAlign: 'right', paddingRight: 5}}>
+                      <Typography.Title level={5} style={{fontWeight: 'normal'}}>
+                        {config.CURRENCY_SYMBOL}
+                        {purchaseOrder?.tax_amount?.toFixed(config.DECIMAL_DIGIT)}
+                      </Typography.Title>
+                      <Typography.Title level={5} style={{fontWeight: 'normal'}}>
+                        {config.CURRENCY_SYMBOL}
+                        {purchaseOrder?.shipping_cost?.toFixed(config.DECIMAL_DIGIT)}
+                      </Typography.Title>
+                      <Typography.Title level={5} style={{fontWeight: 'normal'}}>
+                        {config.CURRENCY_SYMBOL}
+                        {purchaseOrder?.grandTotal_price?.toFixed(config.DECIMAL_DIGIT)}
+                      </Typography.Title>
+                    </Col>
+                  </Row>
                 </Col>
               </Row>
             </Col>

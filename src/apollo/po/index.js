@@ -93,6 +93,7 @@ export const poQuery = {
           comment
           receiving_instruction
           shipping_method_id
+          createdAt
           vendor {
             id
             contact_person
@@ -192,6 +193,25 @@ export const poQuery = {
             phone
             fax
             status
+          }
+          customer {
+            id
+            first_name
+            last_name
+            email
+            email_verified
+            user_status
+            image
+            phone
+            fax
+            company_name
+            createdAt
+            updatedAt
+          }
+          postatus {
+            id
+            name
+            slug
           }
         }
       }
@@ -350,7 +370,6 @@ export const poQuery = {
       getPOStatusList {
         message
         status
-        tenant_id
         data {
           id
           name
@@ -365,9 +384,14 @@ export const poQuery = {
         message
         status
         data {
+          id
+          po_id
+          purchaseOrder {
+            po_number
+          }
           invoice_no
           invoice_date
-          invoice_path
+          invoice_file
           createdAt
           updatedAt
         }
@@ -382,13 +406,26 @@ export const poQuery = {
       }
     }
   `,
+  UPDATE_PO_INVOICE: gql`
+    mutation updatePOInvoice($data: updatePOInvoiceInput) {
+      updatePOInvoice(data: $data) {
+        message
+        status
+      }
+    }
+  `,
   GET_PO_MFG_DOC_LIST: gql`
     query getPOMFGDOCList($query: GetPOMFGDOCListInput) {
       getPOMFGDOCList(query: $query) {
         message
         status
         data {
-          doc_file
+          id
+          pomfg_file
+          po_id
+          purchaseOrder {
+            po_number
+          }
           createdAt
           updatedAt
         }
@@ -401,10 +438,64 @@ export const poQuery = {
         message
         status
         data {
+          po_id
           comment
+          action_type
           createdAt
           updatedAt
+          purchaseOrder {
+            id
+            po_number
+            postatus {
+              id
+              name
+              slug
+            }
+          }
+          activity_by {
+            first_name
+            last_name
+            email
+            email_verified
+            id
+            image
+            fax
+            phone
+            user_status
+          }
         }
+      }
+    }
+  `,
+  DELETE_PO_INVOICE: gql`
+    mutation deletePOInvoice($data: deletePOInvoiceInput) {
+      deletePOInvoice(data: $data) {
+        message
+        status
+      }
+    }
+  `,
+  CREATE_MFG_DOC: gql`
+    mutation createMFGDOC($data: POMFGDOCInput) {
+      createMFGDOC(data: $data) {
+        message
+        status
+      }
+    }
+  `,
+  UPDATE_MFG_DOC: gql`
+    mutation updatePOMFGDOC($data: updatePOMFGDOCInput) {
+      updatePOMFGDOC(data: $data) {
+        message
+        status
+      }
+    }
+  `,
+  DELETE_MFG_DOC: gql`
+    mutation deletePOMFGDOC($data: deletePOMFGDOCInput) {
+      deletePOMFGDOC(data: $data) {
+        message
+        status
       }
     }
   `,

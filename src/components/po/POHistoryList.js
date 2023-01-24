@@ -17,11 +17,11 @@ export default function POHistoryList({ history }) {
     },
     {
       title: 'Rep',
-      dataIndex: 'rep',
-      key: 'rep',
+      dataIndex: 'activity_by',
+      key: 'activity_by',
       width: 120,
       ellipsis: true,
-      render: (text, record) => nameFormat(record)
+      render: (obj) => nameFormat(obj)
     },
     {
       title: 'Action Type',
