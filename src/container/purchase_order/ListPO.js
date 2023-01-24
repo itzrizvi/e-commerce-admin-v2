@@ -448,7 +448,12 @@ const ListPO = () => {
           .then(res => {
             const data = res?.data?.poSendToVendor;
             if (!data.status) return;
-            statusUpdate(record.po_number);
+            Modal.success({
+              content: `${record.po_number} send successfully.`,
+              onOk: () => {
+                searchPOAdmin();
+              },
+            });
           });
       },
       okText: 'Yes',
