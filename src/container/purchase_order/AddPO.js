@@ -10,7 +10,6 @@ import apolloClient, { vendorMutation } from '../../utility/apollo';
 import { poQuery } from '../../apollo/po';
 import { toast } from 'react-toastify';
 import { viewPermission } from '../../utility/utility';
-import Products from './Products';
 import { useSelector } from 'react-redux';
 const { TextArea } = Input;
 import { orderQuery } from '../../apollo/order';
@@ -29,6 +28,7 @@ import AddressList from '../../components/common-modal/AddressList';
 import AddAddress from '../../components/common-modal/AddAddress';
 import { addressSchema } from '../../apollo/address';
 import UpdateAddress from '../../components/common-modal/UpdateAddress';
+import Products from '../../components/products/Products';
 const { confirm } = Modal;
 
 const AddPO = () => {
@@ -378,7 +378,7 @@ const AddPO = () => {
         return {
           parent_id: selectedVendor?.id,
           isNew: false,
-          isDefault: isDefault,
+          isDefault,
           id,
           ...rest,
         };
@@ -537,17 +537,15 @@ const AddPO = () => {
                                               setBillingAddressListModalOpen(true);
                                             }}
                                           />
-                                          <p className="line-height-0">{selectedVendorBillingAddress?.address1}</p>
+                                          <p className="mb-0">{selectedVendorBillingAddress?.address1}</p>
                                           {selectedVendorBillingAddress?.address2 && (
-                                            <p className="line-height-0">{selectedVendorBillingAddress?.address2}</p>
+                                            <p className="mb-0">{selectedVendorBillingAddress?.address2}</p>
                                           )}
-                                          <p className="line-height-0">
+                                          <p className="mb-0">
                                             {selectedVendorBillingAddress?.city &&
                                               `${selectedVendorBillingAddress.city}, ${selectedVendorBillingAddress.state} - ${selectedVendorBillingAddress.zip_code}`}
                                           </p>
-                                          <p className="line-height-0">
-                                            {selectedVendorBillingAddress?.countryCode.name}
-                                          </p>
+                                          <p className="mb-0">{selectedVendorBillingAddress?.countryCode.name}</p>
                                         </Card>
                                       </Col>
                                     </Row>
@@ -814,15 +812,6 @@ const AddPO = () => {
                 setSelectedVendorBillingAddress,
               }}
             />
-            <AddContactPerson
-              {...{
-                contactPersonAddModalOpen,
-                setContactPersonAddModalOpen,
-                parent: 'vendor',
-                id: selectedVendor?.id,
-                setCPSuccess,
-              }}
-            />
             <ContactPersonList
               {...{
                 contactPersons: selectedVendor?.contactPersons,
@@ -833,6 +822,16 @@ const AddPO = () => {
                 setContactPersonAddModalOpen,
               }}
             />
+            <AddContactPerson
+              {...{
+                contactPersonAddModalOpen,
+                setContactPersonAddModalOpen,
+                parent: 'vendor',
+                id: selectedVendor?.id,
+                setCPSuccess,
+              }}
+            />
+
             <PaymentMethodList
               {...{
                 paymentMethodSelectModalOpen,

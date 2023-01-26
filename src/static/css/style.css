@@ -2913,9 +2913,9 @@ html[dir='rtl'] .ant-menu-vertical .ant-menu-submenu-title {
 
 .billing_address_card .ant-card-body{
   padding: 10px !important;
-  padding-bottom: 0px !important;
-  padding-top: 15px !important;
-  min-height: 50px;
+  padding-top: 10px !important;
+  padding-bottom: 10px !important;
+  min-height: 75px;
 }
 
 .global-address-list-card .ant-card-body{
@@ -2929,4 +2929,9 @@ html[dir='rtl'] .ant-menu-vertical .ant-menu-submenu-title {
 }
 .ant-typography{
   margin-bottom: 0;
+}
+
+.mb-0{
+  margin-bottom: 0 !important;
+  line-height: 1;
 }

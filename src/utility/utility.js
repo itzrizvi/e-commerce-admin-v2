@@ -19,6 +19,11 @@ const viewPermission = (name) => {
   if (!menuPermission(name)) history.push('/admin/403');
 }
 
+const checkPermission = (name, type = 'read') => {
+  if (menuPermission(name, type)) return true;
+  return false;
+}
+
 const ellipsis = (input, size = 30) => input.length > size ? `${input.substring(0, size)}...` : input;
 
 const randomUniqueNumber = () => {
@@ -26,6 +31,6 @@ const randomUniqueNumber = () => {
 }
 
 
-export { ellipsis, menuPermission, viewPermission, randomUniqueNumber };
+export { ellipsis, menuPermission, viewPermission, randomUniqueNumber, checkPermission };
 
 

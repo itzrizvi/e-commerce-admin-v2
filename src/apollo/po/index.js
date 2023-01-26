@@ -499,4 +499,20 @@ export const poQuery = {
       }
     }
   `,
+  SEND_PO_LINK: gql`
+    mutation resendPOLink($data: ResendPOLinkInput) {
+      resendPOLink(data: $data) {
+        message
+        status
+      }
+    }
+  `,
+  SEND_PO: gql`
+    mutation resendPOAttachment($data: ResendPOAttachmentInput) {
+      resendPOLink(data: $data) {
+        message
+        status
+      }
+    }
+  `,
 };

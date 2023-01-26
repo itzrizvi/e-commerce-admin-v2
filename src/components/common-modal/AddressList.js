@@ -9,7 +9,7 @@ export default function AddressList({
   addressListModalOpen,
   setAddressListModalOpen,
   handler,
-  selectHandler,
+  selectHandler
 }) {
   return (
     <Modal
@@ -19,6 +19,7 @@ export default function AddressList({
       open={addressListModalOpen}
       className="globalAddressModal"
       footer={null}
+      destroyOnClose={true}
       onCancel={() => setAddressListModalOpen(false)}
     >
       <Row gutter={25}>
@@ -49,7 +50,7 @@ export default function AddressList({
             <Button
               size="small"
               style={{ position: 'absolute', right: 14, zIndex: 1000, top: 45 }}
-              title="Edit Billing Address"
+              title="Select Billing Address"
               htmlType="button"
               type="info"
               onClick={() => selectHandler(type, item.id)}

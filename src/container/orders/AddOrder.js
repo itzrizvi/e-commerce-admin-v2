@@ -18,7 +18,6 @@ import {
   Divider,
   Alert,
 } from 'antd';
-import FeatherIcon from 'feather-icons-react';
 import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
 import { Cards } from '../../components/cards/frame/cards-frame';
@@ -32,22 +31,27 @@ import { productSchema } from '../../apollo/product';
 import { customerMutation } from '../../apollo/customer';
 import { useSelector } from 'react-redux';
 import { orderQuery } from '../../apollo/order';
-import { UploadOutlined } from '@ant-design/icons';
+import { SelectOutlined, UploadOutlined } from '@ant-design/icons';
 import { addressSchema } from '../../apollo/address';
-import { strCamelCase } from '../../utility/stringModify';
+import { nameFormat, strCamelCase } from '../../utility/stringModify';
 import Checkout from '../../components/stripe/Checkout';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements } from '@stripe/react-stripe-js';
 import { stripeSchema } from '../../apollo/stripe';
 import { useMemo } from 'react';
+import Products from '../../components/products/Products';
+import ProductSearch from '../../components/searchModule/ProductSearch';
+import CustomerSearch from '../../components/searchModule/CustomerSearch';
+import AddressList from '../../components/common-modal/AddressList';
+import AddAddress from '../../components/common-modal/AddAddress';
+import UpdateAddress from '../../components/common-modal/UpdateAddress';
+import { poQuery } from '../../apollo/po';
+import AddContactPerson from '../../components/contactPerson/AddContactPerson';
+import ContactPersonList from '../../components/contactPerson/ContactPersonList';
+import { contactPersonsSchema } from '../../apollo/contactPerson';
 
 const { Text, Paragraph } = Typography;
-const prod_initial = {
-  id: '',
-  prod_name: '',
-  quantity: 1,
-  price: 0,
-};
+
 const AddOrder = () => {
   viewPermission('order');
   const history = useHistory();
@@ -55,16 +59,12 @@ const AddOrder = () => {
   const token = useSelector(state => state.auth.token);
   const [form] = Form.useForm();
   const [addressForm] = Form.useForm();
-  const [customerData, setCustomerData] = useState([]);
   // ===================== new =====================
-  const [selectedCustomer, setSelectedCustomer] = useState({});
   const [billingAddresses, setBillingAddresses] = useState([]);
   const [shippingAddresses, setShippingAddresses] = useState([]);
 
   const [selectedProduct, setSelectedProduct] = useState([]);
   const formRef = useRef();
-  const [productOption, setProductOption] = useState([]);
-  const [lastInitProductId, setLastInitProductId] = useState(null);
   const [discount, setDiscount] = useState('00.0');
   const [shippingMethod, setShippingMethod] = useState([]);
   const [paymentMethod, setPaymentMethod] = useState([]);
@@ -76,8 +76,6 @@ const AddOrder = () => {
   const [isAddressEdit, setIsAddressEdit] = useState(false);
   const [addressType, setAddressType] = useState(null);
   const [listAddressModalOpen, setListAddressModalOpen] = useState(false);
-  const [selectedBillingAddress, setSelectedBillingAddress] = useState(null);
-  const [selectedShippingAddress, setSelectedShippingAddress] = useState(null);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(null);
   const [selectedShippingMethod, setSelectedShippingMethod] = useState(null);
   const [selectedShippingAccount, setSelectedShippingAccount] = useState(null);
@@ -93,9 +91,6 @@ const AddOrder = () => {
   const [shippingMethodAccountList, setShippingMethodAccountList] = useState([]);
   const [clientSecret, setClientSecret] = useState(null);
   const [cardHolderName, setCardHolderName] = useState('');
-  const [customerFound, setCustomerFound] = useState(true);
-  const [productFound, setProductFound] = useState(true);
-  const [contactPerson, setContactPerson] = useState([]);
   // Message
   const [message, setMessage] = useState(null);
 
@@ -103,6 +98,26 @@ const AddOrder = () => {
   const stripePromise = useMemo(() => loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY), []);
   const paymentValidateCard = useRef(null);
   const finalPayment = useRef(null);
+
+  // New State Assign Start Here
+  const [products, setProducts] = useState([]);
+  const [productSearchModalOpen, setProductSearchModalOpen] = useState(false);
+  const [selectedCustomer, setSelectedCustomer] = useState(null);
+  const [customerSearchModalOpen, setCustomerSearchModalOpen] = useState(false);
+  const [selectedBillingAddress, setSelectedBillingAddress] = useState(null);
+  const [selectedShippingAddress, setSelectedShippingAddress] = useState(null);
+  const [billingAddressListModalOpen, setBillingAddressListModalOpen] = useState(false);
+  const [shippingAddressListModalOpen, setShippingAddressListModalOpen] = useState(false);
+  const [contactPerson, setContactPerson] = useState([]);
+  const [selectedContactPerson, setSelectedContactPerson] = useState(null);
+  const [addAddressBillingModalOpen, setAddAddressBillingModalOpen] = useState(false);
+  const [updateAddressBillingModalOpen, setUpdateAddressBillingModalOpen] = useState(false);
+  const [addAddressShippingModalOpen, setAddAddressShippingModalOpen] = useState(false);
+  const [updateAddressShippingModalOpen, setUpdateAddressShippingModalOpen] = useState(false);
+  const [contactSelectModalOpen, setContactSelectModalOpen] = useState(false);
+  const [contactPersonAddModalOpen, setContactPersonAddModalOpen] = useState(false);
+  const [cpSuccess, setCPSuccess] = useState(false);
+  // New State End Here
 
   useEffect(() => {
     if (!token) return;
@@ -290,144 +305,6 @@ const AddOrder = () => {
       .finally(() => setIsLoading(false));
   };
 
-  const productColumn = [
-    {
-      title: 'Product',
-      dataIndex: 'prod_name',
-      key: 'prod_name',
-      width: 400,
-      render: (_, record) => (
-        <Select
-          placeholder="Select Product"
-          options={productOption}
-          defaultValue={record.prod_name}
-          showSearch
-          allowClear
-          optionFilterProp="label"
-          style={{ width: 400 }}
-          onSearch={val => {
-            setProductFound(true);
-            if (val.length >= 6) {
-              apolloClient
-                .query({
-                  query: productSchema.SEARCH_PRODUCT,
-                  variables: {
-                    query: {
-                      searchQuery: val,
-                    },
-                  },
-                  context: {
-                    headers: {
-                      TENANTID: process.env.REACT_APP_TENANTID,
-                    },
-                  },
-                })
-                .then(res => {
-                  const data = res?.data?.getSearchedProducts;
-                  if (!data.status) return;
-                  if (data?.data.length === 0) return setProductFound(false);
-                  setProductOption(
-                    data.data.map(product => ({
-                      label:
-                        product?.prod_name +
-                        product?.prod_slug +
-                        product?.prod_sku +
-                        product?.prod_partnum +
-                        product?.mfg_build_part_number,
-                      value: product?.id,
-                      ...product,
-                    })),
-                  );
-                });
-            } else {
-              setProductOption([]);
-            }
-          }}
-          onSelect={(_, data) => {
-            for (const item of selectedProduct) {
-              if (item.id === data.id) {
-                setSelectedProduct(prevState => prevState.filter(value => value.id !== lastInitProductId));
-                return setMessage({ type: 'warning', message: 'Duplicate Product Found!' });
-              }
-            }
-
-            setSelectedProduct(prevState => [
-              ...prevState.filter(item => item.id !== record.id),
-              ...prevState
-                .filter(item => item.id === record.id)
-                .map(item => ({
-                  ...item,
-                  id: data.id,
-                  price: data.prod_sale_price === 0 ? data.prod_regular_price : data.prod_sale_price,
-                  prod_name: data.prod_name,
-                  quantity: 1,
-                })),
-            ]);
-          }}
-        />
-      ),
-    },
-    {
-      title: 'U. Price',
-      dataIndex: 'price',
-      key: 'price',
-      width: 150,
-      render: (val, record) => `$${val}`,
-    },
-    {
-      title: 'Price',
-      dataIndex: 'price',
-      key: 'price',
-      width: 100,
-      render: (val, record) => `$${parseFloat(val) * record.quantity}`,
-    },
-    {
-      title: 'Quantity',
-      dataIndex: 'quantity',
-      key: 'quantity',
-      width: 150,
-      render: (val, record) => (
-        <Input
-          min={0}
-          type="number"
-          defaultValue={val}
-          onChange={e => {
-            e.persist();
-            setSelectedProduct(prevState =>
-              prevState.map(item => {
-                if (item.id === record.id) {
-                  return { ...item, quantity: parseInt(e.target.value) };
-                }
-                return item;
-              }),
-            );
-          }}
-        />
-      ),
-    },
-    {
-      title: 'Action',
-      dataIndex: 'id',
-      key: 'id',
-      width: 100,
-      align: 'center',
-      render: val => (
-        <Button
-          size="small"
-          title="Remove"
-          type="danger"
-          onClick={() => {
-            setSelectedProduct(prevState => {
-              return prevState.filter(value => value?.id !== val);
-            });
-          }}
-        >
-          <FeatherIcon icon="trash-2" />
-        </Button>
-      ),
-    },
-  ];
-
   const overViewColumn = [
     {
       title: 'Item',
@@ -465,18 +342,6 @@ const AddOrder = () => {
   /* -------------------------- Step From Data Start -------------------------- */
   const steps = [
     {
-      title: 'Customer',
-      percent: 15,
-    },
-    {
-      title: 'Products',
-      percent: 35,
-    },
-    {
-      title: 'Addresses',
-      percent: 50,
-    },
-    {
       title: 'Shipping',
       percent: 65,
     },
@@ -497,37 +362,6 @@ const AddOrder = () => {
   const [current, setCurrent] = useState(0);
   const next = async () => {
     try {
-      if (current === 0) {
-        await form.validateFields(['customer_id']);
-      } else if (current === 1) {
-        if (selectedProduct.length === 0) {
-          return setMessage({ type: 'warning', message: 'Please Select at Least One Product.' });
-        } else if (selectedProduct.some(item => item.prod_name === '')) {
-          return setMessage({ type: 'warning', message: 'Please Fill Product Field Properly.' });
-        }
-      } else if (current === 2) {
-        if (!selectedBillingAddress) return setMessage({ type: 'warning', message: 'Please select billing address.' });
-        if (!selectedShippingAddress)
-          return setMessage({ type: 'warning', message: 'Please select shipping address.' });
-      } else if (current === 3) {
-        await form.validateFields(['shipping_method_id']);
-      } else if (current === 4) {
-        if (textExempt && !image) {
-          return setMessage({ type: 'warning', message: 'Please attach Tax Exempt file.' });
-        }
-      } else if (current === 5) {
-        if (selectedPaymentMethod?.name?.toLowerCase() === 'credit card') {
-          setWaitNext(true);
-          const createToken = await paymentValidateCard.current();
-          if (createToken.error) {
-            setWaitNext(false);
-            return setMessage({ type: 'error', message: 'Invalid Card Details.' });
-          } else {
-            setCreditCardLast4(createToken?.token.card.last4);
-            setWaitNext(false);
-          }
-        }
-      }
       setCurrent(current + 1);
     } catch {}
   };
@@ -582,26 +416,15 @@ const AddOrder = () => {
 
   // Add Edit Address Modal Open
   const addOrEditAddressHandler = (id, type) => {
-    setAddressType(type);
     if (id) {
-      setIsAddressEdit(true);
-      if (type === 'billing') {
-        setEditSelectedAddress(billingAddresses.filter(item => item.id === id)[0]);
-        form.setFieldsValue({
-          billing_address_id: id,
-        });
-      } else {
-        setEditSelectedAddress(shippingAddresses.filter(item => item.id === id)[0]);
-        form.setFieldsValue({
-          shipping_address_id: id,
-        });
-      }
+      if (type === 'billing') setUpdateAddressBillingModalOpen(true);
+      else setUpdateAddressShippingModalOpen(true);
+
+      setEditSelectedAddress(selectedCustomer?.addresses?.filter(item => item.id === id)[0]);
     } else {
-      setEditSelectedAddress(null);
-      addressForm.resetFields();
-      setIsAddressEdit(false);
+      if (type === 'billing') setAddAddressBillingModalOpen(true);
+      else setAddAddressShippingModalOpen(true);
     }
-    setAddressModalOpen(true);
   };
 
   // First Time Change address open Modal
@@ -711,67 +534,196 @@ const AddOrder = () => {
   };
 
   // Trigger Function when select an address finally
-  const selectAddressHandler = (type, id) => {
-    if (!tempSelectedAddress) return;
-    if (type === 'billing') {
-      setSelectedBillingAddress(tempSelectedAddress);
-      form.setFieldsValue({
-        billing_address_id: id,
-      });
-    } else {
-      setSelectedShippingAddress(tempSelectedAddress);
-      form.setFieldsValue({
-        shipping_address_id: id,
-      });
-    }
-    setListAddressModalOpen(false);
-    setTempSelectedAddress(null);
+  // Select Billing Address Handler
+  const selectBillingAddressHandler = (_, id) => {
+    setSelectedBillingAddress(
+      selectedCustomer.addresses.filter(item => item.type === 'billing' && item.id === id).shift(),
+    );
+    form.setFieldsValue({
+      billing_address_id: id,
+    });
+    setBillingAddressListModalOpen(false);
+  };
+  // Select Shipping Address Handler
+  const selectShippingAddressHandler = (_, id) => {
+    setSelectedShippingAddress(
+      selectedCustomer.addresses.filter(item => item.type === 'shipping' && item.id === id).shift(),
+    );
+    form.setFieldsValue({
+      shipping_address_id: id,
+    });
+    setShippingAddressListModalOpen(false);
   };
 
   // Refetch query after adding or updating address
   useEffect(() => {
     if (!selectedCustomer?.id) return;
-    setTimeout(() => {
-      apolloClient
-        .query({
-          query: customerQuery.GET_SINGLE_CUSTOMER,
-          variables: { customer_id: selectedCustomer?.id },
-          context: {
-            headers: {
-              TENANTID: process.env.REACT_APP_TENANTID,
-              Authorization: token,
-            },
+    apolloClient
+      .query({
+        query: poQuery.GET_ADDRESS_BY_CUSTOMER,
+        variables: {
+          query: {
+            customer_id: selectedCustomer?.id,
           },
-          fetchPolicy: 'network-only',
-        })
-        .then(res => {
-          const data = res?.data?.getSingleCustomer;
-          if (!data?.status) return;
-          const shipping = [];
-          const billing = [];
-          setSelectedBillingAddress(null);
-          setSelectedShippingAddress(null);
-          data?.data?.addresses?.forEach(address => {
-            if (address.type === 'billing') billing.push(address);
-            if (address.type === 'shipping') shipping.push(address);
-            if (address.type === 'billing' && address.isDefault) {
-              setSelectedBillingAddress(address);
-              form.setFieldsValue({
-                billing_address_id: address.id,
-              });
-            }
-            if (address.type === 'shipping' && address.isDefault) {
-              setSelectedShippingAddress(address);
-              form.setFieldsValue({
-                shipping_address_id: address?.id,
-              });
-            }
-          });
-          setBillingAddresses(billing);
-          setShippingAddresses(shipping);
+        },
+        context: {
+          headers: {
+            TENANTID: process.env.REACT_APP_TENANTID,
+            Authorization: token,
+          },
+        },
+        fetchPolicy: 'network-only',
+      })
+      .then(res => {
+        const data = res?.data?.getAddressListByCustomerID;
+        if (!data?.status) return;
+        setSelectedCustomer(prev => ({ ...prev, addresses: data?.data }));
+        const selected_shipping_address = data?.data.filter(item => item.isDefault && item.type === 'shipping').shift();
+        const selected_billing_address = data?.data.filter(item => item.isDefault && item.type === 'billing').shift();
+        setSelectedShippingAddress(selected_shipping_address);
+        setSelectedBillingAddress(selected_billing_address);
+        form.setFieldsValue({
+          shipping_address_id: selected_shipping_address?.id,
+          billing_address_id: selected_shipping_address?.id,
         });
-    }, 2000);
+      });
   }, [changeAddress]);
+
+  // Trigger After Contact Person Add
+  useEffect(() => {
+    if (!selectedCustomer?.id) return;
+    apolloClient
+      .query({
+        query: contactPersonsSchema.GET_CONTACT_PERSON_BY_ID,
+        variables: {
+          query: {
+            id: selectedCustomer?.id,
+            type: 'customer',
+            status: true,
+          },
+        },
+        context: {
+          headers: { TENANTID: process.env.REACT_APP_TENANTID, Authorization: token },
+        },
+      })
+      .then(res => {
+        const data = res.data.getContactPerson;
+        if (!data.status) return;
+        setSelectedCustomer(prev => ({ ...prev, contactPersons: data?.data }));
+      });
+  }, [cpSuccess]);
+
+  // Add Address Handler
+  const addAddressHandler = (type, values) => {
+    let newBillingAddress = [];
+    let newShippingAddress = [];
+    if (type === 'billing') newBillingAddress.push({ parent_id: selectedCustomer?.id, ...values });
+    else newShippingAddress.push({ parent_id: selectedCustomer?.id, ...values });
+    apolloClient
+      .mutate({
+        mutation:
+          type === 'billing'
+            ? customerMutation.ADD_CUSTOMER_BILLING_ADDRESS
+            : customerMutation.ADD_CUSTOMER_SHIPPING_ADDRESS,
+        variables: {
+          data: {
+            addresses: [...(type === 'billing' ? newBillingAddress : newShippingAddress)],
+          },
+        },
+        context: {
+          headers: {
+            TENANTID: process.env.REACT_APP_TENANTID,
+            Authorization: token,
+          },
+        },
+      })
+      .then(res => {
+        const data = type === 'billing' ? res?.data?.addCustomerBillingAddress : res?.data?.addCustomerShippingAddress;
+        if (!data?.status) return;
+        if (type === 'billing') setAddAddressBillingModalOpen(false);
+        else setAddAddressShippingModalOpen(false);
+        setChangeAddress(prev => !prev);
+      });
+  };
+
+  // Update Address Handler
+  const updateAddressHandler = (type, values) => {
+    let newBillingAddress;
+    let newShippingAddress;
+    setEditSelectedAddress(null);
+
+    if (type === 'billing') {
+      newBillingAddress = selectedCustomer.addresses
+        ?.filter(item => item.type === 'billing')
+        ?.map(item => {
+          let { id, createdAt, updatedAt, __typename, type, isDefault, countryCode, ...rest } = item;
+          if (values.isDefault) isDefault = false;
+          if (editSelectedAddress?.id === id) {
+            rest = values;
+          }
+          return {
+            parent_id: selectedCustomer?.id,
+            isNew: false,
+            isDefault,
+            id,
+            ...rest,
+          };
+        });
+    } else {
+      newShippingAddress = selectedCustomer.addresses
+        ?.filter(item => item.type === 'shipping')
+        ?.map(item => {
+          let { id, createdAt, updatedAt, __typename, type, isDefault, countryCode, ...rest } = item;
+          if (values.isDefault) isDefault = false;
+          if (editSelectedAddress?.id === id) {
+            rest = values;
+          }
+          return {
+            parent_id: selectedCustomer?.id,
+            isDefault: isDefault,
+            isNew: false,
+            id,
+            ...rest,
+          };
+        });
+    }
+
+    apolloClient
+      .mutate({
+        mutation: customerMutation.UPDATE_CUSTOMER_ADDRESSES,
+        variables: {
+          data: {
+            ref_id: selectedCustomer?.id,
+            type,
+            addresses: [...(type === 'billing' ? newBillingAddress : newShippingAddress)],
+          },
+        },
+        context: {
+          headers: {
+            TENANTID: process.env.REACT_APP_TENANTID,
+            Authorization: token,
+          },
+        },
+      })
+      .then(res => {
+        const data = res?.data?.updateCustomerAddress;
+        if (!data?.status) return;
+        setChangeAddress(prev => !prev);
+        if (type === 'billing') setUpdateAddressBillingModalOpen(false);
+        else setUpdateAddressShippingModalOpen(false);
+      });
+  };
+
+  // Trigger When Customer Select
+  useEffect(() => {
+    form.setFieldsValue({
+      customer_id: selectedCustomer?.id,
+      payment_method_id: selectedPaymentMethod?.id,
+      shipping_method_id: selectedShippingMethod?.id,
+      billing_address_id: selectedBillingAddress?.id,
+      shipping_address_id: selectedShippingAddress?.id,
+    });
+  }, [selectedCustomer?.id, selectedPaymentMethod?.id, selectedShippingMethod?.id, selectedBillingAddress?.id, selectedShippingAddress?.id]);
 
   return (
     <>
@@ -799,8 +751,8 @@ const AddOrder = () => {
                   name="addOrder"
                   onFinish={handleSubmit}
                   onFinishFailed={errorInfo => console.log('form error info:\n', errorInfo)}
-                  // labelCol={{ span: 4 }}
-                  layout="vertical"
+                  labelCol={{ xl: 8, xxl: 6 }}
+                  scrollToFirstError={true}
                 >
                   <Row style={{ marginBottom: 20 }}>
                     <Steps
@@ -813,384 +765,8 @@ const AddOrder = () => {
                   </Row>
                   <Row style={{ marginTop: 40 }}>
                     <Col span={24}>
-                      <div className="steps-content">
-                        {current === 0 && (
-                          <Row gutter={25}>
-                            <Col md={8} sm={24}>
-                              <Form.Item
-                                rules={[{ required: true, message: 'Please select a customer' }]}
-                                name="customer_id"
-                                label="Customer"
-                              >
-                                <Select
-                                  placeholder="Select a customer"
-                                  options={customerData}
-                                  showSearch
-                                  allowClear
-                                  optionFilterProp="label"
-                                  onSelect={(val, data) => {
-                                    setSelectedCustomer(data.item);
-                                    const billing = [];
-                                    const shipping = [];
-                                    setSelectedBillingAddress(null);
-                                    setSelectedShippingAddress(null);
-                                    data?.item?.addresses?.forEach(addr => {
-                                      if (addr.type === 'billing') billing.push(addr);
-                                      if (addr.type === 'shipping') shipping.push(addr);
-                                      if (addr.type === 'billing' && addr.isDefault) setSelectedBillingAddress(addr);
-                                      if (addr.type === 'shipping' && addr.isDefault) setSelectedShippingAddress(addr);
-                                    });
-                                    setBillingAddresses(billing);
-                                    setShippingAddresses(shipping);
-                                    setContactPerson(
-                                      data?.item?.contactPersons?.map(item => ({
-                                        label: item.email + ' ( ' + item.name + ' )',
-                                        value: item.id,
-                                      })),
-                                    );
-                                  }}
-                                  onSearch={val => {
-                                    if (val.length >= 6) {
-                                      setCustomerFound(true);
-                                      apolloClient
-                                        .query({
-                                          query: productSchema.GET_SEARCH_CUSTOMER,
-                                          variables: {
-                                            query: {
-                                              searchQuery: val,
-                                            },
-                                          },
-                                          context: {
-                                            headers: {
-                                              TENANTID: process.env.REACT_APP_TENANTID,
-                                              Authorization: token,
-                                            },
-                                          },
-                                        })
-                                        .then(res => {
-                                          const data = res.data.getSearchedCustomers;
-                                          if (!data.status) return setMessage({ type: 'error', message: data.message });
-                                          if (data.data.length === 0) {
-                                            setCustomerFound(false);
-                                          }
-                                          const options = data?.data?.map(item => ({
-                                            label: item?.email + ' - ' + item?.first_name + ' ' + item?.last_name,
-                                            value: item.id,
-                                            item,
-                                          }));
-                                          setCustomerData(options);
-                                        });
-                                    } else {
-                                      setCustomerData([]);
-                                    }
-                                  }}
-                                />
-                              </Form.Item>
-                              {contactPerson.length > 0 && (
-                                <Form.Item name="person_id" label="Contact Person">
-                                  <Select placeholder="Contact Person (optional)" options={contactPerson} />
-                                </Form.Item>
-                              )}
-
-                              {!customerFound && <Alert message="Customer Not Found!" type="info" showIcon closable />}
-                            </Col>
-                            <Col md={16} sm={24}>
-                              <Row gutter={25}>
-                                <Col>
-                                  {selectedCustomer?.image ? (
-                                    <Avatar
-                                      size={{ xs: 24, sm: 32, md: 40, lg: 64, xl: 80, xxl: 100 }}
-                                      src={renderImage(selectedCustomer?.id, selectedCustomer?.image, 'user', '', true)}
-                                    >
-                                      <LazyLoadImage
-                                        effect="blur"
-                                        width={100}
-                                        height={100}
-                                        src={renderImage(
-                                          selectedCustomer?.id,
-                                          selectedCustomer?.image,
-                                          'user',
-                                          '',
-                                          true,
-                                        )}
-                                        onError={errorImageSrc}
-                                        alt={selectedCustomer.id}
-                                      />
-                                    </Avatar>
-                                  ) : (
-                                    <Avatar
-                                      size={{ xs: 24, sm: 32, md: 40, lg: 64, xl: 80, xxl: 100 }}
-                                      src={'/no-image.png'}
-                                    />
-                                  )}
-                                </Col>
-                                <Col>
-                                  <Paragraph>
-                                    <Text strong>ID: </Text>
-                                    {selectedCustomer?.id ?? '...'}
-                                  </Paragraph>
-                                  <Paragraph>
-                                    <Text strong>Name: </Text>
-                                    {selectedCustomer?.first_name
-                                      ? `${selectedCustomer?.first_name} ${selectedCustomer?.last_name}`
-                                      : '...'}
-                                  </Paragraph>
-                                  <Paragraph>
-                                    <Text strong>Email: </Text>
-                                    {selectedCustomer?.email ?? '...'}
-                                  </Paragraph>
-                                </Col>
-                              </Row>
-                            </Col>
-                          </Row>
-                        )}
-                        {current === 1 && (
-                          <Row gutter={25}>
-                            <Col lg={18} md={16} sm={24}>
-                              <span className={'psp_list'}>
-                                <Table
-                                  className="table-responsive"
-                                  columns={productColumn}
-                                  dataSource={selectedProduct}
-                                  pagination={false}
-                                  rowKey="id"
-                                  rowClassName={(record, index) => (index % 2 === 0 ? '' : 'altTableClass')}
-                                />
-                                <div
-                                  style={{
-                                    display: 'flex',
-                                    justifyContent: 'flex-end',
-                                    marginTop: '10px',
-                                    marginBottom: '10px',
-                                    paddingRight: '18px',
-                                  }}
-                                >
-                                  {!productFound && (
-                                    <Alert
-                                      style={{ width: '30%', marginBottom: 10, marginRight: 10 }}
-                                      message="Product Not Found!"
-                                      type="info"
-                                      showIcon
-                                      closable
-                                    />
-                                  )}
-                                  <Button
-                                    onClick={() => {
-                                      const new_id = new Date().getTime();
-                                      setLastInitProductId(new_id);
-                                      setSelectedProduct(prevState => [...prevState, { ...prod_initial, id: new_id }]);
-                                      setProductOption([]);
-                                    }}
-                                    size="small"
-                                    title="Add Product"
-                                    htmlType="button"
-                                    type="primary"
-                                  >
-                                    <FeatherIcon icon="plus-circle" />
-                                  </Button>
-                                </div>
-                              </span>
-                            </Col>
-                            <Col lg={6} md={8} sm={24}>
-                              <Card
-                                title="Summary"
-                                bordered={true}
-                                size="small"
-                                headStyle={{
-                                  backgroundColor: '#5f63f24d',
-                                  borderTopLeftRadius: 3,
-                                  borderTopRightRadius: 3,
-                                }}
-                              >
-                                <Paragraph>
-                                  <Text strong>Sub Total Price : </Text>$
-                                  {selectedProduct.reduce(
-                                    (accumulator, item) => accumulator + item.quantity * item.price,
-                                    0,
-                                  )}
-                                </Paragraph>
-                                <Paragraph>
-                                  <Text strong>Product Quantity : </Text>
-                                  {selectedProduct.reduce((accumulator, item) => accumulator + item.quantity, 0)}
-                                </Paragraph>
-                                <Paragraph>
-                                  <Text strong>Discount : </Text>${discount}
-                                </Paragraph>
-                                <Paragraph>
-                                  <Text strong>Shipping Cost : </Text>${shippingCost}
-                                </Paragraph>
-                                <Paragraph>
-                                  <Text strong>Total Price : </Text>$
-                                  {selectedProduct.reduce(
-                                    (accumulator, item) => accumulator + item.quantity * item.price,
-                                    0,
-                                  ) +
-                                    shippingCost -
-                                    discount}
-                                </Paragraph>
-                              </Card>
-                            </Col>
-                          </Row>
-                        )}
-                        {current === 2 && (
-                          <Row gutter={25}>
-                            <Col lg={12} sm={24}>
-                              <Form.Item
-                                rules={[{ required: true, message: 'Please Select Shipping Address' }]}
-                                name="shipping_address_id"
-                                label="Shipping Addresses"
-                                initialValue={selectedShippingAddress?.id}
-                              >
-                                {!selectedShippingAddress?.id && shippingAddresses.length > 0 ? (
-                                  <Button
-                                    size="small"
-                                    style={{ position: 'absolute', right: 14, zIndex: 1000 }}
-                                    title="Change Shipping Address"
-                                    htmlType="button"
-                                    type="info"
-                                    onClick={() => changeAddressHandler('shipping')}
-                                  >
-                                    Select Address
-                                  </Button>
-                                ) : (
-                                  !selectedShippingAddress?.id && (
-                                    <Button
-                                      size="small"
-                                      style={{ position: 'absolute', right: 14, zIndex: 1000 }}
-                                      title={`Add Shipping Address`}
-                                      htmlType="button"
-                                      type="primary"
-                                      onClick={() => addOrEditAddressHandler(null, 'shipping')}
-                                    >
-                                      Add address
-                                    </Button>
-                                  )
-                                )}
-
-                                <Radio.Group style={{ width: '100%', padding: 10 }}>
-                                  <Row gutter={25}>
-                                    {selectedShippingAddress && (
-                                      <Col key={selectedShippingAddress?.id} xs={24}>
-                                        <Button
-                                          size="small"
-                                          style={{ position: 'absolute', right: 14, zIndex: 1000 }}
-                                          title="Change Shipping Address"
-                                          htmlType="button"
-                                          type="info"
-                                          onClick={() => changeAddressHandler('shipping')}
-                                        >
-                                          Change
-                                        </Button>
-                                        <Radio
-                                          style={{
-                                            width: '100%',
-                                            border: '1px solid #f0f0f0',
-                                            fontSize: 12,
-                                            marginBottom: 10,
-                                            padding: 10,
-                                            borderRadius: 5,
-                                          }}
-                                          defaultValue={selectedShippingAddress?.id}
-                                        >
-                                          <p>
-                                            {selectedShippingAddress?.address1 &&
-                                              ellipsis(selectedShippingAddress?.address1, 35)}
-                                          </p>
-                                          <p>
-                                            {selectedShippingAddress?.address2 &&
-                                              ellipsis(selectedShippingAddress?.address2, 35)}
-                                          </p>
-                                          <p>
-                                            {selectedShippingAddress?.city}, {selectedShippingAddress?.state} -{' '}
-                                            {selectedShippingAddress?.zip_code}
-                                          </p>
-                                          {/* Need To Add Country */}
-                                        </Radio>
-                                      </Col>
-                                    )}
-                                  </Row>
-                                </Radio.Group>
-                              </Form.Item>
-                            </Col>
-                            <Col lg={12} sm={24}>
-                              <Form.Item
-                                rules={[{ required: true, message: 'Please Select Billing Address' }]}
-                                name="billing_address_id"
-                                label="Billing Addresses"
-                                initialValue={selectedBillingAddress?.id}
-                              >
-                                {!selectedBillingAddress?.id && billingAddresses.length > 0 ? (
-                                  <Button
-                                    size="small"
-                                    style={{ position: 'absolute', right: 14, zIndex: 1000 }}
-                                    title="Change Billing Address"
-                                    htmlType="button"
-                                    type="info"
-                                    onClick={() => changeAddressHandler('billing')}
-                                  >
-                                    Select Address
-                                  </Button>
-                                ) : (
-                                  !selectedBillingAddress?.id && (
-                                    <Button
-                                      size="small"
-                                      style={{ position: 'absolute', right: 14, zIndex: 1000 }}
-                                      title={`Add Billing Address`}
-                                      htmlType="button"
-                                      type="primary"
-                                      onClick={() => addOrEditAddressHandler(null, 'billing')}
-                                    >
-                                      Add Address
-                                    </Button>
-                                  )
-                                )}
-                                <Radio.Group style={{ width: '100%', padding: 10 }}>
-                                  <Row gutter={25}>
-                                    {selectedBillingAddress && (
-                                      <Col key={selectedBillingAddress?.id} xs={24}>
-                                        <Button
-                                          size="small"
-                                          style={{ position: 'absolute', right: 14, zIndex: 1000 }}
-                                          title="Change Billing Address"
-                                          htmlType="button"
-                                          type="info"
-                                          onClick={() => changeAddressHandler('billing')}
-                                        >
-                                          Change
-                                        </Button>
-                                        <Radio
-                                          style={{
-                                            width: '100%',
-                                            border: '1px solid #f0f0f0',
-                                            fontSize: 12,
-                                            marginBottom: 10,
-                                            padding: 10,
-                                            borderRadius: 5,
-                                          }}
-                                          defaultValue={selectedBillingAddress?.id}
-                                        >
-                                          <p>
-                                            {selectedBillingAddress?.address1 &&
-                                              ellipsis(selectedBillingAddress?.address1, 35)}
-                                          </p>
-                                          <p>
-                                            {selectedBillingAddress?.address2 &&
-                                              ellipsis(selectedBillingAddress?.address2, 35)}
-                                          </p>
-                                          <p>
-                                            {selectedBillingAddress?.city}, {selectedBillingAddress?.state} -{' '}
-                                            {selectedBillingAddress?.zip_code}
-                                          </p>
-                                        </Radio>
-                                      </Col>
-                                    )}
-                                  </Row>
-                                </Radio.Group>
-                              </Form.Item>
-                            </Col>
-                          </Row>
-                        )}
-                        {current === 5 ||
+                    <div className="steps-content">
+                        {current === 2 ||
                         (selectedPaymentMethod?.name?.toLowerCase() === 'credit card' && current > 5) ? (
                           <Row
                             gutter={25}
@@ -1250,7 +826,7 @@ const AddOrder = () => {
                             </Col>
                           </Row>
                         ) : null}
-                        {current === 3 && (
+                        {current === 0 && (
                           <Row gutter={25}>
                             <Col xs={24} md={12}>
                               <Form.Item
@@ -1315,7 +891,7 @@ const AddOrder = () => {
                             </Col>
                           </Row>
                         )}
-                        {current === 4 && (
+                        {current === 1 && (
                           <Row gutter={25}>
                             <Col lg={18} xs={24}>
                               <Row gutter={25}>
@@ -1393,7 +969,7 @@ const AddOrder = () => {
                             </Col>
                           </Row>
                         )}
-                        {current === 6 && (
+                        {current === 3 && (
                           <Row gutter={25} align="middle" justify="center">
                             <Col lg={24}>
                               <Row gutter={25} justify="space-between" style={{ marginBottom: 10 }}>
@@ -1624,6 +1200,265 @@ const AddOrder = () => {
                       </div>
                     </Col>
                   </Row>
+
+                  {/* New Code Start From Here */}
+                  <Row>
+                    <Col span={24}>
+                      <div className="steps-content">
+                        <Products {...{ products, setProducts, setProductSearchModalOpen }} />
+                        <table className="table table-responsive purchase_order_vendor_table">
+                          <thead>
+                            <tr>
+                              <th>Customer</th>
+                              <th></th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr>
+                              <td width="50%" style={{ borderRight: '1px solid #ddd' }}>
+                                <Form.Item
+                                  label="Customer"
+                                  name="customer_id"
+                                  labelAlign="left"
+                                  style={{ margin: 0 }}
+                                  rules={[{ required: true, message: 'Customer is required' }]}
+                                >
+                                  {selectedCustomer ? (
+                                    nameFormat(selectedCustomer)
+                                  ) : (
+                                    <Typography.Text
+                                      style={{ cursor: 'pointer' }}
+                                      onClick={() => setCustomerSearchModalOpen(true)}
+                                    >
+                                      Select customer
+                                    </Typography.Text>
+                                  )}
+                                  <SelectOutlined
+                                    style={{
+                                      cursor: 'pointer',
+                                      color: 'var(--primary)',
+                                      marginRight: 10,
+                                      float: 'right',
+                                    }}
+                                    onClick={() => setCustomerSearchModalOpen(true)}
+                                  />
+                                </Form.Item>
+                                {/* Customer Billing Address Start */}
+                                <Form.Item
+                                  name="billing_address_id"
+                                  label="Billing Address"
+                                  labelAlign="left"
+                                  style={{ margin: 0 }}
+                                  rules={[{ required: true, message: 'Billing address is required' }]}
+                                >
+                                  <Row gutter={25}>
+                                    <Col xs={24}>
+                                      <Card
+                                        style={{
+                                          border: '1px solid #ddd',
+                                        }}
+                                        className="billing_address_card"
+                                      >
+                                        <SelectOutlined
+                                          style={{
+                                            cursor: 'pointer',
+                                            color: 'var(--primary)',
+                                            float: 'right',
+                                          }}
+                                          onClick={() => {
+                                            if (!selectedCustomer?.id) return;
+                                            setBillingAddressListModalOpen(true);
+                                          }}
+                                        />
+                                        <p className="mb-0">{selectedBillingAddress?.address1}</p>
+                                        {selectedBillingAddress?.address2 && (
+                                          <p className="mb-0">{selectedBillingAddress?.address2}</p>
+                                        )}
+                                        <p className="mb-0">
+                                          {selectedBillingAddress?.city &&
+                                            `${selectedBillingAddress.city}, ${selectedBillingAddress.state} - ${selectedBillingAddress.zip_code}`}
+                                        </p>
+                                        <p className="mb-0">{selectedBillingAddress?.countryCode.name}</p>
+                                      </Card>
+                                    </Col>
+                                  </Row>
+                                </Form.Item>
+                                {/* Customer Billing Address End */}
+                                {/* Customer Shipping Address Start */}
+                                <Form.Item
+                                  name="shipping_address_id"
+                                  label="Shipping Address"
+                                  labelAlign="left"
+                                  style={{ margin: 0, marginTop: 10 }}
+                                  rules={[{ required: true, message: 'Shipping address is required' }]}
+                                >
+                                  <Row gutter={25}>
+                                    <Col xs={24}>
+                                      <Card
+                                        style={{
+                                          border: '1px solid #ddd',
+                                        }}
+                                        className="billing_address_card"
+                                      >
+                                        <SelectOutlined
+                                          style={{
+                                            cursor: 'pointer',
+                                            color: 'var(--primary)',
+                                            float: 'right',
+                                          }}
+                                          onClick={() => {
+                                            if (!selectedCustomer?.id) return;
+                                            setShippingAddressListModalOpen(true);
+                                          }}
+                                        />
+                                        <p className="mb-0">{selectedShippingAddress?.address1}</p>
+                                        {selectedShippingAddress?.address2 && (
+                                          <p className="mb-0">{selectedShippingAddress?.address2}</p>
+                                        )}
+                                        <p className="mb-0">
+                                          {selectedShippingAddress?.city &&
+                                            `${selectedShippingAddress.city}, ${selectedShippingAddress.state} - ${selectedShippingAddress.zip_code}`}
+                                        </p>
+                                        <p className="mb-0">{selectedShippingAddress?.countryCode.name}</p>
+                                      </Card>
+                                    </Col>
+                                  </Row>
+                                </Form.Item>
+                                {/* Customer Billing Address End */}
+                                <Form.Item label="Customer Contact" labelAlign="left" style={{ margin: 0 }}>
+                                  <Row gutter={10}>
+                                    <Col span={24}>
+                                      {selectedContactPerson ? (
+                                        selectedContactPerson?.name
+                                      ) : (
+                                        <Typography.Text
+                                          style={{ cursor: 'pointer' }}
+                                          onClick={() => {
+                                            if (!selectedCustomer?.id) return;
+                                            setContactSelectModalOpen(true);
+                                          }}
+                                        >
+                                          Select Contact
+                                        </Typography.Text>
+                                      )}
+                                      <SelectOutlined
+                                        style={{
+                                          cursor: 'pointer',
+                                          color: 'var(--primary)',
+                                          marginRight: 10,
+                                          float: 'right',
+                                        }}
+                                        onClick={() => {
+                                          if (!selectedCustomer?.id) return;
+                                          setContactSelectModalOpen(true);
+                                        }}
+                                      />
+                                    </Col>
+                                  </Row>
+                                </Form.Item>
+                              </td>
+                              <td width="50%">
+                                <Form.Item
+                                  label="Payment Method"
+                                  labelAlign="left"
+                                  name="payment_method_id"
+                                  style={{ margin: 0 }}
+                                  rules={[{ required: true, message: 'Payment method is required' }]}
+                                >
+                                  <Row gutter={10}>
+                                    <Col span={24}>
+                                      {selectedPaymentMethod ? (
+                                        selectedPaymentMethod?.name
+                                      ) : (
+                                        <Typography.Text
+                                          style={{ cursor: 'pointer' }}
+                                          onClick={() => setPaymentMethodSelectModalOpen(true)}
+                                        >
+                                          Select Payment Method
+                                        </Typography.Text>
+                                      )}
+                                      <SelectOutlined
+                                        style={{
+                                          cursor: 'pointer',
+                                          color: 'var(--primary)',
+                                          marginRight: 10,
+                                          float: 'right',
+                                        }}
+                                        onClick={() => {
+                                          setPaymentMethodSelectModalOpen(true);
+                                        }}
+                                      />
+                                    </Col>
+                                  </Row>
+                                </Form.Item>
+                                <Form.Item
+                                  label="Shipping Method"
+                                  labelAlign="left"
+                                  style={{ margin: 0 }}
+                                  name="shipping_method_id"
+                                  rules={[{ required: true, message: 'Shipping method is required' }]}
+                                >
+                                  <Row gutter={10}>
+                                    <Col span={24}>
+                                      {selectedShippingMethod ? (
+                                        selectedShippingMethod?.name
+                                      ) : (
+                                        <Typography.Text
+                                          style={{ cursor: 'pointer' }}
+                                          onClick={() => setShippingMethodSelectModalOpen(true)}
+                                        >
+                                          Select Shipping Method
+                                        </Typography.Text>
+                                      )}
+                                      <SelectOutlined
+                                        style={{
+                                          cursor: 'pointer',
+                                          color: 'var(--primary)',
+                                          marginRight: 10,
+                                          float: 'right',
+                                        }}
+                                        onClick={() => {
+                                          setShippingMethodSelectModalOpen(true);
+                                        }}
+                                      />
+                                    </Col>
+                                  </Row>
+                                </Form.Item>
+                                <Form.Item label="Shipping Account" labelAlign="left" style={{ margin: 0 }}>
+                                  <Row gutter={10}>
+                                    <Col span={24}>
+                                      {selectedShippingAccount ? (
+                                        selectedShippingAccount?.name
+                                      ) : (
+                                        <Typography.Text
+                                          style={{ cursor: 'pointer' }}
+                                          onClick={() => setShippingAccountModalOpen(true)}
+                                        >
+                                          Select Shipping Account
+                                        </Typography.Text>
+                                      )}
+                                      <SelectOutlined
+                                        style={{
+                                          cursor: 'pointer',
+                                          color: 'var(--primary)',
+                                          marginRight: 10,
+                                          float: 'right',
+                                        }}
+                                        onClick={() => {
+                                          setShippingAccountModalOpen(true);
+                                        }}
+                                      />
+                                    </Col>
+                                  </Row>
+                                </Form.Item>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </Col>
+                  </Row>
+                  {/* New Code End Here */}
                 </Form>
               </Cards>
             </Col>
@@ -1867,6 +1702,94 @@ const AddOrder = () => {
             </Radio.Group>
           </Modal>
           {/* Modal For Add / Update Address */}
+          <ProductSearch {...{ productSearchModalOpen, setProductSearchModalOpen, products, setProducts }} />
+          <CustomerSearch
+            {...{
+              customerSearchModalOpen,
+              setCustomerSearchModalOpen,
+              selectedCustomer,
+              setSelectedCustomer,
+              setSelectedBillingAddress,
+              setSelectedShippingAddress,
+              setContactPerson,
+            }}
+          />
+          {/* Billing Address */}
+          <AddressList
+            {...{
+              addresses: selectedCustomer?.addresses.filter(item => item.type === 'billing'),
+              addressListModalOpen: billingAddressListModalOpen,
+              setAddressListModalOpen: setBillingAddressListModalOpen,
+              type: 'billing',
+              handler: addOrEditAddressHandler,
+              selectHandler: selectBillingAddressHandler,
+            }}
+          />
+          {/* Shipping Address */}
+          <AddressList
+            {...{
+              addresses: selectedCustomer?.addresses.filter(item => item.type === 'shipping'),
+              addressListModalOpen: shippingAddressListModalOpen,
+              setAddressListModalOpen: setShippingAddressListModalOpen,
+              type: 'shipping',
+              handler: addOrEditAddressHandler,
+              selectHandler: selectShippingAddressHandler,
+            }}
+          />
+          <AddAddress
+            {...{
+              type: 'billing',
+              addressModalOpen: addAddressBillingModalOpen,
+              setAddressModalOpen: setAddAddressBillingModalOpen,
+              handleSubmit: addAddressHandler,
+            }}
+          />
+          <UpdateAddress
+            {...{
+              type: 'billing',
+              address: editSelectedAddress,
+              addressModalOpen: updateAddressBillingModalOpen,
+              setAddressModalOpen: setUpdateAddressBillingModalOpen,
+              handleSubmit: updateAddressHandler,
+            }}
+          />
+          <AddAddress
+            {...{
+              type: 'shipping',
+              addressModalOpen: addAddressShippingModalOpen,
+              setAddressModalOpen: setAddAddressShippingModalOpen,
+              handleSubmit: addAddressHandler,
+            }}
+          />
+          <UpdateAddress
+            {...{
+              type: 'shipping',
+              address: editSelectedAddress,
+              addressModalOpen: updateAddressShippingModalOpen,
+              setAddressModalOpen: setUpdateAddressShippingModalOpen,
+              handleSubmit: updateAddressHandler,
+            }}
+          />
+
+          <ContactPersonList
+            {...{
+              contactPersons: selectedCustomer?.contactPersons,
+              setContactSelectModalOpen,
+              contactSelectModalOpen,
+              selectedContactPerson,
+              setSelectedContactPerson,
+              setContactPersonAddModalOpen,
+            }}
+          />
+          <AddContactPerson
+            {...{
+              contactPersonAddModalOpen,
+              setContactPersonAddModalOpen,
+              parent: 'customer',
+              id: selectedCustomer?.id,
+              setCPSuccess,
+            }}
+          />
         </Main>
       </Elements>
     </>

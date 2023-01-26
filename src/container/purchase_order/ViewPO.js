@@ -16,12 +16,13 @@ import POMFGDocList from '../../components/po/POMFGDocList';
 import AddMFG from '../../components/common-modal/AddMFG';
 import POHistoryList from '../../components/po/POHistoryList';
 import ViewOrder from '../../components/common-modal/ViewOrder';
+import { checkPermission } from '../../utility/utility';
 
 export default function ViewPO() {
   const params = useParams();
   const [form] = Form.useForm();
   const token = useSelector(state => state.auth.token);
-  const [singlePO, setSinglePO] = useState({ data: [], isLoading: true });
+  const [singlePO, setSinglePO] = useState({ data: null, isLoading: true });
   const [POStatus, setPOStatus] = useState([]);
   const [invoiceList, setInvoiceList] = useState([]);
   const [changeInvoice, setChangeInvoice] = useState(false);
@@ -173,9 +174,9 @@ export default function ViewPO() {
       .finally(() => setTabLoading(false));
   }, [changeActivityHistory, params?.id]);
 
-  const sendMailPOConfirmation = () => {
+  const submitPO = () => {
     Modal.confirm({
-      title: 'Do you want to send mail PO to vendor?',
+      title: 'Do you want to submit PO to vendor?',
       icon: <CheckCircleOutlined />,
       content: null,
       onOk() {
@@ -201,6 +202,128 @@ export default function ViewPO() {
             if (!data.status) return;
             Modal.success({
               content: 'PO send successfully.',
+              onOk: () => window.location.reload(),
+            });
+          });
+      },
+      okText: 'Yes',
+      cancelText: 'No',
+    });
+  };
+  const sendPOLink = () => {
+    Modal.confirm({
+      title: 'Do you want to send PO link to vendor?',
+      icon: <CheckCircleOutlined />,
+      content: null,
+      onOk() {
+        apolloClient
+          .mutate({
+            mutation: poQuery.SEND_PO_LINK,
+            variables: {
+              data: {
+                po_id: parseInt(params?.id),
+              },
+            },
+            context: {
+              headers: {
+                TENANTID: process.env.REACT_APP_TENANTID,
+                Authorization: token,
+              },
+            },
+          })
+          .then(res => {
+            const data = res?.data?.resendPOLink;
+            if (!data.status) return;
+            Modal.success({
+              content: 'PO link send successfully.'
+            });
+          });
+      },
+      okText: 'Yes',
+      cancelText: 'No',
+    });
+  };
+  const sendPO = () => {
+    Modal.confirm({
+      title: 'Do you want to send PO to vendor?',
+      icon: <CheckCircleOutlined />,
+      content: null,
+      onOk() {
+        apolloClient
+          .mutate({
+            mutation: poQuery.SEND_PO,
+            variables: {
+              data: {
+                po_id: parseInt(params?.id)
+              },
+            },
+            context: {
+              headers: {
+                TENANTID: process.env.REACT_APP_TENANTID,
+                Authorization: token,
+              },
+            },
+          })
+          .then(res => {
+            const data = res?.data?.resendPOAttachment;
+            if (!data.status) return;
+            Modal.success({
+              content: 'PO send successfully.'
+            });
+          });
+      },
+      okText: 'Yes',
+      cancelText: 'No',
+    });
+  };
+
+  // Confirmation status change
+  const poStatus = type => {
+    const record = singlePO.data;
+    if (POStatus.length === 0) return;
+    let status_id;
+    let title;
+    if (type === 'send') {
+      status_id = POStatus.filter(item => item.slug === 'submitted')[0].id;
+      title = `Do you want to send PO to vendor ?`;
+    } else if (type === 'hold') {
+      status_id = POStatus.filter(item => item.slug === 'hold')[0].id;
+      title = `Do you want to hold PO?`;
+    } else if (type === 'cancel') {
+      status_id = POStatus.filter(item => item.slug === 'canceled')[0].id;
+      title = `Do you want to cancel PO?`;
+    } else if (type === 'kill') {
+      status_id = POStatus.filter(item => item.slug === 'kill')[0].id;
+      title = `Do you want to kill PO?`;
+    }
+
+    Modal.confirm({
+      title,
+      icon: <CheckCircleOutlined />,
+      content: `PO Number: ${record.po_number}`,
+      onOk() {
+        apolloClient
+          .mutate({
+            mutation: poQuery.UPDATE_PO_STATUS,
+            variables: {
+              data: {
+                id: record.id,
+                status: status_id,
+              },
+            },
+            context: {
+              headers: {
+                TENANTID: process.env.REACT_APP_TENANTID,
+                Authorization: token,
+              },
+            },
+          })
+          .then(res => {
+            const data = res?.data?.updatePOStatus;
+            if (!data.status) return toast.error(data.message);
+            Modal.success({
+              content: `Status has been changed successfully.`,
+              onOk: () => window.location.reload(),
             });
           });
       },
@@ -242,17 +365,95 @@ export default function ViewPO() {
                               <Spin />
                             </div>
                           ) : (
-                            <>
-                              <Button type="primary" onClick={sendMailPOConfirmation} style={{ marginBottom: 15 }}>
-                                Send mail PO to vendor
-                              </Button>
-                              <br />
-                              {singlePO?.data?.order_id && (
-                                <Button type="primary" onClick={() => setViewOrderModalOpen(true)}>
-                                  View order
+                            <Row gutter={25}>
+                              <Col md={12} sm={24}>
+                                {(singlePO.data.postatus.slug === 'new' ||
+                                  singlePO.data.postatus.slug === 'canceled') &&
+                                  checkPermission('submit-po', 'edit') && (
+                                    <>
+                                      {/* Submit PO to vendor */}
+                                      <br />
+                                      <Button type="primary" onClick={submitPO} style={{ marginBottom: 15 }}>
+                                        Submit PO to vendor
+                                      </Button>
+                                    </>
+                                  )}
+                                {/* Action with resend link to vendor */}
+                                {singlePO.data.postatus.slug === 'submitted' &&
+                                  checkPermission('send-po-link', 'edit') && (
+                                    <>
+                                      <br />
+                                      <Button type="primary" onClick={sendPOLink} style={{ marginBottom: 15 }}>
+                                        Send PO link to vendor
+                                      </Button>
+                                    </>
+                                  )}
+                                {singlePO.data.postatus.slug === 'submitted' && checkPermission('send-po', 'edit') && (
+                                  <>
+                                    <br />
+                                    {/* Action with Pdf to vendor */}
+                                    <Button type="primary" onClick={sendPO} style={{ marginBottom: 15 }}>
+                                      Send PO to vendor
+                                    </Button>
+                                  </>
+                                )}
+
+                                {singlePO?.data?.order_id && (
+                                  <>
+                                    <br />
+                                    <Button type="primary" onClick={() => setViewOrderModalOpen(true)}>
+                                      View order
+                                    </Button>
+                                  </>
+                                )}
+                                <br />
+                                <Button type="primary" onClick={() => null}>
+                                  Generate PDF
                                 </Button>
-                              )}
-                            </>
+                              </Col>
+                              <Col md={12} sm={24}>
+                                {singlePO.data.postatus.slug === 'new' && checkPermission('hold-po', 'edit') && (
+                                  <>
+                                    <br />
+                                    <Button
+                                      type="primary"
+                                      onClick={() => poStatus('hold')}
+                                      style={{ marginBottom: 15 }}
+                                    >
+                                      Hold PO
+                                    </Button>
+                                  </>
+                                )}
+
+                                {(singlePO.data.postatus.slug === 'submitted' ||
+                                  singlePO.data.postatus.slug === 'new' ||
+                                  singlePO.data.postatus.slug === 'view') &&
+                                  checkPermission('cancel-po', 'edit') && (
+                                    <>
+                                      <br />
+                                      <Button
+                                        type="primary"
+                                        onClick={() => poStatus('cancel')}
+                                        style={{ marginBottom: 15 }}
+                                      >
+                                        Cancel PO
+                                      </Button>
+                                    </>
+                                  )}
+                                {singlePO.data.postatus.slug === 'canceled' && checkPermission('kill-po', 'edit') && (
+                                  <>
+                                    <br />
+                                    <Button
+                                      type="primary"
+                                      onClick={() => poStatus('kill')}
+                                      style={{ marginBottom: 15 }}
+                                    >
+                                      Kill PO
+                                    </Button>
+                                  </>
+                                )}
+                              </Col>
+                            </Row>
                           )}
                         </Tabs.TabPane>
                         <Tabs.TabPane tab="Invoice" key="invoice">

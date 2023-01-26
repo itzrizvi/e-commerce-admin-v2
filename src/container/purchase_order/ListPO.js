@@ -19,7 +19,7 @@ import {
 import config from '../../config/config';
 import apolloClient from '../../utility/apollo';
 import { toast } from 'react-toastify';
-import { viewPermission } from '../../utility/utility';
+import { checkPermission, viewPermission } from '../../utility/utility';
 import { useSelector } from 'react-redux';
 import { poQuery } from '../../apollo/po';
 import { receivingProductQuery } from '../../apollo/receiving_product';
@@ -136,7 +136,6 @@ const ListPO = () => {
       align: 'right',
       render: (text, record) => (
         <>
-
           {/* <Tooltip placement="topLeft" title="Create Receiving Product">
             <FontAwesome
               onClick={() => handleCreateReceivingProduct(record.id)}
@@ -147,7 +146,7 @@ const ListPO = () => {
           {/* <Link to={`/admin/po/edit/${record.id}`}>
             <FontAwesome name="edit" style={{ margin: '.5em', color: '#5F63F2', cursor: 'pointer' }} />
           </Link> */}
-          {(record.postatus.slug === 'new' || record.postatus.slug === 'canceled') && (
+          {(record.postatus.slug === 'new' || record.postatus.slug === 'canceled') && checkPermission('submit-po', 'edit') && (
             <Tooltip placement="topLeft" title="Send to vendor">
               <SendOutlined
                 onClick={() => poSendToVendor(record)}
@@ -158,23 +157,24 @@ const ListPO = () => {
 
           {(record.postatus.slug === 'submitted' ||
             record.postatus.slug === 'new' ||
-            record.postatus.slug === 'view') && (
-            <Tooltip placement="topLeft" title="Cancel PO">
-              <CloseCircleOutlined
-                onClick={() => poStatus(record, 'cancel')}
-                style={{ margin: '.5em', color: 'rgb(255 0 0)', cursor: 'pointer' }}
-              />
-            </Tooltip>
-          )}
-          {record.postatus.slug === 'new' && (
+            record.postatus.slug === 'view') &&
+            checkPermission('cancel-po', 'edit') && (
+              <Tooltip placement="topLeft" title="Cancel PO">
+                <CloseCircleOutlined
+                  onClick={() => poStatus(record, 'cancel')}
+                  style={{ margin: '.5em', color: 'rgb(255 0 0)', cursor: 'pointer' }}
+                />
+              </Tooltip>
+            )}
+          {record.postatus.slug === 'new' && checkPermission('hold-po', 'edit') && (
             <Tooltip placement="topLeft" title="Hold PO">
               <PauseCircleOutlined
                 onClick={() => poStatus(record, 'hold')}
                 style={{ margin: '.5em', color: 'rgb(165 77 0)', cursor: 'pointer' }}
               />
             </Tooltip>
-          )}
-          {record.postatus.slug === 'canceled' && (
+          )}	
+          {record.postatus.slug === 'canceled' && checkPermission('kill-po', 'edit') (
             <Tooltip placement="topLeft" title="Kill PO">
               <StopOutlined
                 onClick={() => poStatus(record, 'kill')}
@@ -377,7 +377,7 @@ const ListPO = () => {
     } else if (type === 'cancel') {
       status_id = POStatus.data.filter(item => item.slug === 'canceled')[0].id;
       title = `Do you want to cancel PO?`;
-    }else if (type === 'kill') {
+    } else if (type === 'kill') {
       status_id = POStatus.data.filter(item => item.slug === 'kill')[0].id;
       title = `Do you want to kill PO?`;
     }
@@ -505,11 +505,13 @@ const ListPO = () => {
               <RetweetOutlined />
               Reset Filter
             </Button>
-            <Link to="/admin/po/add">
-              <Button size="small" title="Add Purchase Order" type="primary">
-                <FeatherIcon icon="plus" /> Create PO
-              </Button>
-            </Link>
+            {checkPermission('create-po', 'edit') && (
+              <Link to="/admin/po/add">
+                <Button size="small" title="Add Purchase Order" type="primary">
+                  <FeatherIcon icon="plus" /> Create PO
+                </Button>
+              </Link>
+            )}
           </div>,
         ]}
       />
