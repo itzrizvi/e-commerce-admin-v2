@@ -13,8 +13,7 @@ import { orderQuery } from '../../apollo/order';
 import { toast } from 'react-toastify';
 import { useLocation } from 'react-router-dom';
 import queryString from 'query-string';
-import Invoice from '../../utility/invoice/invoice';
-import { PDFViewer, PDFDownloadLink } from '@react-pdf/renderer';
+import { PDFDownloadLink } from '@react-pdf/renderer';
 import Invoice1 from '../../utility/invoice/invoice1';
 
 const ViewOrder = () => {
@@ -191,11 +190,7 @@ const ViewOrder = () => {
                   <br />
                   <br />
 
-                  <Table
-                    columns={column}
-                    dataSource={products}
-                    pagination={false}
-                  />
+                  <Table columns={column} dataSource={products} pagination={false} />
 
                   <div className={style.tableFooter}>
                     <div>
@@ -209,19 +204,19 @@ const ViewOrder = () => {
 
                     <div className={style.total}>
                       <p>
-                        <b>SUBTOTAL</b>${subTotal}
+                        <b>Sub Total</b>${subTotal}
                       </p>
                       <p>
                         <b>Shipping Cost</b>${singleOrder.data?.shipping_cost}
                       </p>
                       <p>
-                        <b>TAX</b>${singleOrder.data?.tax_amount}
+                        <b>Tax</b>${singleOrder.data?.tax_amount}
                       </p>
                       <p>
-                        <b>DISCOUNT</b>${singleOrder.data?.discount_amount}
+                        <b>Discount</b>${singleOrder.data?.discount_amount}
                       </p>
                       <p>
-                        <b>TOTAL</b>
+                        <b>Total</b>
                         <b>
                           $
                           {subTotal +
@@ -238,9 +233,13 @@ const ViewOrder = () => {
                       <Typography.Paragraph>
                         <b>BILL TO:</b>
                       </Typography.Paragraph>
-                      <Typography.Paragraph>{singleOrder?.data?.payment?.billingAddress?.address1}</Typography.Paragraph>
+                      <Typography.Paragraph>
+                        {singleOrder?.data?.payment?.billingAddress?.address1}
+                      </Typography.Paragraph>
                       {singleOrder?.data?.payment?.billingAddress?.address2 && (
-                        <Typography.Paragraph>{singleOrder?.data?.payment?.billingAddress?.address2}</Typography.Paragraph>
+                        <Typography.Paragraph>
+                          {singleOrder?.data?.payment?.billingAddress?.address2}
+                        </Typography.Paragraph>
                       )}
                       <Typography.Paragraph>
                         {singleOrder?.data?.payment?.billingAddress?.city},{' '}

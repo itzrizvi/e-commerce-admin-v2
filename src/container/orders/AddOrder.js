@@ -10,7 +10,6 @@ import {
   Steps,
   Avatar,
   Typography,
-  Radio,
   Upload,
   Divider,
   message,
@@ -19,7 +18,7 @@ import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
 import { Cards } from '../../components/cards/frame/cards-frame';
 import { Button } from '../../components/buttons/buttons';
-import { Link, useHistory } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import apolloClient, { apolloUploadClient } from '../../utility/apollo';
 import { productTotalAmount, productTotalQuantity, viewPermission } from '../../utility/utility';
 import { errorImageSrc, renderImage } from '../../utility/images';

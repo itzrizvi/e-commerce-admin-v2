@@ -53,7 +53,7 @@ const ListOrder = () => {
     if (!checkPermission(slug)) return history.push('/admin/403');
     setFilterParams(s => ({
       ...s,
-      statuses: filterParams.statuses.concat(orderStatus?.data.filter(item => item.slug === config_slug).shift().id),
+      statuses: [orderStatus?.data.filter(item => item.slug === config_slug).shift().id],
     }));
   };
 
@@ -65,13 +65,25 @@ const ListOrder = () => {
         case order_config.STOCK_CHECK:
           status_check(order_config.STOCK_CHECK, 'order-stock-check');
           break;
+        case order_config.CREDIT_CHECK:
+          status_check(order_config.CREDIT_CHECK, 'order-credit-check');
+          break;
+        case order_config.ALLOCATION:
+          status_check(order_config.ALLOCATION, 'order-allocation');
+          break;
+        case order_config.SHIP_REVIEW:
+          status_check(order_config.SHIP_REVIEW, 'order-ship-review');
+          break;
+        case order_config.ALLOCATION_HOLD:
+          status_check(order_config.ALLOCATION_HOLD, 'order-allocation-hold');
+          break;
         default:
           break;
       }
     } else {
       if (!checkPermission('order')) return history.push('/admin/403');
     }
-  }, [orderStatus.data.length]);
+  }, [orderStatus.data.length, params?.status]);
 
   const searchOrderAdmin = () => {
     setOrders(s => ({ ...s, loading: true }));
