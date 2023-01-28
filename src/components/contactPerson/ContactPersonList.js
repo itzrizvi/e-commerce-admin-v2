@@ -93,7 +93,6 @@ export default function ContactPersonList({
               dataSource={contactPersons}
               pagination={false}
               rowKey="id"
-              rowClassName={(record, index) => (index % 2 === 0 ? '' : 'altTableClass')}
             />
           </Col>
         </Row>

@@ -158,7 +158,6 @@ const ListEmail = () => {
                       rowKey={'id'}
                       size="small"
                       dataSource={isFilter ? filteredHeaderFooter : headerFooter.data}
-                      rowClassName={(record, index) => (index % 2 === 0 ? '' : 'altTableClass')}
                     />
                   </span>
                 </>

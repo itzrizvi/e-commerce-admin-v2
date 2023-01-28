@@ -5,7 +5,6 @@ import {
   Form,
   Input,
   Switch,
-  Select,
   Card,
   Table,
   Steps,
@@ -13,18 +12,16 @@ import {
   Typography,
   Radio,
   Upload,
-  Modal,
-  Badge,
   Divider,
-  Alert,
+  message,
 } from 'antd';
 import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
 import { Cards } from '../../components/cards/frame/cards-frame';
 import { Button } from '../../components/buttons/buttons';
 import { Link, useHistory } from 'react-router-dom';
-import apolloClient, { apolloUploadClient, customerQuery } from '../../utility/apollo';
-import { ellipsis, viewPermission } from '../../utility/utility';
+import apolloClient, { apolloUploadClient } from '../../utility/apollo';
+import { productTotalAmount, productTotalQuantity, viewPermission } from '../../utility/utility';
 import { errorImageSrc, renderImage } from '../../utility/images';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
 import { productSchema } from '../../apollo/product';
@@ -32,9 +29,7 @@ import { customerMutation } from '../../apollo/customer';
 import { useSelector } from 'react-redux';
 import { orderQuery } from '../../apollo/order';
 import { SelectOutlined, UploadOutlined } from '@ant-design/icons';
-import { addressSchema } from '../../apollo/address';
-import { nameFormat, strCamelCase } from '../../utility/stringModify';
-import Checkout from '../../components/stripe/Checkout';
+import { nameFormat } from '../../utility/stringModify';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements } from '@stripe/react-stripe-js';
 import { stripeSchema } from '../../apollo/stripe';
@@ -49,6 +44,13 @@ import { poQuery } from '../../apollo/po';
 import AddContactPerson from '../../components/contactPerson/AddContactPerson';
 import ContactPersonList from '../../components/contactPerson/ContactPersonList';
 import { contactPersonsSchema } from '../../apollo/contactPerson';
+import ShippingTypeList from '../../components/common-modal/ShippingTypeList';
+import ShippingAccountList from '../../components/common-modal/ShippingAccountList';
+import PaymentMethodList from '../../components/common-modal/PaymentMethodList';
+import { methodQuery } from '../../apollo/method';
+import config from '../../config/config';
+import CreditCard from '../../components/common-modal/CreditCard';
+import CancelButton from '../../components/buttons/CancelButton';
 
 const { Text, Paragraph } = Typography;
 
@@ -58,45 +60,23 @@ const AddOrder = () => {
   const [isLoading, setIsLoading] = useState(false);
   const token = useSelector(state => state.auth.token);
   const [form] = Form.useForm();
-  const [addressForm] = Form.useForm();
   // ===================== new =====================
-  const [billingAddresses, setBillingAddresses] = useState([]);
-  const [shippingAddresses, setShippingAddresses] = useState([]);
 
-  const [selectedProduct, setSelectedProduct] = useState([]);
   const formRef = useRef();
   const [discount, setDiscount] = useState('00.0');
-  const [shippingMethod, setShippingMethod] = useState([]);
   const [paymentMethod, setPaymentMethod] = useState([]);
   const [selctedCouponCode, setSelectedCouponCode] = useState(null);
   const [shippingCost, setShippingCost] = useState(0);
   const [textExempt, setTextExempt] = useState(false);
   const [image, setImage] = useState(null);
-  const [addressModalOpen, setAddressModalOpen] = useState(false);
-  const [isAddressEdit, setIsAddressEdit] = useState(false);
-  const [addressType, setAddressType] = useState(null);
-  const [listAddressModalOpen, setListAddressModalOpen] = useState(false);
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(null);
-  const [selectedShippingMethod, setSelectedShippingMethod] = useState(null);
-  const [selectedShippingAccount, setSelectedShippingAccount] = useState(null);
   const [editSelectedAddress, setEditSelectedAddress] = useState(null);
   const [changeAddress, setChangeAddress] = useState(false);
-  const [tempSelectedAddress, setTempSelectedAddress] = useState(null);
   const [creditCardLast4, setCreditCardLast4] = useState('****');
   // Change State After Country Change
-  const [selectedCountryCode, setSelectedCountryCode] = useState('US');
-  const [countries, setCountries] = useState([]);
-  const [states, setStates] = useState([]);
-  const [waitNext, setWaitNext] = useState(false);
-  const [shippingMethodAccountList, setShippingMethodAccountList] = useState([]);
-  const [clientSecret, setClientSecret] = useState(null);
   const [cardHolderName, setCardHolderName] = useState('');
-  // Message
-  const [message, setMessage] = useState(null);
 
   // Stripe Code
   const stripePromise = useMemo(() => loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY), []);
-  const paymentValidateCard = useRef(null);
   const finalPayment = useRef(null);
 
   // New State Assign Start Here
@@ -117,55 +97,40 @@ const AddOrder = () => {
   const [contactSelectModalOpen, setContactSelectModalOpen] = useState(false);
   const [contactPersonAddModalOpen, setContactPersonAddModalOpen] = useState(false);
   const [cpSuccess, setCPSuccess] = useState(false);
+
+  // Shipping Method Select List State Start
+  const [selectedShippingMethod, setSelectedShippingMethod] = useState(null);
+  const [shippingMethodSelectModalOpen, setShippingMethodSelectModalOpen] = useState(null);
+  const [shippingMethod, setShippingMethod] = useState([]);
+  // Shipping Method Select List State End
+
+  //Shipping Account List State Start
+  const [selectedShippingAccount, setSelectedShippingAccount] = useState(null);
+  const [shippingAccountModalOpen, setShippingAccountModalOpen] = useState(null);
+  const [shippingMethodAccountList, setShippingMethodAccountList] = useState([]);
+  // Shipping Account List State End
+
+  // Payment Method Select List State Start
+  const [paymentMethodSelectModalOpen, setPaymentMethodSelectModalOpen] = useState(false);
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(null);
+  // Payment Method Select List State END
+
+  // Credit Card Modal State Start
+  const [creditCardModalOpen, setCreditCardModalOpen] = useState(false);
+  // Credit Card Modal State End
+
+  const [paymentSuccess, setPaymentSuccess] = useState(false);
+
   // New State End Here
 
   useEffect(() => {
-    if (!token) return;
-    // Load Shipping Method
-    apolloClient
-      .query({
-        query: productSchema.GET_SHIPPING_METHOD_LIST,
-        context: {
-          headers: {
-            TENANTID: process.env.REACT_APP_TENANTID,
-          },
-        },
-      })
-      .then(res => {
-        const data = res?.data?.getShippingMethodListPublic;
-        if (!data.status) return;
-        setShippingMethod(data?.data);
-      });
+    if (selectedPaymentMethod?.name.toLowerCase() === 'credit card') {
+      setCreditCardModalOpen(true);
+    }
+  }, [selectedPaymentMethod]);
 
-    // Load Payment Mathod
-    apolloClient
-      .query({
-        query: productSchema.GET_PAYMENT_METHOD_LIST,
-        context: {
-          headers: {
-            TENANTID: process.env.REACT_APP_TENANTID,
-          },
-        },
-      })
-      .then(res => {
-        const data = res?.data?.getPaymentMethodListPublic;
-        if (!data.status) return;
-        setPaymentMethod(data?.data);
-      });
-
-    // Get Country List
-    apolloClient
-      .query({
-        query: addressSchema.GET_COUNTRY_LIST,
-        context: {
-          headers: { TENANTID: process.env.REACT_APP_TENANTID },
-        },
-      })
-      .then(res => {
-        const data = res.data.getCountryList;
-        if (!data.status) return true;
-        setCountries(data?.data);
-      });
+  // LOAD Initial Data from API
+  useEffect(() => {
     // Get Account List for Shipping Method
     apolloClient
       .query({
@@ -179,17 +144,32 @@ const AddOrder = () => {
         if (!data?.status) return true;
         setShippingMethodAccountList(data?.data);
       });
-  }, [token]);
 
-  useEffect(() => {
+    // Load Shipping Method
     apolloClient
       .query({
-        query: addressSchema.GET_STATE_LISTS,
-        variables: {
-          query: {
-            code: selectedCountryCode,
+        query: methodQuery.GET_SHIPPING_METHOD_LIST_ADMIN,
+        context: {
+          headers: {
+            TENANTID: process.env.REACT_APP_TENANTID,
+            Authorization: token,
           },
         },
+      })
+      .then(res => {
+        const data = res?.data?.getShippingMethodListAdmin;
+        if (!data.status) return;
+        setShippingMethod(data?.data);
+        setSelectedShippingMethod(data?.data?.filter(item => item.isDefault === true)[0]?.id);
+      })
+      .catch(err => {
+        console.log(err);
+      });
+
+    // Load Payment Method
+    apolloClient
+      .query({
+        query: methodQuery.GET_PAYMENT_METHOD_LIST,
         context: {
           headers: {
             TENANTID: process.env.REACT_APP_TENANTID,
@@ -197,27 +177,27 @@ const AddOrder = () => {
         },
       })
       .then(res => {
-        const data = res?.data?.getStateList;
-        if (!data?.status) return;
-        setStates(data?.data);
+        const data = res?.data?.getPaymentMethodListPublic;
+        if (!data.status) return;
+        setPaymentMethod(data?.data);
+      })
+      .catch(err => {
+        console.log(err);
       });
-  }, [selectedCountryCode]);
+  }, []);
 
   // Need T Remove order_status_id from varibales after removing api
 
   const handleSubmit = () => {
     const form_data = form.getFieldsValue(true);
-    const orderProducts = selectedProduct.map(item => ({ product_id: item.id, quantity: item.quantity }));
-    if (orderProducts.length === 0)
-      return setMessage({ type: 'error', message: 'Please Select at Least One Product.' });
-    if (!form_data.billing_address_id) return setMessage({ type: 'error', message: 'Please Select Billing Address.' });
-    if (!form_data.shipping_address_id)
-      return setMessage({ type: 'error', message: 'Please Select Shipping Address.' });
-    if (!form_data.customer_id) return setMessage({ type: 'error', message: 'Please Select Customer.' });
-    if (!form_data.payment_id) return setMessage({ type: 'error', message: 'Please Select Payment Method.' });
-    if (!form_data.shipping_method_id) return setMessage({ type: 'error', message: 'Please Select Shipping Method.' });
-    if (form_data?.tax_exempt && !image)
-      return setMessage({ type: 'error', message: 'Please Upload Text Exempt File.' });
+    const orderProducts = products.map(item => ({ product_id: item.id, quantity: item.quantity }));
+    if (orderProducts.length === 0) return message.error('Please Select at Least One Product.');
+    if (!form_data.billing_address_id) return message.error('Please Select Billing Address.');
+    if (!form_data.shipping_address_id) return message.error('Please Select Shipping Address.');
+    if (!form_data.customer_id) return message.error('Please Select Customer.');
+    if (!form_data.payment_id) return message.error('Please Select Payment Method.');
+    if (!form_data.shipping_method_id) return message.error('Please Select Shipping Method.');
+    if (form_data?.tax_exempt && !image) return message.error('Please Upload Text Exempt File.');
     setIsLoading(true);
     apolloUploadClient
       .mutate({
@@ -253,7 +233,7 @@ const AddOrder = () => {
       })
       .then(async res => {
         const data = res?.data?.createOrderByAdmin;
-        if (!data?.status) return setMessage({ type: 'error', message: data?.message });
+        if (!data?.status) return message.error(data?.message);
         if (selectedPaymentMethod?.name?.toLowerCase() === 'credit card') {
           const cardPayment = await finalPayment.current();
           if (cardPayment.error) {
@@ -282,7 +262,7 @@ const AddOrder = () => {
                 .then(res => {
                   const data = res?.data?.stripePaymentIntentFinalized;
                   if (!data?.status) return;
-                  setMessage({ type: 'success', message: data?.message });
+                  message.success(data?.message);
                   setTimeout(() => {
                     history.push('/admin/order/list');
                   }, 3000);
@@ -293,14 +273,14 @@ const AddOrder = () => {
             }
           }
         } else {
-          setMessage({ type: 'success', message: data?.message });
+          message.success(data?.message);
           setTimeout(() => {
             history.push('/admin/order/list');
           }, 3000);
         }
       })
       .catch(err => {
-        setMessage({ type: 'error', message: err });
+        message.error(err);
       })
       .finally(() => setIsLoading(false));
   };
@@ -310,7 +290,7 @@ const AddOrder = () => {
       title: 'Item',
       dataIndex: 'prod_name',
       key: 'prod_name',
-      width: 200,
+      width: 250,
       ellipsis: true,
     },
     {
@@ -323,8 +303,8 @@ const AddOrder = () => {
     },
     {
       title: 'Unit Cost',
-      dataIndex: 'price',
-      key: 'price',
+      dataIndex: 'cost',
+      key: 'cost',
       width: 120,
       align: 'right',
       render: val => `$${val}`,
@@ -335,23 +315,15 @@ const AddOrder = () => {
       key: 'id',
       width: 130,
       align: 'right',
-      render: (val, record) => `$${record.quantity * record.price}`,
+      render: (val, record) => `$${record.quantity * record.cost}`,
     },
   ];
 
   /* -------------------------- Step From Data Start -------------------------- */
   const steps = [
     {
-      title: 'Shipping',
-      percent: 65,
-    },
-    {
-      title: 'Voucher & Other',
-      percent: 80,
-    },
-    {
-      title: 'Payment Method',
-      percent: 100,
+      title: 'Order',
+      percent: 50,
     },
     {
       title: 'OverView',
@@ -362,6 +334,19 @@ const AddOrder = () => {
   const [current, setCurrent] = useState(0);
   const next = async () => {
     try {
+      if (current === 0) {
+        if (products.length === 0) {
+          return message.warn('Please Select at Least One Product.');
+        } else if (products.some(item => item.prod_name === '' || item.cost === 0)) {
+          return message.warn('Product input missing.');
+        }
+        await form.validateFields(['customer_id', 'payment_id', 'shipping_method_id']);
+        if (!selectedBillingAddress) return message.warn('Please select billing address.');
+        if (!selectedShippingAddress) return message.warn('Please select shipping address.');
+        if (textExempt && !image) return message.warn('Please attach Tax Exempt file.');
+        if (selectedPaymentMethod?.name?.toLowerCase() === 'credit card' && !paymentSuccess)
+          return message.error('Credit card payment failed');
+      }
       setCurrent(current + 1);
     } catch {}
   };
@@ -395,7 +380,7 @@ const AddOrder = () => {
           if (data.status) {
             if (data.data.coupon_type === 'percentage') {
               setDiscount(
-                (selectedProduct.reduce((accumulator, item) => accumulator + item.quantity * item.price, 0) / 100) *
+                (products.reduce((accumulator, item) => accumulator + item.quantity * item.price, 0) / 100) *
                   data.data.coupon_amount,
               );
             } else {
@@ -403,7 +388,7 @@ const AddOrder = () => {
             }
             setSelectedCouponCode(data?.data?.id);
           } else {
-            setMessage({ type: 'error', message: data.message });
+            message.error(data.message);
           }
         });
     }
@@ -424,112 +409,6 @@ const AddOrder = () => {
     } else {
       if (type === 'billing') setAddAddressBillingModalOpen(true);
       else setAddAddressShippingModalOpen(true);
-    }
-  };
-
-  // First Time Change address open Modal
-  const changeAddressHandler = type => {
-    setListAddressModalOpen(true);
-    setAddressType(type);
-  };
-
-  // Handle Address Submit
-  const handleAddressSubmit = type => {
-    const values = addressForm.getFieldValue();
-    setChangeAddress(false);
-    let newBillingAddress = [];
-    let newShippingAddress = [];
-    if (editSelectedAddress) {
-      if (type === 'billing') {
-        newBillingAddress = billingAddresses.map(item => {
-          let { id, createdAt, updatedAt, __typename, type, isDefault, countryCode, ...rest } = item;
-          if (values.isDefault) isDefault = false;
-          if (editSelectedAddress?.id === id) {
-            rest = values;
-          }
-          return {
-            parent_id: selectedCustomer?.id,
-            isNew: false,
-            isDefault: isDefault,
-            id,
-            ...rest,
-          };
-        });
-      } else {
-        newShippingAddress = shippingAddresses.map(item => {
-          let { id, createdAt, updatedAt, __typename, type, isDefault, countryCode, ...rest } = item;
-          if (values.isDefault) isDefault = false;
-          if (editSelectedAddress?.id === id) {
-            rest = values;
-          }
-          return {
-            parent_id: selectedCustomer?.id,
-            isDefault: isDefault,
-            isNew: false,
-            id,
-            ...rest,
-          };
-        });
-      }
-
-      apolloClient
-        .mutate({
-          mutation: customerMutation.UPDATE_CUSTOMER_ADDRESSES,
-          variables: {
-            data: {
-              ref_id: selectedCustomer?.id,
-              type,
-              addresses: [...(type === 'billing' ? newBillingAddress : newShippingAddress)],
-            },
-          },
-          context: {
-            headers: {
-              TENANTID: process.env.REACT_APP_TENANTID,
-              Authorization: token,
-            },
-          },
-        })
-        .then(res => {
-          const data = res?.data?.updateCustomerAddress;
-          setShippingAddresses(newShippingAddress);
-          setBillingAddresses(newBillingAddress);
-          if (!data?.status) return;
-          setChangeAddress(true);
-          setAddressModalOpen(false);
-        });
-    } else {
-      if (type === 'billing') newBillingAddress.push({ parent_id: selectedCustomer?.id, ...values });
-      else newShippingAddress.push({ parent_id: selectedCustomer?.id, ...values });
-      apolloClient
-        .mutate({
-          mutation:
-            type === 'billing'
-              ? customerMutation.ADD_CUSTOMER_BILLING_ADDRESS
-              : customerMutation.ADD_CUSTOMER_SHIPPING_ADDRESS,
-          variables: {
-            data: {
-              addresses: [...(type === 'billing' ? newBillingAddress : newShippingAddress)],
-            },
-          },
-          context: {
-            headers: {
-              TENANTID: process.env.REACT_APP_TENANTID,
-              Authorization: token,
-            },
-          },
-        })
-        .then(res => {
-          const data =
-            type === 'billing' ? res?.data?.addCustomerBillingAddress : res?.data?.addCustomerShippingAddress;
-          if (!data?.status) return;
-          if (type === 'billing') {
-            setBillingAddresses(prev => prev.push(newBillingAddress));
-          } else {
-            setShippingAddresses(prev => prev.push(newShippingAddress));
-          }
-          setChangeAddress(true);
-          setAddressModalOpen(false);
-        });
     }
   };
 
@@ -718,29 +597,28 @@ const AddOrder = () => {
   useEffect(() => {
     form.setFieldsValue({
       customer_id: selectedCustomer?.id,
-      payment_method_id: selectedPaymentMethod?.id,
+      payment_id: selectedPaymentMethod?.id,
       shipping_method_id: selectedShippingMethod?.id,
       billing_address_id: selectedBillingAddress?.id,
       shipping_address_id: selectedShippingAddress?.id,
+      person_id: selectedContactPerson?.id,
+      shipping_account_id: selectedShippingAccount?.id,
     });
-  }, [selectedCustomer?.id, selectedPaymentMethod?.id, selectedShippingMethod?.id, selectedBillingAddress?.id, selectedShippingAddress?.id]);
+  }, [
+    selectedCustomer?.id,
+    selectedPaymentMethod?.id,
+    selectedShippingMethod?.id,
+    selectedBillingAddress?.id,
+    selectedShippingAddress?.id,
+    selectedContactPerson?.id,
+    selectedShippingAccount?.id
+  ]);
 
   return (
     <>
       <PageHeader title={'Add Order'} />
       <Elements stripe={stripePromise}>
         <Main>
-          <Row align="middle" justify="center" style={{ margin: 0, padding: 0 }}>
-            {message && (
-              <Alert
-                style={{ width: '50%', marginBottom: 10 }}
-                message={message?.message}
-                type={message?.type}
-                showIcon
-                closable
-              />
-            )}
-          </Row>
           <Row gutter={25}>
             <Col sm={24} xs={24}>
               <Cards headless>
@@ -765,211 +643,331 @@ const AddOrder = () => {
                   </Row>
                   <Row style={{ marginTop: 40 }}>
                     <Col span={24}>
-                    <div className="steps-content">
-                        {current === 2 ||
-                        (selectedPaymentMethod?.name?.toLowerCase() === 'credit card' && current > 5) ? (
-                          <Row
-                            gutter={25}
-                            align="middle"
-                            justify="start"
-                            style={current !== 5 ? { display: 'none' } : {}}
-                          >
-                            <Col xs={24} md={16} lg={12}>
-                              <Form.Item
-                                name="payment_id"
-                                label="Payment Method"
-                                rules={[{ required: true, message: 'Select Payment Method' }]}
-                              >
-                                <Radio.Group style={{ width: '100%', padding: 10 }}>
-                                  {paymentMethod.map(item => (
-                                    <Radio
-                                      key={item?.id}
-                                      className={selectedPaymentMethod?.name?.toLowerCase().replaceAll(' ', '')}
-                                      style={{
-                                        width: '100%',
-                                        border: '1px solid #f0f0f0',
-                                        fontSize: 12,
-                                        marginBottom: 10,
-                                        padding: 10,
-                                        borderRadius: 5,
-                                      }}
-                                      value={item.id}
-                                      onClick={() => setSelectedPaymentMethod(item)}
-                                    >
-                                      <Typography.Title level={5} style={{ fontSize: 14 }}>
-                                        {item.name}
-                                      </Typography.Title>
-                                      {selectedPaymentMethod?.name?.toLowerCase() === 'credit card' &&
-                                        item?.name?.toLowerCase() === 'credit card' && (
-                                          <Checkout
-                                            customer={selectedCustomer}
-                                            amount={
-                                              selectedProduct.reduce(
-                                                (accumulator, item) => accumulator + item.quantity * item.price,
-                                                0,
-                                              ) +
-                                              shippingCost -
-                                              discount
-                                            }
-                                            finalPayment={finalPayment}
-                                            paymentValidateCard={paymentValidateCard}
-                                            clientSecret={clientSecret}
-                                            setClientSecret={setClientSecret}
-                                            cardHolderName={cardHolderName}
-                                            setCardHolderName={setCardHolderName}
-                                          />
-                                        )}
-                                    </Radio>
-                                  ))}
-                                </Radio.Group>
-                              </Form.Item>
-                            </Col>
-                          </Row>
-                        ) : null}
+                      <div className="steps-content">
                         {current === 0 && (
-                          <Row gutter={25}>
-                            <Col xs={24} md={12}>
-                              <Form.Item
-                                name="shipping_method_id"
-                                label="Shipping Method"
-                                rules={[{ required: true, message: 'Select Shipping Method' }]}
-                              >
-                                <Radio.Group style={{ width: '100%', padding: 10 }}>
-                                  {shippingMethod.map(item => (
-                                    <Row gutter={25}>
-                                      <Col key={item.id} xs={18}>
-                                        <Radio
-                                          style={{
-                                            width: '100%',
-                                            border: '1px solid #f0f0f0',
-                                            fontSize: 12,
-                                            marginBottom: 10,
-                                            padding: 10,
-                                            borderRadius: 5,
-                                          }}
-                                          value={item.id}
-                                          onClick={() => setSelectedShippingMethod(item)}
-                                        >
-                                          <Typography.Title level={5} style={{ fontSize: 14 }}>
-                                            {item.name}
-                                          </Typography.Title>
-                                          <Typography.Text>{item?.description}</Typography.Text>
-                                        </Radio>
-                                      </Col>
-                                    </Row>
-                                  ))}
-                                </Radio.Group>
-                              </Form.Item>
-                            </Col>
-                            <Col xs={24} md={12}>
-                              <Form.Item name="shipping_account_id" label="Shipping Account">
-                                <Radio.Group style={{ width: '100%', padding: 10 }}>
-                                  {shippingMethodAccountList.map(item => (
-                                    <Row gutter={25}>
-                                      <Col key={item.id} xs={18}>
-                                        <Radio
-                                          style={{
-                                            width: '100%',
-                                            border: '1px solid #f0f0f0',
-                                            fontSize: 12,
-                                            marginBottom: 10,
-                                            padding: 10,
-                                            borderRadius: 5,
-                                          }}
-                                          value={item.id}
-                                          onClick={() => setSelectedShippingAccount(item)}
-                                        >
-                                          <Typography.Title level={5} style={{ fontSize: 14 }}>
-                                            {item.name}
-                                          </Typography.Title>
-                                        </Radio>
-                                      </Col>
-                                    </Row>
-                                  ))}
-                                </Radio.Group>
-                              </Form.Item>
-                            </Col>
-                          </Row>
+                          <>
+                            {/* New Code Start From Here */}
+                            <Row>
+                              <Col span={24}>
+                                <div>
+                                  <Products {...{ products, setProducts, setProductSearchModalOpen }} />
+                                  <table className="table table-responsive purchase_order_vendor_table">
+                                    <thead>
+                                      <tr>
+                                        <th>Customer</th>
+                                        <th></th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      <tr>
+                                        <td width="50%" style={{ borderRight: '1px solid #ddd' }}>
+                                          <Form.Item
+                                            label="Customer"
+                                            name="customer_id"
+                                            labelAlign="left"
+                                            style={{ margin: 0 }}
+                                            rules={[{ required: true, message: 'Customer is required' }]}
+                                          >
+                                            {selectedCustomer ? (
+                                              nameFormat(selectedCustomer)
+                                            ) : (
+                                              <Typography.Text
+                                                style={{ cursor: 'pointer' }}
+                                                onClick={() => setCustomerSearchModalOpen(true)}
+                                              >
+                                                Select customer
+                                              </Typography.Text>
+                                            )}
+                                            <SelectOutlined
+                                              style={{
+                                                cursor: 'pointer',
+                                                color: 'var(--primary)',
+                                                marginRight: 10,
+                                                float: 'right',
+                                              }}
+                                              onClick={() => setCustomerSearchModalOpen(true)}
+                                            />
+                                          </Form.Item>
+                                          {/* Customer Billing Address Start */}
+                                          <Form.Item
+                                            name="billing_address_id"
+                                            label="Billing Address"
+                                            labelAlign="left"
+                                            style={{ margin: 0 }}
+                                            rules={[{ required: true, message: 'Billing address is required' }]}
+                                          >
+                                            <Row gutter={25}>
+                                              <Col xs={24}>
+                                                <Card
+                                                  style={{
+                                                    border: '1px solid #ddd',
+                                                  }}
+                                                  className="billing_address_card"
+                                                >
+                                                  <SelectOutlined
+                                                    style={{
+                                                      cursor: 'pointer',
+                                                      color: 'var(--primary)',
+                                                      float: 'right',
+                                                    }}
+                                                    onClick={() => {
+                                                      if (!selectedCustomer?.id) return;
+                                                      setBillingAddressListModalOpen(true);
+                                                    }}
+                                                  />
+                                                  <p className="mb-0">{selectedBillingAddress?.address1}</p>
+                                                  {selectedBillingAddress?.address2 && (
+                                                    <p className="mb-0">{selectedBillingAddress?.address2}</p>
+                                                  )}
+                                                  <p className="mb-0">
+                                                    {selectedBillingAddress?.city &&
+                                                      `${selectedBillingAddress.city}, ${selectedBillingAddress.state} - ${selectedBillingAddress.zip_code}`}
+                                                  </p>
+                                                  <p className="mb-0">{selectedBillingAddress?.countryCode.name}</p>
+                                                </Card>
+                                              </Col>
+                                            </Row>
+                                          </Form.Item>
+                                          {/* Customer Billing Address End */}
+                                          {/* Customer Shipping Address Start */}
+                                          <Form.Item
+                                            name="shipping_address_id"
+                                            label="Shipping Address"
+                                            labelAlign="left"
+                                            style={{ margin: 0, marginTop: 10 }}
+                                            rules={[{ required: true, message: 'Shipping address is required' }]}
+                                          >
+                                            <Row gutter={25}>
+                                              <Col xs={24}>
+                                                <Card
+                                                  style={{
+                                                    border: '1px solid #ddd',
+                                                  }}
+                                                  className="billing_address_card"
+                                                >
+                                                  <SelectOutlined
+                                                    style={{
+                                                      cursor: 'pointer',
+                                                      color: 'var(--primary)',
+                                                      float: 'right',
+                                                    }}
+                                                    onClick={() => {
+                                                      if (!selectedCustomer?.id) return;
+                                                      setShippingAddressListModalOpen(true);
+                                                    }}
+                                                  />
+                                                  <p className="mb-0">{selectedShippingAddress?.address1}</p>
+                                                  {selectedShippingAddress?.address2 && (
+                                                    <p className="mb-0">{selectedShippingAddress?.address2}</p>
+                                                  )}
+                                                  <p className="mb-0">
+                                                    {selectedShippingAddress?.city &&
+                                                      `${selectedShippingAddress.city}, ${selectedShippingAddress.state} - ${selectedShippingAddress.zip_code}`}
+                                                  </p>
+                                                  <p className="mb-0">{selectedShippingAddress?.countryCode.name}</p>
+                                                </Card>
+                                              </Col>
+                                            </Row>
+                                          </Form.Item>
+                                          {/* Customer Billing Address End */}
+                                          <Form.Item name="person_id" label="Customer Contact" labelAlign="left" style={{ margin: 0 }}>
+                                            <Row gutter={10}>
+                                              <Col span={24}>
+                                                {selectedContactPerson ? (
+                                                  selectedContactPerson?.name
+                                                ) : (
+                                                  <Typography.Text
+                                                    style={{ cursor: 'pointer' }}
+                                                    onClick={() => {
+                                                      if (!selectedCustomer?.id) return;
+                                                      setContactSelectModalOpen(true);
+                                                    }}
+                                                  >
+                                                    Select Contact
+                                                  </Typography.Text>
+                                                )}
+                                                <SelectOutlined
+                                                  style={{
+                                                    cursor: 'pointer',
+                                                    color: 'var(--primary)',
+                                                    marginRight: 10,
+                                                    float: 'right',
+                                                  }}
+                                                  onClick={() => {
+                                                    if (!selectedCustomer?.id) return;
+                                                    setContactSelectModalOpen(true);
+                                                  }}
+                                                />
+                                              </Col>
+                                            </Row>
+                                          </Form.Item>
+                                        </td>
+                                        <td width="50%">
+                                          <Form.Item
+                                            label="Payment Method"
+                                            labelAlign="left"
+                                            name="payment_id"
+                                            style={{ margin: 0 }}
+                                            rules={[{ required: true, message: 'Payment method is required' }]}
+                                          >
+                                            <Row gutter={10}>
+                                              <Col span={24}>
+                                                {selectedPaymentMethod ? (
+                                                  selectedPaymentMethod?.name
+                                                ) : (
+                                                  <Typography.Text
+                                                    style={{ cursor: 'pointer' }}
+                                                    onClick={() => setPaymentMethodSelectModalOpen(true)}
+                                                  >
+                                                    Select Payment Method
+                                                  </Typography.Text>
+                                                )}
+                                                <SelectOutlined
+                                                  style={{
+                                                    cursor: 'pointer',
+                                                    color: 'var(--primary)',
+                                                    marginRight: 10,
+                                                    float: 'right',
+                                                  }}
+                                                  onClick={() => {
+                                                    setPaymentMethodSelectModalOpen(true);
+                                                  }}
+                                                />
+                                              </Col>
+                                            </Row>
+                                          </Form.Item>
+                                          <Form.Item
+                                            label="Shipping Method"
+                                            labelAlign="left"
+                                            style={{ margin: 0 }}
+                                            name="shipping_method_id"
+                                            rules={[{ required: true, message: 'Shipping method is required' }]}
+                                          >
+                                            <Row gutter={10}>
+                                              <Col span={24}>
+                                                {selectedShippingMethod ? (
+                                                  selectedShippingMethod?.name
+                                                ) : (
+                                                  <Typography.Text
+                                                    style={{ cursor: 'pointer' }}
+                                                    onClick={() => setShippingMethodSelectModalOpen(true)}
+                                                  >
+                                                    Select Shipping Method
+                                                  </Typography.Text>
+                                                )}
+                                                <SelectOutlined
+                                                  style={{
+                                                    cursor: 'pointer',
+                                                    color: 'var(--primary)',
+                                                    marginRight: 10,
+                                                    float: 'right',
+                                                  }}
+                                                  onClick={() => {
+                                                    setShippingMethodSelectModalOpen(true);
+                                                  }}
+                                                />
+                                              </Col>
+                                            </Row>
+                                          </Form.Item>
+                                          <Form.Item name="shipping_account_id" label="Shipping Account" labelAlign="left" style={{ margin: 0 }}>
+                                            <Row gutter={10}>
+                                              <Col span={24}>
+                                                {selectedShippingAccount ? (
+                                                  selectedShippingAccount?.name
+                                                ) : (
+                                                  <Typography.Text
+                                                    style={{ cursor: 'pointer' }}
+                                                    onClick={() => setShippingAccountModalOpen(true)}
+                                                  >
+                                                    Select Shipping Account
+                                                  </Typography.Text>
+                                                )}
+                                                <SelectOutlined
+                                                  style={{
+                                                    cursor: 'pointer',
+                                                    color: 'var(--primary)',
+                                                    marginRight: 10,
+                                                    float: 'right',
+                                                  }}
+                                                  onClick={() => {
+                                                    setShippingAccountModalOpen(true);
+                                                  }}
+                                                />
+                                              </Col>
+                                            </Row>
+                                          </Form.Item>
+                                        </td>
+                                      </tr>
+                                    </tbody>
+                                  </table>
+                                </div>
+                              </Col>
+                            </Row>
+                            <Row>
+                              <Col span={24}>
+                                <div className="steps-content">
+                                  <table className="table table-responsive purchase_order_vendor_table">
+                                    <thead>
+                                      <tr>
+                                        <th>Voucher & Other</th>
+                                        <th></th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      <tr>
+                                        <td width="50%" style={{ borderRight: '1px solid #ddd' }}>
+                                          <Form.Item labelAlign="left" label="Voucher Code" className="voucher_input">
+                                            <Input.Search
+                                              placeholder="Input Voucher Code"
+                                              enterButton="Apply Voucher"
+                                              size="large"
+                                              onSearch={validateVoucher}
+                                              defaultValue={selctedCouponCode}
+                                              style={{ height: config.INPUT_HEIGHT }}
+                                            />
+                                          </Form.Item>
+                                          <Form.Item labelAlign="left" name="po_number" label="PO Number">
+                                            <Input placeholder="PO Number" style={{ height: config.INPUT_HEIGHT }} />
+                                          </Form.Item>
+                                          <Form.Item labelAlign="left" name="note" label="Note">
+                                            <Input.TextArea placeholder="Note" autoSize />
+                                          </Form.Item>
+                                        </td>
+                                        <td width="50%">
+                                          <Form.Item
+                                            labelAlign="left"
+                                            name="tax_exempt"
+                                            defaultValue={false}
+                                            label="Tax Exempt"
+                                          >
+                                            <Switch
+                                              size="small"
+                                              defaultChecked={textExempt}
+                                              onChange={e => setTextExempt(e)}
+                                            />
+                                          </Form.Item>
+                                          {textExempt && (
+                                            <Form.Item labelAlign="left" label="Tax Exempt File">
+                                              <Upload
+                                                defaultFileList={image && [image]}
+                                                beforeUpload={beforeImageUpload}
+                                                name="tax_exempt_file"
+                                              >
+                                                <Button icon={<UploadOutlined />}>Click to Upload</Button>
+                                              </Upload>
+                                            </Form.Item>
+                                          )}
+                                        </td>
+                                      </tr>
+                                    </tbody>
+                                  </table>
+                                </div>
+                              </Col>
+                            </Row>
+                            {/* New Code End Here */}
+                          </>
                         )}
                         {current === 1 && (
-                          <Row gutter={25}>
-                            <Col lg={18} xs={24}>
-                              <Row gutter={25}>
-                                <Col xs={24} md={16} lg={12}>
-                                  <Form.Item label="Voucher Code">
-                                    <Input.Search
-                                      placeholder="Input Voucher Code"
-                                      enterButton="Apply Voucher"
-                                      size="large"
-                                      onSearch={validateVoucher}
-                                      defaultValue={selctedCouponCode}
-                                    />
-                                  </Form.Item>
-                                  <Form.Item name="po_number" label="PO Number">
-                                    <Input placeholder="PO Number" />
-                                  </Form.Item>
-                                  <Form.Item name="note" label="Note">
-                                    <Input.TextArea placeholder="Note" />
-                                  </Form.Item>
-                                  <Form.Item name="tax_exempt" defaultValue={false} label="Tax Exempt">
-                                    <Switch size="small" defaultChecked={textExempt} onChange={e => setTextExempt(e)} />
-                                  </Form.Item>
-                                  {textExempt && (
-                                    <Form.Item label="Tax Exempt File">
-                                      <Upload
-                                        defaultFileList={image && [image]}
-                                        beforeUpload={beforeImageUpload}
-                                        name="tax_exempt_file"
-                                      >
-                                        <Button icon={<UploadOutlined />}>Click to Upload</Button>
-                                      </Upload>
-                                    </Form.Item>
-                                  )}
-                                </Col>
-                              </Row>
-                            </Col>
-                            <Col lg={6} xs={24}>
-                              <Card
-                                title="Summary"
-                                bordered={true}
-                                size="small"
-                                headStyle={{
-                                  backgroundColor: '#5f63f24d',
-                                  borderTopLeftRadius: 3,
-                                  borderTopRightRadius: 3,
-                                }}
-                              >
-                                <Paragraph>
-                                  <Text strong>Sub Total Price : </Text>$
-                                  {selectedProduct.reduce(
-                                    (accumulator, item) => accumulator + item.quantity * item.price,
-                                    0,
-                                  )}
-                                </Paragraph>
-                                <Paragraph>
-                                  <Text strong>Product Quantity : </Text>
-                                  {selectedProduct.reduce((accumulator, item) => accumulator + item.quantity, 0)}
-                                </Paragraph>
-                                <Paragraph>
-                                  <Text strong>Discount : </Text>${discount}
-                                </Paragraph>
-                                <Paragraph>
-                                  <Text strong>Shipping Cost : </Text>${shippingCost}
-                                </Paragraph>{' '}
-                                <Paragraph>
-                                  <Text strong>Total Price : </Text>$
-                                  {selectedProduct.reduce(
-                                    (accumulator, item) => accumulator + item.quantity * item.price,
-                                    0,
-                                  ) +
-                                    shippingCost -
-                                    discount}
-                                </Paragraph>
-                              </Card>
-                            </Col>
-                          </Row>
-                        )}
-                        {current === 3 && (
                           <Row gutter={25} align="middle" justify="center">
                             <Col lg={24}>
                               <Row gutter={25} justify="space-between" style={{ marginBottom: 10 }}>
@@ -1101,14 +1099,11 @@ const AddOrder = () => {
                                   >
                                     <Paragraph>
                                       <Text strong>Sub Total Price : </Text>$
-                                      {selectedProduct.reduce(
-                                        (accumulator, item) => accumulator + item.quantity * item.price,
-                                        0,
-                                      )}
+                                      {productTotalAmount(products, shippingCost, discount)}
                                     </Paragraph>
                                     <Paragraph>
                                       <Text strong>Product Quantity : </Text>
-                                      {selectedProduct.reduce((accumulator, item) => accumulator + item.quantity, 0)}
+                                      {productTotalQuantity(products)}
                                     </Paragraph>
                                     <Paragraph>
                                       <Text strong>Discount : </Text>${discount}
@@ -1118,12 +1113,7 @@ const AddOrder = () => {
                                     </Paragraph>{' '}
                                     <Paragraph>
                                       <Text strong>Total Price : </Text>$
-                                      {selectedProduct.reduce(
-                                        (accumulator, item) => accumulator + item.quantity * item.price,
-                                        0,
-                                      ) +
-                                        shippingCost -
-                                        discount}
+                                      {productTotalAmount(products, shippingCost, discount)}
                                     </Paragraph>
                                   </Card>
                                 </Col>
@@ -1134,10 +1124,9 @@ const AddOrder = () => {
                                     <Table
                                       className="table-responsive"
                                       columns={overViewColumn}
-                                      dataSource={selectedProduct}
+                                      dataSource={products}
                                       pagination={false}
                                       rowKey="id"
-                                      rowClassName={(record, index) => (index % 2 === 0 ? '' : 'altTableClass')}
                                     />
                                   </span>
                                 </Col>
@@ -1151,16 +1140,8 @@ const AddOrder = () => {
                   <Row style={{ marginTop: 20 }}>
                     <Col span={24}>
                       <div className="steps-action" style={{ float: 'right' }}>
-                        <Link to="/admin/order/list">
-                          <Button
-                            type="light"
-                            style={{
-                              margin: '0 8px',
-                            }}
-                          >
-                            Cancel
-                          </Button>
-                        </Link>
+                        <CancelButton url="/admin/order/list" title="Do you want to exit from order?" />
+
                         {current > 0 && (
                           <Button
                             type="light"
@@ -1174,14 +1155,13 @@ const AddOrder = () => {
                         )}
                         {current < steps.length - 1 && (
                           <Button
-                            disabled={waitNext}
                             style={{
                               margin: '0 8px',
                             }}
                             type="primary"
                             onClick={() => next()}
                           >
-                            {waitNext ? 'processing...' : 'Next'}
+                            Next
                           </Button>
                         )}
                         {current === steps.length - 1 && (
@@ -1200,507 +1180,10 @@ const AddOrder = () => {
                       </div>
                     </Col>
                   </Row>
-
-                  {/* New Code Start From Here */}
-                  <Row>
-                    <Col span={24}>
-                      <div className="steps-content">
-                        <Products {...{ products, setProducts, setProductSearchModalOpen }} />
-                        <table className="table table-responsive purchase_order_vendor_table">
-                          <thead>
-                            <tr>
-                              <th>Customer</th>
-                              <th></th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            <tr>
-                              <td width="50%" style={{ borderRight: '1px solid #ddd' }}>
-                                <Form.Item
-                                  label="Customer"
-                                  name="customer_id"
-                                  labelAlign="left"
-                                  style={{ margin: 0 }}
-                                  rules={[{ required: true, message: 'Customer is required' }]}
-                                >
-                                  {selectedCustomer ? (
-                                    nameFormat(selectedCustomer)
-                                  ) : (
-                                    <Typography.Text
-                                      style={{ cursor: 'pointer' }}
-                                      onClick={() => setCustomerSearchModalOpen(true)}
-                                    >
-                                      Select customer
-                                    </Typography.Text>
-                                  )}
-                                  <SelectOutlined
-                                    style={{
-                                      cursor: 'pointer',
-                                      color: 'var(--primary)',
-                                      marginRight: 10,
-                                      float: 'right',
-                                    }}
-                                    onClick={() => setCustomerSearchModalOpen(true)}
-                                  />
-                                </Form.Item>
-                                {/* Customer Billing Address Start */}
-                                <Form.Item
-                                  name="billing_address_id"
-                                  label="Billing Address"
-                                  labelAlign="left"
-                                  style={{ margin: 0 }}
-                                  rules={[{ required: true, message: 'Billing address is required' }]}
-                                >
-                                  <Row gutter={25}>
-                                    <Col xs={24}>
-                                      <Card
-                                        style={{
-                                          border: '1px solid #ddd',
-                                        }}
-                                        className="billing_address_card"
-                                      >
-                                        <SelectOutlined
-                                          style={{
-                                            cursor: 'pointer',
-                                            color: 'var(--primary)',
-                                            float: 'right',
-                                          }}
-                                          onClick={() => {
-                                            if (!selectedCustomer?.id) return;
-                                            setBillingAddressListModalOpen(true);
-                                          }}
-                                        />
-                                        <p className="mb-0">{selectedBillingAddress?.address1}</p>
-                                        {selectedBillingAddress?.address2 && (
-                                          <p className="mb-0">{selectedBillingAddress?.address2}</p>
-                                        )}
-                                        <p className="mb-0">
-                                          {selectedBillingAddress?.city &&
-                                            `${selectedBillingAddress.city}, ${selectedBillingAddress.state} - ${selectedBillingAddress.zip_code}`}
-                                        </p>
-                                        <p className="mb-0">{selectedBillingAddress?.countryCode.name}</p>
-                                      </Card>
-                                    </Col>
-                                  </Row>
-                                </Form.Item>
-                                {/* Customer Billing Address End */}
-                                {/* Customer Shipping Address Start */}
-                                <Form.Item
-                                  name="shipping_address_id"
-                                  label="Shipping Address"
-                                  labelAlign="left"
-                                  style={{ margin: 0, marginTop: 10 }}
-                                  rules={[{ required: true, message: 'Shipping address is required' }]}
-                                >
-                                  <Row gutter={25}>
-                                    <Col xs={24}>
-                                      <Card
-                                        style={{
-                                          border: '1px solid #ddd',
-                                        }}
-                                        className="billing_address_card"
-                                      >
-                                        <SelectOutlined
-                                          style={{
-                                            cursor: 'pointer',
-                                            color: 'var(--primary)',
-                                            float: 'right',
-                                          }}
-                                          onClick={() => {
-                                            if (!selectedCustomer?.id) return;
-                                            setShippingAddressListModalOpen(true);
-                                          }}
-                                        />
-                                        <p className="mb-0">{selectedShippingAddress?.address1}</p>
-                                        {selectedShippingAddress?.address2 && (
-                                          <p className="mb-0">{selectedShippingAddress?.address2}</p>
-                                        )}
-                                        <p className="mb-0">
-                                          {selectedShippingAddress?.city &&
-                                            `${selectedShippingAddress.city}, ${selectedShippingAddress.state} - ${selectedShippingAddress.zip_code}`}
-                                        </p>
-                                        <p className="mb-0">{selectedShippingAddress?.countryCode.name}</p>
-                                      </Card>
-                                    </Col>
-                                  </Row>
-                                </Form.Item>
-                                {/* Customer Billing Address End */}
-                                <Form.Item label="Customer Contact" labelAlign="left" style={{ margin: 0 }}>
-                                  <Row gutter={10}>
-                                    <Col span={24}>
-                                      {selectedContactPerson ? (
-                                        selectedContactPerson?.name
-                                      ) : (
-                                        <Typography.Text
-                                          style={{ cursor: 'pointer' }}
-                                          onClick={() => {
-                                            if (!selectedCustomer?.id) return;
-                                            setContactSelectModalOpen(true);
-                                          }}
-                                        >
-                                          Select Contact
-                                        </Typography.Text>
-                                      )}
-                                      <SelectOutlined
-                                        style={{
-                                          cursor: 'pointer',
-                                          color: 'var(--primary)',
-                                          marginRight: 10,
-                                          float: 'right',
-                                        }}
-                                        onClick={() => {
-                                          if (!selectedCustomer?.id) return;
-                                          setContactSelectModalOpen(true);
-                                        }}
-                                      />
-                                    </Col>
-                                  </Row>
-                                </Form.Item>
-                              </td>
-                              <td width="50%">
-                                <Form.Item
-                                  label="Payment Method"
-                                  labelAlign="left"
-                                  name="payment_method_id"
-                                  style={{ margin: 0 }}
-                                  rules={[{ required: true, message: 'Payment method is required' }]}
-                                >
-                                  <Row gutter={10}>
-                                    <Col span={24}>
-                                      {selectedPaymentMethod ? (
-                                        selectedPaymentMethod?.name
-                                      ) : (
-                                        <Typography.Text
-                                          style={{ cursor: 'pointer' }}
-                                          onClick={() => setPaymentMethodSelectModalOpen(true)}
-                                        >
-                                          Select Payment Method
-                                        </Typography.Text>
-                                      )}
-                                      <SelectOutlined
-                                        style={{
-                                          cursor: 'pointer',
-                                          color: 'var(--primary)',
-                                          marginRight: 10,
-                                          float: 'right',
-                                        }}
-                                        onClick={() => {
-                                          setPaymentMethodSelectModalOpen(true);
-                                        }}
-                                      />
-                                    </Col>
-                                  </Row>
-                                </Form.Item>
-                                <Form.Item
-                                  label="Shipping Method"
-                                  labelAlign="left"
-                                  style={{ margin: 0 }}
-                                  name="shipping_method_id"
-                                  rules={[{ required: true, message: 'Shipping method is required' }]}
-                                >
-                                  <Row gutter={10}>
-                                    <Col span={24}>
-                                      {selectedShippingMethod ? (
-                                        selectedShippingMethod?.name
-                                      ) : (
-                                        <Typography.Text
-                                          style={{ cursor: 'pointer' }}
-                                          onClick={() => setShippingMethodSelectModalOpen(true)}
-                                        >
-                                          Select Shipping Method
-                                        </Typography.Text>
-                                      )}
-                                      <SelectOutlined
-                                        style={{
-                                          cursor: 'pointer',
-                                          color: 'var(--primary)',
-                                          marginRight: 10,
-                                          float: 'right',
-                                        }}
-                                        onClick={() => {
-                                          setShippingMethodSelectModalOpen(true);
-                                        }}
-                                      />
-                                    </Col>
-                                  </Row>
-                                </Form.Item>
-                                <Form.Item label="Shipping Account" labelAlign="left" style={{ margin: 0 }}>
-                                  <Row gutter={10}>
-                                    <Col span={24}>
-                                      {selectedShippingAccount ? (
-                                        selectedShippingAccount?.name
-                                      ) : (
-                                        <Typography.Text
-                                          style={{ cursor: 'pointer' }}
-                                          onClick={() => setShippingAccountModalOpen(true)}
-                                        >
-                                          Select Shipping Account
-                                        </Typography.Text>
-                                      )}
-                                      <SelectOutlined
-                                        style={{
-                                          cursor: 'pointer',
-                                          color: 'var(--primary)',
-                                          marginRight: 10,
-                                          float: 'right',
-                                        }}
-                                        onClick={() => {
-                                          setShippingAccountModalOpen(true);
-                                        }}
-                                      />
-                                    </Col>
-                                  </Row>
-                                </Form.Item>
-                              </td>
-                            </tr>
-                          </tbody>
-                        </table>
-                      </div>
-                    </Col>
-                  </Row>
-                  {/* New Code End Here */}
                 </Form>
               </Cards>
             </Col>
           </Row>
-          {/* Modal For Add / Update Address */}
-          <Modal
-            title={isAddressEdit ? `Update ${addressType} address` : `Add ${addressType} address`}
-            style={{ top: 20 }}
-            width={600}
-            open={addressModalOpen}
-            destroyOnClose={true}
-            okText={isAddressEdit ? 'Update' : 'Save'}
-            onOk={() => handleAddressSubmit(addressType)}
-            onCancel={() => setAddressModalOpen(false)}
-          >
-            <Form
-              preserve={false}
-              style={{ width: '100%' }}
-              form={addressForm}
-              name="addressForm"
-              layout="vertical"
-              size="small"
-            >
-              <Row gutter={25}>
-                <Col md={24}>
-                  <Row gutter={25}>
-                    <Col xs={24} md={12}>
-                      <Form.Item
-                        name="country"
-                        initialValue={isAddressEdit ? editSelectedAddress?.countryCode?.code : 'US'}
-                        label="Country"
-                        style={{ marginBottom: 5 }}
-                      >
-                        <Select
-                          onChange={val => setSelectedCountryCode(val)}
-                          defaultValue={isAddressEdit ? editSelectedAddress?.countryCode?.code : 'US'}
-                          options={countries?.map(item => ({
-                            label: item.name,
-                            value: item.code,
-                          }))}
-                        ></Select>
-                      </Form.Item>
-                    </Col>
-                  </Row>
-                  <Form.Item
-                    rules={[{ required: true, message: 'Please Enter Address 1' }]}
-                    name="address1"
-                    label="Address 1"
-                    style={{ marginBottom: 5 }}
-                    initialValue={editSelectedAddress?.address1 ?? ''}
-                  >
-                    <Input placeholder="Address 1" />
-                  </Form.Item>
-                  <Form.Item
-                    name="address2"
-                    label="Address 2"
-                    style={{ marginBottom: 5 }}
-                    initialValue={editSelectedAddress?.address2}
-                  >
-                    <Input placeholder="Address 2" />
-                  </Form.Item>
-                  <Row gutter={25}>
-                    <Col xs={24} md={12}>
-                      <Form.Item
-                        rules={[{ required: true, message: 'Please Enter City' }]}
-                        name="city"
-                        label="City"
-                        style={{ marginBottom: 5 }}
-                        initialValue={editSelectedAddress?.city}
-                      >
-                        <Input placeholder="City" />
-                      </Form.Item>
-                    </Col>
-                    <Col xs={24} md={12}>
-                      <Form.Item
-                        name="zip_code"
-                        rules={[{ required: true, message: 'Please Enter Zip Code' }]}
-                        label="Zip Code"
-                        style={{ marginBottom: 5 }}
-                        initialValue={editSelectedAddress?.zip_code}
-                      >
-                        <Input placeholder="Zip Code" />
-                      </Form.Item>
-                    </Col>
-                  </Row>
-                  <Row gutter={{}}>
-                    <Col xs={24} md={12}>
-                      <Form.Item
-                        name="state"
-                        rules={[{ required: true, message: 'Please Enter State' }]}
-                        label="State"
-                        style={{ marginBottom: 5 }}
-                        initialValue={editSelectedAddress?.state}
-                      >
-                        <Select
-                          style={{ width: '100%' }}
-                          placeholder="State"
-                          defaultValue={editSelectedAddress?.state}
-                          options={states?.map(item => ({
-                            label: item.state,
-                            value: item.abbreviation,
-                          }))}
-                        />
-                      </Form.Item>
-                    </Col>
-                    <Col xs={24} md={12} style={{ paddingLeft: 15 }}>
-                      <Form.Item
-                        name="isDefault"
-                        label="Default"
-                        style={{ marginBottom: 0 }}
-                        initialValue={editSelectedAddress?.isDefault}
-                      >
-                        <Switch defaultChecked={editSelectedAddress?.isDefault} />
-                      </Form.Item>
-                    </Col>
-                  </Row>
-                </Col>
-              </Row>
-            </Form>
-          </Modal>
-          {/* Modal For Add / Update Address */}
-          {/* Modal For Add / Update Address */}
-          <Modal
-            title={`${strCamelCase(addressType)} addresses`}
-            style={{ top: 20 }}
-            width={600}
-            open={listAddressModalOpen}
-            className="orderAddressModal"
-            footer={null}
-            onCancel={() => setListAddressModalOpen(false)}
-          >
-            <Radio.Group style={{ width: '100%', padding: 10 }}>
-              <Row gutter={25}>
-                <Col span={24}>
-                  <Button
-                    size="small"
-                    style={{ float: 'right', zIndex: 1000, marginTop: -25, marginBottom: 10 }}
-                    title={`Add ${addressType} address`}
-                    htmlType="button"
-                    type="primary"
-                    onClick={() => addOrEditAddressHandler(null, addressType)}
-                  >
-                    Add new address
-                  </Button>
-                </Col>
-                {addressType === 'billing'
-                  ? billingAddresses.map(item => (
-                      <Col key={item.id} xs={24}>
-                        <Button
-                          size="small"
-                          style={{ position: 'absolute', right: 14, zIndex: 1000 }}
-                          title="Edit Billing Address"
-                          htmlType="button"
-                          type="info"
-                          onClick={() => addOrEditAddressHandler(item.id, 'billing')}
-                        >
-                          Edit
-                        </Button>
-                        <Button
-                          size="small"
-                          style={{ position: 'absolute', right: 14, zIndex: 1000, top: 45 }}
-                          title="Edit Shipping Address"
-                          htmlType="button"
-                          type="info"
-                          onClick={() => selectAddressHandler(addressType, item.id)}
-                        >
-                          Select
-                        </Button>
-
-                        <Radio
-                          style={{
-                            width: '100%',
-                            border: '1px solid #f0f0f0',
-                            fontSize: 12,
-                            marginBottom: 10,
-                            padding: 10,
-                            borderRadius: 5,
-                          }}
-                          value={item.id}
-                          onChange={() => setTempSelectedAddress(item)}
-                        >
-                          <p>{item.address1 && ellipsis(item.address1, 35)}</p>
-                          <p>{item.address2 && ellipsis(item.address2, 35)}</p>
-                          <p>
-                            {item.city}, {item.state} - {item.zip_code}
-                          </p>
-                          <p>{item?.countryCode?.name}</p>
-                          {billingAddresses.filter(item => item.isDefault)[0]?.id === item.id && (
-                            <Badge count="Default billing address" color="#ddd" style={{ color: '#000' }} />
-                          )}
-                        </Radio>
-                      </Col>
-                    ))
-                  : shippingAddresses.map(item => (
-                      <Col key={item.id} xs={24}>
-                        <Button
-                          size="small"
-                          style={{ position: 'absolute', right: 14, zIndex: 1000 }}
-                          title="Edit Shipping Address"
-                          htmlType="button"
-                          type="info"
-                          onClick={() => addOrEditAddressHandler(item.id, 'shipping')}
-                        >
-                          Edit
-                        </Button>
-                        <Button
-                          size="small"
-                          style={{ position: 'absolute', right: 14, zIndex: 1000, top: 45 }}
-                          title="Edit Shipping Address"
-                          htmlType="button"
-                          type="info"
-                          onClick={() => selectAddressHandler(addressType, item.id)}
-                        >
-                          Select
-                        </Button>
-                        <Radio
-                          style={{
-                            width: '100%',
-                            border: '1px solid #f0f0f0',
-                            fontSize: 12,
-                            marginBottom: 10,
-                            padding: 10,
-                            borderRadius: 5,
-                          }}
-                          value={item.id}
-                          onChange={() => setTempSelectedAddress(item)}
-                        >
-                          <p>{item.address1 && ellipsis(item.address1, 35)}</p>
-                          <p>{item.address2 && ellipsis(item.address2, 35)}</p>
-                          <p>
-                            {item.city}, {item.state} - {item.zip_code}
-                          </p>
-                          <p>{item?.countryCode?.name}</p>
-                          {shippingAddresses.filter(item => item.isDefault)[0]?.id === item.id && (
-                            <Badge count="Default shipping address" color="#ddd" style={{ color: '#000' }} />
-                          )}
-                        </Radio>
-                      </Col>
-                    ))}
-              </Row>
-            </Radio.Group>
-          </Modal>
           {/* Modal For Add / Update Address */}
           <ProductSearch {...{ productSearchModalOpen, setProductSearchModalOpen, products, setProducts }} />
           <CustomerSearch
@@ -1773,7 +1256,7 @@ const AddOrder = () => {
 
           <ContactPersonList
             {...{
-              contactPersons: selectedCustomer?.contactPersons,
+              contactPersons: contactPerson,
               setContactSelectModalOpen,
               contactSelectModalOpen,
               selectedContactPerson,
@@ -1788,6 +1271,46 @@ const AddOrder = () => {
               parent: 'customer',
               id: selectedCustomer?.id,
               setCPSuccess,
+            }}
+          />
+          <ShippingTypeList
+            {...{
+              shippingMethodSelectModalOpen,
+              setShippingMethodSelectModalOpen,
+              selectedShippingMethod,
+              setSelectedShippingMethod,
+              shippingMethod,
+            }}
+          />
+          <ShippingAccountList
+            {...{
+              shippingAccountModalOpen,
+              setShippingAccountModalOpen,
+              selectedShippingAccount,
+              setSelectedShippingAccount,
+              shippingMethodAccountList,
+            }}
+          />
+          <PaymentMethodList
+            {...{
+              paymentMethodSelectModalOpen,
+              setPaymentMethodSelectModalOpen,
+              selectedPaymentMethod,
+              setSelectedPaymentMethod,
+              paymentMethod,
+            }}
+          />
+          <CreditCard
+            {...{
+              creditCardModalOpen,
+              setCreditCardModalOpen,
+              amount: productTotalAmount(products, shippingCost, discount),
+              selectedCustomer,
+              finalPayment,
+              setCreditCardLast4,
+              cardHolderName,
+              setCardHolderName,
+              setPaymentSuccess,
             }}
           />
         </Main>

@@ -133,7 +133,6 @@ const Products = ({ products, setProducts, setProductSearchModalOpen }) => {
               dataSource={products}
               pagination={false}
               rowKey="id"
-              rowClassName={(record, index) => (index % 2 === 0 ? '' : 'altTableClass')}
               summary={() => (
                 <Table.Summary fixed="bottom">
                   <Table.Summary.Row>

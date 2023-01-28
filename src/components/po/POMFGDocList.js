@@ -107,7 +107,6 @@ export default function POMFGDocList({ mfgList, setChangeMfg }) {
         dataSource={mfgList}
         pagination={false}
         rowKey="id"
-        rowClassName={(record, index) => (index % 2 === 0 ? '' : 'altTableClass')}
       />
       <UpdateMFG {...{ mfg: selectedMfg, updateMfgModalOpen, setUpdateMfgModalOpen, setChangeMfg }} />
     </div>

@@ -1772,10 +1772,6 @@ html[dir='rtl'] .sDash_upload-basic .sDash_upload-browse {
 
 /* page heading */
 
-.ant-page-header {
-  padding: 26px 30px 26px 30px !important;
-}
-
 .ant-page-header.header-boxed {
   padding: 26px 180px 26px 180px !important;
 }
@@ -2317,10 +2313,6 @@ html[dir='rtl']
 }
 
 @media only screen and (max-width: 991px) {
-  .ant-page-header.header-boxed {
-    padding: 26px 30px 26px 30px !important;
-  }
-
   .rdrMonths .rdrMonth {
     width: 100%;
     margin-bottom: 30px;
@@ -2934,4 +2926,16 @@ html[dir='rtl'] .ant-menu-vertical .ant-menu-submenu-title {
 .mb-0{
   margin-bottom: 0 !important;
   line-height: 1;
+}
+
+.voucher_input .ant-input-search-large .ant-input-search-button, .voucher_input .ant-input{
+  height: 36px;
+  margin: 0;
+}
+.voucher_input{
+  margin: 0;
+}
+
+.ant-page-header {
+  padding: 10px 30px;
 }

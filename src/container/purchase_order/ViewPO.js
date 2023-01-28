@@ -401,7 +401,7 @@ export default function ViewPO() {
                                 {singlePO?.data?.order_id && (
                                   <>
                                     <br />
-                                    <Button type="primary" onClick={() => setViewOrderModalOpen(true)}>
+                                    <Button type="primary" onClick={() => setViewOrderModalOpen(true)}  style={{ marginBottom: 15 }}>
                                       View order
                                     </Button>
                                   </>

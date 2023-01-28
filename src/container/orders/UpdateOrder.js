@@ -793,7 +793,6 @@ const UpdateOrder = () => {
                                     dataSource={selectedProduct}
                                     pagination={false}
                                     rowKey="id"
-                                    rowClassName={(record, index) => (index % 2 === 0 ? '' : 'altTableClass')}
                                   />
 
                                   <div

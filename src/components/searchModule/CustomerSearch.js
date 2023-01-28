@@ -144,7 +144,6 @@ export default function CustomerSearch({
               dataSource={searchedCustomer}
               pagination={false}
               rowKey="id"
-              rowClassName={(record, index) => (index % 2 === 0 ? '' : 'altTableClass')}
             />
           </Col>
         </Row>

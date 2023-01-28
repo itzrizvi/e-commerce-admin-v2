@@ -954,7 +954,6 @@ const AddOrder = () => {
                                   dataSource={selectedProduct}
                                   pagination={false}
                                   rowKey="id"
-                                  rowClassName={(record, index) => (index % 2 === 0 ? '' : 'altTableClass')}
                                 />
                                 <div
                                   style={{
@@ -1561,7 +1560,6 @@ const AddOrder = () => {
                                       dataSource={selectedProduct}
                                       pagination={false}
                                       rowKey="id"
-                                      rowClassName={(record, index) => (index % 2 === 0 ? '' : 'altTableClass')}
                                     />
                                   </span>
                                 </Col>

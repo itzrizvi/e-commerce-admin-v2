@@ -181,12 +181,12 @@ const AddPermission = () => {
                         rules={[{ required: true, max: maxLength, message: 'Please enter Role Name' }]}
                         name="permissionName"
                         label="Name"
-                        initialValue={params.id ? singlePermission.data.roles_permission_name : ''}
+                        initialValue={singlePermission?.data?.roles_permission_name}
                         labelCol={{ style: { width: "40%" } }}
                       >
                         <Row>
                           <Col span={22}>
-                            <Input placeholder="Enter Permission Name" />
+                            <Input defaultValue={singlePermission?.data?.roles_permission_name} placeholder="Enter Permission Name" />
                           </Col>
                         </Row>
                       </Form.Item>

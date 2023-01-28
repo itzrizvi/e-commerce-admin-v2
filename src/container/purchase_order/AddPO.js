@@ -29,6 +29,7 @@ import AddAddress from '../../components/common-modal/AddAddress';
 import { addressSchema } from '../../apollo/address';
 import UpdateAddress from '../../components/common-modal/UpdateAddress';
 import Products from '../../components/products/Products';
+import config from '../../config/config';
 const { confirm } = Modal;
 
 const AddPO = () => {
@@ -585,7 +586,7 @@ const AddPO = () => {
                                   <Form.Item name="order_id" label="Order" labelAlign="left">
                                     <Input
                                       disabled={selectedType === 'drop_shipping'}
-                                      style={{ width: '50%', height: 36, margin: 0 }}
+                                      style={{ width: '50%', height: config.INPUT_HEIGHT, margin: 0 }}
                                       name="order_id"
                                       type="number"
                                       placeholder="Order ID"
@@ -703,7 +704,7 @@ const AddPO = () => {
                                     style={{ marginTop: 10 }}
                                   >
                                     <Input
-                                      style={{ width: '19%', height: 36, margin: 0 }}
+                                      style={{ width: '19%', height: config.INPUT_HEIGHT, margin: 0 }}
                                       type="number"
                                       name="shipping_cost"
                                       placeholder="Shipping Cost"
@@ -718,7 +719,7 @@ const AddPO = () => {
                                     style={{ marginTop: 10 }}
                                   >
                                     <Input
-                                      style={{ width: '19%', height: 36, margin: 0 }}
+                                      style={{ width: '19%', height: config.INPUT_HEIGHT, margin: 0 }}
                                       type="number"
                                       name="tax_amount"
                                       placeholder="Tax Amount"
@@ -740,7 +741,7 @@ const AddPO = () => {
                                     name="comment"
                                     style={{ marginTop: 10, marginBottom: 0 }}
                                   >
-                                    <TextArea style={{ minHeight: 35 }} placeholder="Comment" autoSize />
+                                    <TextArea style={{ minHeight: config.INPUT_HEIGHT }} placeholder="Comment" autoSize />
                                   </Form.Item>
                                   <Form.Item
                                     labelCol={{ xl: 4, xxl: 3 }}
@@ -750,7 +751,7 @@ const AddPO = () => {
                                     name="receiving_instruction"
                                   >
                                     <TextArea
-                                      style={{ minHeight: 35, marginTop: 10 }}
+                                      style={{ minHeight: config.INPUT_HEIGHT, marginTop: 10 }}
                                       placeholder="Receiving Instruction"
                                       autoSize
                                     />

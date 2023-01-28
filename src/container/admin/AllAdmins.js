@@ -250,7 +250,6 @@ const AllAdmin = () => {
                       rowKey={'id'}
                       size="small"
                       dataSource={searchText ? filteredUser : staffs.data}
-                      rowClassName={(record, index) => (index % 2 === 0 ? '' : 'altTableClass')}
                       pagination={{
                         defaultPageSize: config.USERS_PER_PAGE,
                         total: searchText ? filteredUser.length : staffs.data.length,

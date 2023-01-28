@@ -67,7 +67,6 @@ export default function PaymentMethodList({
               dataSource={paymentMethod}
               pagination={false}
               rowKey="id"
-              rowClassName={(record, index) => (index % 2 === 0 ? '' : 'altTableClass')}
             />
           </Col>
         </Row>

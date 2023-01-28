@@ -742,7 +742,6 @@ const ListPO = () => {
                       rowKey={'id'}
                       size="small"
                       dataSource={po?.data ? po.data : []}
-                      rowClassName={(record, index) => (index % 2 === 0 ? '' : 'altTableClass')}
                       pagination={{
                         defaultPageSize: config.PO_PER_PAGE,
                         total: po?.data ? po.data.length : 0,

@@ -192,7 +192,6 @@ export default function ProductSearch({ productSearchModalOpen, setProductSearch
               dataSource={searchedProduct}
               pagination={false}
               rowKey="id"
-              rowClassName={(record, index) => (index % 2 === 0 ? '' : 'altTableClass')}
             />
           </Col>
         </Row>

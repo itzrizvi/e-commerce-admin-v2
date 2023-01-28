@@ -166,7 +166,6 @@ const ListContent = () => {
                       rowKey={'id'}
                       size="small"
                       dataSource={isFilter ? filteredEmailContent : emailContent.data}
-                      rowClassName={(record, index) => (index % 2 === 0 ? '' : 'altTableClass')}
                     />
                   </span>
                 </>

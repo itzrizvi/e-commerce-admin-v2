@@ -67,7 +67,6 @@ export default function ShippingTypeList({
               dataSource={shippingMethod}
               pagination={false}
               rowKey="id"
-              rowClassName={(record, index) => (index % 2 === 0 ? '' : 'altTableClass')}
             />
           </Col>
         </Row>

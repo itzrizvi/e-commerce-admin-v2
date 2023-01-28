@@ -195,7 +195,6 @@ const ViewOrder = () => {
                     columns={column}
                     dataSource={products}
                     pagination={false}
-                    rowClassName={(record, index) => (index % 2 === 0 ? '' : 'altTableClass')}
                   />
 
                   <div className={style.tableFooter}>

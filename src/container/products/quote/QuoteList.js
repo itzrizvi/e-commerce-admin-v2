@@ -345,7 +345,6 @@ const QuoteList = () => {
                       rowKey={'id'}
                       size="small"
                       dataSource={quote.data ? quote.data : []}
-                      rowClassName={(record, index) => (index % 2 === 0 ? '' : 'altTableClass')}
                     />
                   </span>
                 </>

@@ -124,11 +124,11 @@ export default function ViewOrder({ order_id, viewOrderModalOpen, setViewOrderMo
                 <div>
                   <p>
                     <b>Customer ID: </b>
-                    {singleOrder.data?.id}
+                    {singleOrder?.data?.id}
                   </p>
                   <p>
                     <b>Customer Name: </b>
-                    {singleOrder.data?.customer?.first_name} {singleOrder?.data?.customer?.last_name}
+                    {singleOrder?.data?.customer?.first_name} {singleOrder?.data?.customer?.last_name}
                   </p>
                   <p>
                     <b>Email: </b> {singleOrder?.data?.customer?.email}{' '}
@@ -144,15 +144,14 @@ export default function ViewOrder({ order_id, viewOrderModalOpen, setViewOrderMo
                 columns={column}
                 dataSource={products}
                 pagination={false}
-                rowClassName={(record, index) => (index % 2 === 0 ? '' : 'altTableClass')}
               />
 
               <div>
                 <p>
-                  <b>Payment Details:</b> {singleOrder.data?.paymentmethod.name}
+                  <b>Payment Details:</b> {singleOrder?.data?.paymentmethod.name}
                 </p>
                 <p>
-                  <b>Delivery Option:</b> {singleOrder.data?.shippingmethod.name}
+                  <b>Delivery Option:</b> {singleOrder?.data?.shippingmethod.name}
                 </p>
               </div>
 
@@ -161,22 +160,22 @@ export default function ViewOrder({ order_id, viewOrderModalOpen, setViewOrderMo
                   <b>SUBTOTAL</b>${subTotal}
                 </p>
                 <p>
-                  <b>Shipping Cost</b>${singleOrder.data?.shipping_cost}
+                  <b>Shipping Cost</b>${singleOrder?.data?.shipping_cost}
                 </p>
                 <p>
-                  <b>TAX</b>${singleOrder.data?.tax_amount}
+                  <b>TAX</b>${singleOrder?.data?.tax_amount}
                 </p>
                 <p>
-                  <b>DISCOUNT</b>${singleOrder.data?.discount_amount}
+                  <b>DISCOUNT</b>${singleOrder?.data?.discount_amount}
                 </p>
                 <p>
                   <b>TOTAL</b>
                   <b>
                     $
                     {subTotal +
-                      singleOrder.data?.shipping_cost +
-                      singleOrder.data?.tax_amount -
-                      singleOrder.data?.discount_amount}
+                      singleOrder?.data?.shipping_cost +
+                      singleOrder?.data?.tax_amount -
+                      singleOrder?.data?.discount_amount}
                   </b>
                 </p>
               </div>

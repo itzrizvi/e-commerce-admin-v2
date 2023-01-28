@@ -46,9 +46,8 @@ export default function POHistoryList({ history }) {
         columns={column}
         style={{ marginTop: 20 }}
         dataSource={history}
-        pagination={false}
+        pagination={true}
         rowKey="id"
-        rowClassName={(record, index) => (index % 2 === 0 ? '' : 'altTableClass')}
       />
     </div>
   );

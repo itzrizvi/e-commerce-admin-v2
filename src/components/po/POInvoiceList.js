@@ -104,7 +104,6 @@ export default function POInvoiceList({ invoiceList, setChangeInvoice }) {
         dataSource={invoiceList}
         pagination={false}
         rowKey="id"
-        rowClassName={(record, index) => (index % 2 === 0 ? '' : 'altTableClass')}
       />
       <UpdateInvoice
         {...{ invoice: selectedInvoice, updateInvoiceModalOpen, setUpdateInvoiceModalOpen, setChangeInvoice }}

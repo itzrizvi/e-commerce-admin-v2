@@ -35,7 +35,6 @@ export default function ExapndableProduct({ products }) {
     }}>
       <Table
         rowKey="id"
-        rowClassName={(record, index) => (index % 2 === 0 ? '' : 'altTableClass')}
         columns={productColumns}
         dataSource={products}
         showSorterTooltip={false}

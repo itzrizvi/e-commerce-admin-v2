@@ -2,7 +2,6 @@ import Styled from 'styled-components';
 import { PageHeader } from 'antd';
 
 const PageHeaderStyle = Styled(PageHeader)`
-  margin-bottom: 25px;
   
   .page-header-actions button.ant-btn-white svg {
     width: 12px;

@@ -196,7 +196,6 @@ const ListTemplate = () => {
                       rowKey={'id'}
                       size="small"
                       dataSource={isFilter ? filteredEmail : email.data}
-                      rowClassName={(record, index) => (index % 2 === 0 ? '' : 'altTableClass')}
                     />
                   </span>
                 </>

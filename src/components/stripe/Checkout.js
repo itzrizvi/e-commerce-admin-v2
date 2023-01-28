@@ -41,11 +41,11 @@ export default function Checkout({
   amount,
   paymentValidateCard,
   finalPayment,
-  clientSecret,
-  setClientSecret,
   cardHolderName,
   setCardHolderName,
 }) {
+
+  const [clientSecret, setClientSecret] = useState(null);
   const stripe = useStripe();
   const elements = useElements();
   const options = useOptions();
@@ -56,7 +56,7 @@ export default function Checkout({
     finalPayment.current = finalPaymentChild;
   }, [clientSecret]);
 
-  const paymentValidateCardChild = () => {
+  const paymentValidateCardChild = async () => {
     if (!stripe || !elements) {
       return;
     }
@@ -118,7 +118,7 @@ export default function Checkout({
     <>
       <Row gutter={25}>
         <Col span={24}>
-          <Form layout="horizontal" className="stripe-form">
+          <Form layout="vertical" className="stripe-form">
             <Form.Item name="card_holder" label="Card Holder">
               <Input placeholder="Card Holder Name" onChange={e => setCardHolderName(e.target.value)} />
             </Form.Item>

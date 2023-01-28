@@ -232,6 +232,7 @@ export const orderQuery = {
         data {
           id
           name
+          slug
           description
           status
         }
