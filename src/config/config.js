@@ -27,7 +27,8 @@ const config = {
   CONTACT_US_MESSAGE_PER_PAGE: 10,
   EMAIL_TEMPLATE_PER_PAGE: 10,
   ADMIN_DOC_BUCKET_NAME: "psp-admin-doc",
-  INPUT_HEIGHT: 36
+  INPUT_HEIGHT: 36,
+  TITLE_LEVEL: 5,
 };
 
 export default config;

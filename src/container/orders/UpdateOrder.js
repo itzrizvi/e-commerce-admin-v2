@@ -1055,7 +1055,7 @@ const UpdateOrder = () => {
                                             }}
                                             value={item.id}
                                           >
-                                            <Typography.Title level={5} style={{ fontSize: 14 }}>
+                                            <Typography.Title level={config.TITLE_LEVEL} style={{ fontSize: 14 }}>
                                               {item.name}
                                             </Typography.Title>
                                             <Typography.Text>{item?.description}</Typography.Text>
@@ -1083,7 +1083,7 @@ const UpdateOrder = () => {
                                             }}
                                             value={item.id}
                                           >
-                                            <Typography.Title level={5} style={{ fontSize: 14 }}>
+                                            <Typography.Title level={config.TITLE_LEVEL} style={{ fontSize: 14 }}>
                                               {item.name}
                                             </Typography.Title>
                                           </Radio>

@@ -18,7 +18,7 @@ export default function ViewPOComponent({ purchaseOrder }) {
       >
         <Row gutter={25}>
           <Col xs={24} md={9}>
-            <Typography.Title level={4}>Issued To</Typography.Title>
+            <Typography.Title level={config.TITLE_LEVEL}>Issued To</Typography.Title>
             <Typography.Paragraph className="po-address">{purchaseOrder?.vendor?.company_name}</Typography.Paragraph>
             <Typography.Paragraph className="po-address">{purchaseOrder?.vendor?.contact_person}</Typography.Paragraph>
             <Typography.Paragraph className="po-address">{purchaseOrder?.vendor?.email}</Typography.Paragraph>
@@ -37,7 +37,7 @@ export default function ViewPOComponent({ purchaseOrder }) {
             </Typography.Paragraph>
           </Col>
           <Col xs={24} md={9}>
-            <Typography.Title level={4}>Ship To</Typography.Title>
+            <Typography.Title level={config.TITLE_LEVEL}>Ship To</Typography.Title>
             {purchaseOrder?.type?.toUpperCase() === 'DROP_SHIPPING' && (
               <>
                 {purchaseOrder?.customer?.company_name && (
@@ -85,21 +85,21 @@ export default function ViewPOComponent({ purchaseOrder }) {
         <Divider />
         <Row gutter={25} style={{ marginTop: 10 }}>
           <Col xs={24} md={6}>
-            <Typography.Title level={5}>Rep</Typography.Title>
+            <Typography.Title level={config.TITLE_LEVEL}>Rep</Typography.Title>
             <Typography.Paragraph className="po-address">
               {nameFormat(purchaseOrder?.POCreated_by)}
             </Typography.Paragraph>
           </Col>
           <Col xs={24} md={6}>
-            <Typography.Title level={5}>Payment Terms</Typography.Title>
+            <Typography.Title level={config.TITLE_LEVEL}>Payment Terms</Typography.Title>
             <Typography.Paragraph className="po-address">{purchaseOrder?.paymentmethod?.name}</Typography.Paragraph>
           </Col>
           <Col xs={24} md={6}>
-            <Typography.Title level={5}>Delivery</Typography.Title>
+            <Typography.Title level={config.TITLE_LEVEL}>Delivery</Typography.Title>
             <Typography.Paragraph className="po-address">{purchaseOrder?.shippingMethod?.name}</Typography.Paragraph>
           </Col>
           <Col xs={24} md={6}>
-            <Typography.Title level={5}>Tax Rate</Typography.Title>
+            <Typography.Title level={config.TITLE_LEVEL}>Tax Rate</Typography.Title>
             <Typography.Paragraph className="po-address">
               {config.CURRENCY_SYMBOL}
               {purchaseOrder?.tax_amount?.toFixed(config.DECIMAL_DIGIT)}
@@ -175,34 +175,34 @@ export default function ViewPOComponent({ purchaseOrder }) {
                 <Col xs={{ span: 24 }} md={{ span: 20, offset: 2 }}>
                   <Row gutter={25} justify="end"> 
                     <Col span={{span: 16}} style={{textAlign: 'right'}}>
-                      <Typography.Title level={5}>Tax: </Typography.Title>
-                      <Typography.Title level={5}>Shipping Cost: </Typography.Title>
-                      <Typography.Title level={5}>Total: </Typography.Title>
+                      <Typography.Paragraph strong>Tax: </Typography.Paragraph>
+                      <Typography.Paragraph strong>Shipping Cost: </Typography.Paragraph>
+                      <Typography.Paragraph strong>Total: </Typography.Paragraph>
                     </Col>
-                    <Col span={8} style={{textAlign: 'right', paddingRight: 5}}>
-                      <Typography.Title level={5} style={{fontWeight: 'normal'}}>
+                    <Col span={8} style={{textAlign: 'right', paddingRight: 0}}>
+                      <Typography.Paragraph style={{fontWeight: 'normal'}}>
                         {config.CURRENCY_SYMBOL}
                         {purchaseOrder?.tax_amount?.toFixed(config.DECIMAL_DIGIT)}
-                      </Typography.Title>
-                      <Typography.Title level={5} style={{fontWeight: 'normal'}}>
+                      </Typography.Paragraph>
+                      <Typography.Paragraph style={{fontWeight: 'normal'}}>
                         {config.CURRENCY_SYMBOL}
                         {purchaseOrder?.shipping_cost?.toFixed(config.DECIMAL_DIGIT)}
-                      </Typography.Title>
-                      <Typography.Title level={5} style={{fontWeight: 'normal'}}>
+                      </Typography.Paragraph>
+                      <Typography.Paragraph style={{fontWeight: 'normal'}}>
                         {config.CURRENCY_SYMBOL}
                         {purchaseOrder?.grandTotal_price?.toFixed(config.DECIMAL_DIGIT)}
-                      </Typography.Title>
+                      </Typography.Paragraph>
                     </Col>
                   </Row>
                 </Col>
               </Row>
             </Col>
             <Col xs={{ span: 24, order: 2 }} md={{ span: 16, order: 1 }} style={{ marginTop: 10 }}>
-              <Typography.Title level={5}>Comment: </Typography.Title>
+              <Typography.Title level={config.TITLE_LEVEL}>Comment: </Typography.Title>
               <Typography.Paragraph className="po-address">
                 {ellipsis(purchaseOrder?.comment ?? '', 255)}
               </Typography.Paragraph>
-              <Typography.Title level={5}>Receiving Instruction: </Typography.Title>
+              <Typography.Title level={config.TITLE_LEVEL}>Receiving Instruction: </Typography.Title>
               <Typography.Paragraph className="po-address">
                 {ellipsis(purchaseOrder?.receiving_instruction ?? '', 255)}
               </Typography.Paragraph>

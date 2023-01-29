@@ -15,6 +15,7 @@ import { useLocation } from 'react-router-dom';
 import queryString from 'query-string';
 import { PDFDownloadLink } from '@react-pdf/renderer';
 import Invoice1 from '../../utility/invoice/invoice1';
+import config from '../../config/config';
 
 const ViewOrder = () => {
   const { Title } = Typography;
@@ -119,7 +120,46 @@ const ViewOrder = () => {
 
   return (
     <>
-      <PageHeader title="Order" />
+      <PageHeader
+        title="Order"
+        buttons={[
+          <PDFDownloadLink
+            document={
+              <Invoice1
+                invoice={{
+                  id: singleOrder.data?.id,
+                  date: 'January 13, 2022',
+                  subTotal: subTotal,
+                  shippingCost: singleOrder.data?.shipping_cost,
+                  tax: singleOrder.data?.tax_amount,
+                  discount: singleOrder.data?.discount_amount,
+                  total:
+                    subTotal +
+                    singleOrder.data?.shipping_cost +
+                    singleOrder.data?.tax_amount -
+                    singleOrder.data?.discount_amount,
+                  note,
+                }}
+                billing={singleOrder?.data?.payment?.billingAddress}
+                product={singleOrder.data?.orderitems}
+              />
+            }
+            fileName={`PrimeServerParts#IN_${singleOrder.data?.id}`}
+          >
+            {({ loading }) =>
+              loading ? (
+                <Button size="small" title="Generate Invoice" type="primary">
+                  Generating Invoice
+                </Button>
+              ) : (
+                <Button size="small" title="Download Invoice" type="primary">
+                  Download Invoice
+                </Button>
+              )
+            }
+          </PDFDownloadLink>,
+        ]}
+      />
       <Main>
         <Row gutter={25}>
           <Col sm={24} xs={24}>
@@ -130,65 +170,55 @@ const ViewOrder = () => {
                 </div>
               ) : (
                 <>
-                  <div
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                    }}
-                  >
-                    <div>
-                      <p>
-                        <b>Customer ID: </b>
-                        {singleOrder.data.id}
-                      </p>
-                      <p>
-                        <b>Customer Name: </b>
+                  <Row gutter={25} style={{ marginBottom: 10 }}>
+                    <Col xs={24} md={9}>
+                      <Typography.Title level={config.TITLE_LEVEL}>Issued To</Typography.Title>
+                      <Typography.Paragraph className="po-address">{singleOrder?.data?.id}</Typography.Paragraph>
+                      <Typography.Paragraph className="po-address">
                         {singleOrder?.data?.customer?.first_name} {singleOrder?.data?.customer?.last_name}
-                      </p>
-                      <p>
-                        <b>Email: </b> {singleOrder?.data?.customer?.email}{' '}
-                      </p>
-                    </div>
-                    <PDFDownloadLink
-                      document={
-                        <Invoice1
-                          invoice={{
-                            id: singleOrder.data?.id,
-                            date: 'January 13, 2022',
-                            subTotal: subTotal,
-                            shippingCost: singleOrder.data?.shipping_cost,
-                            tax: singleOrder.data?.tax_amount,
-                            discount: singleOrder.data?.discount_amount,
-                            total:
-                              subTotal +
-                              singleOrder.data?.shipping_cost +
-                              singleOrder.data?.tax_amount -
-                              singleOrder.data?.discount_amount,
-                            note,
-                          }}
-                          billing={singleOrder?.data?.payment?.billingAddress}
-                          product={singleOrder.data?.orderitems}
-                        />
-                      }
-                      fileName={`PrimeServerParts#IN_${singleOrder.data?.id}`}
-                    >
-                      {({ loading }) =>
-                        loading ? (
-                          <Button size="small" title="Generate Invoice" type="primary">
-                            Generating Invoice
-                          </Button>
-                        ) : (
-                          <Button size="small" title="Download Invoice" type="primary">
-                            Download Invoice
-                          </Button>
-                        )
-                      }
-                    </PDFDownloadLink>
-                  </div>
-                  <br />
-                  <br />
-                  <br />
-                  <br />
+                      </Typography.Paragraph>
+                      <Typography.Paragraph className="po-address">
+                        {singleOrder?.data?.customer?.email}
+                      </Typography.Paragraph>
+                    </Col>
+                    <Col xs={24} md={9}>
+                      <Typography.Title level={config.TITLE_LEVEL}>Ship To</Typography.Title>
+                      <Typography.Paragraph className="po-address">
+                        {singleOrder?.data?.shippingAddress?.address1}
+                      </Typography.Paragraph>
+                      {singleOrder?.data?.shippingAddress?.address2 && (
+                        <Typography.Paragraph className="po-address">
+                          {singleOrder?.data?.shippingAddress?.address2}
+                        </Typography.Paragraph>
+                      )}
+                      <Typography.Paragraph className="po-address">
+                        {singleOrder?.data?.shippingAddress?.city}, {singleOrder?.data?.shippingAddress?.state} -{' '}
+                        {singleOrder?.data?.shippingAddress?.zip_code}
+                      </Typography.Paragraph>
+                      <Typography.Paragraph className="po-address">
+                        {singleOrder?.data?.shippingAddress?.country}
+                      </Typography.Paragraph>
+                    </Col>
+                    <Col xs={24} md={6}>
+                      <Typography.Title level={config.TITLE_LEVEL}>BILL TO</Typography.Title>
+                      <Typography.Paragraph className="po-address">
+                        {singleOrder?.data?.payment?.billingAddress?.address1}
+                      </Typography.Paragraph>
+                      {singleOrder?.data?.payment?.billingAddress?.address2 && (
+                        <Typography.Paragraph className="po-address">
+                          {singleOrder?.data?.payment?.billingAddress?.address2}
+                        </Typography.Paragraph>
+                      )}
+                      <Typography.Paragraph className="po-address">
+                        {singleOrder?.data?.payment?.billingAddress?.city},{' '}
+                        {singleOrder?.data?.payment?.billingAddress?.state} -{' '}
+                        {singleOrder?.data?.payment?.billingAddress?.zip_code}
+                      </Typography.Paragraph>
+                      <Typography.Paragraph className="po-address">
+                        {singleOrder?.data?.payment?.billingAddress?.country}
+                      </Typography.Paragraph>
+                    </Col>
+                  </Row>
 
                   <Table columns={column} dataSource={products} pagination={false} />
 
@@ -200,6 +230,18 @@ const ViewOrder = () => {
                       <p>
                         <b>Delivery Option:</b> {singleOrder.data?.shippingmethod.name}
                       </p>
+                      <Row>
+                        <Col lg={12} sm={24}>
+                          <Typography.Paragraph strong level={config.TITLE_LEVEL}>Note/Memo:</Typography.Paragraph>
+                          <Input.TextArea
+                            placeholder="Write Note..."
+                            showCount
+                            maxLength={200}
+                            onChange={e => setNote(e.target.value)}
+                            autoSize
+                          />
+                        </Col>
+                      </Row>
                     </div>
 
                     <div className={style.total}>
@@ -227,54 +269,6 @@ const ViewOrder = () => {
                       </p>
                     </div>
                   </div>
-
-                  <div className={style.addresses}>
-                    <div className={style.billing}>
-                      <Typography.Paragraph>
-                        <b>BILL TO:</b>
-                      </Typography.Paragraph>
-                      <Typography.Paragraph>
-                        {singleOrder?.data?.payment?.billingAddress?.address1}
-                      </Typography.Paragraph>
-                      {singleOrder?.data?.payment?.billingAddress?.address2 && (
-                        <Typography.Paragraph>
-                          {singleOrder?.data?.payment?.billingAddress?.address2}
-                        </Typography.Paragraph>
-                      )}
-                      <Typography.Paragraph>
-                        {singleOrder?.data?.payment?.billingAddress?.city},{' '}
-                        {singleOrder?.data?.payment?.billingAddress?.state} -{' '}
-                        {singleOrder?.data?.payment?.billingAddress?.zip_code}
-                      </Typography.Paragraph>
-                      <Typography.Paragraph>{singleOrder?.data?.payment?.billingAddress?.country}</Typography.Paragraph>
-                    </div>
-                    <div className={style.billing}>
-                      <Typography.Paragraph>
-                        <b>SHIP TO:</b>
-                      </Typography.Paragraph>
-                      <Typography.Paragraph>{singleOrder?.data?.shippingAddress?.address1}</Typography.Paragraph>
-                      {singleOrder?.data?.shippingAddress?.address2 && (
-                        <Typography.Paragraph>{singleOrder?.data?.shippingAddress?.address2}</Typography.Paragraph>
-                      )}
-                      <Typography.Paragraph>
-                        {singleOrder?.data?.shippingAddress?.city}, {singleOrder?.data?.shippingAddress?.state} -{' '}
-                        {singleOrder?.data?.shippingAddress?.zip_code}
-                      </Typography.Paragraph>
-                      <Typography.Paragraph>{singleOrder?.data?.shippingAddress?.country}</Typography.Paragraph>
-                    </div>
-                  </div>
-                  <Divider />
-                  <Row>
-                    <Col lg={12} sm={24}>
-                      <Title level={5}>Note/Memo:</Title>
-                      <Input.TextArea
-                        placeholder="Write Note..."
-                        showCount
-                        maxLength={200}
-                        onChange={e => setNote(e.target.value)}
-                      />
-                    </Col>
-                  </Row>
                 </>
               )}
             </Cards>

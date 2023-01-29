@@ -16,6 +16,7 @@ import { strCamelCase } from '../../utility/stringModify';
 import { addressSchema } from '../../apollo/address';
 import { orderQuery } from '../../apollo/order';
 import { methodQuery } from '../../apollo/method';
+import config from '../../config/config';
 const { TextArea } = Input;
 
 const EditPO = () => {
@@ -746,7 +747,7 @@ const EditPO = () => {
                     <Tabs.TabPane tab="Addresses" key="address">
                       <Row gutter={25}>
                         <Col sm={12}>
-                          <Typography.Title level={5}>Shipping Address</Typography.Title>
+                          <Typography.Title level={config.TITLE_LEVEL}>Shipping Address</Typography.Title>
                           <Form.Item
                             rules={[{ required: true, message: 'Please Select Shipping Address' }]}
                             name="vendor_shipping_id"
@@ -824,7 +825,7 @@ const EditPO = () => {
                           </Form.Item>
                         </Col>
                         <Col sm={12}>
-                          <Typography.Title level={5}>Billing Address</Typography.Title>
+                          <Typography.Title level={config.TITLE_LEVEL}>Billing Address</Typography.Title>
                           <Form.Item
                             rules={[{ required: true, message: 'Please Select Billing Address' }]}
                             name="vendor_billing_id"

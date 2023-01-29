@@ -2920,7 +2920,7 @@ html[dir='rtl'] .ant-menu-vertical .ant-menu-submenu-title {
   width: 260px;
 }
 .ant-typography{
-  margin-bottom: 0;
+  margin-bottom: 0 !important;
 }
 
 .mb-0{

@@ -72,7 +72,7 @@ const SignIn = () => {
             </NavLink>
           </div> */}
           <Form.Item>
-            <Button className="btn-signin" htmlType="submit" type="primary" size="large">
+            <Button disabled={isLoading} className="btn-signin" htmlType="submit" type="primary" size="large">
               {isLoading ? 'Loading...' : 'Sign In'}
             </Button>
           </Form.Item>

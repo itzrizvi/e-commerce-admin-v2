@@ -197,7 +197,7 @@ const Invoice1 = ({ invoice, billing, product }) => {
                         <Text style={style.td4} >Total</Text>
 
                     </View>
-                    {product.map(item => (
+                    {product?.map(item => (
                         <View style={[style.tr, {
                             // color: "#272b41"
                             color: "#4d4c4c",

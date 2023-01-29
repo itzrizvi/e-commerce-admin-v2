@@ -1,5 +1,5 @@
 import { Button, Col, Divider, Form, Modal, Row, Spin, Tabs } from 'antd';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import apolloClient from '../../apollo';
@@ -17,6 +17,7 @@ import AddMFG from '../../components/common-modal/AddMFG';
 import POHistoryList from '../../components/po/POHistoryList';
 import ViewOrder from '../../components/common-modal/ViewOrder';
 import { checkPermission } from '../../utility/utility';
+import ReactToPrint from 'react-to-print';
 
 export default function ViewPO() {
   const params = useParams();
@@ -34,6 +35,7 @@ export default function ViewPO() {
   const [changeActivityHistory, setChangeActivityHistory] = useState(false);
   const [activityHistory, setActivityHistory] = useState([]);
   const [tabLoading, setTabLoading] = useState(true);
+  const pdf_print = useRef();
   /* ------------------------ Get Single PO Order Start ----------------------- */
   useEffect(() => {
     if (!params?.id) return;
@@ -235,7 +237,7 @@ export default function ViewPO() {
             const data = res?.data?.resendPOLink;
             if (!data.status) return;
             Modal.success({
-              content: 'PO link send successfully.'
+              content: 'PO link send successfully.',
             });
           });
       },
@@ -254,7 +256,7 @@ export default function ViewPO() {
             mutation: poQuery.SEND_PO,
             variables: {
               data: {
-                po_id: parseInt(params?.id)
+                po_id: parseInt(params?.id),
               },
             },
             context: {
@@ -268,7 +270,7 @@ export default function ViewPO() {
             const data = res?.data?.resendPOAttachment;
             if (!data.status) return;
             Modal.success({
-              content: 'PO send successfully.'
+              content: 'PO send successfully.',
             });
           });
       },
@@ -343,7 +345,8 @@ export default function ViewPO() {
               </div>
             ) : (
               <Cards headless>
-                <ViewPOComponent {...{ purchaseOrder: singlePO.data }} />
+                <ReactToPrint trigger={() => <button>Print this out!</button>} content={() => pdf_print.current} />
+                <ViewPOComponent {...{ purchaseOrder: singlePO.data }} ref="pdf_print" />
                 <Divider />
                 <Row gutter={25}>
                   <Col span={24}>
@@ -401,7 +404,11 @@ export default function ViewPO() {
                                 {singlePO?.data?.order_id && (
                                   <>
                                     <br />
-                                    <Button type="primary" onClick={() => setViewOrderModalOpen(true)}  style={{ marginBottom: 15 }}>
+                                    <Button
+                                      type="primary"
+                                      onClick={() => setViewOrderModalOpen(true)}
+                                      style={{ marginBottom: 15 }}
+                                    >
                                       View order
                                     </Button>
                                   </>
