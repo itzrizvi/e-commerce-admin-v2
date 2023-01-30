@@ -2948,4 +2948,10 @@ html[dir='rtl'] .ant-menu-vertical .ant-menu-submenu-title {
   cursor: 'pointer';
 }
 
+.ant-input, .ant-btn {
+  height: 36px !important;
+}
 
+.ant-input-affix-wrapper {
+  padding: 0px 11px;
+}
