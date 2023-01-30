@@ -2,7 +2,7 @@ import React from 'react';
 
 const Test = React.forwardRef((props, ref) => {
   return (
-    <div ref={ref} style={{position: "absolute", left: -1000}}>
+    <div ref={ref}>
       <h2>HTML Table</h2>
 
       <table>

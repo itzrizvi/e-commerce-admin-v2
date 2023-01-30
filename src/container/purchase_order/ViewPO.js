@@ -17,6 +17,8 @@ import AddMFG from '../../components/common-modal/AddMFG';
 import POHistoryList from '../../components/po/POHistoryList';
 import ViewOrder from '../../components/common-modal/ViewOrder';
 import { checkPermission } from '../../utility/utility';
+import ReactToPrint from 'react-to-print';
+import Test from '../../components/Test';
 
 export default function ViewPO() {
   const params = useParams();
@@ -346,6 +348,9 @@ export default function ViewPO() {
             ) : (
               <Cards headless>
                 <ViewPOComponent {...{ purchaseOrder: singlePO.data }} />
+                <div style={{ display: 'none' }}>
+                  <Test ref={pdf_print} />
+                </div>
                 <Divider />
                 <Row gutter={25}>
                   <Col span={24}>
@@ -414,7 +419,10 @@ export default function ViewPO() {
                                 )}
                                 <br />
 
-                                <Button type="primary">Print PO</Button>
+                                <ReactToPrint
+                                  trigger={() => <Button type="primary">Print PO</Button>}
+                                  content={() => pdf_print.current}
+                                />
                               </Col>
                               <Col md={12} sm={24}>
                                 {singlePO.data.postatus.slug === 'new' && checkPermission('hold-po', 'edit') && (
