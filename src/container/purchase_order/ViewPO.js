@@ -17,7 +17,6 @@ import AddMFG from '../../components/common-modal/AddMFG';
 import POHistoryList from '../../components/po/POHistoryList';
 import ViewOrder from '../../components/common-modal/ViewOrder';
 import { checkPermission } from '../../utility/utility';
-import ReactToPrint from 'react-to-print';
 
 export default function ViewPO() {
   const params = useParams();
@@ -333,6 +332,7 @@ export default function ViewPO() {
       cancelText: 'No',
     });
   };
+
   return (
     <>
       {/* <PageHeader /> */}
@@ -345,8 +345,7 @@ export default function ViewPO() {
               </div>
             ) : (
               <Cards headless>
-                <ReactToPrint trigger={() => <button>Print this out!</button>} content={() => pdf_print.current} />
-                <ViewPOComponent {...{ purchaseOrder: singlePO.data }} ref="pdf_print" />
+                <ViewPOComponent {...{ purchaseOrder: singlePO.data }} />
                 <Divider />
                 <Row gutter={25}>
                   <Col span={24}>
@@ -414,9 +413,8 @@ export default function ViewPO() {
                                   </>
                                 )}
                                 <br />
-                                <Button type="primary" onClick={() => null}>
-                                  Generate PDF
-                                </Button>
+
+                                <Button type="primary">Print PO</Button>
                               </Col>
                               <Col md={12} sm={24}>
                                 {singlePO.data.postatus.slug === 'new' && checkPermission('hold-po', 'edit') && (

@@ -218,22 +218,12 @@ const Invoice1 = ({ invoice, billing, product }) => {
                         style={{
                             display: "flex",
                             flexDirection: "row",
-                            justifyContent: "space-between",
+                            justifyContent: "flex-end",
                             marginTop: 70,
                             // color: '#272B41'
                             color: '#3a3f59'
                         }}
                     >
-                        <View
-                            style={{
-                                paddingRight: 20,
-                                paddingTop: 12
-                            }}
-                        >
-                            <Text style={{ color: "black", marginBottom: 4 }}>NOTES / MEMO</Text>
-                            <Text style={{ color: "gray" }}>{invoice.note}</Text>
-
-                        </View>
 
                         <View>
                             <View style={style.total} >
