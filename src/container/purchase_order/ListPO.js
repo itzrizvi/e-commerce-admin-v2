@@ -136,55 +136,49 @@ const ListPO = () => {
       align: 'right',
       render: (text, record) => (
         <>
-          {/* <Tooltip placement="topLeft" title="Create Receiving Product">
-            <FontAwesome
-              onClick={() => handleCreateReceivingProduct(record.id)}
-              name="anchor"
-              style={{ margin: '.5em', color: '#e67e22', cursor: 'pointer' }}
-            />
-          </Tooltip> */}
-          {/* <Link to={`/admin/po/edit/${record.id}`}>
-            <FontAwesome name="edit" style={{ margin: '.5em', color: '#5F63F2', cursor: 'pointer' }} />
-          </Link> */}
-          {(record.postatus.slug === 'new' || record.postatus.slug === 'canceled') && checkPermission('submit-po', 'edit') && (
-            <Tooltip placement="topLeft" title="Send to vendor">
-              <SendOutlined
-                onClick={() => poSendToVendor(record)}
-                style={{ margin: '.5em', color: 'rgb(34 121 230)', cursor: 'pointer' }}
-              />
-            </Tooltip>
-          )}
+          {(record?.postatus?.slug === 'new' || record?.postatus?.slug === 'canceled') &&
+            checkPermission('submit-po', 'edit') && (
+              <Tooltip placement="topLeft" title="Send to vendor">
+                <SendOutlined
+                  onClick={() => poSendToVendor(record)}
+                  className="list_po_button_style"
+                />
+              </Tooltip>
+            )}
 
-          {(record.postatus.slug === 'submitted' ||
-            record.postatus.slug === 'new' ||
-            record.postatus.slug === 'view') &&
+          {(record?.postatus?.slug === 'submitted' ||
+            record?.postatus?.slug === 'new' ||
+            record?.postatus?.slug === 'view') &&
             checkPermission('cancel-po', 'edit') && (
               <Tooltip placement="topLeft" title="Cancel PO">
                 <CloseCircleOutlined
                   onClick={() => poStatus(record, 'cancel')}
-                  style={{ margin: '.5em', color: 'rgb(255 0 0)', cursor: 'pointer' }}
+                  className="list_po_button_style"
                 />
               </Tooltip>
             )}
-          {record.postatus.slug === 'new' && checkPermission('hold-po', 'edit') && (
+          {record?.postatus?.slug === 'new' && checkPermission('hold-po', 'edit') && (
             <Tooltip placement="topLeft" title="Hold PO">
               <PauseCircleOutlined
                 onClick={() => poStatus(record, 'hold')}
-                style={{ margin: '.5em', color: 'rgb(165 77 0)', cursor: 'pointer' }}
-              />
-            </Tooltip>
-          )}	
-          {record.postatus.slug === 'canceled' && checkPermission('kill-po', 'edit') (
-            <Tooltip placement="topLeft" title="Kill PO">
-              <StopOutlined
-                onClick={() => poStatus(record, 'kill')}
-                style={{ margin: '.5em', color: 'rgb(255 0 0)', cursor: 'pointer' }}
+                className="list_po_button_style"
               />
             </Tooltip>
           )}
+          {record?.postatus?.slug === 'canceled' &&
+            checkPermission(
+              'kill-po',
+              'edit',
+            )(
+              <Tooltip placement="topLeft" title="Kill PO">
+                <StopOutlined
+                  onClick={() => poStatus(record, 'kill')}
+                  className="list_po_button_style"
+                />
+              </Tooltip>,
+            )}
         </>
-      ),
-      key: 'id',
+      )
     },
   ];
 

@@ -1,7 +1,7 @@
 import { Button, Col, Divider, Form, Modal, Row, Spin, Tabs } from 'antd';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import apolloClient from '../../apollo';
 import { Main } from '../styled';
 import { Cards } from '../../components/cards/frame/cards-frame';
@@ -17,8 +17,6 @@ import AddMFG from '../../components/common-modal/AddMFG';
 import POHistoryList from '../../components/po/POHistoryList';
 import ViewOrder from '../../components/common-modal/ViewOrder';
 import { checkPermission } from '../../utility/utility';
-import ReactToPrint from 'react-to-print';
-import Test from '../../components/Test';
 
 export default function ViewPO() {
   const params = useParams();
@@ -36,7 +34,6 @@ export default function ViewPO() {
   const [changeActivityHistory, setChangeActivityHistory] = useState(false);
   const [activityHistory, setActivityHistory] = useState([]);
   const [tabLoading, setTabLoading] = useState(true);
-  const pdf_print = useRef();
   /* ------------------------ Get Single PO Order Start ----------------------- */
   useEffect(() => {
     if (!params?.id) return;
@@ -348,9 +345,6 @@ export default function ViewPO() {
             ) : (
               <Cards headless>
                 <ViewPOComponent {...{ purchaseOrder: singlePO.data }} />
-                <div style={{ display: 'none' }}>
-                  <Test ref={pdf_print} />
-                </div>
                 <Divider />
                 <Row gutter={25}>
                   <Col span={24}>
@@ -418,11 +412,11 @@ export default function ViewPO() {
                                   </>
                                 )}
                                 <br />
-
-                                <ReactToPrint
-                                  trigger={() => <Button type="primary">Print PO</Button>}
-                                  content={() => pdf_print.current}
-                                />
+                                {params?.id && (
+                                  <Link target="_blank" to={`/admin/po/po-print/${params?.id}`}>
+                                    <Button type="primary">Print PO</Button>
+                                  </Link>
+                                )}
                               </Col>
                               <Col md={12} sm={24}>
                                 {singlePO.data.postatus.slug === 'new' && checkPermission('hold-po', 'edit') && (

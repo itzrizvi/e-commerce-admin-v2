@@ -2826,14 +2826,15 @@ html[dir='rtl'] .ant-menu-vertical .ant-menu-submenu-title {
   padding-right: 15px !important;
 }
 
-.orderAddressModal .ant-modal-header, .globalAddressModal .ant-modal-header {
+.orderAddressModal .ant-modal-header,
+.globalAddressModal .ant-modal-header {
   background: var(--primary);
 }
 
-.orderAddressModal .ant-modal-header .ant-modal-title, .globalAddressModal .ant-modal-header .ant-modal-title {
+.orderAddressModal .ant-modal-header .ant-modal-title,
+.globalAddressModal .ant-modal-header .ant-modal-title {
   color: #fff;
 }
-
 
 .ant-radio {
   border-color: var(--primary) !important;
@@ -2895,47 +2896,56 @@ html[dir='rtl'] .ant-menu-vertical .ant-menu-submenu-title {
   vertical-align: baseline;
 }
 
-.ant-select-selector{
+.ant-select-selector {
   padding: 0;
 }
 
-.ant-spin-nested-loading > div > .ant-spin{
+.ant-spin-nested-loading > div > .ant-spin {
   position: fixed;
 }
 
-.billing_address_card .ant-card-body{
+.billing_address_card .ant-card-body {
   padding: 10px !important;
   padding-top: 10px !important;
   padding-bottom: 10px !important;
   min-height: 75px;
 }
 
-.global-address-list-card .ant-card-body{
+.global-address-list-card .ant-card-body {
   line-height: 0.6;
 }
-.po-address{
+.po-address {
   margin-bottom: 0px !important;
 }
 .avatar-uploader-po .ant-upload.ant-upload-select-picture-card {
   width: 260px;
 }
-.ant-typography{
+.ant-typography {
   margin-bottom: 0 !important;
 }
 
-.mb-0{
+.mb-0 {
   margin-bottom: 0 !important;
   line-height: 1;
 }
 
-.voucher_input .ant-input-search-large .ant-input-search-button, .voucher_input .ant-input{
+.voucher_input .ant-input-search-large .ant-input-search-button,
+.voucher_input .ant-input {
   height: 36px;
   margin: 0;
 }
-.voucher_input{
+.voucher_input {
   margin: 0;
 }
 
 .ant-page-header {
   padding: 10px 30px;
 }
+
+.list_po_button_style {
+  margin: '.5em';
+  color: 'rgb(34 121 230)';
+  cursor: 'pointer';
+}
+
+
