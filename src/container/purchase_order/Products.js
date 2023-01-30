@@ -2,6 +2,7 @@ import { Alert, Button, Col, Input, Row, Table } from 'antd';
 import React from 'react';
 import FeatherIcon from 'feather-icons-react';
 import config from '../../config/config'
+import AddButton from '../../components/buttons/AddButton';
 
 const Products = ({ products, setProducts, setProductSearchModalOpen }) => {
   const column = [
@@ -116,15 +117,7 @@ const Products = ({ products, setProducts, setProductSearchModalOpen }) => {
           <span className={'psp_list'}>
             <Row gutter={25} justify="end">
               <Col span={24}>
-                <Button
-                  style={{ float: 'right', marginBottom: 20 }}
-                  title="Add Product"
-                  htmlType="button"
-                  type="primary"
-                  onClick={addNewRow}
-                >
-                  <FeatherIcon icon="plus" />
-                </Button>
+                <AddButton onClick={addNewRow} style={{ float: 'right' }} title="Add Product" />
               </Col>
             </Row>
             <Table

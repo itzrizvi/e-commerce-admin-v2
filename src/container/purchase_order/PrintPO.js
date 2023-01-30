@@ -61,9 +61,13 @@ export default function PrintPO() {
             ) : (
               <>
                 <Cards headless style={{ width: '210mm' }}>
-                  <Row justify="end">
+                  <Row justify="end" style={{ paddingRight: 10 }}>
                     <Col>
+                      <Button style={{ marginRight: 10 }} onClick={() => window.close()}>
+                        Cancel
+                      </Button>
                       <Button
+                        type="primary"
                         onClick={() => {
                           handlePrint();
                           document.title = `PO-${params.id}-${new Date().getTime()}`;

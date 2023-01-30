@@ -14,6 +14,7 @@ import { AllPosts, BackShadowEmoji, Title } from './style';
 import { Cards } from '../../../../../components/cards/frame/cards-frame';
 import { Button } from '../../../../../components/buttons/buttons';
 import { likeUpdate, commentUpdate, postDelete } from '../../../../../redux/profile/actionCreator';
+import config from '../../../../../config/config';
 
 const ExampleComment = ({ children, replay }) => (
   <Comment
@@ -224,7 +225,7 @@ const Posts = ({ postId, from, time, img, like, comment, content, author }) => {
               <div className="commentArea">
                 <div className="comment-form">
                   <img src={require('../../../../../static/img/chat-author/t2.jpg')} alt="" />
-                  <Input.TextArea onChange={onTextChange} value={textValue} placeholder="Write comment...." />
+                  <Input.TextArea onChange={onTextChange} value={textValue} placeholder="Write comment...."  autoSize />
                   <div className="chatbox-reply-action d-flex">
                     <span className="smile-icon">
                       {pickerShow && (

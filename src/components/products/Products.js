@@ -1,7 +1,9 @@
-import { Alert, Button, Col, Input, Row, Table } from 'antd';
+import { Col, Input, Row, Table } from 'antd';
 import React from 'react';
 import FeatherIcon from 'feather-icons-react';
-import config from '../../config/config'
+import config from '../../config/config';
+
+import AddButton from '../buttons/AddButton';
 
 const Products = ({ products, setProducts, setProductSearchModalOpen }) => {
   const column = [
@@ -11,7 +13,7 @@ const Products = ({ products, setProducts, setProductSearchModalOpen }) => {
       key: 'prod_partnum',
       width: 120,
       ellipsis: true,
-      align: 'left'
+      align: 'left',
     },
     {
       title: 'Description',
@@ -90,16 +92,16 @@ const Products = ({ products, setProducts, setProductSearchModalOpen }) => {
       width: 60,
       align: 'right',
       render: val => (
-          <FeatherIcon
-            style={{cursor: 'pointer'}}
-            className="color-danger"
-            onClick={() => {
-              setProducts(prevState => {
-                return prevState.filter(value => value?.id !== val);
-              });
-            }}
-            icon="trash-2"
-          />
+        <FeatherIcon
+          style={{ cursor: 'pointer' }}
+          className="color-danger"
+          onClick={() => {
+            setProducts(prevState => {
+              return prevState.filter(value => value?.id !== val);
+            });
+          }}
+          icon="trash-2"
+        />
       ),
     },
   ];
@@ -116,15 +118,7 @@ const Products = ({ products, setProducts, setProductSearchModalOpen }) => {
           <span className={'psp_list'}>
             <Row gutter={25} justify="end">
               <Col span={24}>
-                <Button
-                  style={{ float: 'right', marginBottom: 20 }}
-                  title="Add Product"
-                  htmlType="button"
-                  type="primary"
-                  onClick={addNewRow}
-                >
-                  <FeatherIcon icon="plus" />
-                </Button>
+                <AddButton onClick={addNewRow} style={{ float: 'right' }} title="Add Product" />
               </Col>
             </Row>
             <Table
@@ -142,7 +136,10 @@ const Products = ({ products, setProducts, setProductSearchModalOpen }) => {
                     </Table.Summary.Cell>
                     <Table.Summary.Cell index={4}>
                       <strong>
-                        {config.CURRENCY_SYMBOL}{products.reduce((accumulator, item) => accumulator + item.quantity * item.cost, 0).toFixed(config.DECIMAL_DIGIT)}
+                        {config.CURRENCY_SYMBOL}
+                        {products
+                          .reduce((accumulator, item) => accumulator + item.quantity * item.cost, 0)
+                          .toFixed(config.DECIMAL_DIGIT)}
                       </strong>
                     </Table.Summary.Cell>
                   </Table.Summary.Row>

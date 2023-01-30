@@ -28,6 +28,7 @@ const config = {
   EMAIL_TEMPLATE_PER_PAGE: 10,
   ADMIN_DOC_BUCKET_NAME: "psp-admin-doc",
   INPUT_HEIGHT: 36,
+  TEXTARIA_HEIGHT: 45,
   TITLE_LEVEL: 5,
 };
 

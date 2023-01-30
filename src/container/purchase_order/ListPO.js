@@ -138,10 +138,11 @@ const ListPO = () => {
         <>
           {(record?.postatus?.slug === 'new' || record?.postatus?.slug === 'canceled') &&
             checkPermission('submit-po', 'edit') && (
-              <Tooltip placement="topLeft" title="Send to vendor">
+              <Tooltip placement="topLeft" title="Submit PO">
                 <SendOutlined
                   onClick={() => poSendToVendor(record)}
                   className="list_po_button_style"
+                  style={{ color: 'rgb(34 121 230)' }}
                 />
               </Tooltip>
             )}
@@ -154,6 +155,7 @@ const ListPO = () => {
                 <CloseCircleOutlined
                   onClick={() => poStatus(record, 'cancel')}
                   className="list_po_button_style"
+                  style={{ color: 'rgb(255 0 0)' }}
                 />
               </Tooltip>
             )}
@@ -162,6 +164,7 @@ const ListPO = () => {
               <PauseCircleOutlined
                 onClick={() => poStatus(record, 'hold')}
                 className="list_po_button_style"
+                style={{ color: 'rgb(165 77 0)' }}
               />
             </Tooltip>
           )}
@@ -174,6 +177,7 @@ const ListPO = () => {
                 <StopOutlined
                   onClick={() => poStatus(record, 'kill')}
                   className="list_po_button_style"
+                  style={{ color: 'rgb(255 0 0)' }}
                 />
               </Tooltip>,
             )}

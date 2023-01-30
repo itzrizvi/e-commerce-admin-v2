@@ -140,7 +140,7 @@ ul {
 }
 
 .ant-card-body {
-  padding: 25px !important;
+  padding: 5px !important;
 }
 
 .ant-card-head {
@@ -2943,15 +2943,32 @@ html[dir='rtl'] .ant-menu-vertical .ant-menu-submenu-title {
 }
 
 .list_po_button_style {
-  margin: '.5em';
-  color: 'rgb(34 121 230)';
+  margin: 0.5em;
   cursor: 'pointer';
 }
 
-.ant-input, .ant-btn {
+input.ant-input {
   height: 36px !important;
+}
+
+.ant-btn {
+  height: 40px !important;
 }
 
 .ant-input-affix-wrapper {
   padding: 0px 11px;
 }
+
+.add_button {
+  font-size: 30px;
+  cursor: 'pointer';
+  margin-bottom: 10px;
+}
+
+.width-600{
+  width: 600px !important;
+}
+
+/* .ant-select-multiple .ant-select-selector::after{
+  margin: 2px 0;
+} */

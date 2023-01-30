@@ -1,4 +1,4 @@
-import { Button, Col, Divider, Form, Modal, Row, Spin, Tabs } from 'antd';
+import { Button, Col, Divider, Form, Input, Modal, Row, Select, Spin, Tabs } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Link, useParams } from 'react-router-dom';
@@ -21,6 +21,7 @@ import { checkPermission } from '../../utility/utility';
 export default function ViewPO() {
   const params = useParams();
   const [form] = Form.useForm();
+  const [commentForm] = Form.useForm();
   const token = useSelector(state => state.auth.token);
   const [singlePO, setSinglePO] = useState({ data: null, isLoading: true });
   const [POStatus, setPOStatus] = useState([]);
@@ -214,7 +215,19 @@ export default function ViewPO() {
     Modal.confirm({
       title: 'Do you want to send PO link to vendor?',
       icon: <CheckCircleOutlined />,
-      content: null,
+      className:"width-600",
+      content: (
+        <Select
+          mode="tags"
+          style={{
+            width: '100%',
+          }}
+          tokenSeparators={[',']}
+          options={[]}
+          notFoundContent={null}
+          placeholder="Email address (multiple)"
+        />
+      ),
       onOk() {
         apolloClient
           .mutate({
@@ -247,7 +260,19 @@ export default function ViewPO() {
     Modal.confirm({
       title: 'Do you want to send PO to vendor?',
       icon: <CheckCircleOutlined />,
-      content: null,
+      className:"width-600",
+      content: (
+        <Select
+          mode="tags"
+          style={{
+            width: '100%',
+          }}
+          tokenSeparators={[',']}
+          options={[]}
+          notFoundContent={null}
+          placeholder="Email address (multiple)"
+        />
+      ),
       onOk() {
         apolloClient
           .mutate({
@@ -274,6 +299,82 @@ export default function ViewPO() {
       },
       okText: 'Yes',
       cancelText: 'No',
+    });
+  };
+
+  const requestTracking = () => {
+    Modal.confirm({
+      title: 'Do you want to get tracking PO Number?',
+      icon: <CheckCircleOutlined />,
+      content: null,
+      onOk() {
+        apolloClient
+          .mutate({
+            mutation: poQuery.SEND_PO,
+            variables: {
+              data: {
+                po_id: parseInt(params?.id),
+              },
+            },
+            context: {
+              headers: {
+                TENANTID: process.env.REACT_APP_TENANTID,
+                Authorization: token,
+              },
+            },
+          })
+          .then(res => {
+            const data = res?.data?.resendPOAttachment;
+            if (!data.status) return;
+            Modal.success({
+              content: 'Request tracking number send successfully.',
+            });
+          });
+      },
+      okText: 'Yes',
+      cancelText: 'No',
+    });
+  };
+  const addComment = () => {
+    Modal.confirm({
+      title: 'Add PO Comment',
+      className: 'width-600',
+      centered: true,
+      icon: <CheckCircleOutlined />,
+      content: (
+        <Form style={{ width: '100%' }} form={commentForm} name="comment">
+          <Form.Item rules={[{ required: true, message: 'Comment is required' }]} name="comment">
+            <Input.TextArea placeholder="Comment" autoSize required />
+          </Form.Item>
+        </Form>
+      ),
+      async onOk() {
+        await commentForm.validateFields(['comment']);
+        apolloClient
+          .mutate({
+            mutation: poQuery.SEND_PO,
+            variables: {
+              data: {
+                po_id: parseInt(params?.id),
+              },
+            },
+            context: {
+              headers: {
+                TENANTID: process.env.REACT_APP_TENANTID,
+                Authorization: token,
+              },
+            },
+          })
+          .then(res => {
+            const data = res?.data?.resendPOAttachment;
+            if (!data.status) return;
+            Modal.success({
+              content: data.message,
+            });
+          });
+      },
+      okText: 'Add Comment',
+      cancelText: 'Cancel',
     });
   };
 
@@ -373,8 +474,7 @@ export default function ViewPO() {
                                   checkPermission('submit-po', 'edit') && (
                                     <>
                                       {/* Submit PO to vendor */}
-                                      <br />
-                                      <Button type="primary" onClick={submitPO} style={{ marginBottom: 15 }}>
+                                      <Button type="primary" onClick={submitPO} style={{ marginBottom: 15, marginRight: 10 }}>
                                         Submit PO to vendor
                                       </Button>
                                     </>
@@ -383,49 +483,51 @@ export default function ViewPO() {
                                 {singlePO.data.postatus.slug === 'submitted' &&
                                   checkPermission('send-po-link', 'edit') && (
                                     <>
-                                      <br />
-                                      <Button type="primary" onClick={sendPOLink} style={{ marginBottom: 15 }}>
+                                      <Button type="primary" onClick={sendPOLink} style={{ marginBottom: 15, marginRight: 10 }}>
                                         Send PO link to vendor
                                       </Button>
                                     </>
                                   )}
                                 {singlePO.data.postatus.slug === 'submitted' && checkPermission('send-po', 'edit') && (
                                   <>
-                                    <br />
                                     {/* Action with Pdf to vendor */}
-                                    <Button type="primary" onClick={sendPO} style={{ marginBottom: 15 }}>
+                                    <Button type="primary" onClick={sendPO} style={{ marginBottom: 15, marginRight: 10 }}>
                                       Send PO to vendor
+                                    </Button>
+                                    {/* Action with Pdf to vendor */}
+                                    <Button type="primary" onClick={requestTracking} style={{ marginBottom: 15, marginRight: 10 }}>
+                                      Request Tracking No
+                                    </Button>
+                                    <Button type="primary" onClick={addComment} style={{ marginBottom: 15, marginRight: 10 }}>
+                                      Add Comment
                                     </Button>
                                   </>
                                 )}
 
                                 {singlePO?.data?.order_id && (
                                   <>
-                                    <br />
                                     <Button
                                       type="primary"
                                       onClick={() => setViewOrderModalOpen(true)}
-                                      style={{ marginBottom: 15 }}
+                                      style={{ marginBottom: 15, marginRight: 10 }}
                                     >
                                       View order
                                     </Button>
                                   </>
                                 )}
-                                <br />
                                 {params?.id && (
                                   <Link target="_blank" to={`/admin/po/po-print/${params?.id}`}>
-                                    <Button type="primary">Print PO</Button>
+                                    <Button type="primary" style={{ marginBottom: 15, marginRight: 10 }}>Print PO</Button>
                                   </Link>
                                 )}
                               </Col>
                               <Col md={12} sm={24}>
                                 {singlePO.data.postatus.slug === 'new' && checkPermission('hold-po', 'edit') && (
                                   <>
-                                    <br />
                                     <Button
                                       type="primary"
                                       onClick={() => poStatus('hold')}
-                                      style={{ marginBottom: 15 }}
+                                      style={{ marginBottom: 15, marginRight: 10 }}
                                     >
                                       Hold PO
                                     </Button>
@@ -437,11 +539,10 @@ export default function ViewPO() {
                                   singlePO.data.postatus.slug === 'view') &&
                                   checkPermission('cancel-po', 'edit') && (
                                     <>
-                                      <br />
                                       <Button
                                         type="primary"
                                         onClick={() => poStatus('cancel')}
-                                        style={{ marginBottom: 15 }}
+                                        style={{ marginBottom: 15, marginRight: 10 }}
                                       >
                                         Cancel PO
                                       </Button>
@@ -449,11 +550,10 @@ export default function ViewPO() {
                                   )}
                                 {singlePO.data.postatus.slug === 'canceled' && checkPermission('kill-po', 'edit') && (
                                   <>
-                                    <br />
                                     <Button
                                       type="primary"
                                       onClick={() => poStatus('kill')}
-                                      style={{ marginBottom: 15 }}
+                                      style={{ marginBottom: 15, marginRight: 10 }}
                                     >
                                       Kill PO
                                     </Button>

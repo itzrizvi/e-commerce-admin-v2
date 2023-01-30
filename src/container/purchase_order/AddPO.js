@@ -23,7 +23,6 @@ import { contactPersonsSchema } from '../../apollo/contactPerson';
 import PaymentMethodList from '../../components/common-modal/PaymentMethodList';
 import ShippingTypeList from '../../components/common-modal/ShippingTypeList';
 import ShippingAccountList from '../../components/common-modal/ShippingAccountList';
-import { rest } from 'lodash';
 import AddressList from '../../components/common-modal/AddressList';
 import AddAddress from '../../components/common-modal/AddAddress';
 import { addressSchema } from '../../apollo/address';
@@ -741,7 +740,7 @@ const AddPO = () => {
                                     name="comment"
                                     style={{ marginTop: 10, marginBottom: 0 }}
                                   >
-                                    <TextArea style={{ minHeight: config.INPUT_HEIGHT }} placeholder="Comment" autoSize />
+                                    <TextArea placeholder="Comment" autoSize />
                                   </Form.Item>
                                   <Form.Item
                                     labelCol={{ xl: 4, xxl: 3 }}
@@ -751,7 +750,7 @@ const AddPO = () => {
                                     name="receiving_instruction"
                                   >
                                     <TextArea
-                                      style={{ minHeight: config.INPUT_HEIGHT, marginTop: 10 }}
+                                      style={{ marginTop: 10 }}
                                       placeholder="Receiving Instruction"
                                       autoSize
                                     />
