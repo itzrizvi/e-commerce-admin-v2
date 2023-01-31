@@ -261,7 +261,6 @@ const ListUser = () => {
                                         <Row gutter={25}>
                                             <Col span={18}>
                                                 <Input
-                                                    style={{ height: "42px" }}
                                                     placeholder="Search Customer..."
                                                     prefix={<SearchOutlined />}
                                                     value={filterParams?.searchQuery}
@@ -274,7 +273,6 @@ const ListUser = () => {
                                             </Col>
                                             <Col span={6}>
                                                 <Button
-                                                    style={{ height: "42px" }}
                                                     size="large"
                                                     type="primary"
                                                     disabled={searchDisable}

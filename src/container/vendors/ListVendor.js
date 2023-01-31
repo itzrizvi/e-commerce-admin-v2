@@ -293,7 +293,6 @@ const ListVendor = () => {
                     <Row gutter={25}>
                       <Col span={18}>
                         <Input
-                          style={{ height: "42px" }}
                           placeholder="Search Vendor By Company Name, Email, Phone...."
                           prefix={<SearchOutlined />}
                           value={filterParams?.searchQuery}
@@ -306,7 +305,6 @@ const ListVendor = () => {
                       </Col>
                       <Col span={6}>
                         <Button
-                          style={{ height: "42px" }}
                           size="large"
                           type="primary"
                           disabled={searchDisable}

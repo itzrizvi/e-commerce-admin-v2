@@ -90,13 +90,13 @@ export const poQuery = {
           grandTotal_price
           tax_amount
           shipping_cost
+          is_insurance
           comment
           receiving_instruction
           shipping_method_id
           createdAt
           vendor {
             id
-            contact_person
             contactPersons {
               id
               ref_id
@@ -110,14 +110,39 @@ export const poQuery = {
               createdAt
               updatedAt
             }
-            company_name
+            contact_person
             email
-            description
             phone_number
+            FAX_no
+            company_name
+            description
             EIN_no
             TAX_ID
-            FAX_no
             status
+            addresses {
+              id
+              address1
+              address2
+              phone
+              fax
+              email
+              city
+              state
+              zip_code
+              country
+              type
+              status
+              isDefault
+              countryCode {
+                name
+                code
+                status
+              }
+              updatedAt
+              createdAt
+            }
+            createdAt
+            updatedAt
           }
           POCreated_by {
             first_name
@@ -138,6 +163,11 @@ export const poQuery = {
             country
             type
             status
+            countryCode {
+              name
+              code
+              status
+            }
           }
           vendorShippingAddress {
             id
@@ -152,6 +182,11 @@ export const poQuery = {
             country
             type
             status
+            countryCode {
+              name
+              code
+              status
+            }
           }
           paymentmethod {
             id
@@ -160,6 +195,7 @@ export const poQuery = {
             status
           }
           shippingMethod {
+            id
             name
             description
             status
@@ -222,6 +258,7 @@ export const poQuery = {
       updatePurchaseOrder(data: $data) {
         message
         status
+        po_number
       }
     }
   `,
@@ -510,6 +547,22 @@ export const poQuery = {
   SEND_PO: gql`
     mutation resendPOAttachment($data: ResendPOAttachmentInput) {
       resendPOLink(data: $data) {
+        message
+        status
+      }
+    }
+  `,
+  ADD_PO_COMMENT: gql`
+    mutation createPOComment($data: createPOCommentInput) {
+      createPOComment(data: $data) {
+        message
+        status
+      }
+    }
+  `,
+  REQUEST_TRACKING: gql`
+    mutation requestTracking($data: requestTrackingInput) {
+      requestTracking(data: $data) {
         message
         status
       }

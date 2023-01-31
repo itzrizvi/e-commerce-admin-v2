@@ -504,7 +504,7 @@ const ListPO = () => {
               Reset Filter
             </Button>
             {checkPermission('create-po', 'edit') && (
-              <Link to="/admin/po/add">
+              <Link to="/admin/po">
                 <Button size="small" title="Add Purchase Order" type="primary">
                   <FeatherIcon icon="plus" /> Create PO
                 </Button>
@@ -528,7 +528,6 @@ const ListPO = () => {
                   <Row gutter={25}>
                     <Col span={18}>
                       <Input
-                        style={{ height: '42px' }}
                         placeholder="Search PO By Vendor Details..."
                         prefix={<SearchOutlined />}
                         value={filterParams?.searchQuery}
@@ -541,7 +540,6 @@ const ListPO = () => {
                     </Col>
                     <Col span={6}>
                       <Button
-                        style={{ height: '42px' }}
                         size="large"
                         type="primary"
                         disabled={searchDisable}
@@ -637,7 +635,7 @@ const ListPO = () => {
                           <Select
                             style={{ width: '100%' }}
                             placeholder={POStatus.loading ? 'Loading..' : 'Select PO Status'}
-                            size="middle"
+                            size="small"
                             mode="multiple"
                             optionFilterProp="label"
                             value={filterParams?.statuses}
@@ -711,7 +709,7 @@ const ListPO = () => {
                         <Col span={8}>
                           Date Added: <br />
                           <RangePicker
-                            style={{ height: '40px', width: '100%' }}
+                            style={{ width: '100%' }}
                             size="small"
                             allowClear={true}
                             picker="date"
@@ -722,7 +720,7 @@ const ListPO = () => {
                         <Col span={8}>
                           Date Updated: <br />
                           <RangePicker
-                            style={{ height: '40px', width: '100%' }}
+                            style={{ width: '100%' }}
                             size="small"
                             allowClear={true}
                             picker="date"

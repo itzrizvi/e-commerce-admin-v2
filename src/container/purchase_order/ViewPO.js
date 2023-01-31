@@ -1,4 +1,4 @@
-import { Button, Col, Divider, Form, Input, Modal, Row, Select, Spin, Tabs } from 'antd';
+import { Button, Col, Divider, Form, Input, message, Modal, Row, Select, Spin, Tabs } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Link, useParams } from 'react-router-dom';
@@ -17,11 +17,14 @@ import AddMFG from '../../components/common-modal/AddMFG';
 import POHistoryList from '../../components/po/POHistoryList';
 import ViewOrder from '../../components/common-modal/ViewOrder';
 import { checkPermission } from '../../utility/utility';
+import { validateEmail } from '../../utility/stringModify';
 
 export default function ViewPO() {
   const params = useParams();
   const [form] = Form.useForm();
   const [commentForm] = Form.useForm();
+  const [sendPOForm] = Form.useForm();
+  const [sendPOLinkForm] = Form.useForm();
   const token = useSelector(state => state.auth.token);
   const [singlePO, setSinglePO] = useState({ data: null, isLoading: true });
   const [POStatus, setPOStatus] = useState([]);
@@ -215,26 +218,35 @@ export default function ViewPO() {
     Modal.confirm({
       title: 'Do you want to send PO link to vendor?',
       icon: <CheckCircleOutlined />,
-      className:"width-600",
+      className: 'width-600',
       content: (
-        <Select
-          mode="tags"
-          style={{
-            width: '100%',
-          }}
-          tokenSeparators={[',']}
-          options={[]}
-          notFoundContent={null}
-          placeholder="Email address (multiple)"
-        />
+        <Form style={{ width: '100%' }} form={sendPOLinkForm} name="sendPO">
+          <Form.Item
+            rules={[
+              {
+                type: 'email',
+                message: 'Invalid email',
+              },
+              {
+                required: true,
+                message: 'Email is required',
+              },
+            ]}
+            name="emails"
+          >
+            <Input type="email" placeholder="Email address" />
+          </Form.Item>
+        </Form>
       ),
-      onOk() {
+      async onOk() {
+        await sendPOLinkForm.validateFields(['emails']);
         apolloClient
           .mutate({
             mutation: poQuery.SEND_PO_LINK,
             variables: {
               data: {
                 po_id: parseInt(params?.id),
+                emails: new Array(sendPOLinkForm.getFieldValue('emails')),
               },
             },
             context: {
@@ -260,26 +272,35 @@ export default function ViewPO() {
     Modal.confirm({
       title: 'Do you want to send PO to vendor?',
       icon: <CheckCircleOutlined />,
-      className:"width-600",
+      className: 'width-600',
       content: (
-        <Select
-          mode="tags"
-          style={{
-            width: '100%',
-          }}
-          tokenSeparators={[',']}
-          options={[]}
-          notFoundContent={null}
-          placeholder="Email address (multiple)"
-        />
+        <Form style={{ width: '100%' }} form={sendPOForm} name="sendPO">
+          <Form.Item
+            rules={[
+              {
+                type: 'email',
+                message: 'Invalid email',
+              },
+              {
+                required: true,
+                message: 'Email is required',
+              },
+            ]}
+            name="emails"
+          >
+            <Input type="email" placeholder="Email address" />
+          </Form.Item>
+        </Form>
       ),
-      onOk() {
+      async onOk() {
+        await sendPOForm.validateFields(['emails']);
         apolloClient
           .mutate({
             mutation: poQuery.SEND_PO,
             variables: {
               data: {
                 po_id: parseInt(params?.id),
+                emails: new Array(sendPOForm.getFieldValue('emails')),
               },
             },
             context: {
@@ -310,7 +331,7 @@ export default function ViewPO() {
       onOk() {
         apolloClient
           .mutate({
-            mutation: poQuery.SEND_PO,
+            mutation: poQuery.REQUEST_TRACKING,
             variables: {
               data: {
                 po_id: parseInt(params?.id),
@@ -324,7 +345,7 @@ export default function ViewPO() {
             },
           })
           .then(res => {
-            const data = res?.data?.resendPOAttachment;
+            const data = res?.data?.requestTracking;
             if (!data.status) return;
             Modal.success({
               content: 'Request tracking number send successfully.',
@@ -335,7 +356,7 @@ export default function ViewPO() {
       cancelText: 'No',
     });
   };
-  const addComment = () => {
+  const addComment = async () => {
     Modal.confirm({
       title: 'Add PO Comment',
       className: 'width-600',
@@ -352,10 +373,11 @@ export default function ViewPO() {
         await commentForm.validateFields(['comment']);
         apolloClient
           .mutate({
-            mutation: poQuery.SEND_PO,
+            mutation: poQuery.ADD_PO_COMMENT,
             variables: {
               data: {
                 po_id: parseInt(params?.id),
+                comment: await commentForm.getFieldValue('comment'),
               },
             },
             context: {
@@ -366,7 +388,7 @@ export default function ViewPO() {
             },
           })
           .then(res => {
-            const data = res?.data?.resendPOAttachment;
+            const data = res?.data?.createPOComment;
             if (!data.status) return;
             Modal.success({
               content: data.message,
@@ -474,7 +496,11 @@ export default function ViewPO() {
                                   checkPermission('submit-po', 'edit') && (
                                     <>
                                       {/* Submit PO to vendor */}
-                                      <Button type="primary" onClick={submitPO} style={{ marginBottom: 15, marginRight: 10 }}>
+                                      <Button
+                                        type="primary"
+                                        onClick={submitPO}
+                                        style={{ marginBottom: 15, marginRight: 10 }}
+                                      >
                                         Submit PO to vendor
                                       </Button>
                                     </>
@@ -483,7 +509,11 @@ export default function ViewPO() {
                                 {singlePO.data.postatus.slug === 'submitted' &&
                                   checkPermission('send-po-link', 'edit') && (
                                     <>
-                                      <Button type="primary" onClick={sendPOLink} style={{ marginBottom: 15, marginRight: 10 }}>
+                                      <Button
+                                        type="primary"
+                                        onClick={sendPOLink}
+                                        style={{ marginBottom: 15, marginRight: 10 }}
+                                      >
                                         Send PO link to vendor
                                       </Button>
                                     </>
@@ -491,18 +521,40 @@ export default function ViewPO() {
                                 {singlePO.data.postatus.slug === 'submitted' && checkPermission('send-po', 'edit') && (
                                   <>
                                     {/* Action with Pdf to vendor */}
-                                    <Button type="primary" onClick={sendPO} style={{ marginBottom: 15, marginRight: 10 }}>
+                                    <Button
+                                      type="primary"
+                                      onClick={sendPO}
+                                      style={{ marginBottom: 15, marginRight: 10 }}
+                                    >
                                       Send PO to vendor
                                     </Button>
                                     {/* Action with Pdf to vendor */}
-                                    <Button type="primary" onClick={requestTracking} style={{ marginBottom: 15, marginRight: 10 }}>
-                                      Request Tracking No
-                                    </Button>
-                                    <Button type="primary" onClick={addComment} style={{ marginBottom: 15, marginRight: 10 }}>
-                                      Add Comment
-                                    </Button>
                                   </>
                                 )}
+                                {singlePO.data.postatus.slug === 'submitted' &&
+                                  checkPermission('po-request-tracking-no', 'edit') && (
+                                    <>
+                                      <Button
+                                        type="primary"
+                                        onClick={requestTracking}
+                                        style={{ marginBottom: 15, marginRight: 10 }}
+                                      >
+                                        Request Tracking No
+                                      </Button>
+                                    </>
+                                  )}
+                                {singlePO.data.postatus.slug === 'submitted' &&
+                                  checkPermission('po-add-comment', 'edit') && (
+                                    <>
+                                      <Button
+                                        type="primary"
+                                        onClick={addComment}
+                                        style={{ marginBottom: 15, marginRight: 10 }}
+                                      >
+                                        Add Comment
+                                      </Button>
+                                    </>
+                                  )}
 
                                 {singlePO?.data?.order_id && (
                                   <>
@@ -516,9 +568,20 @@ export default function ViewPO() {
                                   </>
                                 )}
                                 {params?.id && (
-                                  <Link target="_blank" to={`/admin/po/po-print/${params?.id}`}>
-                                    <Button type="primary" style={{ marginBottom: 15, marginRight: 10 }}>Print PO</Button>
-                                  </Link>
+                                  <>
+                                    <Link target="_blank" to={`/admin/po/po-print/${params?.id}`}>
+                                      <Button type="primary" style={{ marginBottom: 15, marginRight: 10 }}>
+                                        Print PO
+                                      </Button>
+                                    </Link>
+                                    {checkPermission('purchase-order-edit', 'edit') && (
+                                      <Link to={`/admin/po/${params?.id}`}>
+                                        <Button type="primary" style={{ marginBottom: 15, marginRight: 10 }}>
+                                          Edit PO
+                                        </Button>
+                                      </Link>
+                                    )}
+                                  </>
                                 )}
                               </Col>
                               <Col md={12} sm={24}>

@@ -4,7 +4,7 @@ import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
 import { Cards } from '../../components/cards/frame/cards-frame';
 import { Button } from '../../components/buttons/buttons';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useHistory, useLocation, useParams } from 'react-router-dom';
 import queryString from 'query-string';
 import apolloClient, { vendorMutation } from '../../utility/apollo';
 import { poQuery } from '../../apollo/po';
@@ -31,9 +31,11 @@ import Products from '../../components/products/Products';
 import config from '../../config/config';
 const { confirm } = Modal;
 
-const AddPO = () => {
-  viewPermission('purchase-order');
+const PO = () => {
   const history = useHistory();
+  const { id } = useParams();
+  if (id) viewPermission('purchase-order-edit');
+  else viewPermission('purchase-order');
   const token = useSelector(state => state.auth.token);
   const [form] = Form.useForm();
   const { search } = useLocation();
@@ -85,6 +87,9 @@ const AddPO = () => {
   const [changeAddress, setChangeAddress] = useState(false);
   // Billing Address List State End
   const [creatingPO, setCreatingPO] = useState(false);
+
+  // Edit PO
+  const [singlePO, setSinglePO] = useState({ data: [], isLoading: false });
 
   // Get Order Id From Param And get the Order
   let check_post = true;
@@ -225,7 +230,7 @@ const AddPO = () => {
       return { id: item.id, price: item.cost, quantity: item.quantity };
     });
 
-    const { order_id, shipping_cost, tax_amount, ...newValues } = values;
+    const { order_id, shipping_cost, tax_amount, vendor_billing_address_id, ...newValues } = values;
 
     const variables = {
       ...newValues,
@@ -236,6 +241,12 @@ const AddPO = () => {
       ...(tax_amount && { tax_amount: parseFloat(tax_amount) }),
       products: newProduct,
       type: selectedType,
+      ...(!id && { vendor_billing_address_id }),
+      ...(id && {
+        id: singlePO?.data?.id,
+        po_number: singlePO?.data?.po_number,
+        vendor_billing_id: vendor_billing_address_id,
+      }),
     };
 
     // Loading Start Until process Finished
@@ -244,7 +255,7 @@ const AddPO = () => {
     setIsLoading(true);
     apolloClient
       .mutate({
-        mutation: poQuery.CREATE_PURCHASE_ORDER,
+        mutation: id ? poQuery.UPDATE_PO : poQuery.CREATE_PURCHASE_ORDER,
         variables: { data: variables },
         context: {
           headers: {
@@ -266,9 +277,9 @@ const AddPO = () => {
         ],
       })
       .then(res => {
-        const data = res?.data?.createPurchaseOrder;
+        const data = id ? res?.data?.updatePurchaseOrder : res?.data?.createPurchaseOrder;
         if (!data.status) return toast.error(data.message);
-        successPO(data?.po_number);
+        successPO(data?.po_number, id);
       })
       .catch(err => {
         console.log('got error on add vendor', err);
@@ -304,7 +315,7 @@ const AddPO = () => {
   // Confirmation For Create PO
   const createConfirm = () => {
     confirm({
-      title: 'Do you want to create this PO?',
+      title: id ? 'Do you want to update this PO?' : 'Do you want to create this PO?',
       icon: <CheckCircleOutlined />,
       content: null,
       onOk() {
@@ -440,10 +451,72 @@ const AddPO = () => {
       });
   }, [changeAddress]);
 
+  /* ------------------------ Get Single PO Order Start ----------------------- */
+  useEffect(() => {
+    if (!id) return;
+    apolloClient
+      .query({
+        query: poQuery.GET_SINGLE_PO,
+        variables: {
+          query: {
+            id: parseInt(id),
+          },
+        },
+        context: {
+          headers: {
+            TENANTID: process.env.REACT_APP_TENANTID,
+            Authorization: token,
+          },
+        },
+      })
+      .then(res => {
+        const data = res?.data?.getSinglePurchaseOrder;
+        if (!data.status) return;
+        setSinglePO({ data: data?.data, isLoading: false, message: data?.message });
+        setSelectedType(data?.data?.type);
+        setSelectedContactPerson(data?.data?.contactPerson);
+        setSelectedVendor(data?.data?.vendor);
+        setSelectedVendorBillingAddress(data?.data?.vendorBillingAddress);
+        setSelectedPaymentMethod(data?.data?.paymentmethod);
+        setSelectedShippingMethod(data?.data?.shippingMethod);
+        setSelectedShippingAccount(data?.data?.shippingAccount);
+        form.setFieldsValue({
+          comment: data?.data?.comment,
+          receiving_instruction: data?.data?.receiving_instruction,
+          is_insurance: data?.data?.is_insurance,
+          shipping_method_id: data?.data?.shippingMethod?.id,
+          shipping_cost: data?.data?.shipping_cost,
+          payment_method_id: data?.data?.paymentmethod?.id,
+          tax_amount: data?.data?.tax_amount,
+          vendor_id: data?.data?.vendor?.id,
+          vendor_billing_address_id: data?.data?.vendorBillingAddress?.id,
+          order_id: data?.data?.order_id,
+        });
+        const new_product_list = data?.data?.poProductlist?.map(item => {
+          return {
+            prod_partnum: item.product.prod_partnum,
+            id: item.product.id,
+            cost: item.price,
+            quantity: item.quantity,
+            prod_name: item.product.prod_name,
+          };
+        });
+        setProducts(new_product_list);
+      })
+      .catch(err => {
+        console.log(err);
+        setSinglePO({ data: {}, isLoading: false, error: 'Something went wrong' });
+      })
+      .finally(() => {
+        setSinglePO(s => ({ ...s, isLoading: false }));
+      });
+  }, [id]);
+  /* ------------------------- Get Single PO Order End ------------------------ */
+
   // Success Message
   const successPO = po_number => {
     Modal.success({
-      content: `${po_number} has been created successfully.`,
+      content: `${po_number} has been ${id ? 'updated' : 'created'} successfully.`,
       onOk: () => {
         history.push('/admin/po/list?status=new');
       },
@@ -454,7 +527,17 @@ const AddPO = () => {
     <>
       <PageHeader title="Add Purchase Order" />
       <Main>
-        <Spin spinning={creatingPO} tip="Creating PO please wait..." size="large">
+        <Spin
+          spinning={creatingPO || singlePO.isLoading}
+          tip={
+            creatingPO
+              ? id
+                ? 'Updating PO please wait...'
+                : 'Creating PO please wait...'
+              : singlePO.isLoading && 'Loading...'
+          }
+          size="large"
+        >
           <>
             <Row gutter={25}>
               <Col sm={24} xs={24}>
@@ -545,7 +628,7 @@ const AddPO = () => {
                                             {selectedVendorBillingAddress?.city &&
                                               `${selectedVendorBillingAddress.city}, ${selectedVendorBillingAddress.state} - ${selectedVendorBillingAddress.zip_code}`}
                                           </p>
-                                          <p className="mb-0">{selectedVendorBillingAddress?.countryCode.name}</p>
+                                          <p className="mb-0">{selectedVendorBillingAddress?.countryCode?.name}</p>
                                         </Card>
                                       </Col>
                                     </Row>
@@ -743,17 +826,14 @@ const AddPO = () => {
                                     <TextArea placeholder="Comment" autoSize />
                                   </Form.Item>
                                   <Form.Item
+                                    style={{ marginBottom: 10 }}
                                     labelCol={{ xl: 4, xxl: 3 }}
                                     size="small"
                                     label="Receiving Instruction"
                                     labelAlign="left"
                                     name="receiving_instruction"
                                   >
-                                    <TextArea
-                                      style={{ marginTop: 10 }}
-                                      placeholder="Receiving Instruction"
-                                      autoSize
-                                    />
+                                    <TextArea style={{ marginTop: 10 }} placeholder="Receiving Instruction" autoSize />
                                   </Form.Item>
                                 </td>
                               </tr>
@@ -771,7 +851,7 @@ const AddPO = () => {
                                     name="is_insurance"
                                     style={{ marginTop: 10, marginBottom: 0 }}
                                   >
-                                    <Switch defaultChecked={false} />
+                                    <Switch checked={singlePO?.data?.is_insurance} />
                                   </Form.Item>
                                 </td>
                               </tr>
@@ -790,7 +870,7 @@ const AddPO = () => {
                               type="primary"
                               raised
                             >
-                              {isLoading ? 'Processing' : 'Create PO'}
+                              {isLoading ? 'Processing' : id ? 'Update PO' : 'Create PO'}
                             </Button>
                           </div>
                         </div>
@@ -861,7 +941,7 @@ const AddPO = () => {
             />
             <AddressList
               {...{
-                addresses: selectedVendor?.addresses.filter(item => item.type === 'billing'),
+                addresses: selectedVendor?.addresses?.filter(item => item.type === 'billing'),
                 addressListModalOpen: billingAddressListModalOpen,
                 setAddressListModalOpen: setBillingAddressListModalOpen,
                 type: 'billing',
@@ -893,4 +973,4 @@ const AddPO = () => {
   );
 };
 
-export default AddPO;
+export default PO;

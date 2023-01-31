@@ -247,7 +247,6 @@ const QuoteList = () => {
                   <Row gutter={25}>
                     <Col span={18}>
                       <Input
-                        style={{ height: "42px" }}
                         placeholder="Search Quotes..."
                         prefix={<SearchOutlined />}
                         value={filterDate?.searchQuery}

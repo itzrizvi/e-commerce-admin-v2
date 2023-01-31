@@ -418,7 +418,6 @@ const ListOrder = () => {
                   <Row gutter={25}>
                     <Col span={18}>
                       <Input
-                        style={{ height: '42px' }}
                         placeholder="Search Order By Customer..."
                         prefix={<SearchOutlined />}
                         value={filterParams?.searchQuery}
@@ -431,7 +430,6 @@ const ListOrder = () => {
                     </Col>
                     <Col span={6}>
                       <Button
-                        style={{ height: '42px' }}
                         size="large"
                         type="primary"
                         disabled={searchDisable}
