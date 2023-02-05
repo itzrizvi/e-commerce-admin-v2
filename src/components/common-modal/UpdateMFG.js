@@ -75,7 +75,6 @@ export default function UpdateMFG({ mfg, updateMfgModalOpen, setUpdateMfgModalOp
         form={mfgForm}
         name="mfgForm"
         layout="horizontal"
-        size="small"
         onFinish={handleSubmit}
       >
         <Row gutter={25}>

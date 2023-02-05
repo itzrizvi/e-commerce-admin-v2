@@ -25,7 +25,6 @@ export default function AddressList({
       <Row gutter={25}>
         <Col span={24}>
           <Button
-            size="small"
             style={{ float: 'right', zIndex: 1000, marginTop: -15, marginBottom: 10 }}
             title={`Add ${type} address`}
             htmlType="button"

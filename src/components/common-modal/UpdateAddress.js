@@ -65,7 +65,6 @@ export default function UpdateAddress({ type, address, addressModalOpen, setAddr
         form={addressForm}
         name="addressForm"
         layout="vertical"
-        size="small"
       >
         <Row gutter={25}>
           <Col md={24}>

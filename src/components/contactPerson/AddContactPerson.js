@@ -73,7 +73,6 @@ export default function AddContactPerson({
           form={personForm}
           name="personForm"
           layout="horizontal"
-          size="small"
         >
           <Form.Item
             {...formItemLayout}

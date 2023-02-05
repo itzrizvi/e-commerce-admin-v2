@@ -582,7 +582,6 @@ const UpdateVendor = () => {
             form={personForm}
             name="personForm"
             layout="horizontal"
-            size="small"
           >
             <Form.Item
               {...formItemLayout}

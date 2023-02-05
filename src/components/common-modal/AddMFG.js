@@ -76,7 +76,6 @@ export default function AddMFG({ po_id, addMfgModalOpen, setAddMfgModalOpen, set
         form={mfgForm}
         name="addMfgForm"
         layout="horizontal"
-        size="small"
         onFinish={handleSubmit}
       >
         <Row gutter={25}>

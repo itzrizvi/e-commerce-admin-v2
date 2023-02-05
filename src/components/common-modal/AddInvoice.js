@@ -79,7 +79,6 @@ export default function AddInvoice({ po_id, addInvoiceModalOpen, setAddInvoiceMo
         form={invoiceForm}
         name="addressForm"
         layout="horizontal"
-        size="small"
         onFinish={handleSubmit}
       >
         <Row gutter={25}>

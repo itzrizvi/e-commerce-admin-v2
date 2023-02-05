@@ -82,7 +82,6 @@ export default function UpdateInvoice({
         form={invoiceForm}
         name="addressForm"
         layout="horizontal"
-        size="small"
         onFinish={handleSubmit}
       >
         <Row gutter={25}>

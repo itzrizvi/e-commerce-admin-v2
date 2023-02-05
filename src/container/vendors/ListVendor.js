@@ -92,11 +92,11 @@ const ListVendor = () => {
       sorter: (a, b) => (a.status === b.status ? 0 : a.status ? -1 : 1),
       filters: [
         {
-          text: 'True',
+          text: 'Active',
           value: true,
         },
         {
-          text: 'False',
+          text: 'Inactive',
           value: false,
         },
       ],
@@ -329,11 +329,11 @@ const ListVendor = () => {
                               value={filterParams?.status}
                               options={[
                                 {
-                                  label: "True",
+                                  label: "Active",
                                   value: "true"
                                 },
                                 {
-                                  label: "False",
+                                  label: "Inactive",
                                   value: "false"
                                 },
                               ]}
