@@ -69,16 +69,16 @@ const AddVendor = () => {
       } else if (current === 1) {
         // validate billingAddresses.
         const notValidate = billingAddresses.find(item => {
-          const { id, address1, country, city, state, zip_code, address2 } = item;
-          const checkFalse = !(id && address1 && country && city && state && zip_code && address2);
+          const { id, address1, country, city, state, zip_code } = item;
+          const checkFalse = !(id && address1 && country && city && state && zip_code);
           return checkFalse;
         });
         if (notValidate?.id) return setMessage({ type: 'warning', message: 'Enter Billing Address Correctly.' });
       } else if (current === 2) {
         // validate shippingAddresses.
         const notValidate1 = shippingAddresses.find(item => {
-          const { id, address1, country, city, state, zip_code, address2 } = item;
-          const checkFalse = !(id && address1 && country && city && state && zip_code && address2);
+          const { id, address1, country, city, state, zip_code } = item;
+          const checkFalse = !(id && address1 && country && city && state && zip_code);
           return checkFalse;
         });
         if (notValidate1?.id) return setMessage({ type: 'warning', message: 'Enter Shipping Address Correctly.' });
