@@ -850,8 +850,9 @@ const PO = () => {
                                     labelAlign="left"
                                     name="is_insurance"
                                     style={{ marginTop: 10, marginBottom: 0 }}
+                                    initialValue={singlePO?.data?.is_insurance}
                                   >
-                                    <Switch checked={singlePO?.data?.is_insurance} />
+                                    <Switch defaultChecked={singlePO?.data?.is_insurance} />
                                   </Form.Item>
                                 </td>
                               </tr>
