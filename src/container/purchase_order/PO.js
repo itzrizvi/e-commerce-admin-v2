@@ -263,18 +263,6 @@ const PO = () => {
             Authorization: token,
           },
         },
-        refetchQueries: [
-          {
-            query: poQuery.GET_ALL_PO,
-            context: {
-              headers: {
-                TENANTID: process.env.REACT_APP_TENANTID,
-                Authorization: token,
-              },
-            },
-          },
-          ['getPurchaseOrderList'],
-        ],
       })
       .then(res => {
         const data = id ? res?.data?.updatePurchaseOrder : res?.data?.createPurchaseOrder;
