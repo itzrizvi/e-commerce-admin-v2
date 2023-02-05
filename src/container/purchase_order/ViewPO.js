@@ -1,4 +1,4 @@
-import { Button, Col, Divider, Form, Input, message, Modal, Row, Select, Spin, Tabs } from 'antd';
+import { Button, Col, Divider, Form, Input, Modal, Row, Spin, Switch, Tabs } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Link, useParams } from 'react-router-dom';
@@ -17,7 +17,7 @@ import AddMFG from '../../components/common-modal/AddMFG';
 import POHistoryList from '../../components/po/POHistoryList';
 import ViewOrder from '../../components/common-modal/ViewOrder';
 import { checkPermission } from '../../utility/utility';
-import { validateEmail } from '../../utility/stringModify';
+import configMessage from '../../config/config_message';
 
 export default function ViewPO() {
   const params = useParams();
@@ -38,6 +38,8 @@ export default function ViewPO() {
   const [changeActivityHistory, setChangeActivityHistory] = useState(false);
   const [activityHistory, setActivityHistory] = useState([]);
   const [tabLoading, setTabLoading] = useState(true);
+  const [customEmailForSendPoLink, setCustomEmailForSendPoLink] = useState(false);
+  const [customEmailForSendPoToVendor, setCustomEmailForSendPoToVendor] = useState(false);
   /* ------------------------ Get Single PO Order Start ----------------------- */
   useEffect(() => {
     if (!params?.id) return;
@@ -58,15 +60,18 @@ export default function ViewPO() {
       })
       .then(res => {
         const data = res?.data?.getSinglePurchaseOrder;
-        if (!data.status) return;
+        if (!data.status) {
+          Modal.error({
+            title: 'Internal Error',
+            content: configMessage.INTERNAL_ERROR_MESSAGE,
+          });
+          return;
+        }
         setSinglePO({ data: data?.data, isLoading: false, message: data?.message });
       })
       .catch(err => {
         console.log(err);
         setSinglePO({ data: {}, isLoading: false, error: 'Something went worng' });
-      })
-      .finally(() => {
-        setSinglePO(s => ({ ...s, isLoading: false }));
       });
   }, [params?.id]);
 
@@ -215,27 +220,33 @@ export default function ViewPO() {
     });
   };
   const sendPOLink = () => {
-    Modal.confirm({
+    const modal = Modal.confirm({
       title: 'Do you want to send PO link to vendor?',
       icon: <CheckCircleOutlined />,
       className: 'width-600',
       content: (
         <Form style={{ width: '100%' }} form={sendPOLinkForm} name="sendPO">
-          <Form.Item
-            rules={[
-              {
-                type: 'email',
-                message: 'Invalid email',
-              },
-              {
-                required: true,
-                message: 'Email is required',
-              },
-            ]}
-            name="emails"
-          >
-            <Input type="email" placeholder="Email address" />
+          <Form.Item label="Custom Email">
+            <Switch
+              onChange={checked => {
+                setCustomEmailForSendPoLink(checked);
+                modal.update(prev => prev);
+              }}
+            />
           </Form.Item>
+          {customEmailForSendPoLink && (
+            <Form.Item
+              rules={[
+                {
+                  type: 'email',
+                  message: 'Invalid email',
+                },
+              ]}
+              name="emails"
+            >
+              <Input type="email" placeholder="Email address" />
+            </Form.Item>
+          )}
         </Form>
       ),
       async onOk() {
@@ -246,7 +257,7 @@ export default function ViewPO() {
             variables: {
               data: {
                 po_id: parseInt(params?.id),
-                emails: new Array(sendPOLinkForm.getFieldValue('emails')),
+                ...(customEmailForSendPoLink && { emails: new Array(sendPOLinkForm.getFieldValue('emails')) }),
               },
             },
             context: {
@@ -269,27 +280,34 @@ export default function ViewPO() {
     });
   };
   const sendPO = () => {
-    Modal.confirm({
+    const modal = Modal.confirm({
       title: 'Do you want to send PO to vendor?',
       icon: <CheckCircleOutlined />,
       className: 'width-600',
       content: (
         <Form style={{ width: '100%' }} form={sendPOForm} name="sendPO">
-          <Form.Item
-            rules={[
-              {
-                type: 'email',
-                message: 'Invalid email',
-              },
-              {
-                required: true,
-                message: 'Email is required',
-              },
-            ]}
-            name="emails"
-          >
-            <Input type="email" placeholder="Email address" />
+          <Form.Item label="Custom Email">
+            <Switch
+              onChange={checked => {
+                setCustomEmailForSendPoToVendor(checked);
+                modal.update(prev => prev);
+              }}
+            />
           </Form.Item>
+          {console.log(customEmailForSendPoToVendor)}
+          {customEmailForSendPoToVendor && (
+            <Form.Item
+              rules={[
+                {
+                  type: 'email',
+                  message: 'Invalid email',
+                },
+              ]}
+              name="emails"
+            >
+              <Input type="email" placeholder="Email address" />
+            </Form.Item>
+          )}
         </Form>
       ),
       async onOk() {
@@ -300,7 +318,7 @@ export default function ViewPO() {
             variables: {
               data: {
                 po_id: parseInt(params?.id),
-                emails: new Array(sendPOForm.getFieldValue('emails')),
+                ...(customEmailForSendPoToVendor && { emails: new Array(sendPOForm.getFieldValue('emails')) }),
               },
             },
             context: {
