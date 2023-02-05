@@ -41,6 +41,9 @@ export default function ViewPO() {
   const [customEmailForSendPoLink, setCustomEmailForSendPoLink] = useState(false);
   const [customEmailForSendPoToVendor, setCustomEmailForSendPoToVendor] = useState(false);
   /* ------------------------ Get Single PO Order Start ----------------------- */
+  // Send Po And PO Link
+  const [openSendPOLinkModalOpen, setOpenSendPOLinkModalOpen] = useState(false);
+  const [openSendPOModalOpen, setOpenSendPOModalOpen] = useState(false);
   useEffect(() => {
     if (!params?.id) return;
     apolloClient
@@ -212,127 +215,6 @@ export default function ViewPO() {
             Modal.success({
               content: 'PO send successfully.',
               onOk: () => window.location.reload(),
-            });
-          });
-      },
-      okText: 'Yes',
-      cancelText: 'No',
-    });
-  };
-  const sendPOLink = () => {
-    const modal = Modal.confirm({
-      title: 'Do you want to send PO link to vendor?',
-      icon: <CheckCircleOutlined />,
-      className: 'width-600',
-      content: (
-        <Form style={{ width: '100%' }} form={sendPOLinkForm} name="sendPO">
-          <Form.Item label="Custom Email">
-            <Switch
-              onChange={checked => {
-                setCustomEmailForSendPoLink(checked);
-                modal.update(prev => prev);
-              }}
-            />
-          </Form.Item>
-          {customEmailForSendPoLink && (
-            <Form.Item
-              rules={[
-                {
-                  type: 'email',
-                  message: 'Invalid email',
-                },
-              ]}
-              name="emails"
-            >
-              <Input type="email" placeholder="Email address" />
-            </Form.Item>
-          )}
-        </Form>
-      ),
-      async onOk() {
-        await sendPOLinkForm.validateFields(['emails']);
-        apolloClient
-          .mutate({
-            mutation: poQuery.SEND_PO_LINK,
-            variables: {
-              data: {
-                po_id: parseInt(params?.id),
-                ...(customEmailForSendPoLink && { emails: new Array(sendPOLinkForm.getFieldValue('emails')) }),
-              },
-            },
-            context: {
-              headers: {
-                TENANTID: process.env.REACT_APP_TENANTID,
-                Authorization: token,
-              },
-            },
-          })
-          .then(res => {
-            const data = res?.data?.resendPOLink;
-            if (!data.status) return;
-            Modal.success({
-              content: 'PO link send successfully.',
-            });
-          });
-      },
-      okText: 'Yes',
-      cancelText: 'No',
-    });
-  };
-  const sendPO = () => {
-    const modal = Modal.confirm({
-      title: 'Do you want to send PO to vendor?',
-      icon: <CheckCircleOutlined />,
-      className: 'width-600',
-      content: (
-        <Form style={{ width: '100%' }} form={sendPOForm} name="sendPO">
-          <Form.Item label="Custom Email">
-            <Switch
-              onChange={checked => {
-                setCustomEmailForSendPoToVendor(checked);
-                modal.update(prev => prev);
-              }}
-            />
-          </Form.Item>
-          {console.log(customEmailForSendPoToVendor)}
-          {customEmailForSendPoToVendor && (
-            <Form.Item
-              rules={[
-                {
-                  type: 'email',
-                  message: 'Invalid email',
-                },
-              ]}
-              name="emails"
-            >
-              <Input type="email" placeholder="Email address" />
-            </Form.Item>
-          )}
-        </Form>
-      ),
-      async onOk() {
-        await sendPOForm.validateFields(['emails']);
-        apolloClient
-          .mutate({
-            mutation: poQuery.SEND_PO,
-            variables: {
-              data: {
-                po_id: parseInt(params?.id),
-                ...(customEmailForSendPoToVendor && { emails: new Array(sendPOForm.getFieldValue('emails')) }),
-              },
-            },
-            context: {
-              headers: {
-                TENANTID: process.env.REACT_APP_TENANTID,
-                Authorization: token,
-              },
-            },
-          })
-          .then(res => {
-            const data = res?.data?.resendPOAttachment;
-            if (!data.status) return;
-            Modal.success({
-              content: 'PO send successfully.',
             });
           });
       },
@@ -529,7 +411,7 @@ export default function ViewPO() {
                                     <>
                                       <Button
                                         type="primary"
-                                        onClick={sendPOLink}
+                                        onClick={() => setOpenSendPOLinkModalOpen(true)}
                                         style={{ marginBottom: 15, marginRight: 10 }}
                                       >
                                         Send PO link to vendor
@@ -541,7 +423,7 @@ export default function ViewPO() {
                                     {/* Action with Pdf to vendor */}
                                     <Button
                                       type="primary"
-                                      onClick={sendPO}
+                                      onClick={() => setOpenSendPOModalOpen(true)}
                                       style={{ marginBottom: 15, marginRight: 10 }}
                                     >
                                       Send PO to vendor
@@ -738,6 +620,148 @@ export default function ViewPO() {
         />
         <AddMFG {...{ po_id: parseInt(params?.id), addMfgModalOpen, setAddMfgModalOpen, setChangeMfg }} />
         <ViewOrder {...{ order_id: singlePO?.data?.order_id, viewOrderModalOpen, setViewOrderModalOpen }} />
+        <Modal
+          title="Do you want to send PO link to vendor?"
+          width={600}
+          open={openSendPOLinkModalOpen}
+          destroyOnClose={true}
+          centered={true}
+          okText="Yes"
+          cancelText="No"
+          onOk={() => sendPOLinkForm.submit()}
+          onCancel={() => {
+            setOpenSendPOLinkModalOpen(false);
+            setCustomEmailForSendPoLink(false);
+          }}
+        >
+          <Form
+            style={{ width: '100%' }}
+            form={sendPOLinkForm}
+            name="sendPO"
+            onFinish={async () => {
+              if (customEmailForSendPoLink) await sendPOLinkForm.validateFields(['emails']);
+              apolloClient
+                .mutate({
+                  mutation: poQuery.SEND_PO_LINK,
+                  variables: {
+                    data: {
+                      po_id: parseInt(params?.id),
+                      ...(customEmailForSendPoLink && { emails: new Array(sendPOLinkForm.getFieldValue('emails')) }),
+                    },
+                  },
+                  context: {
+                    headers: {
+                      TENANTID: process.env.REACT_APP_TENANTID,
+                      Authorization: token,
+                    },
+                  },
+                })
+                .then(res => {
+                  const data = res?.data?.resendPOLink;
+                  if (!data.status) return;
+                  setOpenSendPOLinkModalOpen(false);
+                  setCustomEmailForSendPoLink(false);
+                  Modal.success({
+                    content: 'PO link send successfully.',
+                  });
+                });
+            }}
+          >
+            <Form.Item label="Custom Email">
+              <Switch onChange={checked => setCustomEmailForSendPoLink(checked)} />
+            </Form.Item>
+            <div style={{ minHeight: 50 }}>
+              {customEmailForSendPoLink && (
+                <Form.Item
+                  rules={[
+                    {
+                      type: 'email',
+                      message: 'Invalid email',
+                    },
+                    {
+                      required: true,
+                      message: 'Email is required',
+                    },
+                  ]}
+                  name="emails"
+                >
+                  <Input type="email" placeholder="Email address" />
+                </Form.Item>
+              )}
+            </div>
+          </Form>
+        </Modal>
+        <Modal
+          title="Do you want to send PO to vendor?"
+          width={600}
+          open={openSendPOModalOpen}
+          destroyOnClose={true}
+          centered={true}
+          okText="Yes"
+          cancelText="No"
+          onOk={() => sendPOForm.submit()}
+          onCancel={() => {
+            setOpenSendPOModalOpen(false);
+            setCustomEmailForSendPoToVendor(false);
+          }}
+        >
+          <Form
+            style={{ width: '100%' }}
+            form={sendPOForm}
+            name="sendPO"
+            onFinish={async () => {
+              if (customEmailForSendPoToVendor) await sendPOForm.validateFields(['emails']);
+              apolloClient
+                .mutate({
+                  mutation: poQuery.SEND_PO,
+                  variables: {
+                    data: {
+                      po_id: parseInt(params?.id),
+                      ...(customEmailForSendPoToVendor && { emails: new Array(sendPOForm.getFieldValue('emails')) }),
+                    },
+                  },
+                  context: {
+                    headers: {
+                      TENANTID: process.env.REACT_APP_TENANTID,
+                      Authorization: token,
+                    },
+                  },
+                })
+                .then(res => {
+                  const data = res?.data?.resendPOAttachment;
+                  if (!data.status) return;
+                  setOpenSendPOModalOpen(false);
+                  setCustomEmailForSendPoToVendor(false);
+                  Modal.success({
+                    content: 'PO send successfully.',
+                  });
+                });
+            }}
+          >
+            <Form.Item label="Custom Email">
+              <Switch onChange={checked => setCustomEmailForSendPoToVendor(checked)} />
+            </Form.Item>
+            <div style={{ minHeight: 50 }}>
+              {customEmailForSendPoToVendor && (
+                <Form.Item
+                  rules={[
+                    {
+                      type: 'email',
+                      message: 'Invalid email',
+                    },
+                    {
+                      required: true,
+                      message: 'Email is required',
+                    },
+                  ]}
+                  name="emails"
+                >
+                  <Input type="email" placeholder="Email address" />
+                </Form.Item>
+              )}
+            </div>
+          </Form>
+        </Modal>
       </Main>
     </>
   );

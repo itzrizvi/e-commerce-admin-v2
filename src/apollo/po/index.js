@@ -546,7 +546,7 @@ export const poQuery = {
   `,
   SEND_PO: gql`
     mutation resendPOAttachment($data: ResendPOAttachmentInput) {
-      resendPOLink(data: $data) {
+      resendPOAttachment(data: $data) {
         message
         status
       }
