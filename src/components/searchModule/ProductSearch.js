@@ -144,7 +144,7 @@ export default function ProductSearch({ productSearchModalOpen, setProductSearch
   };
 
   const addProductHandler = (record) => {
-    setProducts(prev => ([...prev, record]))
+    setProducts(prev => ([...prev, {...record, isNew: true}]))
   }
 
   return (

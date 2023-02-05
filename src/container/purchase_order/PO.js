@@ -227,7 +227,7 @@ const PO = () => {
     });
     if (notValidate) return toast.warning('Please Fill Products All of Data!');
     const newProduct = products.map(item => {
-      return { id: item.id, price: item.cost, quantity: item.quantity };
+      return { id: item.id, price: item.cost, quantity: item.quantity, ...(item?.isNew && { isNew: item?.isNew }) };
     });
 
     const { order_id, shipping_cost, tax_amount, vendor_billing_address_id, ...newValues } = values;
