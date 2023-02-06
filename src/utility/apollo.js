@@ -21,7 +21,6 @@ export const authQuery = {
         status
         data {
           id
-          role_no
           role
           role_slug
           role_status
@@ -104,7 +103,6 @@ export const authQuery = {
         status
         data {
           id
-          role_no
           role
           role_slug
           role_status
@@ -143,7 +141,6 @@ export const authQuery = {
             id
             role
             role_slug
-            role_no
             role_status
           }
         }
@@ -450,7 +447,6 @@ export const productQuery = {
             image
             roles {
               id
-              role_no
               role
               role_slug
               role_status
@@ -596,7 +592,6 @@ export const productQuery = {
             image
             roles {
               id
-              role_no
               role
               role_slug
               role_status

@@ -213,7 +213,6 @@ export const orderQuery = {
             image
             roles {
               id
-              role_no
               role
               role_slug
               role_status
