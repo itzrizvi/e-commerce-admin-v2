@@ -11,7 +11,7 @@ import { contactUsQueries } from '../../apollo/contactUs';
 import FontAwesome from 'react-fontawesome';
 import Cookies from 'js-cookie';
 import { Link } from 'react-router-dom';
-import { ShoppingCartOutlined, ShoppingOutlined, UsergroupAddOutlined } from '@ant-design/icons';
+import { ShoppingCartOutlined, ShoppingOutlined, SnippetsOutlined, UsergroupAddOutlined } from '@ant-design/icons';
 import CountUp from 'react-countup';
 import { dashboardAnalytics } from '../../apollo/dashboard';
 import Moment from 'react-moment';
