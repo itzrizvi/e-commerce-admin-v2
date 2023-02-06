@@ -13,6 +13,7 @@ import Cookies from 'js-cookie';
 import { toast } from 'react-toastify';
 import config from '../../config/config';
 import { viewPermission } from '../../utility/utility';
+import InternalErrorMessage from '../../components/esential/InternalErrorMessage';
 
 const ListCoupon = () => {
     viewPermission('coupon');
@@ -202,7 +203,7 @@ const ListCoupon = () => {
 
         }).then(res => {
             const data = res?.data?.updateCoupon
-            if (!data.status) return toast.error(data.message);
+            if (!data.status) return InternalErrorMessage();
             toast.success(`${record.coupon_name} status updated successfully`);
 
         }).catch(err => {

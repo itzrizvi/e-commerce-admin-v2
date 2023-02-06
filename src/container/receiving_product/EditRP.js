@@ -13,6 +13,7 @@ import Products from './Products';
 import { useSelector } from 'react-redux';
 import { receivingProductQuery } from './../../apollo/receiving_product/index';
 import Moment from 'react-moment';
+import InternalErrorMessage from '../../components/esential/InternalErrorMessage';
 
 const EditRP = () => {
   viewPermission('receiving-product');
@@ -56,8 +57,7 @@ const EditRP = () => {
       })
       .then(res => {
         const data = res?.data?.getSingleReceivingProduct;
-        console.log("🚀 ~ file: EditRP.js:59 ~ useEffect ~ data", data)
-        if (!data.status) return;
+        if (!data.status) return InternalErrorMessage();
         setSingleRP({ data: data?.data, isLoading: false, message: data.message });
         setProductItem(data?.data?.receivingitems.map(item => ({ ...item, receiving_quantity: 0, new_serials: [] })));
         form.setFieldsValue({
@@ -157,7 +157,7 @@ const EditRP = () => {
       })
       .then(res => {
         const data = res?.data?.updateReceiving;
-        if (!data.status) return toast.error(data.message);
+        if (!data.status) return InternalErrorMessage();
         setTimeout(() => {
           history.push('/admin/rp/list');
         }, 1000);

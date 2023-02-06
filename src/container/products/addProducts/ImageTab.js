@@ -5,6 +5,7 @@ import { toast } from 'react-toastify';
 import { InboxOutlined } from '@ant-design/icons'
 import { apolloUploadClient, productMutation } from '../../../utility/apollo';
 import Cookies from 'js-cookie';
+import InternalErrorMessage from '../../../components/esential/InternalErrorMessage';
 
 const ImageTab = ({ featuresImage, setFeaturesImage, gallaryImages, setGallaryImages, singleProdId, setIsLoading }) => {
 
@@ -38,7 +39,7 @@ const ImageTab = ({ featuresImage, setFeaturesImage, gallaryImages, setGallaryIm
                     }
                 }).then(res => {
                     const data = res?.data?.updateThumbnail
-                    if (!data.status) return toast.error(data.message);
+                    if (!data.status) return InternalErrorMessage();
                     toast.success(data.message);
                 }).catch(err => {
                     console.log("update thumbnail err:\n", err)
@@ -78,7 +79,7 @@ const ImageTab = ({ featuresImage, setFeaturesImage, gallaryImages, setGallaryIm
                 }
             }).then(res => {
                 const data = res?.data?.uploadGalleryImage
-                if (!data.status) return toast.error(data.message);
+                if (!data.status) return InternalErrorMessage();
                 toast.success(data.message);
             }).catch(err => {
                 console.log("update gal img err:\n", err)
@@ -141,7 +142,7 @@ const ImageTab = ({ featuresImage, setFeaturesImage, gallaryImages, setGallaryIm
                                 }
                             }).then(res => {
                                 const data = res?.data?.deleteGalleryImage
-                                if (!data.status) return toast.error(data.message);
+                                if (!data.status) return InternalErrorMessage();
                                 toast.success(data.message);
                             }).catch(err => {
                                 console.log("del gal img err:\n", err)

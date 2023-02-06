@@ -10,6 +10,7 @@ import apolloClient, { attributeMutation, attributeQuery } from '../../utility/a
 import Cookies from 'js-cookie';
 import { toast } from 'react-toastify';
 import { viewPermission } from '../../utility/utility';
+import InternalErrorMessage from '../../components/esential/InternalErrorMessage';
 
 const AddAttributeGroup = () => {
   viewPermission('attribute-group');
@@ -85,7 +86,7 @@ const AddAttributeGroup = () => {
         })
         .then(res => {
           const data = res?.data?.createAttrGroup;
-          if (!data.status) return toast.error(data.message);
+          if (!data.status) return InternalErrorMessage();
           setTimeout(() => {
             history.push('/admin/attributes/list-group');
           }, 1000);
@@ -135,7 +136,7 @@ const AddAttributeGroup = () => {
         })
         .then(res => {
           const data = res?.data?.updateAttrGroup;
-          if (!data.status) return toast.error(data.message);
+          if (!data.status) return InternalErrorMessage();
           setTimeout(() => {
             history.push('/admin/attributes/list-group');
           }, 1000);

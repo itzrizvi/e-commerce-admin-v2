@@ -29,6 +29,7 @@ import { addressSchema } from '../../apollo/address';
 import UpdateAddress from '../../components/common-modal/UpdateAddress';
 import Products from '../../components/products/Products';
 import config from '../../config/config';
+import InternalErrorMessage from '../../components/esential/InternalErrorMessage';
 const { confirm } = Modal;
 
 const PO = () => {
@@ -117,7 +118,7 @@ const PO = () => {
         })
         .then(res => {
           const data = res.data.getSingleOrderAdmin;
-          if (!data.status) return;
+          if (!data.status) return InternalErrorMessage();
           form.setFieldsValue({
             order_id: data?.data?.id,
           });
@@ -164,7 +165,7 @@ const PO = () => {
       })
       .then(res => {
         const data = res?.data?.getShippingMethodListAdmin;
-        if (!data.status) return;
+        if (!data.status) return InternalErrorMessage();
         setShippingMethod(data?.data);
         setSelectedShippingMethod(data?.data?.filter(item => item.isDefault === true)[0]?.id);
       })
@@ -184,7 +185,7 @@ const PO = () => {
       })
       .then(res => {
         const data = res?.data?.getPaymentMethodListPublic;
-        if (!data.status) return;
+        if (!data.status) return InternalErrorMessage();
         setPaymentMethod(data?.data);
       })
       .catch(err => {
@@ -211,7 +212,7 @@ const PO = () => {
       })
       .then(res => {
         const data = res.data.getContactPerson;
-        if (!data.status) return;
+        if (!data.status) return InternalErrorMessage();
         setSelectedVendor(prev => ({ ...prev, contactPersons: data?.data }));
       });
   }, [cpSuccess]);
@@ -266,7 +267,7 @@ const PO = () => {
       })
       .then(res => {
         const data = id ? res?.data?.updatePurchaseOrder : res?.data?.createPurchaseOrder;
-        if (!data.status) return toast.error(data.message);
+        if (!data.status) return InternalErrorMessage();
         successPO(data?.po_number, id);
       })
       .catch(err => {
@@ -460,7 +461,7 @@ const PO = () => {
       })
       .then(res => {
         const data = res?.data?.getSinglePurchaseOrder;
-        if (!data.status) return;
+        if (!data.status) return InternalErrorMessage();
         setSinglePO({ data: data?.data, isLoading: false, message: data?.message });
         setSelectedType(data?.data?.type);
         setSelectedContactPerson(data?.data?.contactPerson);

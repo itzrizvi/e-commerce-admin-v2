@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Col, Tabs, Form, Input, Switch, Select, Spin } from 'antd';
+import { Row, Col, Tabs, Form, Input, Switch, Select, Spin, message } from 'antd';
 import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
 import { Cards } from '../../components/cards/frame/cards-frame';
@@ -19,6 +19,7 @@ import { viewPermission } from '../../utility/utility';
 import { Link, useHistory, useLocation } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import queryString from 'query-string';
+import InternalErrorMessage from '../../components/esential/InternalErrorMessage';
 
 const AddProduct = () => {
   viewPermission('product');
@@ -53,7 +54,7 @@ const AddProduct = () => {
       })
       .then(res => {
         const data = res?.data?.getSingleProduct;
-        if (!data.status) return toast.error('Try reload..!');
+        if (!data.status) return InternalErrorMessage();
         setSingleProduct({ data: data?.data, isLoading: false });
         setLongDescription(RichTextEditor.createValueFromString(data?.data?.prod_long_desc, 'html'));
         setProd_long_desc(data?.data?.prod_long_desc);
@@ -553,14 +554,14 @@ const AddProduct = () => {
     }
 
     // All Validation Start
-    if (!data.prod_long_desc) return toast.warning('Please enter a long description');
-    if (!data.prod_short_desc) return toast.warning('Please enter a long description');
-    if (!data.prod_sku) return toast.warning('Please enter Product SKU');
-    if (!data.prod_partnum) return toast.warning('Please enter Part No');
-    if (!data.brand_id) return toast.warning('Please select a Manufacture');
-    if (!data.prod_category) return toast.warning('Please select a Category');
-    if (!data.prod_outofstock_status && !params.id) return toast.warning('Please select an Availability Status');
-    if (!data.prod_regular_price) return toast.warning('Please enter Regular Price');
+    if (!data.prod_long_desc) return message.warning('Please enter a long description');
+    if (!data.prod_short_desc) return message.warning('Please enter a long description');
+    if (!data.prod_sku) return message.warning('Please enter Product SKU');
+    if (!data.prod_partnum) return message.warning('Please enter Part No');
+    if (!data.brand_id) return message.warning('Please select a Manufacture');
+    if (!data.prod_category) return message.warning('Please select a Category');
+    if (!data.prod_outofstock_status && !params.id) return message.warning('Please select an Availability Status');
+    if (!data.prod_regular_price) return message.warning('Please enter Regular Price');
     // All Validation End
 
     setIsLoading(true);
@@ -598,7 +599,7 @@ const AddProduct = () => {
         })
         .then(res => {
           const data = res?.data?.addProduct;
-          if (!data.status) return toast.error(data.message);
+          if (!data.status) return InternalErrorMessage();
           setTimeout(() => {
             history.push('/admin/products/list');
           }, 1000);
@@ -642,7 +643,7 @@ const AddProduct = () => {
         })
         .then(res => {
           const data = res?.data?.updateProduct;
-          if (!data.status) return toast.error(data.message);
+          if (!data.status) return InternalErrorMessage();
           setTimeout(() => {
             history.push('/admin/products/list');
           }, 1000);
@@ -650,7 +651,6 @@ const AddProduct = () => {
         })
         .catch(err => {
           console.log('add Prod err:\n', err);
-          return toast.error('Something Went wrong !!');
         })
         .finally(() => {
           setIsLoading(false);

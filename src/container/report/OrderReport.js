@@ -19,6 +19,7 @@ import { reportQuery } from '../../apollo/report';
 import { CSVLink } from 'react-csv';
 import { orderQuery } from '../../apollo/order';
 import { methodQuery } from '../../apollo/method';
+import InternalErrorMessage from '../../components/esential/InternalErrorMessage';
 const { RangePicker } = DatePicker;
 
 const OrderReport = () => {
@@ -62,7 +63,7 @@ const OrderReport = () => {
             })
             .then(res => {
                 const data = res?.data?.getOrderListReport;
-                if (!data.status) return;
+                if (!data.status) return InternalErrorMessage();
 
                 setOrders(s => ({ ...s, data: data.data, error: '' }));
             })
@@ -88,7 +89,7 @@ const OrderReport = () => {
             })
             .then(res => {
                 const data = res?.data?.getAllCustomer;
-                if (!data.status) return;
+                if (!data.status) return InternalErrorMessage();
 
                 setCustomer({ data: data.data, isLoading: false });
                 setCustomerEmail({ data: data.data, isLoading: false });
@@ -108,7 +109,7 @@ const OrderReport = () => {
             })
             .then(res => {
                 const data = res?.data?.getOrderStatusList;
-                if (!data.status) return;
+                if (!data.status) return InternalErrorMessage();
                 setStatus({ data: data.data, isLoading: false });
             })
             .catch(err => { });
@@ -126,7 +127,7 @@ const OrderReport = () => {
             })
             .then(res => {
                 const data = res?.data?.getPaymentMethodListPublic;
-                if (!data.status) return;
+                if (!data.status) return InternalErrorMessage();
                 setPaymentMethod({ data: data.data, isLoading: false });
             })
             .catch(err => { });
@@ -144,7 +145,7 @@ const OrderReport = () => {
             })
             .then(res => {
                 const data = res?.data?.getShippingMethodListAdmin;
-                if (!data.status) return;
+                if (!data.status) return InternalErrorMessage();
                 setShippingMethod({ data: data.data, isLoading: false });
             })
             .catch(err => { });
@@ -162,7 +163,7 @@ const OrderReport = () => {
             })
             .then(res => {
                 const data = res?.data?.getAllCoupons;
-                if (!data.status) return;
+                if (!data.status) return InternalErrorMessage();
                 setCoupon({ data: data.data, isLoading: false });
             })
             .catch(err => { });

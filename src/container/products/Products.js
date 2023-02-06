@@ -18,6 +18,7 @@ import { gql } from '@apollo/client';
 import { toast } from 'react-toastify';
 import moment from 'moment';
 import Moment from 'react-moment';
+import InternalErrorMessage from '../../components/esential/InternalErrorMessage';
 const { RangePicker } = DatePicker;
 
 let checkPoint = false;
@@ -78,7 +79,7 @@ const Products = () => {
       })
       .then(res => {
         const data = res?.data?.getAllCategories;
-        if (!data.status) return;
+        if (!data.status) return InternalErrorMessage();
         // setCategories(data.categories)
 
         if (!data.categories.length) return;
@@ -130,7 +131,7 @@ const Products = () => {
       })
       .then(res => {
         const data = res?.data?.getAllAttributes;
-        if (!data.status) return;
+        if (!data.status) return InternalErrorMessage();
         setAttributes({ data: data.data, isLoading: false });
       });
 
@@ -147,7 +148,7 @@ const Products = () => {
       })
       .then(res => {
         const data = res?.data?.getAllProductAvailabilityStatus;
-        if (!data.status) return;
+        if (!data.status) return InternalErrorMessage();
         setAvailability({ data: data.data, isLoading: false });
       });
 
@@ -164,7 +165,7 @@ const Products = () => {
       })
       .then(res => {
         const data = res?.data?.getAllProductCondition;
-        if (!data.status) return;
+        if (!data.status) return InternalErrorMessage();
         setConditions({ data: data.data, isLoading: false });
       });
 
@@ -230,7 +231,7 @@ const Products = () => {
       })
       .then(res => {
         const data = res?.data?.updateProduct;
-        if (!data.status) return toast.error(data.message);
+        if (!data.status) return InternalErrorMessage();
         toast.success(`${record.prod_sku} status updated.`);
       })
       .catch(err => {
@@ -251,7 +252,7 @@ const Products = () => {
       })
       .then(res => {
         const data = res?.data?.updateProduct;
-        if (!data.status) return toast.error(data.message);
+        if (!data.status) return InternalErrorMessage();
         toast.success(`${record.prod_sku} status updated.`);
       })
       .catch(err => {

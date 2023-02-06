@@ -12,6 +12,7 @@ import apolloClient, { attributeMutation, attributeQuery } from '../../utility/a
 import Cookies from 'js-cookie';
 import { toast } from 'react-toastify';
 import { viewPermission } from '../../utility/utility';
+import InternalErrorMessage from '../../components/esential/InternalErrorMessage';
 
 const ListAttributes = () => {
     viewPermission('attribute');
@@ -126,7 +127,7 @@ const ListAttributes = () => {
 
         }).then(res => {
             const data = res?.data?.updateAttribute
-            if (!data.status) return toast.error(data.message);
+            if (!data.status) return InternalErrorMessage();
             toast.success(`${record.attribute_name} attribute status updated.`);
         }).catch(err => {
             console.log("got error on addPermission", err)

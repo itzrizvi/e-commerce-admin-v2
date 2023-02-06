@@ -10,6 +10,7 @@ import { toast } from 'react-toastify';
 import { useLocation } from 'react-router-dom';
 import queryString from 'query-string'
 import { renderImage } from '../../utility/images';
+import InternalErrorMessage from '../../components/esential/InternalErrorMessage';
 
 const ViewSingleMessage = () => {
     const { search } = useLocation();
@@ -30,7 +31,7 @@ const ViewSingleMessage = () => {
             })
             .then(res => {
                 const data = res?.data?.getSingleContactUsMsg;
-                if (!data.status) toast.error(data.message)
+                if (!data.status) InternalErrorMessage();
                 setSingleMessage({ data: data.data, isLoading: false })
 
             })

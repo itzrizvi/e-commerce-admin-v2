@@ -9,6 +9,7 @@ import { poQuery } from '../../apollo/po';
 import config from '../../config/config';
 import { getFile } from '../../utility/images';
 import UpdateInvoice from '../common-modal/UpdateInvoice';
+import InternalErrorMessage from '../esential/InternalErrorMessage';
 
 export default function POInvoiceList({ invoiceList, setChangeInvoice }) {
   const [updateInvoiceModalOpen, setUpdateInvoiceModalOpen] = useState(false);
@@ -83,7 +84,7 @@ export default function POInvoiceList({ invoiceList, setChangeInvoice }) {
           })
           .then(res => {
             const data = res?.data?.deletePOInvoice;
-            if (!data.status) return toast.error(data.message);
+            if (!data.status) return InternalErrorMessage();
             setChangeInvoice(prev => !prev);
           })
           .finally(() => {

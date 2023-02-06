@@ -18,6 +18,7 @@ import { toast } from 'react-toastify';
 import { data } from 'browserslist';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
 import { errorImageSrc, renderImage } from '../../utility/images';
+import InternalErrorMessage from '../../components/esential/InternalErrorMessage';
 
 const prodDeatails = () => {
   const { search } = useLocation();
@@ -40,7 +41,7 @@ const prodDeatails = () => {
       })
       .then(res => {
         const data = res?.data?.getSingleProduct;
-        if (!data.status) return toast.error('Try reload..!');
+        if (!data.status) return InternalErrorMessage();
         setProduct({ data: data.data, isLoading: false });
       });
   }, [productId]);

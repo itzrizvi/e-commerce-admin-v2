@@ -2,6 +2,7 @@ import { Button, Col, Input, Modal, Row, Table } from 'antd';
 import React, { useState } from 'react';
 import apolloClient from '../../apollo';
 import { productSchema } from '../../apollo/product';
+import InternalErrorMessage from '../esential/InternalErrorMessage';
 
 export default function ProductSearch({ productSearchModalOpen, setProductSearchModalOpen, products, setProducts }) {
   const [searchString, setSearchString] = useState(null);
@@ -136,7 +137,7 @@ export default function ProductSearch({ productSearchModalOpen, setProductSearch
           ...item,
           quantity: 1
         })));
-        if (!data.status) return;
+        if (!data.status) return InternalErrorMessage();
       })
       .finally(() => {
         setLoading(false);

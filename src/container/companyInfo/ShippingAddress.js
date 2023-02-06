@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import FeatherIcon from 'feather-icons-react';
 import { addressSchema } from '../../apollo/address';
 import apolloClient from '../../utility/apollo';
+import InternalErrorMessage from '../../components/esential/InternalErrorMessage';
 
 const ShippingAddress = ({ initialData, shippingData, setShippingData, defaultAddressId, setDefaultShipping }) => {
   // Change State After Country Change
@@ -20,7 +21,7 @@ const ShippingAddress = ({ initialData, shippingData, setShippingData, defaultAd
       })
       .then(res => {
         const data = res.data.getCountryList;
-        if (!data.status) return true;
+        if (!data.status) return InternalErrorMessage();
         setCountries(data?.data);
       });
 

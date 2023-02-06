@@ -12,6 +12,7 @@ import queryString from 'query-string';
 import { toast } from 'react-toastify';
 import Cookies from 'js-cookie';
 import { viewPermission } from '../../utility/utility';
+import InternalErrorMessage from '../../components/esential/InternalErrorMessage';
 
 const { TextArea } = Input;
 const { Option } = Select;
@@ -48,7 +49,7 @@ const AddCategory = () => {
       })
       .then(res => {
         const data = res?.data?.getAllCategories;
-        if (!data.status) return;
+        if (!data.status) return InternalErrorMessage();
         setCategories(data.categories);
       })
       .catch(err => {});
@@ -91,7 +92,7 @@ const AddCategory = () => {
       })
       .then(res => {
         const data = res?.data?.getSingleCategory;
-        if (!data.status) return;
+        if (!data.status) return InternalErrorMessage();
         setSingleCategory(data.category);
         setIsFeatured(state => data?.category?.is_featured || state);
         setCategoryStatus(state => data?.category?.cat_status || state);

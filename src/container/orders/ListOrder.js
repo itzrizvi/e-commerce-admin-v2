@@ -19,6 +19,7 @@ import queryString from 'query-string';
 const { RangePicker } = DatePicker;
 import { productSchema } from '../../apollo/product';
 import order_config from '../../config/order_config';
+import InternalErrorMessage from '../../components/esential/InternalErrorMessage';
 
 let checkPoint = false;
 const ListOrder = () => {
@@ -113,7 +114,7 @@ const ListOrder = () => {
       })
       .then(res => {
         const data = res?.data?.getOrderlistAdmin;
-        if (!data.status) return;
+        if (!data.status) return InternalErrorMessage();
         setOrders(data);
       })
       .catch(err => {
@@ -283,7 +284,7 @@ const ListOrder = () => {
       })
       .then(res => {
         const data = res?.data?.getPaymentMethodListPublic;
-        if (!data.status) return;
+        if (!data.status) return InternalErrorMessage();
         setPaymentMethod(data);
       })
       .catch(err => {
@@ -307,7 +308,7 @@ const ListOrder = () => {
       })
       .then(res => {
         const data = res?.data?.getOrderStatusList;
-        if (!data.status) return;
+        if (!data.status) return InternalErrorMessage();
         setOrderStatus(data);
       })
       .catch(err => {
@@ -331,7 +332,7 @@ const ListOrder = () => {
       })
       .then(res => {
         const data = res?.data?.getOrderUpdateAdminList;
-        if (!data.status) return;
+        if (!data.status) return InternalErrorMessage();
         setOrderUpdateAdmins(data);
       })
       .catch(err => {
@@ -486,7 +487,7 @@ const ListOrder = () => {
                                   })
                                   .then(res => {
                                     const data = res?.data?.getSearchedProducts;
-                                    if (!data.status) return;
+                                    if (!data.status) return InternalErrorMessage();
                                     setProductOption(
                                       data.data.map(product => ({
                                         label:

@@ -16,6 +16,7 @@ import { viewPermission } from '../../../utility/utility';
 import config from '../../../config/config';
 import Cookies from 'js-cookie';
 import moment from 'moment';
+import InternalErrorMessage from '../../../components/esential/InternalErrorMessage';
 
 let checkPoint = false;
 
@@ -52,7 +53,7 @@ const QuoteList = () => {
       })
       .then(res => {
         const data = res?.data?.getQuoteStatusList;
-        if (!data.status) return;
+        if (!data.status) return InternalErrorMessage();
         setQuoteStatus({ data: data.data, isLoading: false });
       });
 

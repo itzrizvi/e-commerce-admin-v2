@@ -8,6 +8,7 @@ import apolloClient, { authMutation } from '../../../../utility/apollo';
 import Cookies from 'js-cookie';
 import { useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
+import InternalErrorMessage from '../../../../components/esential/InternalErrorMessage';
 
 const Password = () => {
   const [form] = Form.useForm();
@@ -34,7 +35,7 @@ const Password = () => {
       }
     }).then(res => {
       const data = res.data.adminPasswordChange
-      if (!data.status) return toast.error(data.message)
+      if (!data.status) return InternalErrorMessage()
       toast.success(data.message)
     }).catch(err => {
       toast.error(`Something went wrong.!`)

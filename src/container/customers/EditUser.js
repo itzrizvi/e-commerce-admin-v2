@@ -13,6 +13,7 @@ import { useSelector } from 'react-redux';
 import { customerMutation } from '../../apollo/customer';
 import { contactPersonsSchema } from '../../apollo/contactPerson';
 import FeatherIcon from 'feather-icons-react';
+import InternalErrorMessage from '../../components/esential/InternalErrorMessage';
 
 const formItemLayout = {
   labelCol: {
@@ -155,7 +156,7 @@ const EditUser = () => {
       })
       .then(res => {
         const data = res?.data?.updateCustomer;
-        if (!data.status) return setMessage({ type: 'error', message: data.message });
+        if (!data.status) return InternalErrorMessage();
         setOperation(true);
       })
       .catch(err => {

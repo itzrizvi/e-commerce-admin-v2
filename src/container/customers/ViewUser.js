@@ -11,6 +11,7 @@ import { viewPermission } from '../../utility/utility';
 import { Button } from '../../components/buttons/buttons';
 import { useState } from 'react';
 import { useSelector } from 'react-redux';
+import InternalErrorMessage from '../../components/esential/InternalErrorMessage';
 
 const ViewUser = () => {
   viewPermission('customer');
@@ -55,7 +56,7 @@ const ViewUser = () => {
       })
       .then(res => {
         const data = res?.data?.getOrderListByCustomerID;
-        if (!data.status) return;
+        if (!data.status) return InternalErrorMessage();
         setOrder(data?.data);
       })
       .catch(err => {
@@ -79,7 +80,7 @@ const ViewUser = () => {
       })
       .then(res => {
         const data = res?.data?.getRatingsByUserID;
-        if (!data.status) return;
+        if (!data.status) return InternalErrorMessage();
         setRating(data?.data);
       })
       .catch(err => {

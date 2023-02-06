@@ -13,6 +13,7 @@ import apolloClient, { customerMutation, customerQuery } from '../../utility/apo
 import Cookies from 'js-cookie';
 import { toast } from 'react-toastify';
 import { viewPermission } from '../../utility/utility';
+import InternalErrorMessage from '../../components/esential/InternalErrorMessage';
 
 
 const CustomerGroups = () => {
@@ -42,7 +43,7 @@ const CustomerGroups = () => {
 
         }).then(res => {
             const data = res?.data?.updateCustomerGroup
-            if (!data.status) return toast.error(data.message);
+            if (!data.status) return InternalErrorMessage();
             toast.success(`${record.customer_group_name} Group Status Updated successfully`);
         }).catch(err => {
             console.log("got error on updateStatus", err)

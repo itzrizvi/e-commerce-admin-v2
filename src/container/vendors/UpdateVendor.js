@@ -12,6 +12,7 @@ import BillingAdderess from './BillingAdderess';
 import ShippingAddress from './ShippingAddress';
 import { useSelector } from 'react-redux';
 import { contactPersonsSchema } from '../../apollo/contactPerson';
+import InternalErrorMessage from '../../components/esential/InternalErrorMessage';
 const { TextArea } = Input;
 
 const formItemLayout = {
@@ -177,7 +178,7 @@ const UpdateVendor = () => {
       })
       .then(res => {
         const data = res?.data?.updateVendor;
-        if (!data.status) return setMessage({ type: 'error', message: data.message });
+        if (!data.status) return InternalErrorMessage();
         setVendorId(parseInt(params?.id));
         setOperation(true);
       })

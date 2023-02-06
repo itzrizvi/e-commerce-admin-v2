@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import FeatherIcon from 'feather-icons-react';
 import { addressSchema } from '../../apollo/address';
 import apolloClient from '../../utility/apollo';
+import InternalErrorMessage from '../../components/esential/InternalErrorMessage';
 
 const BillingAdderess = ({
   defaultBilling,
@@ -25,7 +26,7 @@ const BillingAdderess = ({
       })
       .then(res => {
         const data = res.data.getCountryList;
-        if (!data.status) return true;
+        if (!data.status) return InternalErrorMessage();
         setCountries(data?.data);
       });
 

@@ -8,6 +8,7 @@ import { poQuery } from '../../apollo/po';
 import config from '../../config/config';
 import { getFile } from '../../utility/images';
 import UpdateMFG from '../common-modal/UpdateMFG';
+import InternalErrorMessage from '../esential/InternalErrorMessage';
 
 export default function POMFGDocList({ mfgList, setChangeMfg }) {
   const [updateMfgModalOpen, setUpdateMfgModalOpen] = useState(false);
@@ -86,7 +87,7 @@ export default function POMFGDocList({ mfgList, setChangeMfg }) {
           })
           .then(res => {
             const data = res?.data?.deletePOMFGDOC;
-            if (!data.status) return toast.error(data.message);
+            if (!data.status) return InternalErrorMessage();
             setChangeMfg(prev => !prev);
           })
           .finally(() => {

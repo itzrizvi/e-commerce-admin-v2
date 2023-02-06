@@ -14,6 +14,7 @@ import 'react-quill/dist/quill.snow.css';
 import ImageResize from 'quill-image-resize-module-react';
 import htmlEditButton from 'quill-html-edit-button';
 import { bannerQuery } from '../../apollo/banner';
+import InternalErrorMessage from '../../components/esential/InternalErrorMessage';
 Quill.register('modules/imageResize', ImageResize);
 Quill.register('modules/htmlEditButton', htmlEditButton);
 
@@ -117,7 +118,7 @@ const UpdateBanner = () => {
       })
       .then(res => {
         const data = res?.data?.getSingleBanner;
-        if (!data.status) return;
+        if (!data.status) return InternalErrorMessage();
         setSingleBanner({ data: data?.data, loading: false, error: '' });
         form.setFieldsValue({
           name: data?.data?.name

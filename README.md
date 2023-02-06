@@ -12,7 +12,7 @@ const params = queryString.parse(search);
 # Cancel Button
 
 <Form.Item>
-  <CancelButton url="/admin/po/list" title="Do you want to exit from PO?" />
+<CancelButton url="/admin/po/list" title="Do you want to exit from PO?" />
 </Form.Item>
 
 // Confirmation
@@ -40,3 +40,11 @@ searchPOAdmin();
 },
 });
 };
+
+<!-- Message -->
+
+message.success()
+message.warning()
+message.error()
+
+InternalErrorMessage()

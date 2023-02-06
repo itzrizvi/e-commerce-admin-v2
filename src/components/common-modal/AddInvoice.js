@@ -1,9 +1,10 @@
 import { InboxOutlined } from '@ant-design/icons';
-import { Button, Col, Form, Input, Modal, Row, Upload } from 'antd';
+import { Button, Col, Form, Input, message, Modal, Row, Upload } from 'antd';
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 import { poQuery } from '../../apollo/po';
+import configMessage from '../../config/config_message';
 import { apolloUploadClient } from '../../utility/apollo';
 
 export default function AddInvoice({ po_id, addInvoiceModalOpen, setAddInvoiceModalOpen, setChangeInvoice }) {
@@ -37,7 +38,7 @@ export default function AddInvoice({ po_id, addInvoiceModalOpen, setAddInvoiceMo
       })
       .then(res => {
         const data = res?.data?.createPOInvoice;
-        if (!data.status) return toast.error(data.message);
+        if (!data.status) return message.error(data.message);
         setChangeInvoice(prev => !prev);
         setAddInvoiceModalOpen(false);
         setInvoiceFile(null);
@@ -54,7 +55,7 @@ export default function AddInvoice({ po_id, addInvoiceModalOpen, setAddInvoiceMo
   const beforeImageUpload = file => {
     const isPDF = file.type === 'application/pdf';
     if (!isPDF) {
-      toast.error('You can only upload PDF file.');
+      message.error(configMessage.ONLY_PDF_FILE_UPLOAD)
       return false;
     }
     if (isPDF) setInvoiceFile(file);

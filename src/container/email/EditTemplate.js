@@ -11,6 +11,7 @@ import apolloClient from '../../apollo';
 import { viewPermission } from '../../utility/utility';
 import { EmailTemplateQuery } from '../../apollo/email';
 import { useEffect } from 'react';
+import InternalErrorMessage from '../../components/esential/InternalErrorMessage';
 
 const AddTemplate = () => {
   viewPermission('email-template');
@@ -82,7 +83,7 @@ const AddTemplate = () => {
       })
       .then(res => {
         const data = res?.data?.getSingleEmailTemplateList;
-        if (!data.status) return;
+        if (!data.status) return InternalErrorMessage();
         setSingleTemplate({ data: data?.data, loading: false, error: '' });
         form.setFieldsValue({
           name: data?.data?.name,

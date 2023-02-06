@@ -5,6 +5,7 @@ import { toast } from 'react-toastify';
 import apolloClient from '../../apollo';
 import { orderQuery } from '../../apollo/order';
 import OrderView from '../common-component/OrderView';
+import InternalErrorMessage from '../esential/InternalErrorMessage';
 
 export default function ViewOrder({ order_id, viewOrderModalOpen, setViewOrderModalOpen }) {
   const [loading, setLoading] = useState(true);
@@ -32,7 +33,7 @@ export default function ViewOrder({ order_id, viewOrderModalOpen, setViewOrderMo
       })
       .then(res => {
         const data = res.data.getSingleOrderAdmin;
-        if (!data.status) return toast.error(data.message);
+        if (!data.status) return InternalErrorMessage();
         setSingleOrder(data.data);
         const prods = data.data?.orderitems?.map(item => {
           const {

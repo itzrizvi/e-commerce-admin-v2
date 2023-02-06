@@ -33,6 +33,7 @@ import { useSelector } from 'react-redux';
 import { orderQuery } from '../../apollo/order';
 import { addressSchema } from '../../apollo/address';
 import { strCamelCase } from '../../utility/stringModify';
+import InternalErrorMessage from '../../components/esential/InternalErrorMessage';
 const { Text, Paragraph } = Typography;
 const prod_initial = {
   id: '',
@@ -93,7 +94,7 @@ const UpdateOrder = () => {
       })
       .then(res => {
         const data = res?.data?.getShippingMethodListPublic;
-        if (!data.status) return;
+        if (!data.status) return InternalErrorMessage();
         setShippingMethod(data?.data);
       });
 
@@ -116,7 +117,7 @@ const UpdateOrder = () => {
       })
       .then(res => {
         const data = res.data.getSingleOrderAdmin;
-        if (!data.status) return toast.error(data.message);
+        if (!data.status) return InternalErrorMessage();
         setSingleOrder({ data: data.data, isLoading: false });
         const billing = [];
         const shipping = [];
@@ -168,7 +169,7 @@ const UpdateOrder = () => {
       })
       .then(res => {
         const data = res?.data?.getOrderStatusList;
-        if (!data.status) return;
+        if (!data.status) return InternalErrorMessage();
         const order_status_list = data?.data?.map(item => ({
           ...item,
           value: item.id,
@@ -187,7 +188,7 @@ const UpdateOrder = () => {
       })
       .then(res => {
         const data = res.data.getCountryList;
-        if (!data.status) return true;
+        if (!data.status) return InternalErrorMessage();
         setCountries(data?.data);
       });
     // Get Account List for Shipping Method
@@ -310,7 +311,7 @@ const UpdateOrder = () => {
                 })
                 .then(res => {
                   const data = res?.data?.getSearchedProducts;
-                  if (!data.status) return;
+                  if (!data.status) return InternalErrorMessage();
                   if (data?.data.length === 0) return setProductFound(false);
                   setProductOption(
                     data.data.map(product => ({
@@ -701,7 +702,7 @@ const UpdateOrder = () => {
                                           })
                                           .then(res => {
                                             const data = res.data.getSearchedCustomers;
-                                            if (!data.status) return toast.error(data.message);
+                                            if (!data.status) return InternalErrorMessage();
                                             const options = data?.data?.map(item => ({
                                               label: item?.email + ' - ' + item?.first_name + ' ' + item?.last_name,
                                               value: item.id,

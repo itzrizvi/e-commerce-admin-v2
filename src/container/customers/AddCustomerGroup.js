@@ -10,6 +10,7 @@ import apolloClient, { customerMutation, customerQuery } from '../../utility/apo
 import Cookies from 'js-cookie';
 import { toast } from 'react-toastify';
 import { viewPermission } from '../../utility/utility';
+import InternalErrorMessage from '../../components/esential/InternalErrorMessage';
 const { TextArea } = Input;
 
 const AddCustomerGroup = () => {
@@ -91,7 +92,7 @@ const AddCustomerGroup = () => {
         })
         .then(res => {
           const data = res?.data?.createCustomerGroup;
-          if (!data.status) return toast.error(data.message);
+          if (!data.status) return InternalErrorMessage();
           setTimeout(() => {
             history.push('/admin/customers/group');
           }, 1000);
@@ -141,7 +142,7 @@ const AddCustomerGroup = () => {
         })
         .then(res => {
           const data = res?.data?.updateCustomerGroup;
-          if (!data.status) return toast.error(data.message);
+          if (!data.status) return InternalErrorMessage();
           setTimeout(() => {
             history.push('/admin/customers/group');
           }, 1000);

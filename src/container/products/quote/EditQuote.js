@@ -13,6 +13,7 @@ import { viewPermission } from '../../../utility/utility';
 import 'react-lazy-load-image-component/src/effects/blur.css';
 import { quoteQuery } from '../../../apollo/quote';
 import Cookies from 'js-cookie';
+import InternalErrorMessage from '../../../components/esential/InternalErrorMessage';
 
 const EditQuote = () => {
   viewPermission('quote');
@@ -44,7 +45,7 @@ const EditQuote = () => {
       })
       .then(res => {
         const data = res?.data?.getSingleSubmittedQuote;
-        if (!data.status) return;
+        if (!data.status) return InternalErrorMessage();
         setSingleQuote({ data: data?.data, loading: false, error: '' });
         const newQuiteData = data?.data?.submittedquoteitems.map(item => {
           return {
@@ -81,7 +82,7 @@ const EditQuote = () => {
       })
       .then(res => {
         const data = res?.data?.getQuoteStatusList;
-        if (!data.status) return;
+        if (!data.status) return InternalErrorMessage();
         setQuoteStatus({ data: data.data, isLoading: false });
       });
 
@@ -138,7 +139,7 @@ const EditQuote = () => {
       })
       .then(res => {
         const data = res?.data?.updateSubmittedQuote;
-        if (!data.status) toast.error(data.message);
+        if (!data.status) InternalErrorMessage();
         setIsLoading(false);
         toast.success(data.message);
         setTimeout(() => {

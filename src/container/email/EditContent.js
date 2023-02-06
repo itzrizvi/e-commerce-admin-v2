@@ -15,6 +15,7 @@ import { EmailTemplateQuery } from '../../apollo/email';
 import ImageResize from 'quill-image-resize-module-react';
 import htmlEditButton from 'quill-html-edit-button';
 import { useEffect } from 'react';
+import InternalErrorMessage from '../../components/esential/InternalErrorMessage';
 Quill.register('modules/imageResize', ImageResize);
 Quill.register('modules/htmlEditButton', htmlEditButton);
 
@@ -119,7 +120,7 @@ const AddContent = () => {
       })
       .then(res => {
         const data = res?.data?.getSingleEmailTemplate;
-        if (!data.status) return;
+        if (!data.status) return InternalErrorMessage();
         setSingleTemplate({ data: data, loading: false, error: '' });
         form.setFieldsValue({
           name: data?.data?.name,

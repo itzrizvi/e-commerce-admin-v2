@@ -11,6 +11,7 @@ import Cookies from 'js-cookie';
 import { toast } from 'react-toastify';
 import moment from 'moment';
 import { viewPermission } from '../../utility/utility';
+import InternalErrorMessage from '../../components/esential/InternalErrorMessage';
 const { TextArea } = Input;
 
 const AddCoupon = () => {
@@ -97,7 +98,7 @@ const AddCoupon = () => {
         })
         .then(res => {
           const data = res?.data?.createCoupon;
-          if (!data.status) return toast.error(data.message);
+          if (!data.status) return InternalErrorMessage();
           setTimeout(() => {
             history.push('/admin/products/coupon');
           }, 1000);
@@ -130,7 +131,7 @@ const AddCoupon = () => {
         })
         .then(res => {
           const data = res?.data?.updateCoupon;
-          if (!data.status) return toast.error(data.message);
+          if (!data.status) return InternalErrorMessage();
           setTimeout(() => {
             history.push('/admin/products/coupon');
           }, 1000);

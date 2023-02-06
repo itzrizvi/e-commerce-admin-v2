@@ -15,6 +15,7 @@ import { EmailTemplateQuery } from '../../apollo/email';
 import { useEffect } from 'react';
 import ImageResize from 'quill-image-resize-module-react';
 import htmlEditButton from 'quill-html-edit-button';
+import InternalErrorMessage from '../../components/esential/InternalErrorMessage';
 Quill.register('modules/imageResize', ImageResize);
 Quill.register('modules/htmlEditButton', htmlEditButton);
 
@@ -118,7 +119,7 @@ const HeaderFooterEdit = () => {
       })
       .then(res => {
         const data = res?.data?.getSingleEmailTempHeaderFooter;
-        if (!data.status) return;
+        if (!data.status) return InternalErrorMessage();
         setSingleHeaderFooter({ data: data?.data, loading: false, error: '' });
         form.setFieldsValue({
           name: data?.data?.name,

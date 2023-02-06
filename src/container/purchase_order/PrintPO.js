@@ -8,6 +8,7 @@ import { useReactToPrint } from 'react-to-print';
 import apolloClient from '../../apollo';
 import { poQuery } from '../../apollo/po';
 import { Cards } from '../../components/cards/frame/cards-frame';
+import InternalErrorMessage from '../../components/esential/InternalErrorMessage';
 import PrintPOComponent from '../../components/po/PrintPOComponent';
 import { Main } from '../styled';
 
@@ -33,7 +34,7 @@ export default function PrintPO() {
       })
       .then(res => {
         const data = res?.data?.getSinglePurchaseOrder;
-        if (!data.status) return;
+        if (!data.status) return InternalErrorMessage();
         setSinglePO({ data: data?.data, isLoading: false, message: data?.message });
       })
       .catch(err => {

@@ -15,6 +15,7 @@ import { toast } from 'react-toastify';
 import ShippingAddress from './ShippingAddress';
 import BillingAddress from './BillingAddress';
 import apolloClient from './../../apollo';
+import InternalErrorMessage from '../../components/esential/InternalErrorMessage';
 
 export default function companyInfo() {
   viewPermission('company-info');
@@ -286,7 +287,7 @@ export default function companyInfo() {
         })
         .then(res => {
           const data = type === "add" ? res?.data?.addCompanyBillingAddress : res?.data?.updateCompanyAddress
-          if (!data.status) return toast.error(data.message)
+          if (!data.status) return InternalErrorMessage();
           // toast.success(data.message)
         }).catch(err => {
           console.log("error on billing")
@@ -348,7 +349,7 @@ export default function companyInfo() {
         })
         .then(res => {
           const data = type === "add" ? res.data.addCompanyShippingAddress : 'update'
-          if (!data.status) return toast.error(data.message)
+          if (!data.status) return InternalErrorMessage();
           // toast.success(data.message)
         }).catch(err => {
           console.log("error on billing")

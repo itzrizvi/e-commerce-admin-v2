@@ -15,6 +15,7 @@ import { errorImageSrc, renderImage } from '../../utility/images';
 import Cookies from 'js-cookie';
 import { toast } from 'react-toastify';
 import { viewPermission } from '../../utility/utility';
+import InternalErrorMessage from '../../components/esential/InternalErrorMessage';
 
 
 const ListCategories = () => {
@@ -41,7 +42,7 @@ const ListCategories = () => {
             }
         }).then(res => {
             const data = res?.data?.getAllCategories
-            if (!data.status) return;
+            if (!data.status) return InternalErrorMessage();
             setCategories(data.categories)
             // console.log("list Category UseEffect:\n", data.categories);
 

@@ -10,6 +10,7 @@ import apolloClient, { authMutation, authQuery } from '../../utility/apollo';
 import Cookies from 'js-cookie';
 import { toast } from 'react-toastify';
 import { viewPermission } from '../../utility/utility';
+import InternalErrorMessage from '../../components/esential/InternalErrorMessage';
 const { TextArea } = Input;
 
 const UpdateRole = () => {
@@ -63,7 +64,7 @@ const UpdateRole = () => {
               })
               .then(res => {
                 const data = res?.data?.updateRolePermissions;
-                if (!data.status) return toast.error('Something Went wrong !!');
+                if (!data.status) return InternalErrorMessage();
                 toast.success(`Permission Updated Successfully`);
                 // update state
                 setPermissionList(state => {
@@ -114,7 +115,7 @@ const UpdateRole = () => {
               })
               .then(res => {
                 const data = res?.data?.updateRolePermissions;
-                if (!data.status) return toast.error('Something Went wrong !!');
+                if (!data.status) return InternalErrorMessage();
                 toast.success(`Permission Updated Successfully`);
                 // update state
                 setPermissionList(state => {
@@ -159,7 +160,7 @@ const UpdateRole = () => {
       })
       .then(res => {
         const data = res?.data?.getSingleRole;
-        if (!data.status) return;
+        if (!data.status) return InternalErrorMessage();
         setSingleRole({ data: data?.data, loading: false, error: '' });
         setRole_status(data?.data?.role_status);
       })

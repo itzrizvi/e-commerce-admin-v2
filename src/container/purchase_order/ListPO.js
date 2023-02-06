@@ -27,6 +27,7 @@ import Moment from 'react-moment';
 import moment from 'moment';
 const { RangePicker } = DatePicker;
 import { productSchema } from '../../apollo/product';
+import InternalErrorMessage from '../../components/esential/InternalErrorMessage';
 
 let checkPoint = false;
 const ListPO = () => {
@@ -200,7 +201,7 @@ const ListPO = () => {
       })
       .then(res => {
         const data = res?.data?.getPOStatusList;
-        if (!data.status) return;
+        if (!data.status) return InternalErrorMessage();
         setPOStatus(data);
       })
       .catch(err => {
@@ -223,7 +224,7 @@ const ListPO = () => {
       })
       .then(res => {
         const data = res?.data?.getPONumbers;
-        if (!data.status) return;
+        if (!data.status) return InternalErrorMessage();
         setPONumbers(data);
       })
       .catch(err => {
@@ -283,7 +284,7 @@ const ListPO = () => {
       })
       .then(res => {
         const data = res?.data?.getPurchaseOrderList;
-        if (!data.status) return;
+        if (!data.status) return InternalErrorMessage();
         setPO(data);
       })
       .catch(err => {
@@ -326,7 +327,7 @@ const ListPO = () => {
       })
       .then(res => {
         const data = res?.data?.createReceiving;
-        if (!data.status) return toast.error(data.message);
+        if (!data.status) return InternalErrorMessage();
         toast.success(data.message);
         history.push(`/admin/rp/edit?id=${data?.id}`);
       })
@@ -403,7 +404,7 @@ const ListPO = () => {
           })
           .then(res => {
             const data = res?.data?.updatePOStatus;
-            if (!data.status) return toast.error(data.message);
+            if (!data.status) return InternalErrorMessage();
             statusUpdate(record.po_number);
           })
           .catch(err => {
@@ -445,7 +446,7 @@ const ListPO = () => {
           })
           .then(res => {
             const data = res?.data?.poSendToVendor;
-            if (!data.status) return;
+            if (!data.status) return InternalErrorMessage();
             Modal.success({
               content: `${record.po_number} send successfully.`,
               onOk: () => {
@@ -610,7 +611,7 @@ const ListPO = () => {
                                   })
                                   .then(res => {
                                     const data = res?.data?.getSearchedProducts;
-                                    if (!data.status) return;
+                                    if (!data.status) return InternalErrorMessage();
                                     setProductOption(
                                       data.data.map(product => ({
                                         label:

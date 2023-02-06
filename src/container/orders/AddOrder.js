@@ -50,6 +50,7 @@ import { methodQuery } from '../../apollo/method';
 import config from '../../config/config';
 import CreditCard from '../../components/common-modal/CreditCard';
 import CancelButton from '../../components/buttons/CancelButton';
+import InternalErrorMessage from '../../components/esential/InternalErrorMessage';
 
 const { Text, Paragraph } = Typography;
 
@@ -157,7 +158,7 @@ const AddOrder = () => {
       })
       .then(res => {
         const data = res?.data?.getShippingMethodListAdmin;
-        if (!data.status) return;
+        if (!data.status) return InternalErrorMessage();
         setShippingMethod(data?.data);
         setSelectedShippingMethod(data?.data?.filter(item => item.isDefault === true)[0]?.id);
       })
@@ -177,7 +178,7 @@ const AddOrder = () => {
       })
       .then(res => {
         const data = res?.data?.getPaymentMethodListPublic;
-        if (!data.status) return;
+        if (!data.status) return InternalErrorMessage();
         setPaymentMethod(data?.data);
       })
       .catch(err => {
@@ -486,7 +487,7 @@ const AddOrder = () => {
       })
       .then(res => {
         const data = res.data.getContactPerson;
-        if (!data.status) return;
+        if (!data.status) return InternalErrorMessage();
         setSelectedCustomer(prev => ({ ...prev, contactPersons: data?.data }));
       });
   }, [cpSuccess]);

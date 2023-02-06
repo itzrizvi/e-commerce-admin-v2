@@ -10,6 +10,7 @@ import Cookies from 'js-cookie';
 import { toast } from 'react-toastify';
 import queryString from 'query-string';
 import { viewPermission } from '../../utility/utility';
+import InternalErrorMessage from '../../components/esential/InternalErrorMessage';
 
 const AddPermission = () => {
   viewPermission('permission');
@@ -81,7 +82,7 @@ const AddPermission = () => {
         })
         .then(res => {
           const data = res?.data?.createRolesPermission;
-          if (!data.status) return toast.error(data.message);
+          if (!data.status) return InternalErrorMessage();
           setTimeout(() => {
             history.push('/admin/permission/list');
           }, 1000);
@@ -131,7 +132,7 @@ const AddPermission = () => {
         })
         .then(res => {
           const data = res?.data?.updateRolesPermission;
-          if (!data.status) return toast.error(data.message);
+          if (!data.status) return InternalErrorMessage();
           setTimeout(() => {
             history.push('/admin/permission/list');
           }, 1000);

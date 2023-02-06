@@ -17,6 +17,7 @@ const { RangePicker } = DatePicker;
 import { useSelector } from 'react-redux';
 import Cookies from 'js-cookie';
 import { toast } from 'react-toastify';
+import InternalErrorMessage from '../../components/esential/InternalErrorMessage';
 
 let checkPoint = false;
 const ListVendor = () => {
@@ -168,7 +169,7 @@ const ListVendor = () => {
       })
       .then(res => {
         const data = res?.data?.getAllVendor;
-        if (!data.status) return;
+        if (!data.status) return InternalErrorMessage();
         setVendors(data);
       })
       .catch(err => {
@@ -194,7 +195,7 @@ const ListVendor = () => {
       })
       .then(res => {
         const data = res?.data?.updateVendorStatus;
-        if (!data.status) return toast.error(data.message);
+        if (!data.status) return InternalErrorMessage();
         toast.success(`${record.company_name} status updated.`);
       })
       .catch(err => {

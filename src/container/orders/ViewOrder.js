@@ -15,6 +15,7 @@ import queryString from 'query-string';
 import { PDFDownloadLink } from '@react-pdf/renderer';
 import Invoice1 from '../../utility/invoice/invoice1';
 import OrderView from '../../components/common-component/OrderView';
+import InternalErrorMessage from '../../components/esential/InternalErrorMessage';
 
 const ViewOrder = () => {
   const [products, setProducts] = useState([]);
@@ -44,7 +45,7 @@ const ViewOrder = () => {
       })
       .then(res => {
         const data = res.data.getSingleOrderAdmin;
-        if (!data.status) return toast.error(data.message);
+        if (!data.status) return InternalErrorMessage();
         setSingleOrder({ data: data.data, isLoading: false });
 
         let sub_total = 0;

@@ -13,6 +13,7 @@ import { customerMutation, customerQuery } from '../../apollo/customer';
 import AddressTable from './AddressTable';
 import { useEffect } from 'react';
 import { contactPersonsSchema } from '../../apollo/contactPerson';
+import InternalErrorMessage from '../../components/esential/InternalErrorMessage';
 
 const formItemLayout = {
   labelCol: {
@@ -91,7 +92,7 @@ const AddUser = () => {
       })
       .then(res => {
         const data = res?.data?.addCustomer;
-        if (!data.status) return setMessage({ type: 'error', message: data.message });
+        if (!data.status) return InternalErrorMessage();
 
         setOperation(true);
         setUserId(data?.id);

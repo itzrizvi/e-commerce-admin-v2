@@ -14,6 +14,7 @@ import queryString from 'query-string';
 import { errorImageSrc, renderImage } from '../../utility/images';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
 import { viewPermission } from '../../utility/utility';
+import InternalErrorMessage from '../../components/esential/InternalErrorMessage';
 
 const UpdateBrand = () => {
   viewPermission('manufacture');
@@ -144,7 +145,7 @@ const UpdateBrand = () => {
       })
       .then(res => {
         const data = res?.data?.getSingleBrand;
-        if (!data.status) return;
+        if (!data.status) return InternalErrorMessage();
         setSingleBrand({ data: data?.data, loading: false, error: '' });
         const inputSelectedCategories = [];
         data?.data?.categories.map(item => {

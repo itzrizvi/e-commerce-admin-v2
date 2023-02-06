@@ -13,6 +13,7 @@ import queryString from 'query-string';
 import Cookies from 'js-cookie';
 import { viewPermission } from '../../utility/utility';
 import config from '../../config/config';
+import InternalErrorMessage from '../../components/esential/InternalErrorMessage';
 const { Paragraph } = Typography;
 
 const AddAdmin = () => {
@@ -133,7 +134,7 @@ const AddAdmin = () => {
         })
         .then(res => {
           const data = res.data.adminSignUp;
-          if (!data.status) return toast.error(data.message);
+          if (!data.status) return InternalErrorMessage();
           setTimeout(() => {
             history.push('/admin/admin/admins');
           }, 1000);
@@ -187,7 +188,7 @@ const AddAdmin = () => {
         })
         .then(res => {
           const data = res?.data?.adminUpdate;
-          if (!data.status) return toast.error(data.message);
+          if (!data.status) return InternalErrorMessage();
           setTimeout(() => {
             history.push('/admin/admin/admins');
           }, 1000);

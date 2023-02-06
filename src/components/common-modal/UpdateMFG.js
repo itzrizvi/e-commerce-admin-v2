@@ -1,10 +1,12 @@
 import { InboxOutlined } from '@ant-design/icons';
-import { Button, Col, Form, Input, Modal, Row, Upload } from 'antd';
+import { Button, Col, Form, Input, message, Modal, Row, Upload } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 import { apolloUploadClient } from '../../apollo';
 import { poQuery } from '../../apollo/po';
+import configMessage from '../../config/config_message';
+import InternalErrorMessage from '../esential/InternalErrorMessage';
 
 export default function UpdateMFG({ mfg, updateMfgModalOpen, setUpdateMfgModalOpen, setChangeMfg }) {
   const [mfgForm] = Form.useForm();
@@ -36,7 +38,7 @@ export default function UpdateMFG({ mfg, updateMfgModalOpen, setUpdateMfgModalOp
       })
       .then(res => {
         const data = res?.data?.updatePOMFGDOC;
-        if (!data.status) return toast.error(data.message);
+        if (!data.status) return InternalErrorMessage();
         setChangeMfg(prev => !prev);
         setUpdateMfgModalOpen(false);
         setMfgFile(null);
@@ -50,7 +52,7 @@ export default function UpdateMFG({ mfg, updateMfgModalOpen, setUpdateMfgModalOp
   const beforeImageUpload = file => {
     const isPDF = file.type === 'application/pdf';
     if (!isPDF) {
-      toast.error('You can only upload PDF file.');
+      message.error(configMessage.ONLY_PDF_FILE_UPLOAD)
       return false;
     }
     if (isPDF) setMfgFile(file);

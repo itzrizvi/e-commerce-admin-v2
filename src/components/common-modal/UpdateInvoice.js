@@ -5,6 +5,7 @@ import { useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 import { poQuery } from '../../apollo/po';
 import { apolloUploadClient } from '../../utility/apollo';
+import InternalErrorMessage from '../esential/InternalErrorMessage';
 
 export default function UpdateInvoice({
   invoice,
@@ -44,7 +45,7 @@ export default function UpdateInvoice({
       })
       .then(res => {
         const data = res?.data?.updatePOInvoice;
-        if (!data.status) return toast.error(data.message);
+        if (!data.status) return InternalErrorMessage();
         setChangeInvoice(prev => !prev);
         setUpdateInvoiceModalOpen(false);
       })
