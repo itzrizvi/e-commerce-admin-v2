@@ -38,9 +38,6 @@ const ListBanner = () => {
         // console.log(data);
         setBanner(s => ({ ...s, data: data?.data, error: '' }));
       })
-      .catch(err => {
-        setBanner(s => ({ ...s, error: 'Something went Wrong.!! ' }));
-      })
       .finally(() => {
         setBanner(s => ({ ...s, loading: false }));
       });

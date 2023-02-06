@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Col, Form, Input, Spin, Switch, Checkbox, Typography, Table } from 'antd';
+import { Row, Col, Form, Input, Spin, Switch, Checkbox, Typography, Table, message } from 'antd';
 import FeatherIcon from 'feather-icons-react';
 import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
@@ -8,12 +8,12 @@ import { Button } from '../../components/buttons/buttons';
 import { Link, useHistory, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import apolloClient, { authMutation, authQuery } from '../../utility/apollo';
-import { toast } from 'react-toastify';
 import queryString from 'query-string';
 import Cookies from 'js-cookie';
 import { viewPermission } from '../../utility/utility';
 import config from '../../config/config';
 import InternalErrorMessage from '../../components/esential/InternalErrorMessage';
+import configMessage from '../../config/config_message';
 const { Paragraph } = Typography;
 
 const AddAdmin = () => {
@@ -59,9 +59,6 @@ const AddAdmin = () => {
           setRoles(state => ({ ...state, roles: data.data }));
         }
       })
-      .catch(err => {
-        console.log('Error on get all role', err);
-      })
       .finally(() => {
         setRoles(state => ({ ...state, isLoading: false }));
       });
@@ -92,16 +89,13 @@ const AddAdmin = () => {
           setSelectedRoles(rolesArray);
         }
       })
-      .catch(err => {
-        console.log('Error on loading single user', err);
-      })
       .finally(() => {
         setRoles(state => ({ ...state, isLoading: false }));
       });
   }, []);
 
   const handleSubmit = values => {
-    if (!selectedRoles.length) return toast.warn('Select At List 1 Role..');
+    if (!selectedRoles.length) return message.warn(configMessage.ROLE_EMPTY);
 
     setIsLoading(true);
     if (!params.id) {
@@ -134,15 +128,11 @@ const AddAdmin = () => {
         })
         .then(res => {
           const data = res.data.adminSignUp;
-          if (!data.status) return InternalErrorMessage();
+          if (!data?.status) return InternalErrorMessage();
           setTimeout(() => {
             history.push('/admin/admin/admins');
           }, 1000);
-          toast.success(`${values.email} added successfully.`);
-        })
-        .catch(err => {
-          console.log('Error on add admin', err);
-          toast.error('Something went wrong !!');
+          message.success(`${values.email} added successfully.`);
         })
         .finally(() => setIsLoading(false));
     }
@@ -188,15 +178,11 @@ const AddAdmin = () => {
         })
         .then(res => {
           const data = res?.data?.adminUpdate;
-          if (!data.status) return InternalErrorMessage();
+          if (!data?.status) return InternalErrorMessage();
           setTimeout(() => {
             history.push('/admin/admin/admins');
           }, 1000);
-          toast.success(data.message);
-        })
-        .catch(err => {
-          console.log('Error on update admin', err);
-          toast.error(`Something went wrong!!`);
+          message.success(data.message);
         })
         .finally(() => setIsLoading(false));
     }
@@ -217,14 +203,11 @@ const AddAdmin = () => {
       })
       .then(res => {
         const data = res?.data?.resetPassword;
-        if (data.status) {
-          toast.success(data.message);
+        if (data?.status) {
+          message.success(data.message);
         } else {
-          toast.error(data.message);
+          InternalErrorMessage();
         }
-      })
-      .catch(err => {
-        toast.error('Something Went wrong !!');
       })
       .finally(() => setIsResetLoading(false));
   };

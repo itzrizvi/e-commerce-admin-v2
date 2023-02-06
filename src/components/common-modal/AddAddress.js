@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import apolloClient from '../../apollo';
 import { addressSchema } from '../../apollo/address';
 import { strCamelCase } from '../../utility/stringModify';
+import InternalErrorMessage from '../esential/InternalErrorMessage';
 
 export default function AddAddress({ type, addressModalOpen, setAddressModalOpen, handleSubmit }) {
   const [addressForm] = Form.useForm();
@@ -21,7 +22,7 @@ export default function AddAddress({ type, addressModalOpen, setAddressModalOpen
       })
       .then(res => {
         const data = res.data.getCountryList;
-        if (!data.status) return true;
+        if (!data?.status) return InternalErrorMessage();
         setCountries(data?.data);
       });
   }, []);
@@ -44,7 +45,7 @@ export default function AddAddress({ type, addressModalOpen, setAddressModalOpen
       })
       .then(res => {
         const data = res?.data?.getStateList;
-        if (!data?.status) return;
+        if (!data?.status) return InternalErrorMessage();
         setStates(data?.data);
       });
   }, [selectedCountryCode]);

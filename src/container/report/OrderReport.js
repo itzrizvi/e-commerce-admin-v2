@@ -9,9 +9,7 @@ import { Link } from 'react-router-dom';
 import FontAwesome from 'react-fontawesome';
 import { FileExcelOutlined, FilePdfOutlined, SearchOutlined } from '@ant-design/icons';
 import config from '../../config/config';
-import apolloClient, { couponQuery, customerMutation, customerQuery } from '../../utility/apollo';
-import Cookies from 'js-cookie';
-import { toast } from 'react-toastify';
+import apolloClient, { couponQuery, customerQuery } from '../../utility/apollo';
 import { viewPermission } from '../../utility/utility';
 import { useSelector } from 'react-redux';
 import Moment from 'react-moment';
@@ -63,12 +61,9 @@ const OrderReport = () => {
             })
             .then(res => {
                 const data = res?.data?.getOrderListReport;
-                if (!data.status) return InternalErrorMessage();
+                if (!data?.status) return InternalErrorMessage();
 
                 setOrders(s => ({ ...s, data: data.data, error: '' }));
-            })
-            .catch(err => {
-                setOrders(s => ({ ...s, error: 'Something went Wrong.!! ' }));
             })
             .finally(() => {
                 setOrders(s => ({ ...s, loading: false }));
@@ -89,12 +84,11 @@ const OrderReport = () => {
             })
             .then(res => {
                 const data = res?.data?.getAllCustomer;
-                if (!data.status) return InternalErrorMessage();
+                if (!data?.status) return InternalErrorMessage();
 
                 setCustomer({ data: data.data, isLoading: false });
                 setCustomerEmail({ data: data.data, isLoading: false });
             })
-            .catch(err => { });
 
         // 2. Load Order Status
         apolloClient
@@ -109,10 +103,9 @@ const OrderReport = () => {
             })
             .then(res => {
                 const data = res?.data?.getOrderStatusList;
-                if (!data.status) return InternalErrorMessage();
+                if (!data?.status) return InternalErrorMessage();
                 setStatus({ data: data.data, isLoading: false });
             })
-            .catch(err => { });
 
         // 3. Load Payment Methods
         apolloClient
@@ -127,10 +120,9 @@ const OrderReport = () => {
             })
             .then(res => {
                 const data = res?.data?.getPaymentMethodListPublic;
-                if (!data.status) return InternalErrorMessage();
+                if (!data?.status) return InternalErrorMessage();
                 setPaymentMethod({ data: data.data, isLoading: false });
             })
-            .catch(err => { });
 
         // 3. Load Shipping Methods
         apolloClient
@@ -145,10 +137,9 @@ const OrderReport = () => {
             })
             .then(res => {
                 const data = res?.data?.getShippingMethodListAdmin;
-                if (!data.status) return InternalErrorMessage();
+                if (!data?.status) return InternalErrorMessage();
                 setShippingMethod({ data: data.data, isLoading: false });
             })
-            .catch(err => { });
 
         // 3. Load Coupon
         apolloClient
@@ -163,10 +154,9 @@ const OrderReport = () => {
             })
             .then(res => {
                 const data = res?.data?.getAllCoupons;
-                if (!data.status) return InternalErrorMessage();
+                if (!data?.status) return InternalErrorMessage();
                 setCoupon({ data: data.data, isLoading: false });
             })
-            .catch(err => { });
 
 
     }, []);

@@ -1,10 +1,11 @@
 import { InboxOutlined } from '@ant-design/icons';
-import { Button, Col, Form, Input, Modal, Row, Upload } from 'antd';
-import React, { useEffect, useState } from 'react';
+import { Button, Col, Form, message, Modal, Row, Upload } from 'antd';
+import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
-import { toast } from 'react-toastify';
 import { poQuery } from '../../apollo/po';
+import configMessage from '../../config/config_message';
 import { apolloUploadClient } from '../../utility/apollo';
+import InternalErrorMessage from '../esential/InternalErrorMessage';
 
 export default function AddMFG({ po_id, addMfgModalOpen, setAddMfgModalOpen, setChangeMfg }) {
   const [mfgForm] = Form.useForm();
@@ -14,7 +15,7 @@ export default function AddMFG({ po_id, addMfgModalOpen, setAddMfgModalOpen, set
 
   /* ------------------------- Add Address Form Submit ------------------------ */
   const handleSubmit = async () => {
-    if (!mfgFile) return toast.error('Please select Mfg doc file first.');
+    if (!mfgFile) return message.error(configMessage.FILE_NOT_EXIST);
     setSubmitting(true);
     apolloUploadClient
       .mutate({
@@ -34,13 +35,10 @@ export default function AddMFG({ po_id, addMfgModalOpen, setAddMfgModalOpen, set
       })
       .then(res => {
         const data = res?.data?.createMFGDOC;
-        if (!data.status) return toast.error(data.message);
+        if (!data?.status) return InternalErrorMessage();
         setChangeMfg(prev => !prev);
         setAddMfgModalOpen(false);
         setMfgFile(null);
-      })
-      .catch(err => {
-        console.log(err);
       })
       .finally(() => {
         setSubmitting(false);
@@ -51,7 +49,7 @@ export default function AddMFG({ po_id, addMfgModalOpen, setAddMfgModalOpen, set
   const beforeImageUpload = file => {
     const isPDF = file.type === 'application/pdf';
     if (!isPDF) {
-      toast.error('You can only upload PDF file.');
+      message.error(configMessage.ONLY_PDF_FILE_UPLOAD);
       return false;
     }
     if (isPDF) setMfgFile(file);

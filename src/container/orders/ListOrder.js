@@ -114,11 +114,8 @@ const ListOrder = () => {
       })
       .then(res => {
         const data = res?.data?.getOrderlistAdmin;
-        if (!data.status) return InternalErrorMessage();
+        if (!data?.status) return InternalErrorMessage();
         setOrders(data);
-      })
-      .catch(err => {
-        setOrders(s => ({ ...s, error: 'Something went Wrong.!! ' }));
       })
       .finally(() => {
         setOrders(s => ({ ...s, loading: false }));
@@ -284,11 +281,8 @@ const ListOrder = () => {
       })
       .then(res => {
         const data = res?.data?.getPaymentMethodListPublic;
-        if (!data.status) return InternalErrorMessage();
+        if (!data?.status) return InternalErrorMessage();
         setPaymentMethod(data);
-      })
-      .catch(err => {
-        setPaymentMethod(s => ({ ...s, error: 'Something went Wrong.!! ' }));
       })
       .finally(() => {
         setPaymentMethod(s => ({ ...s, loading: false }));
@@ -308,12 +302,10 @@ const ListOrder = () => {
       })
       .then(res => {
         const data = res?.data?.getOrderStatusList;
-        if (!data.status) return InternalErrorMessage();
+        if (!data?.status) return InternalErrorMessage();
         setOrderStatus(data);
       })
-      .catch(err => {
-        setOrderStatus(s => ({ ...s, error: 'Something went Wrong.!! ' }));
-      })
+
       .finally(() => {
         setOrderStatus(s => ({ ...s, loading: false }));
         setOrders(s => ({ ...s, loading: false }));
@@ -332,12 +324,10 @@ const ListOrder = () => {
       })
       .then(res => {
         const data = res?.data?.getOrderUpdateAdminList;
-        if (!data.status) return InternalErrorMessage();
+        if (!data?.status) return InternalErrorMessage();
         setOrderUpdateAdmins(data);
       })
-      .catch(err => {
-        setOrderUpdateAdmins(s => ({ ...s, error: 'Something went Wrong.!! ' }));
-      })
+
       .finally(() => {
         setOrderUpdateAdmins(s => ({ ...s, loading: false }));
         setOrders(s => ({ ...s, loading: false }));
@@ -487,7 +477,7 @@ const ListOrder = () => {
                                   })
                                   .then(res => {
                                     const data = res?.data?.getSearchedProducts;
-                                    if (!data.status) return InternalErrorMessage();
+                                    if (!data?.status) return InternalErrorMessage();
                                     setProductOption(
                                       data.data.map(product => ({
                                         label:

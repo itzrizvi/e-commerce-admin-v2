@@ -1,4 +1,5 @@
 import { Modal } from 'antd'
+import configMessage from '../../config/config_message'
 
 export default function InternalErrorMessage() {
   return (

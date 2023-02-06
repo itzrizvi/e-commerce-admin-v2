@@ -20,7 +20,7 @@ const AddressTable = ({ initialData, addresses, setAddresses, defaultAddressId, 
       })
       .then(res => {
         const data = res.data.getCountryList;
-        if (!data.status) return InternalErrorMessage();
+        if (!data?.status) return InternalErrorMessage();
         setCountries(data?.data);
       });
 
@@ -41,7 +41,7 @@ const AddressTable = ({ initialData, addresses, setAddresses, defaultAddressId, 
       })
       .then(res => {
         const data = res?.data?.getStateList;
-        if (!data?.status) return;
+        if (!data?.status) return InternalErrorMessage();
         setNewInitialData({ data: { ...initialData, states: data?.data }, loading: false });
         setAddresses(
           addresses.map(item => {

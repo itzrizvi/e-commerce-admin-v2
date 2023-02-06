@@ -1,9 +1,9 @@
 import { InboxOutlined } from '@ant-design/icons';
-import { Button, Col, Form, Input, Modal, Row, Upload } from 'antd';
+import { Button, Col, Form, Input, message, Modal, Row, Upload } from 'antd';
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
-import { toast } from 'react-toastify';
 import { poQuery } from '../../apollo/po';
+import configMessage from '../../config/config_message';
 import { apolloUploadClient } from '../../utility/apollo';
 import InternalErrorMessage from '../esential/InternalErrorMessage';
 
@@ -45,7 +45,7 @@ export default function UpdateInvoice({
       })
       .then(res => {
         const data = res?.data?.updatePOInvoice;
-        if (!data.status) return InternalErrorMessage();
+        if (!data?.status) return InternalErrorMessage();
         setChangeInvoice(prev => !prev);
         setUpdateInvoiceModalOpen(false);
       })
@@ -58,7 +58,7 @@ export default function UpdateInvoice({
   const beforeImageUpload = file => {
     const isPDF = file.type === 'application/pdf';
     if (!isPDF) {
-      toast.error('You can only upload PDF file.');
+      message.error(configMessage.ONLY_PDF_FILE_UPLOAD);
       return false;
     }
     if (isPDF) setInvoiceFile(file);

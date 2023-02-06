@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Col, Form, Input, Switch, Spin } from 'antd';
+import { Row, Col, Form, Input, Switch, Spin, message } from 'antd';
 import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
 import { Cards } from '../../components/cards/frame/cards-frame';
@@ -8,7 +8,6 @@ import { Link, useHistory, useLocation } from 'react-router-dom';
 import queryString from 'query-string';
 import apolloClient, { customerMutation, customerQuery } from '../../utility/apollo';
 import Cookies from 'js-cookie';
-import { toast } from 'react-toastify';
 import { viewPermission } from '../../utility/utility';
 import InternalErrorMessage from '../../components/esential/InternalErrorMessage';
 const { TextArea } = Input;
@@ -43,11 +42,8 @@ const AddCustomerGroup = () => {
       .then(res => {
         const data = res?.data?.getSingleCustomerGroup;
 
-        if (!data?.status) return;
+        if (!data?.status) return InternalErrorMessage();
         setSingleCustomerGroup(s => ({ ...s, data: data?.data, error: '' }));
-      })
-      .catch(err => {
-        setSingleCustomerGroup(s => ({ ...s, error: 'Something went Wrong.!! ' }));
       })
       .finally(() => {
         setSingleCustomerGroup(s => ({ ...s, isLoading: false }));
@@ -92,15 +88,11 @@ const AddCustomerGroup = () => {
         })
         .then(res => {
           const data = res?.data?.createCustomerGroup;
-          if (!data.status) return InternalErrorMessage();
+          if (!data?.status) return InternalErrorMessage();
           setTimeout(() => {
             history.push('/admin/customers/group');
           }, 1000);
-          toast.success(`${values.customer_group_name} Group added successfully`);
-        })
-        .catch(err => {
-          console.log('got error on addCustomerGroup', err);
-          return toast.error('Something Went wrong !!');
+          message.success(`${values.customer_group_name} Group added successfully`);
         })
         .finally(() => {
           setIsLoading(false);
@@ -142,15 +134,11 @@ const AddCustomerGroup = () => {
         })
         .then(res => {
           const data = res?.data?.updateCustomerGroup;
-          if (!data.status) return InternalErrorMessage();
+          if (!data?.status) return InternalErrorMessage();
           setTimeout(() => {
             history.push('/admin/customers/group');
           }, 1000);
-          toast.success(`${values.customer_group_name} Group Updated successfully`);
-        })
-        .catch(err => {
-          console.log('got error on addCustomerGroup', err);
-          return toast.error('Something Went wrong !!');
+          message.success(`${values.customer_group_name} Group Updated successfully`);
         })
         .finally(() => {
           setIsLoading(false);

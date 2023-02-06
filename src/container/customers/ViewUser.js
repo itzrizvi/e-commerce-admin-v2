@@ -39,9 +39,6 @@ const ViewUser = () => {
         const data = res?.data?.getSingleCustomer;
         setSingleUser({ data: data.data, isLoading: false });
       })
-      .catch(err => {
-        console.log('🚀 ~ file: AddAdmin.js ~ line 46 ~ useEffect ~ err', err);
-      });
 
     apolloClient
       .query({
@@ -56,12 +53,9 @@ const ViewUser = () => {
       })
       .then(res => {
         const data = res?.data?.getOrderListByCustomerID;
-        if (!data.status) return InternalErrorMessage();
+        if (!data?.status) return InternalErrorMessage();
         setOrder(data?.data);
       })
-      .catch(err => {
-        console.log('🚀 ~ file: AddAdmin.js ~ line 46 ~ useEffect ~ err', err);
-      });
 
     apolloClient
       .query({
@@ -80,12 +74,9 @@ const ViewUser = () => {
       })
       .then(res => {
         const data = res?.data?.getRatingsByUserID;
-        if (!data.status) return InternalErrorMessage();
+        if (!data?.status) return InternalErrorMessage();
         setRating(data?.data);
       })
-      .catch(err => {
-        console.log('🚀 ~ file: AddAdmin.js ~ line 46 ~ useEffect ~ err', err);
-      });
   }, [params.id, token]);
 
   const order_columns = [

@@ -1,16 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Col, Form, Input, Switch, Select, Upload, InputNumber, Spin } from 'antd';
+import { Row, Col, Form, Input, Spin, message } from 'antd';
 import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
 import { Cards } from '../../components/cards/frame/cards-frame';
 import { Button } from '../../components/buttons/buttons';
 import { Link, useHistory, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { toast } from 'react-toastify';
 import queryString from 'query-string';
 import apolloClient from '../../apollo';
 import { viewPermission } from '../../utility/utility';
 import { productAvailabilityStatusQuery } from '../../apollo/productAvailabilityStatus';
+import InternalErrorMessage from '../../components/esential/InternalErrorMessage';
 
 const UpdateAvailabilityStatus = () => {
   viewPermission('product-availability-status');
@@ -39,14 +39,11 @@ const UpdateAvailabilityStatus = () => {
       })
       .then(res => {
         const data = res?.data?.getSingleProductAvailabilityStatus;
-        if (!data?.status) return;
+        if (!data?.status) return InternalErrorMessage();
         setAvailabilityStatus(s => ({ ...s, data: data?.data, error: '' }));
         form.setFieldsValue({
           name: data?.data?.name,
         });
-      })
-      .catch(err => {
-        setAvailabilityStatus(s => ({ ...s, error: 'Something went Wrong.!! ' }));
       })
       .finally(() => {
         setAvailabilityStatus(s => ({ ...s, isLoading: false }));
@@ -81,14 +78,11 @@ const UpdateAvailabilityStatus = () => {
       })
       .then(res => {
         const data = res?.data?.updateProductAvailabilityStatus;
-        if (!data?.status) return toast.error('Something Went wrong !!');
+        if (!data?.status) return InternalErrorMessage();
         setTimeout(() => {
           history.push('/admin/product-availability-status/list');
         }, 1000);
-        toast.success(data?.message);
-      })
-      .catch(err => {
-        toast.error('Something Went wrong !!');
+        message.success(data?.message);
       })
       .finally(() => setLoading(false));
   };

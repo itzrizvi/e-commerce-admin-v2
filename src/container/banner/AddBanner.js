@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
-import { Row, Col, Form, Input, Switch, Popconfirm } from 'antd';
+import { Row, Col, Form, Input, Switch, Popconfirm, message } from 'antd';
 import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
 import { Cards } from '../../components/cards/frame/cards-frame';
 import { Button } from '../../components/buttons/buttons';
 import { useHistory } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { toast } from 'react-toastify';
 import apolloClient from '../../apollo';
 import { viewPermission } from '../../utility/utility';
 import ReactQuill, { Quill } from 'react-quill';
@@ -14,6 +13,7 @@ import 'react-quill/dist/quill.snow.css';
 import ImageResize from 'quill-image-resize-module-react';
 import htmlEditButton from 'quill-html-edit-button';
 import { bannerQuery } from '../../apollo/banner';
+import InternalErrorMessage from '../../components/esential/InternalErrorMessage';
 Quill.register('modules/imageResize', ImageResize);
 Quill.register('modules/htmlEditButton', htmlEditButton);
 
@@ -84,14 +84,11 @@ const AddBanner = () => {
       })
       .then(res => {
         const data = res?.data?.addBanner;
-        if (!data?.status) return toast.error('Something Went wrong !!');
+        if (!data?.status) return InternalErrorMessage()
         setTimeout(() => {
           history.push('/admin/banner/list');
         }, 2000);
-        toast.success(data?.message);
-      })
-      .catch(err => {
-        toast.error('Something Went wrong !!');
+        message.success(data?.message);
       })
       .finally(() => setIsLoading(false));
   };

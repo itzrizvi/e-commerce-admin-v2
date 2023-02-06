@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Col, Form, Input, Typography, Switch, Modal, Spin, Radio, Card } from 'antd';
+import { Row, Col, Form, Input, Typography, Switch, Modal, Spin, Card, message } from 'antd';
 import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
 import { Cards } from '../../components/cards/frame/cards-frame';
@@ -8,7 +8,6 @@ import { useHistory, useLocation, useParams } from 'react-router-dom';
 import queryString from 'query-string';
 import apolloClient, { vendorMutation } from '../../utility/apollo';
 import { poQuery } from '../../apollo/po';
-import { toast } from 'react-toastify';
 import { viewPermission } from '../../utility/utility';
 import { useSelector } from 'react-redux';
 const { TextArea } = Input;
@@ -30,6 +29,7 @@ import UpdateAddress from '../../components/common-modal/UpdateAddress';
 import Products from '../../components/products/Products';
 import config from '../../config/config';
 import InternalErrorMessage from '../../components/esential/InternalErrorMessage';
+import configMessage from '../../config/config_message';
 const { confirm } = Modal;
 
 const PO = () => {
@@ -118,7 +118,7 @@ const PO = () => {
         })
         .then(res => {
           const data = res.data.getSingleOrderAdmin;
-          if (!data.status) return InternalErrorMessage();
+          if (!data?.status) return InternalErrorMessage();
           form.setFieldsValue({
             order_id: data?.data?.id,
           });
@@ -148,7 +148,7 @@ const PO = () => {
       })
       .then(res => {
         const data = res.data.getShippingAccountListAdmin;
-        if (!data?.status) return true;
+        if (!data?.status) return InternalErrorMessage();
         setShippingMethodAccountList(data?.data);
       });
 
@@ -165,13 +165,10 @@ const PO = () => {
       })
       .then(res => {
         const data = res?.data?.getShippingMethodListAdmin;
-        if (!data.status) return InternalErrorMessage();
+        if (!data?.status) return InternalErrorMessage();
         setShippingMethod(data?.data);
         setSelectedShippingMethod(data?.data?.filter(item => item.isDefault === true)[0]?.id);
       })
-      .catch(err => {
-        console.log(err);
-      });
 
     // Load Payment Method
     apolloClient
@@ -185,12 +182,9 @@ const PO = () => {
       })
       .then(res => {
         const data = res?.data?.getPaymentMethodListPublic;
-        if (!data.status) return InternalErrorMessage();
+        if (!data?.status) return InternalErrorMessage();
         setPaymentMethod(data?.data);
       })
-      .catch(err => {
-        console.log(err);
-      });
   }, []);
 
   // Trigger After Contact Person Add
@@ -212,7 +206,7 @@ const PO = () => {
       })
       .then(res => {
         const data = res.data.getContactPerson;
-        if (!data.status) return InternalErrorMessage();
+        if (!data?.status) return InternalErrorMessage();
         setSelectedVendor(prev => ({ ...prev, contactPersons: data?.data }));
       });
   }, [cpSuccess]);
@@ -220,13 +214,13 @@ const PO = () => {
   const handleSubmit = () => {
     const values = form.getFieldsValue(true);
     // validate Products.
-    if (products.length === 0) return toast.warning('Please Select at Least One Product!');
+    if (products.length === 0) return message.warning(configMessage.PRODUCT_NOT_EXIST);
     const notValidate = products.find(item => {
       const { id, cost, quantity } = item;
       const checkFalse = !(id && cost && quantity);
       return checkFalse;
     });
-    if (notValidate) return toast.warning('Please Fill Products All of Data!');
+    if (notValidate) return message.warning(configMessage.PRODUCT_DATA_MISSING);
     const newProduct = products.map(item => {
       return { id: item.id, price: item.cost, quantity: item.quantity, ...(item?.isNew && { isNew: item?.isNew }) };
     });
@@ -267,11 +261,8 @@ const PO = () => {
       })
       .then(res => {
         const data = id ? res?.data?.updatePurchaseOrder : res?.data?.createPurchaseOrder;
-        if (!data.status) return InternalErrorMessage();
+        if (!data?.status) return InternalErrorMessage();
         successPO(data?.po_number, id);
-      })
-      .catch(err => {
-        console.log('got error on add vendor', err);
       })
       .finally(() => {
         setIsLoading(false);
@@ -348,7 +339,7 @@ const PO = () => {
       })
       .then(res => {
         const data = type === 'billing' ? res?.data?.addVendorBillingAddress : res?.data?.addVendorShippingAddress;
-        if (!data?.status) return;
+        if (!data?.status) return InternalErrorMessage();
         setAddAddressModalOpen(false);
         setChangeAddress(prev => !prev);
       });
@@ -403,7 +394,7 @@ const PO = () => {
       })
       .then(res => {
         const data = res?.data?.updateVendorAddress;
-        if (!data?.status) return;
+        if (!data?.status) return InternalErrorMessage();
         setChangeAddress(prev => !prev);
         setUpdateAddressModalOpen(false);
       });
@@ -430,7 +421,7 @@ const PO = () => {
       })
       .then(res => {
         const data = res?.data?.getAddressListByVendorID;
-        if (!data?.status) return;
+        if (!data?.status) return InternalErrorMessage();
         setSelectedVendor(prev => ({ ...prev, addresses: data?.data }));
         const default_billing = data?.data.filter(item => item.isDefault && item.type === 'billing')[0];
         setSelectedVendorBillingAddress(default_billing);
@@ -461,7 +452,7 @@ const PO = () => {
       })
       .then(res => {
         const data = res?.data?.getSinglePurchaseOrder;
-        if (!data.status) return InternalErrorMessage();
+        if (!data?.status) return InternalErrorMessage();
         setSinglePO({ data: data?.data, isLoading: false, message: data?.message });
         setSelectedType(data?.data?.type);
         setSelectedContactPerson(data?.data?.contactPerson);
@@ -492,10 +483,6 @@ const PO = () => {
           };
         });
         setProducts(new_product_list);
-      })
-      .catch(err => {
-        console.log(err);
-        setSinglePO({ data: {}, isLoading: false, error: 'Something went wrong' });
       })
       .finally(() => {
         setSinglePO(s => ({ ...s, isLoading: false }));

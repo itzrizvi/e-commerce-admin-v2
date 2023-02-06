@@ -9,7 +9,6 @@ import { useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import apolloClient from '../../apollo';
 import { orderQuery } from '../../apollo/order';
-import { toast } from 'react-toastify';
 import { useLocation } from 'react-router-dom';
 import queryString from 'query-string';
 import { PDFDownloadLink } from '@react-pdf/renderer';
@@ -45,7 +44,7 @@ const ViewOrder = () => {
       })
       .then(res => {
         const data = res.data.getSingleOrderAdmin;
-        if (!data.status) return InternalErrorMessage();
+        if (!data?.status) return InternalErrorMessage();
         setSingleOrder({ data: data.data, isLoading: false });
 
         let sub_total = 0;

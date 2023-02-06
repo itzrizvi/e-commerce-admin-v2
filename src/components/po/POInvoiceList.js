@@ -3,7 +3,6 @@ import { Modal, Table, Tooltip } from 'antd';
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
-import { toast } from 'react-toastify';
 import apolloClient from '../../apollo';
 import { poQuery } from '../../apollo/po';
 import config from '../../config/config';
@@ -84,7 +83,7 @@ export default function POInvoiceList({ invoiceList, setChangeInvoice }) {
           })
           .then(res => {
             const data = res?.data?.deletePOInvoice;
-            if (!data.status) return InternalErrorMessage();
+            if (!data?.status) return InternalErrorMessage();
             setChangeInvoice(prev => !prev);
           })
           .finally(() => {

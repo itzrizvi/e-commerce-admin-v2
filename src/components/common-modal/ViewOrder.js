@@ -1,7 +1,6 @@
 import { Modal, Spin } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { toast } from 'react-toastify';
 import apolloClient from '../../apollo';
 import { orderQuery } from '../../apollo/order';
 import OrderView from '../common-component/OrderView';
@@ -33,7 +32,7 @@ export default function ViewOrder({ order_id, viewOrderModalOpen, setViewOrderMo
       })
       .then(res => {
         const data = res.data.getSingleOrderAdmin;
-        if (!data.status) return InternalErrorMessage();
+        if (!data?.status) return InternalErrorMessage();
         setSingleOrder(data.data);
         const prods = data.data?.orderitems?.map(item => {
           const {

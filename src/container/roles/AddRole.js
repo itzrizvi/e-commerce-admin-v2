@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Col, Form, Input, Table, Spin, Switch, Checkbox } from 'antd';
+import { Row, Col, Form, Input, Table, Spin, Switch, Checkbox, message } from 'antd';
 import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
 import { Cards } from '../../components/cards/frame/cards-frame';
@@ -7,9 +7,9 @@ import { Button } from '../../components/buttons/buttons';
 import { Link, useHistory } from 'react-router-dom';
 import apolloClient, { authMutation, authQuery } from '../../utility/apollo';
 import { useSelector } from 'react-redux';
-import { toast } from 'react-toastify';
 const { TextArea } = Input;
 import { viewPermission } from '../../utility/utility';
+import InternalErrorMessage from '../../components/esential/InternalErrorMessage';
 
 const AddRole = () => {
   viewPermission('role');
@@ -94,9 +94,6 @@ const AddRole = () => {
           return newState;
         });
       })
-      .catch(err => {
-        setAllPermission(s => ({ ...s, error: 'Something went Wrong.!! ' }));
-      })
       .finally(() => {
         setAllPermission(s => ({ ...s, isLoading: false }));
       });
@@ -120,15 +117,11 @@ const AddRole = () => {
       })
       .then(res => {
         const data = res?.data?.createRoleWithPermission;
-        if (!data?.status) return toast.error('Something Went wrong !!');
+        if (!data?.status) return InternalErrorMessage();
         setTimeout(() => {
           history.push('/admin/roles/list');
         }, 1000);
-        toast.success(`${values.role} Role created successfully.`);
-      })
-      .catch(err => {
-        console.log('Error on add role: ', err);
-        toast.error('Something Went wrong !!');
+        message.success(`${values.role} role created successfully.`);
       })
       .finally(() => setIsLoading(false));
   };

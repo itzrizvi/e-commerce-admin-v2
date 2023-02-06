@@ -59,7 +59,7 @@ const MenuItems = ({ darkMode, toggleCollapsed, topMenu }) => {
           {menuPermission('permission') && (
             <Menu.Item key="permission">
               <NavLink onClick={toggleCollapsed} to={`${path}/permission/list`}>
-                Permissions
+                Permission
               </NavLink>
             </Menu.Item>
           )}
@@ -67,7 +67,7 @@ const MenuItems = ({ darkMode, toggleCollapsed, topMenu }) => {
           {menuPermission('role') && (
             <Menu.Item key="roles">
               <NavLink onClick={toggleCollapsed} to={`${path}/roles/list`}>
-                Roles
+                Role
               </NavLink>
             </Menu.Item>
           )}
@@ -75,7 +75,7 @@ const MenuItems = ({ darkMode, toggleCollapsed, topMenu }) => {
           {menuPermission('user') && (
             <Menu.Item key="users">
               <NavLink onClick={toggleCollapsed} to={`${path}/admin/admins`}>
-                Users
+                User
               </NavLink>
             </Menu.Item>
           )}
@@ -90,11 +90,11 @@ const MenuItems = ({ darkMode, toggleCollapsed, topMenu }) => {
         menuPermission('product') ||
         menuPermission('product-availability-status') ||
         menuPermission('product-condition')) && (
-        <SubMenu key="products" icon={!topMenu && <FeatherIcon icon="shopping-cart" />} title="Products">
+        <SubMenu key="products" icon={!topMenu && <FeatherIcon icon="shopping-cart" />} title="Product">
           {menuPermission('product') && (
             <Menu.Item key="products_list">
               <NavLink onClick={toggleCollapsed} to={`${path}/products/list`}>
-                Products
+                Product
               </NavLink>
             </Menu.Item>
           )}
@@ -108,21 +108,21 @@ const MenuItems = ({ darkMode, toggleCollapsed, topMenu }) => {
           {menuPermission('coupon') && (
             <Menu.Item key="listCoupon">
               <NavLink onClick={toggleCollapsed} to={`${path}/products/coupon`}>
-                Coupons
+                Coupon
               </NavLink>
             </Menu.Item>
           )}
           {menuPermission('attribute') && (
             <Menu.Item key="listAttribute">
               <NavLink onClick={toggleCollapsed} to={`${path}/attributes/list`}>
-                Attributes
+                Attribute
               </NavLink>
             </Menu.Item>
           )}
           {menuPermission('attribute-group') && (
             <Menu.Item key="listAttributegroup">
               <NavLink onClick={toggleCollapsed} to={`${path}/attributes/list-group`}>
-                Attribute Groups
+                Attribute Group
               </NavLink>
             </Menu.Item>
           )}
@@ -137,14 +137,14 @@ const MenuItems = ({ darkMode, toggleCollapsed, topMenu }) => {
           {menuPermission('product-condition') && (
             <Menu.Item key="product_condition">
               <NavLink onClick={toggleCollapsed} to={`${path}/product-condition/list`}>
-                Product Conditions
+                Product Condition
               </NavLink>
             </Menu.Item>
           )}
           {menuPermission('product-availability-status') && (
             <Menu.Item key="product-availability-status">
               <NavLink onClick={toggleCollapsed} to={`${path}/product-availability-status/list`}>
-                Product Availability Statuses
+                Product Availability Status
               </NavLink>
             </Menu.Item>
           )}
@@ -152,18 +152,18 @@ const MenuItems = ({ darkMode, toggleCollapsed, topMenu }) => {
       )}
 
       {(menuPermission('customer') || menuPermission('customer-group')) && (
-        <SubMenu key="customers" icon={!topMenu && <FeatherIcon icon="user" />} title="Customers">
+        <SubMenu key="customers" icon={!topMenu && <FeatherIcon icon="user" />} title="Customer">
           {menuPermission('customer') && (
             <Menu.Item key="customer_list">
               <NavLink onClick={toggleCollapsed} to={`${path}/customers/list`}>
-                Customers
+                Customer
               </NavLink>
             </Menu.Item>
           )}
           {menuPermission('customer-group') && (
             <Menu.Item key="customers_group">
               <NavLink onClick={toggleCollapsed} to={`${path}/customers/group`}>
-                Customer Groups
+                Customer Group
               </NavLink>
             </Menu.Item>
           )}
@@ -194,11 +194,11 @@ const MenuItems = ({ darkMode, toggleCollapsed, topMenu }) => {
         menuPermission('order-stock-check') ||
         menuPermission('order-stock-check') ||
         menuPermission('order-stock-check')) && (
-        <SubMenu key="orders" icon={!topMenu && <FeatherIcon icon="shopping-bag" />} title="Orders">
+        <SubMenu key="orders" icon={!topMenu && <FeatherIcon icon="shopping-bag" />} title="Order">
           {menuPermission('order') && (
             <Menu.Item key="list_orders">
               <NavLink onClick={toggleCollapsed} to={`${path}/order/list`}>
-                Orders
+                Order
               </NavLink>
             </Menu.Item>
           )}
@@ -241,10 +241,10 @@ const MenuItems = ({ darkMode, toggleCollapsed, topMenu }) => {
       )}
 
       {menuPermission('vendor') && (
-        <SubMenu key="vendor" icon={!topMenu && <FeatherIcon icon="archive" />} title="Vendors">
+        <SubMenu key="vendor" icon={!topMenu && <FeatherIcon icon="archive" />} title="Vendor">
           <Menu.Item key="list_vendor">
             <NavLink onClick={toggleCollapsed} to={`${path}/vendor/list`}>
-              Vendors
+              Vendor
             </NavLink>
           </Menu.Item>
         </SubMenu>
@@ -271,7 +271,7 @@ const MenuItems = ({ darkMode, toggleCollapsed, topMenu }) => {
       )}
 
       {menuPermission('report') && (
-        <SubMenu key="report" icon={!topMenu && <FeatherIcon icon="file-text" />} title="Reports">
+        <SubMenu key="report" icon={!topMenu && <FeatherIcon icon="file-text" />} title="Report">
           {menuPermission('report') && (
             <>
               <Menu.Item key="order-report">
@@ -285,18 +285,18 @@ const MenuItems = ({ darkMode, toggleCollapsed, topMenu }) => {
       )}
 
       {menuPermission('company-info') && (
-        <SubMenu key="supports-sub" icon={!topMenu && <FeatherIcon icon="message-circle" />} title="Supports">
+        <SubMenu key="supports-sub" icon={!topMenu && <FeatherIcon icon="message-circle" />} title="Support">
           {menuPermission('company-info') && (
             <Menu.Item key="supports">
               <NavLink onClick={toggleCollapsed} to={`${path}/supports/list`}>
-                Messages
+                Message
               </NavLink>
             </Menu.Item>
           )}
         </SubMenu>
       )}
       {menuPermission('company-info') && (
-        <SubMenu key="settings" icon={!topMenu && <FeatherIcon icon="settings" />} title="Settings">
+        <SubMenu key="settings" icon={!topMenu && <FeatherIcon icon="settings" />} title="Setting">
           {menuPermission('company-info') && (
             <Menu.Item key="company_info">
               <NavLink onClick={toggleCollapsed} to={`${path}/company-info`}>

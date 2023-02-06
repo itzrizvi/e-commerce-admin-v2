@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Col, Form, Input, Switch, Spin } from 'antd';
+import { Row, Col, Form, Input, Switch, Spin, message } from 'antd';
 import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
 import { Cards } from '../../components/cards/frame/cards-frame';
@@ -8,7 +8,6 @@ import { Link, useHistory, useLocation } from 'react-router-dom';
 import queryString from 'query-string';
 import apolloClient, { attributeMutation, attributeQuery } from '../../utility/apollo';
 import Cookies from 'js-cookie';
-import { toast } from 'react-toastify';
 import { viewPermission } from '../../utility/utility';
 import InternalErrorMessage from '../../components/esential/InternalErrorMessage';
 
@@ -47,9 +46,6 @@ const AddAttributeGroup = () => {
         setSingleAttributeGroup({ data: data.data, isLoading: false });
         setGroupStatus(data.data.attrgroup_status);
       })
-      .catch(err => {
-        console.log(err);
-      });
   }, []);
 
   const handleSubmit = values => {
@@ -86,15 +82,11 @@ const AddAttributeGroup = () => {
         })
         .then(res => {
           const data = res?.data?.createAttrGroup;
-          if (!data.status) return InternalErrorMessage();
+          if (!data?.status) return InternalErrorMessage();
           setTimeout(() => {
             history.push('/admin/attributes/list-group');
           }, 1000);
-          toast.success(`${values.attr_group_name} updated successfully`);
-        })
-        .catch(err => {
-          console.log('got error on addPermission', err);
-          return toast.error('Something Went wrong !!');
+          message.success(`${values.attr_group_name} updated successfully`);
         })
         .finally(() => {
           setIsLoading(false);
@@ -136,15 +128,11 @@ const AddAttributeGroup = () => {
         })
         .then(res => {
           const data = res?.data?.updateAttrGroup;
-          if (!data.status) return InternalErrorMessage();
+          if (!data?.status) return InternalErrorMessage();
           setTimeout(() => {
             history.push('/admin/attributes/list-group');
           }, 1000);
-          toast.success(`${values.attr_group_name} updated successfully`);
-        })
-        .catch(err => {
-          console.log('got error on addPermission', err);
-          return toast.error('Something Went wrong !!');
+          message.success(`${values.attr_group_name} updated successfully`);
         })
         .finally(() => {
           setIsLoading(false);

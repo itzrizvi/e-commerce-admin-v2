@@ -39,9 +39,6 @@ const ListTemplate = () => {
         const data = res?.data?.getAllEmailTemplateList;
         setEmail(s => ({ ...s, data: data?.data, error: '' }));
       })
-      .catch(err => {
-        setEmail(s => ({ ...s, error: 'Something went Wrong.!! ' }));
-      })
       .finally(() => {
         setEmail(s => ({ ...s, loading: false }));
       });
@@ -141,9 +138,6 @@ const ListTemplate = () => {
         const data = res?.data?.getEmailTemplatePreview;
         setModalContent(data?.data);
         setModalOpen(true);
-      })
-      .catch(err => {
-        setEmail(s => ({ ...s, error: 'Something went Wrong.!! ' }));
       })
       .finally(() => {
         setEmail(s => ({ ...s, loading: false }));

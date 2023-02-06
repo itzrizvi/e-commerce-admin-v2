@@ -37,9 +37,6 @@ const ListContent = () => {
         const data = res?.data?.getEmailTemplateList;
         setEmailContent(s => ({ ...s, data: data?.data, error: '' }));
       })
-      .catch(err => {
-        setEmailContent(s => ({ ...s, error: 'Something went Wrong.!! ' }));
-      })
       .finally(() => {
         setEmailContent(s => ({ ...s, loading: false }));
       });

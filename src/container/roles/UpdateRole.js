@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Col, Form, Input, Switch, Table, Checkbox, Spin } from 'antd';
+import { Row, Col, Form, Input, Switch, Table, Checkbox, Spin, message } from 'antd';
 import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
 import { Cards } from '../../components/cards/frame/cards-frame';
@@ -8,7 +8,6 @@ import { useHistory, useLocation } from 'react-router-dom';
 import queryString from 'query-string';
 import apolloClient, { authMutation, authQuery } from '../../utility/apollo';
 import Cookies from 'js-cookie';
-import { toast } from 'react-toastify';
 import { viewPermission } from '../../utility/utility';
 import InternalErrorMessage from '../../components/esential/InternalErrorMessage';
 const { TextArea } = Input;
@@ -64,17 +63,14 @@ const UpdateRole = () => {
               })
               .then(res => {
                 const data = res?.data?.updateRolePermissions;
-                if (!data.status) return InternalErrorMessage();
-                toast.success(`Permission Updated Successfully`);
+                if (!data?.status) return InternalErrorMessage();
+                message.success(`Permission updated successfully`);
                 // update state
                 setPermissionList(state => {
                   const copyState = [...state];
                   copyState[index] = { ...copyState[index], read_access: e.target.checked };
                   return copyState;
                 });
-              })
-              .catch(err => {
-                toast.error('Something Went wrong !!');
               })
               .finally(() => {
                 setIsLoading(false);
@@ -115,17 +111,14 @@ const UpdateRole = () => {
               })
               .then(res => {
                 const data = res?.data?.updateRolePermissions;
-                if (!data.status) return InternalErrorMessage();
-                toast.success(`Permission Updated Successfully`);
+                if (!data?.status) return InternalErrorMessage();
+                message.success(`Permission updated successfully`);
                 // update state
                 setPermissionList(state => {
                   const copyState = [...state];
                   copyState[index] = { ...copyState[index], edit_access: e.target.checked };
                   return copyState;
                 });
-              })
-              .catch(err => {
-                toast.error('Something Went wrong !!');
               })
               .finally(() => {
                 setIsLoading(false);
@@ -160,14 +153,10 @@ const UpdateRole = () => {
       })
       .then(res => {
         const data = res?.data?.getSingleRole;
-        if (!data.status) return InternalErrorMessage();
+        if (!data?.status) return InternalErrorMessage();
         setSingleRole({ data: data?.data, loading: false, error: '' });
         setRole_status(data?.data?.role_status);
       })
-      .catch(err => {
-        console.log('got error loading single', err);
-        setSingleRole({ data: {}, loading: false, error: 'Something went worng' });
-      });
 
     // Load all permission
     apolloClient
@@ -185,9 +174,6 @@ const UpdateRole = () => {
         if (!data?.isAuth) return setAllPermissions(s => ({ ...s, error: 'You Are not Authorized' }));
         setAllPermissions(s => ({ data: data?.data, loading: false, error: '' }));
       })
-      .catch(err => {
-        setAllPermissions(s => ({ ...s, error: 'Something went Wrong.!! ' }));
-      });
   }, []);
 
   // organize permission
@@ -226,14 +212,11 @@ const UpdateRole = () => {
       })
       .then(res => {
         const data = res?.data?.updateRole;
-        if (!data?.status) return toast.error('Something Went wrong !!');
+        if (!data?.status) return InternalErrorMessage();
         setTimeout(() => {
           history.push('/admin/roles/list');
         }, 1000);
-        toast.success(`${singleRole.data.role} updated successfully.`);
-      })
-      .catch(err => {
-        console.log('Error on update role: ', err);
+        message.success(`${singleRole.data.role} updated successfully.`);
       })
       .finally(() => {
         setIsLoading(false);

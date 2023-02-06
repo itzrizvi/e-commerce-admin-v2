@@ -71,8 +71,6 @@ const login = (email, password, history) => {
       } else {
         dispatch(loginErr(adminSignIn.message));
       }
-    }).catch(err => {
-      dispatch(loginErr('Something went wrong'));
     })
 
 

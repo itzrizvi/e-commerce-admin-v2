@@ -2,10 +2,10 @@ import { InboxOutlined } from '@ant-design/icons';
 import { Button, Col, Form, Input, message, Modal, Row, Upload } from 'antd';
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
-import { toast } from 'react-toastify';
 import { poQuery } from '../../apollo/po';
 import configMessage from '../../config/config_message';
 import { apolloUploadClient } from '../../utility/apollo';
+import InternalErrorMessage from '../esential/InternalErrorMessage';
 
 export default function AddInvoice({ po_id, addInvoiceModalOpen, setAddInvoiceModalOpen, setChangeInvoice }) {
   const [invoiceForm] = Form.useForm();
@@ -38,13 +38,10 @@ export default function AddInvoice({ po_id, addInvoiceModalOpen, setAddInvoiceMo
       })
       .then(res => {
         const data = res?.data?.createPOInvoice;
-        if (!data.status) return message.error(data.message);
+        if (!data?.status) return InternalErrorMessage();
         setChangeInvoice(prev => !prev);
         setAddInvoiceModalOpen(false);
         setInvoiceFile(null);
-      })
-      .catch(err => {
-        console.log(err);
       })
       .finally(() => {
         setSubmitting(false);

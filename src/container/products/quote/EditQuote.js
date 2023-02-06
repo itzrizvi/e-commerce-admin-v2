@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Col, Form, Input, Spin, Table, Select } from 'antd';
+import { Row, Col, Form, Input, Spin, Table, Select, message } from 'antd';
 import { PageHeader } from '../../../components/page-headers/page-headers';
 import { Main } from '../../../container/styled';
 import { Cards } from '../../../components/cards/frame/cards-frame';
 import { Button } from '../../../components/buttons/buttons';
 import { Link, useHistory, useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { toast } from 'react-toastify';
 import apolloClient from '../../../apollo';
 import FeatherIcon from 'feather-icons-react';
 import { viewPermission } from '../../../utility/utility';
@@ -45,7 +44,7 @@ const EditQuote = () => {
       })
       .then(res => {
         const data = res?.data?.getSingleSubmittedQuote;
-        if (!data.status) return InternalErrorMessage();
+        if (!data?.status) return InternalErrorMessage();
         setSingleQuote({ data: data?.data, loading: false, error: '' });
         const newQuiteData = data?.data?.submittedquoteitems.map(item => {
           return {
@@ -64,11 +63,6 @@ const EditQuote = () => {
           status: data?.data?.status,
         });
       })
-      .catch(err => {
-        console.log(err);
-        setSingleQuote({ data: {}, loading: false, error: 'Something went wrong' });
-      });
-
 
     apolloClient
       .query({
@@ -82,11 +76,9 @@ const EditQuote = () => {
       })
       .then(res => {
         const data = res?.data?.getQuoteStatusList;
-        if (!data.status) return InternalErrorMessage();
+        if (!data?.status) return InternalErrorMessage();
         setQuoteStatus({ data: data.data, isLoading: false });
       });
-
-
   }, []);
 
   //Submit Form
@@ -139,15 +131,12 @@ const EditQuote = () => {
       })
       .then(res => {
         const data = res?.data?.updateSubmittedQuote;
-        if (!data.status) InternalErrorMessage();
+        if (!data?.status) InternalErrorMessage();
         setIsLoading(false);
-        toast.success(data.message);
+        message.success(data.message);
         setTimeout(() => {
           history.push('/admin/products/quote');
         }, 2000);
-      })
-      .catch(err => {
-        toast.error('Something Went wrong !!!');
       });
   };
 
@@ -295,7 +284,7 @@ const EditQuote = () => {
                   name="edit-quote"
                   onFinish={handleSubmit}
                   onFinishFailed={errorInfo => console.log('form error info:\n', errorInfo)}
-                // labelCol={{ span: 4 }}
+                  // labelCol={{ span: 4 }}
                 >
                   <Form.Item name="status" label="Status">
                     <Select
@@ -358,10 +347,6 @@ const EditQuote = () => {
                       </Link>
                     </Form.Item>
                   </div>
-
-
-
-
                 </Form>
               )}
             </Cards>

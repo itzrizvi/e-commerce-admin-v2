@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Col, Form, Input, Switch, Select, Upload, InputNumber, Spin } from 'antd';
+import { Row, Col, Form, Input, Switch, Select, Upload, InputNumber, Spin, message } from 'antd';
 import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
 import { Cards } from '../../components/cards/frame/cards-frame';
 import { Button } from '../../components/buttons/buttons';
 import { Link, useHistory } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { toast } from 'react-toastify';
 import { PlusOutlined } from '@ant-design/icons';
 import { brandQuery } from '../../apollo/brand';
 import apolloClient from '../../apollo';
@@ -14,6 +13,8 @@ import { apolloUploadClient } from '../../apollo';
 import { errorImageSrc } from '../../utility/images';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
 import { viewPermission } from '../../utility/utility';
+import configMessage from '../../config/config_message';
+import InternalErrorMessage from '../../components/esential/InternalErrorMessage';
 
 const AddBrand = () => {
   viewPermission('manufacture');
@@ -48,10 +49,6 @@ const AddBrand = () => {
         setCategories(data);
         setLoading(false);
       })
-      .catch(err => {
-        setCategories([]);
-        console.log(err);
-      });
   }, []);
 
   //Submit Form
@@ -64,7 +61,7 @@ const AddBrand = () => {
 
     if (modify_category.length === 0) {
       setIsLoading(false);
-      return toast.error('Please Select Category');
+      return message.error(configMessage.CATEGORY_EMPTY);
     }
 
     const data = { ...values, brandStatus: brandStatus, brandSortOrder: order, categories: modify_category };
@@ -93,14 +90,11 @@ const AddBrand = () => {
       })
       .then(res => {
         const data = res?.data?.createBrand;
-        if (!data?.status) return toast.error('Something Went wrong !!');
+        if (!data?.status) return InternalErrorMessage();
         setTimeout(() => {
           history.push('/admin/brand/list');
         }, 1000);
-        toast.success(data?.message);
-      })
-      .catch(err => {
-        toast.error('Something Went wrong !!');
+        message.success(data?.message);
       })
       .finally(() => setIsLoading(false));
   };
@@ -108,9 +102,9 @@ const AddBrand = () => {
   // Assign Image
   const beforeImageUpload = file => {
     const isJpg = file.type === 'image/jpeg';
-    if (!isJpg) toast.error('You can only upload JPG file!');
+    if (!isJpg) message.error(configMessage.ONLY_JPG_FILE_UPLOAD);
     const isLt2M = file.size / 1024 / 1024 < 1;
-    if (!isLt2M) toast.error('Image must smaller than 1MB!');
+    if (!isLt2M) message.error(configMessage.FILE_MAX_1MB);
 
     if (isJpg && isLt2M) {
       setThumbnail(URL.createObjectURL(file));

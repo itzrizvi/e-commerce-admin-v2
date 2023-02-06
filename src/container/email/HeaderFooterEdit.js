@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
-import { Row, Col, Form, Input, Select, Spin, Switch } from 'antd';
+import { Row, Col, Form, Input, Select, Spin, Switch, message } from 'antd';
 import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
 import { Cards } from '../../components/cards/frame/cards-frame';
 import { Button } from '../../components/buttons/buttons';
 import { Link, useHistory, useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { toast } from 'react-toastify';
 import apolloClient from '../../apollo';
 import { viewPermission } from '../../utility/utility';
 import ReactQuill, { Quill } from 'react-quill';
@@ -87,14 +86,11 @@ const HeaderFooterEdit = () => {
       })
       .then(res => {
         const data = res?.data?.updateEmailTempHeaderFooter;
-        if (!data?.status) return toast.error('Something Went wrong !!');
+        if (!data?.status) return InternalErrorMessage();
         setTimeout(() => {
           history.push('/admin/email/header-footer/list');
         }, 1000);
-        toast.success(data?.message);
-      })
-      .catch(err => {
-        toast.error('Something Went wrong !!');
+        message.success(data?.message);
       })
       .finally(() => setIsLoading(false));
   };
@@ -119,7 +115,7 @@ const HeaderFooterEdit = () => {
       })
       .then(res => {
         const data = res?.data?.getSingleEmailTempHeaderFooter;
-        if (!data.status) return InternalErrorMessage();
+        if (!data?.status) return InternalErrorMessage();
         setSingleHeaderFooter({ data: data?.data, loading: false, error: '' });
         form.setFieldsValue({
           name: data?.data?.name,
@@ -129,10 +125,7 @@ const HeaderFooterEdit = () => {
         setContent(data?.data?.content);
         setCustomHtmlSwitch(data?.data?.layout_type === "custom");
       })
-      .catch(err => {
-        console.log(err);
-        setSingleHeaderFooter({ data: {}, loading: false, error: 'Something went worng' });
-      });
+
   }, [params?.id]);
 
   return (

@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Col, Form, Input, Spin, Switch, Popconfirm } from 'antd';
+import { Row, Col, Form, Input, Spin, Switch, Popconfirm, message } from 'antd';
 import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
 import { Cards } from '../../components/cards/frame/cards-frame';
 import { Button } from '../../components/buttons/buttons';
 import { useHistory, useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { toast } from 'react-toastify';
 import apolloClient from '../../apollo';
 import { viewPermission } from '../../utility/utility';
 import ReactQuill, { Quill } from 'react-quill';
@@ -88,14 +87,11 @@ const UpdateBanner = () => {
       })
       .then(res => {
         const data = res?.data?.updateBanner;
-        if (!data?.status) return toast.error('Something Went wrong !!');
+        if (!data?.status) return InternalErrorMessage();
         setTimeout(() => {
           history.push('/admin/banner/list');
         }, 2000);
-        toast.success(data?.message);
-      })
-      .catch(err => {
-        toast.error('Something Went wrong !!');
+        message.success(data?.message);
       })
       .finally(() => setIsLoading(false));
   };
@@ -118,7 +114,7 @@ const UpdateBanner = () => {
       })
       .then(res => {
         const data = res?.data?.getSingleBanner;
-        if (!data.status) return InternalErrorMessage();
+        if (!data?.status) return InternalErrorMessage();
         setSingleBanner({ data: data?.data, loading: false, error: '' });
         form.setFieldsValue({
           name: data?.data?.name
@@ -128,10 +124,6 @@ const UpdateBanner = () => {
         setStatusSwitch(data?.data?.status);
         setCustomHtmlSwitch(data?.data?.layout_type === "custom");
       })
-      .catch(err => {
-        console.log(err);
-        setSingleBanner({ data: {}, loading: false, error: 'Something went worng' });
-      });
   }, [params?.id]);
 
   return (

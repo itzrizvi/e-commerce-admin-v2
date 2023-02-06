@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Col, Form, Input, Switch, Spin } from 'antd';
+import { Row, Col, Form, Input, Switch, Spin, message } from 'antd';
 import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
 import { Cards } from '../../components/cards/frame/cards-frame';
@@ -7,7 +7,6 @@ import { Button } from '../../components/buttons/buttons';
 import { Link, useLocation, useHistory } from 'react-router-dom';
 import apolloClient, { authMutation, authQuery } from '../../utility/apollo';
 import Cookies from 'js-cookie';
-import { toast } from 'react-toastify';
 import queryString from 'query-string';
 import { viewPermission } from '../../utility/utility';
 import InternalErrorMessage from '../../components/esential/InternalErrorMessage';
@@ -46,9 +45,7 @@ const AddPermission = () => {
         setSinglePermission({ data: data.data, isLoading: false });
         setPermissionStatus(data.data.roles_permission_status);
       })
-      .catch(err => {
-        console.log(err);
-      });
+
   }, []);
 
   const handleSubmit = values => {
@@ -82,15 +79,11 @@ const AddPermission = () => {
         })
         .then(res => {
           const data = res?.data?.createRolesPermission;
-          if (!data.status) return InternalErrorMessage();
+          if (!data?.status) return InternalErrorMessage();
           setTimeout(() => {
             history.push('/admin/permission/list');
           }, 1000);
-          toast.success(`${values.permissionName} added successfully`);
-        })
-        .catch(err => {
-          console.log('got error on addPermission', err);
-          return toast.error('Soemthing Went wrong !!');
+          message.success(`${values.permissionName} added successfully`);
         })
         .finally(() => {
           setIsLoading(false);
@@ -132,15 +125,11 @@ const AddPermission = () => {
         })
         .then(res => {
           const data = res?.data?.updateRolesPermission;
-          if (!data.status) return InternalErrorMessage();
+          if (!data?.status) return InternalErrorMessage();
           setTimeout(() => {
             history.push('/admin/permission/list');
           }, 1000);
-          toast.success(`${values.permissionName} updated successfully`);
-        })
-        .catch(err => {
-          console.log('got error on update Permission', err);
-          return toast.error('Soemthing Went wrong !!');
+          message.success(`${values.permissionName} updated successfully`);
         })
         .finally(() => {
           setIsLoading(false);

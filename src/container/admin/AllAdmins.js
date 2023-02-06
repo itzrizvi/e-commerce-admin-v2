@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Col, Table, Input, Spin, Switch, Typography } from 'antd';
+import { Row, Col, Table, Input, Spin, Switch, message } from 'antd';
 import FeatherIcon from 'feather-icons-react';
 import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
@@ -7,11 +7,10 @@ import { Cards } from '../../components/cards/frame/cards-frame';
 import { SearchOutlined } from '@ant-design/icons';
 import { Button } from '../../components/buttons/buttons';
 import apolloClient, { authMutation, authQuery } from '../../utility/apollo';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import FontAwesome from 'react-fontawesome';
 import Cookies from 'js-cookie';
-import { toast } from 'react-toastify';
 import config from '../../config/config';
 import { logOut } from '../../redux/authentication/actionCreator';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
@@ -34,13 +33,9 @@ const handleStatusChange = (record, checked) => {
     })
     .then(res => {
       const status = res?.data?.adminUpdate?.status;
-      if (!status) return toast.error(res?.data?.adminUpdate.message);
-      toast.success(`${record.email} user Status updated successfully.`);
+      if (!status) return message.error(res?.data?.adminUpdate.message);
+      message.success(`${record.email} user status updated successfully.`);
     })
-    .catch(err => {
-      console.log('🚀 ~ file: AllAdmins.js ~ line 33 ~ handleStatusChange ~ err', err);
-      toast.error(`Something went wrong!!`);
-    });
 };
 
 const AllAdmin = () => {
@@ -72,9 +67,6 @@ const AllAdmin = () => {
         } else {
           setStaffs(s => ({ ...s, data: res?.data?.getAllStaff?.data, error: '' }));
         }
-      })
-      .catch(err => {
-        setStaffs(s => ({ ...s, error: 'Something went Wrong.!! ' }));
       })
       .finally(() => {
         setStaffs(s => ({ ...s, isLoading: false }));

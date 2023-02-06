@@ -137,7 +137,7 @@ export default function ProductSearch({ productSearchModalOpen, setProductSearch
           ...item,
           quantity: 1
         })));
-        if (!data.status) return InternalErrorMessage();
+        if (!data?.status) return InternalErrorMessage();
       })
       .finally(() => {
         setLoading(false);

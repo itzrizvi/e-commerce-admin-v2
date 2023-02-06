@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Col, Spin, Input, Table, DatePicker, Select, Switch } from 'antd';
+import { Row, Col, Spin, Input, Table, DatePicker, Select, Switch, message } from 'antd';
 import FeatherIcon from 'feather-icons-react';
 import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
@@ -16,7 +16,6 @@ import moment from 'moment';
 const { RangePicker } = DatePicker;
 import { useSelector } from 'react-redux';
 import Cookies from 'js-cookie';
-import { toast } from 'react-toastify';
 import InternalErrorMessage from '../../components/esential/InternalErrorMessage';
 
 let checkPoint = false;
@@ -169,11 +168,8 @@ const ListVendor = () => {
       })
       .then(res => {
         const data = res?.data?.getAllVendor;
-        if (!data.status) return InternalErrorMessage();
+        if (!data?.status) return InternalErrorMessage();
         setVendors(data);
-      })
-      .catch(err => {
-        setVendors(s => ({ ...s, error: 'Something went Wrong.!! ' }));
       })
       .finally(() => {
         setVendors(s => ({ ...s, loading: false }));
@@ -195,12 +191,9 @@ const ListVendor = () => {
       })
       .then(res => {
         const data = res?.data?.updateVendorStatus;
-        if (!data.status) return InternalErrorMessage();
-        toast.success(`${record.company_name} status updated.`);
+        if (!data?.status) return InternalErrorMessage();
+        message.success(`${record.company_name} status updated.`);
       })
-      .catch(err => {
-        return toast.error('Something Went wrong !!');
-      });
   };
 
   const onDateRangeChange = dateRange => {

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Col, Form, Input, Select, Spin, Switch } from 'antd';
+import { Row, Col, Form, Input, Select, Spin, Switch, message } from 'antd';
 import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
 import { Cards } from '../../components/cards/frame/cards-frame';
@@ -8,7 +8,6 @@ import { Link, useHistory, useLocation } from 'react-router-dom';
 import queryString from 'query-string';
 import apolloClient, { attributeMutation, attributeQuery } from '../../utility/apollo';
 import Cookies from 'js-cookie';
-import { toast } from 'react-toastify';
 import { viewPermission } from '../../utility/utility';
 import InternalErrorMessage from '../../components/esential/InternalErrorMessage';
 const { Option } = Select;
@@ -42,11 +41,8 @@ const AddAttribute = () => {
       .then(res => {
         const data = res?.data?.getAllAttrGroups;
 
-        if (!data?.status) return;
+        if (!data?.status) return InternalErrorMessage();
         setAttributeGroups(s => ({ ...s, data: data?.data, error: '' }));
-      })
-      .catch(err => {
-        setAttributeGroups(s => ({ ...s, error: 'Something went Wrong.!! ' }));
       })
       .finally(() => {
         setAttributeGroups(s => ({ ...s, isLoading: false }));
@@ -75,14 +71,11 @@ const AddAttribute = () => {
         setSingleAttribute({ data: data.data, isLoading: false });
         setAttr_group_id(data.data.attr_group_id);
       })
-      .catch(err => {
-        console.log(err);
-      });
   }, []);
 
   const handleSubmit = values => {
     const { attribute_name } = values;
-    if (!attr_group_id) return toast.warning('Attribute Group is not selected');
+    if (!attr_group_id) return message.warning('Attribute group is not selected');
 
     setIsLoading(true);
     if (!params.id) {
@@ -114,15 +107,11 @@ const AddAttribute = () => {
         })
         .then(res => {
           const data = res?.data?.createAttribute;
-          if (!data.status) return InternalErrorMessage();
+          if (!data?.status) return InternalErrorMessage();
           setTimeout(() => {
             history.push('/admin/attributes/list');
           }, 1000);
-          toast.success(`${values.attribute_name} Added successfully`);
-        })
-        .catch(err => {
-          console.log('got error on addPermission', err);
-          return toast.error('Something Went wrong !!');
+          message.success(`${values.attribute_name} Added successfully`);
         })
         .finally(() => {
           setIsLoading(false);
@@ -163,15 +152,11 @@ const AddAttribute = () => {
         })
         .then(res => {
           const data = res?.data?.updateAttribute;
-          if (!data.status) return InternalErrorMessage();
+          if (!data?.status) return InternalErrorMessage();
           setTimeout(() => {
             history.push('/admin/attributes/list');
           }, 1000);
-          toast.success(data.message);
-        })
-        .catch(err => {
-          console.log('got error on addPermission', err);
-          return toast.error('Something Went wrong !!');
+          message.success(data.message);
         })
         .finally(() => {
           setIsLoading(false);

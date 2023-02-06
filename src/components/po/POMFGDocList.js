@@ -87,7 +87,7 @@ export default function POMFGDocList({ mfgList, setChangeMfg }) {
           })
           .then(res => {
             const data = res?.data?.deletePOMFGDOC;
-            if (!data.status) return InternalErrorMessage();
+            if (!data?.status) return InternalErrorMessage();
             setChangeMfg(prev => !prev);
           })
           .finally(() => {

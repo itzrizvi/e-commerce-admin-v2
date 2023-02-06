@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
-import { Row, Col, Form, Input, Select, Spin, Switch } from 'antd';
+import { Row, Col, Form, Input, Select, Spin, Switch, message } from 'antd';
 import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
 import { Cards } from '../../components/cards/frame/cards-frame';
 import { Button } from '../../components/buttons/buttons';
 import { Link, useHistory, useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { toast } from 'react-toastify';
 import apolloClient from '../../apollo';
 import { viewPermission } from '../../utility/utility';
 import ReactQuill, { Quill } from 'react-quill';
@@ -89,14 +88,11 @@ const AddContent = () => {
       })
       .then(res => {
         const data = res?.data?.updateEmailTemplate;
-        if (!data?.status) return toast.error('Something Went wrong !!');
+        if (!data?.status) return InternalErrorMessage()
         setTimeout(() => {
           history.push('/admin/email/content/list');
         }, 1000);
-        toast.success(data?.message);
-      })
-      .catch(err => {
-        toast.error('Something Went wrong !!');
+        message.success(data?.message);
       })
       .finally(() => setIsLoading(false));
   };
@@ -120,7 +116,7 @@ const AddContent = () => {
       })
       .then(res => {
         const data = res?.data?.getSingleEmailTemplate;
-        if (!data.status) return InternalErrorMessage();
+        if (!data?.status) return InternalErrorMessage();
         setSingleTemplate({ data: data, loading: false, error: '' });
         form.setFieldsValue({
           name: data?.data?.name,
@@ -131,10 +127,7 @@ const AddContent = () => {
         setContent(data?.data?.content);
         setCustomHtmlSwitch(data?.data?.layout_type);
       })
-      .catch(err => {
-        console.log(err);
-        setSingleTemplate({ data: {}, loading: false, error: 'Something went wrong' });
-      });
+
     apolloClient
       .query({
         query: EmailTemplateQuery.GET_EMAIL_HEADER_FOOTER_LIST,

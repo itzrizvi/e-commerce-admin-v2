@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
-import { Row, Col, Form, Input, Spin, Select } from 'antd';
+import { Row, Col, Form, Input, Spin, Select, message } from 'antd';
 import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
 import { Cards } from '../../components/cards/frame/cards-frame';
 import { Button } from '../../components/buttons/buttons';
 import { Link, useHistory, useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { toast } from 'react-toastify';
 import apolloClient from '../../apollo';
 import { viewPermission } from '../../utility/utility';
 import { EmailTemplateQuery } from '../../apollo/email';
@@ -52,14 +51,11 @@ const AddTemplate = () => {
       })
       .then(res => {
         const data = res?.data?.updateEmailTemplateOnList;
-        if (!data?.status) return toast.error('Something Went wrong !!');
+        if (!data?.status) return InternalErrorMessage();
         setTimeout(() => {
           history.push('/admin/email/template/list');
         }, 1000);
-        toast.success(data?.message);
-      })
-      .catch(err => {
-        toast.error('Something Went wrong !!');
+        message.success(data?.message);
       })
       .finally(() => setIsLoading(false));
   };
@@ -83,17 +79,14 @@ const AddTemplate = () => {
       })
       .then(res => {
         const data = res?.data?.getSingleEmailTemplateList;
-        if (!data.status) return InternalErrorMessage();
+        if (!data?.status) return InternalErrorMessage();
         setSingleTemplate({ data: data?.data, loading: false, error: '' });
         form.setFieldsValue({
           name: data?.data?.name,
           email_template_id:  data?.data?.email_template_id
         });
       })
-      .catch(err => {
-        console.log(err);
-        setSingleTemplate({ data: {}, loading: false, error: 'Something went worng' });
-      });
+
   }, []);
   useEffect(() => {
     apolloClient
@@ -110,10 +103,7 @@ const AddTemplate = () => {
         const data = res?.data?.getEmailTemplateList;
         setEmailTemplate(data?.data);
       })
-      .catch(err => {
-        setEmailTemplate([]);
-        console.log('🚀 ~ file: AddTemplate.js:83 ~ useEffect ~ err', err);
-      });
+
   }, []);
 
   return (

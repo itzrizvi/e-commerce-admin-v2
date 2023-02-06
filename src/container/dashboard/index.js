@@ -21,6 +21,7 @@ import {
 import CountUp from 'react-countup';
 import { dashboardAnalytics } from '../../apollo/dashboard';
 import Moment from 'react-moment';
+import InternalErrorMessage from '../../components/esential/InternalErrorMessage';
 
 const Dashboard = () => {
 	const user = useSelector(state => state.auth.user);
@@ -245,10 +246,8 @@ const Dashboard = () => {
 			}
 		}).then(res => {
 			const data = res?.data?.getContactUsUnreadMsgList
-			if (!data?.status) return
+			if (!data?.status) return InternalErrorMessage();
 			setMessages(s => ({ ...s, data: data?.data, error: '' }))
-		}).catch(err => {
-			setMessages(s => ({ ...s, error: 'Something went Wrong.!! ' }))
 		}).finally(() => {
 			setMessages(s => ({ ...s, isLoading: false }))
 		})
@@ -270,7 +269,7 @@ const Dashboard = () => {
 			})
 			.then(res => {
 				const data = res?.data?.getDashboardAnalytics;
-				if (!data?.status) return
+				if (!data?.status) return InternalErrorMessage();
 				setAnalytics({ data: data, error: '' });
 			})
 			.finally(() => setIsLoading(false));

@@ -92,14 +92,10 @@ const AddUser = () => {
       })
       .then(res => {
         const data = res?.data?.addCustomer;
-        if (!data.status) return InternalErrorMessage();
+        if (!data?.status) return InternalErrorMessage();
 
         setOperation(true);
         setUserId(data?.id);
-      })
-      .catch(err => {
-        console.log('error on adding customer', err);
-        setIsError(true);
       })
       .finally(() => setIsLoading(false));
   };
@@ -153,9 +149,6 @@ const AddUser = () => {
               const data = res?.data?.createContactPerson;
               if (!data?.status) return setIsError(true);
             })
-            .catch(err => {
-              setIsError(true);
-            });
         } else {
           apolloClient
             .mutate({
@@ -177,10 +170,7 @@ const AddUser = () => {
             })
             .then(res => {
               const data = res?.data?.updateVendorAddress;
-              if (!data?.status) return;
-            })
-            .catch(err => {
-              setIsError(true);
+              if (!data?.status) return InternalErrorMessage();
             })
             .finally(res => {
               setIsLoading(false);

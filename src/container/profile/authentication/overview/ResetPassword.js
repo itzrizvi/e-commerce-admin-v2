@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
-import { Form, Input, Button } from 'antd';
+import { Form, Input, Button, message } from 'antd';
 import { AuthWrapper } from './style';
 import Heading from '../../../../components/heading/heading';
 import { authQuery } from '../../../../apollo/auth';
 import apolloClient from '../../../../apollo';
-import { toast } from 'react-toastify';
 import AuthLayout from '../Index';
+import configMessage from '../../../../config/config_message';
 
 const ResetPassword = () => {
   const history = useHistory();
@@ -15,10 +15,10 @@ const ResetPassword = () => {
   let { codeHashed } = useParams();
   const handleSubmit = values => {
     setLoading(true);
-    const {verificationCode, newPassword, confirmPassword} = values
-    if(newPassword !== confirmPassword){
+    const { verificationCode, newPassword, confirmPassword } = values;
+    if (newPassword !== confirmPassword) {
       setLoading(false);
-      return toast.error("New Password and Confirm Password not Matched!")
+      return message.error(configMessage.PASSWORD_NOT_MATCH);
     }
     apolloClient
       .mutate({
@@ -28,7 +28,7 @@ const ResetPassword = () => {
             codeHashed,
             verificationCode: parseInt(verificationCode),
             newPassword,
-            confirmPassword
+            confirmPassword,
           },
         },
         context: {
@@ -38,19 +38,16 @@ const ResetPassword = () => {
         },
       })
       .then(res => {
-        const data = res?.data?.setPassword
-        if(data.status){
-          toast.success(data.message)
-          history.push("/");
+        const data = res?.data?.setPassword;
+        if (data?.status) {
+          message.success(data.message);
+          history.push('/');
           setTimeout(() => {
             window.location.reload();
           }, 2000);
-        }else{
-          toast.error(data.message)
+        } else {
+          InternalErrorMessage();
         }
-      })
-      .catch(err => {
-        toast.error('Something Went wrong !!');
       })
       .finally(() => setLoading(false));
   };

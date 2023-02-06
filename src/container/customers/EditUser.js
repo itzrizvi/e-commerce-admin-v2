@@ -77,7 +77,7 @@ const EditUser = () => {
       })
       .then(res => {
         const data = res?.data?.getSingleCustomer;
-        if (!data?.status) return;
+        if (!data?.status) return InternalErrorMessage();
         const shipping = [];
         const billing = [];
         const contact_person = [];
@@ -106,9 +106,6 @@ const EditUser = () => {
         setShippingAddress(shipping);
         setBillingAddress(billing);
       })
-      .catch(err => {
-        console.log('🚀 ~ file: AddAdmin.js ~ line 85 ~ useEffect ~ err', err);
-      });
   }, [params?.id]);
 
   const handleSubmit = values => {
@@ -156,12 +153,8 @@ const EditUser = () => {
       })
       .then(res => {
         const data = res?.data?.updateCustomer;
-        if (!data.status) return InternalErrorMessage();
+        if (!data?.status) return InternalErrorMessage();
         setOperation(true);
-      })
-      .catch(err => {
-        console.log('error on adding customer', err);
-        setIsError(true);
       })
       .finally(() => setIsLoading(false));
   };
@@ -218,11 +211,8 @@ const EditUser = () => {
             })
             .then(res => {
               const data = !params?.id ? res?.data?.createContactPerson : res?.data?.updateContactPerson;
-              if (!data?.status) return setIsError(true);
+              if (!data?.status) return InternalErrorMessage();
             })
-            .catch(err => {
-              setIsError(true);
-            });
         } else {
           setIsLoading(true);
           apolloClient
@@ -244,10 +234,7 @@ const EditUser = () => {
             })
             .then(res => {
               const data = res?.data?.updateCustomerAddress;
-              if (!data?.status) return;
-            })
-            .catch(err => {
-              setIsError(true);
+              if (!data?.status) return InternalErrorMessage();
             })
             .finally(res => {
               setIsLoading(false);

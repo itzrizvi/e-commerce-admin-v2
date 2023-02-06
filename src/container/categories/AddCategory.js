@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Col, Form, Input, Checkbox, Switch, Tabs, Spin, Select, Upload, Badge, Avatar } from 'antd';
+import { Row, Col, Form, Input, Checkbox, Switch, Tabs, Spin, Select, Upload, Badge, Avatar, message } from 'antd';
 import FeatherIcon from 'feather-icons-react';
 import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
@@ -9,10 +9,10 @@ import { Button } from '../../components/buttons/buttons';
 import apolloClient, { apolloUploadClient, productMutation, productQuery } from '../../utility/apollo';
 import Heading from '../../components/heading/heading';
 import queryString from 'query-string';
-import { toast } from 'react-toastify';
 import Cookies from 'js-cookie';
 import { viewPermission } from '../../utility/utility';
 import InternalErrorMessage from '../../components/esential/InternalErrorMessage';
+import configMessage from '../../config/config_message';
 
 const { TextArea } = Input;
 const { Option } = Select;
@@ -49,10 +49,9 @@ const AddCategory = () => {
       })
       .then(res => {
         const data = res?.data?.getAllCategories;
-        if (!data.status) return InternalErrorMessage();
+        if (!data?.status) return InternalErrorMessage();
         setCategories(data.categories);
       })
-      .catch(err => {});
   }, []);
 
   useEffect(() => {
@@ -92,15 +91,12 @@ const AddCategory = () => {
       })
       .then(res => {
         const data = res?.data?.getSingleCategory;
-        if (!data.status) return InternalErrorMessage();
+        if (!data?.status) return InternalErrorMessage();
         setSingleCategory(data.category);
         setIsFeatured(state => data?.category?.is_featured || state);
         setCategoryStatus(state => data?.category?.cat_status || state);
         setParentId(state => data?.category?.cat_parent_id || state);
       })
-      .catch(err => {
-        toast.error('Something went worng.!');
-      });
   }, []);
 
   const handleSubmit = values => {
@@ -166,13 +162,12 @@ const AddCategory = () => {
         })
         .then(res => {
           const data = res?.data?.createCategory;
-          if (!data?.status) return toast.error(data?.message);
+          if (!data?.status) return InternalErrorMessage();
           setTimeout(() => {
             history.push('/admin/categories/list');
           }, 1000);
-          toast.success(data?.message);
+          message.success(data?.message);
         })
-        .catch(err => {})
         .finally(() => {
           setIsLoading(false);
         });
@@ -224,13 +219,12 @@ const AddCategory = () => {
         })
         .then(res => {
           const data = res?.data?.updateCategory;
-          if (!data?.status) return toast.error(data?.message);
+          if (!data?.status) return InternalErrorMessage();
           setTimeout(() => {
             history.push('/admin/categories/list');
           }, 1000);
-          toast.success(data?.message);
+          message.success(data?.message);
         })
-        .catch(err => {})
         .finally(() => {
           setIsLoading(false);
         });
@@ -358,9 +352,9 @@ const AddCategory = () => {
                             multiple={false}
                             beforeUpload={file => {
                               const isJpg = file.type === 'image/jpeg';
-                              if (!isJpg) return toast.error('You can only upload JPG file!');
+                              if (!isJpg) return message.error(configMessage.ONLY_JPG_FILE_UPLOAD);
                               const isLt2M = file.size / 1024 / 1024 < 2;
-                              if (!isLt2M) return toast.error('Image must smaller than 2MB!');
+                              if (!isLt2M) return message.error(configMessage.FILE_MAX_2MB);
 
                               setThumbUrl(URL.createObjectURL(file));
 

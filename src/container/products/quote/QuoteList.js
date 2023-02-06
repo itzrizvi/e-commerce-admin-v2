@@ -35,9 +35,8 @@ const QuoteList = () => {
     endDate: '',
     minAmount: '',
     maxAmount: '',
-    searchQuery: ''
+    searchQuery: '',
   });
-
 
   // Load Quote Status List
   useEffect(() => {
@@ -53,29 +52,28 @@ const QuoteList = () => {
       })
       .then(res => {
         const data = res?.data?.getQuoteStatusList;
-        if (!data.status) return InternalErrorMessage();
+        if (!data?.status) return InternalErrorMessage();
         setQuoteStatus({ data: data.data, isLoading: false });
       });
-
   }, []);
-
 
   useEffect(() => {
     if (checkPoint) {
-      if (filterDate.status.length > 0 ||
+      if (
+        filterDate.status.length > 0 ||
         filterDate.searchQuery !== '' ||
         filterDate.endDate !== '' ||
         filterDate.startDate !== '' ||
         filterDate.minAmount !== '' ||
-        filterDate.maxAmount !== '') {
-        setSearchDisable(false)
+        filterDate.maxAmount !== ''
+      ) {
+        setSearchDisable(false);
       } else {
-        setSearchDisable(true)
+        setSearchDisable(true);
       }
     }
     checkPoint = true;
   }, [filterDate]);
-
 
   const searchQuoteAdmin = () => {
     setQuote(s => ({ ...s, loading: true }));
@@ -90,8 +88,8 @@ const QuoteList = () => {
             quoteEntryStartDate: filterDate.startDate ?? '',
             quoteEntryEndDate: filterDate.endDate ?? '',
             minAmount: parseFloat(filterDate.minAmount) ?? null,
-            maxAmount: parseFloat(filterDate.maxAmount) ?? null
-          }
+            maxAmount: parseFloat(filterDate.maxAmount) ?? null,
+          },
         },
         context: {
           headers: {
@@ -102,18 +100,14 @@ const QuoteList = () => {
       })
       .then(res => {
         const data = res?.data?.getSubmittedQuoteList;
-        if (!data?.status) return;
+        if (!data?.status) return InternalErrorMessage();
         setQuote(data);
-      })
-      .catch(err => {
-        setQuote(s => ({ ...s, error: 'Something went Wrong.!! ' }));
       })
       .finally(() => {
         setQuote(s => ({ ...s, loading: false }));
-        setSearchButton(!searchButton)
+        setSearchButton(!searchButton);
       });
-  }
-
+  };
 
   const columns = [
     {
@@ -122,7 +116,7 @@ const QuoteList = () => {
       key: 'first_name',
       width: 100,
       ellipsis: true,
-      render: (text, record) => `${text} ${record.quotedby.last_name}`
+      render: (text, record) => `${text} ${record.quotedby.last_name}`,
     },
     {
       title: 'Email',
@@ -184,25 +178,24 @@ const QuoteList = () => {
       width: 100,
       render: (text, record) => (
         <>
-          <Link to={`/admin/products/quote/edit/${record.id}`} style={{ margin: '.5em', color: "#096dd9" }} >
-            <FontAwesome name="edit" style={{ color: "#5F63F2" }} />
+          <Link to={`/admin/products/quote/edit/${record.id}`} style={{ margin: '.5em', color: '#096dd9' }}>
+            <FontAwesome name="edit" style={{ color: '#5F63F2' }} />
           </Link>
         </>
       ),
     },
   ];
 
-
   const onDateRangeChange = dateRange => {
     if (dateRange) {
-      setFilterDate(s => ({ ...s, startDate: dateRange[0]._d ?? '', endDate: dateRange[1]._d ?? '' }))
+      setFilterDate(s => ({ ...s, startDate: dateRange[0]._d ?? '', endDate: dateRange[1]._d ?? '' }));
       setChangeDateRange(returnMomentDateRange(dateRange[0], dateRange[1]));
     } else {
       setChangeDateRange(null);
     }
   };
   const returnMomentDateRange = (start, finish) => {
-    return [moment(start, "YYYY-MM-DD"), moment(finish, "YYYY-MM-DD")];
+    return [moment(start, 'YYYY-MM-DD'), moment(finish, 'YYYY-MM-DD')];
   };
 
   return (
@@ -215,18 +208,22 @@ const QuoteList = () => {
               <FeatherIcon icon="filter" />
               Filter
             </Button>
-            <Button size="small" type="white" onClick={() => {
-              setChangeDateRange(null)
-              setSearchDisable(true)
-              setFilterDate({
-                status: [],
-                startDate: '',
-                endDate: '',
-                minAmount: '',
-                maxAmount: '',
-                searchQuery: ''
-              })
-            }}>
+            <Button
+              size="small"
+              type="white"
+              onClick={() => {
+                setChangeDateRange(null);
+                setSearchDisable(true);
+                setFilterDate({
+                  status: [],
+                  startDate: '',
+                  endDate: '',
+                  minAmount: '',
+                  maxAmount: '',
+                  searchQuery: '',
+                });
+              }}
+            >
               <RetweetOutlined />
               Reset Filter
             </Button>
@@ -252,19 +249,14 @@ const QuoteList = () => {
                         prefix={<SearchOutlined />}
                         value={filterDate?.searchQuery}
                         onChange={e => {
-                          e.persist()
+                          e.persist();
                           const value = e.target.value;
                           setFilterDate(s => ({ ...s, searchQuery: value }));
                         }}
                       />
                     </Col>
                     <Col span={6}>
-                      <Button
-                        size="large"
-                        type="primary"
-                        disabled={searchDisable}
-                        onClick={searchQuoteAdmin}
-                      >
+                      <Button size="large" type="primary" disabled={searchDisable} onClick={searchQuoteAdmin}>
                         Search
                       </Button>
                     </Col>
@@ -281,7 +273,9 @@ const QuoteList = () => {
                             size="middle"
                             mode="multiple"
                             value={filterDate?.status}
-                            onDeselect={(val) => setFilterDate(prev => ({ ...prev, status: prev.status.filter(item => item !== val) }))}
+                            onDeselect={val =>
+                              setFilterDate(prev => ({ ...prev, status: prev.status.filter(item => item !== val) }))
+                            }
                             onSelect={val => {
                               setFilterDate(s => ({ ...s, status: filterDate.status.concat(val) }));
                             }}
@@ -299,7 +293,7 @@ const QuoteList = () => {
                             size="middle"
                             allowClear={true}
                             picker="date"
-                            value={dateRange !== "" ? dateRange : ""}
+                            value={dateRange !== '' ? dateRange : ''}
                             onChange={onDateRangeChange}
                           />
                         </Col>
@@ -313,7 +307,7 @@ const QuoteList = () => {
                               style={{ width: '50%', height: '40px' }}
                               value={filterDate?.minAmount ?? ''}
                               onChange={e => {
-                                e.persist()
+                                e.persist();
                                 setFilterDate(s => ({ ...s, minAmount: e?.target?.value }));
                               }}
                             />
@@ -323,7 +317,7 @@ const QuoteList = () => {
                               style={{ width: '50%', height: '40px' }}
                               value={filterDate?.maxAmount ?? ''}
                               onChange={e => {
-                                e.persist()
+                                e.persist();
                                 setFilterDate(s => ({ ...s, maxAmount: e?.target?.value }));
                               }}
                             />

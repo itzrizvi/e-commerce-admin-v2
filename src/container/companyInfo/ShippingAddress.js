@@ -21,7 +21,7 @@ const ShippingAddress = ({ initialData, shippingData, setShippingData, defaultAd
       })
       .then(res => {
         const data = res.data.getCountryList;
-        if (!data.status) return InternalErrorMessage();
+        if (!data?.status) return InternalErrorMessage();
         setCountries(data?.data);
       });
 
@@ -42,7 +42,7 @@ const ShippingAddress = ({ initialData, shippingData, setShippingData, defaultAd
       })
       .then(res => {
         const data = res?.data?.getStateList;
-        if (!data?.status) return;
+        if (!data?.status) return InternalErrorMessage();
         setNewInitialData({ data: { ...initialData, states: data?.data }, loading: false });
         setShippingData(
           shippingData.map(item => {

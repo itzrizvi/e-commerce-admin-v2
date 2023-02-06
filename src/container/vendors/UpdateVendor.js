@@ -109,7 +109,7 @@ const UpdateVendor = () => {
       })
       .then(res => {
         const data = res?.data?.getSingleVendor;
-        if (!data?.status) return;
+        if (!data?.status) return InternalErrorMessage();
         initialAddressData.parent_id = data?.data?.id;
         setSingleVendor(s => ({ ...s, data: data?.data, error: '' }));
         setStatus(data?.data?.status);
@@ -139,9 +139,6 @@ const UpdateVendor = () => {
         setContactPersons(contact_person);
         setBillingAddresses(billings);
         setShippingAddresses(shippings);
-      })
-      .catch(err => {
-        setSingleVendor(s => ({ ...s, error: 'Something went Wrong.!! ' }));
       })
       .finally(() => {
         setSingleVendor(s => ({ ...s, isLoading: false }));
@@ -178,13 +175,9 @@ const UpdateVendor = () => {
       })
       .then(res => {
         const data = res?.data?.updateVendor;
-        if (!data.status) return InternalErrorMessage();
+        if (!data?.status) return InternalErrorMessage();
         setVendorId(parseInt(params?.id));
         setOperation(true);
-      })
-      .catch(err => {
-        console.log('got error on update vendor', err);
-        setIsError(true);
       })
       .finally(() => {
         setIsLoading(false);
@@ -246,11 +239,8 @@ const UpdateVendor = () => {
             })
             .then(res => {
               const data = !params?.id ? res?.data?.createContactPerson : res?.data?.updateContactPerson;
-              if (!data?.status) return setIsError(true);
+              if (!data?.status) return InternalErrorMessage();
             })
-            .catch(err => {
-              setIsError(true);
-            });
         } else {
           apolloClient
             .mutate({
@@ -271,10 +261,7 @@ const UpdateVendor = () => {
             })
             .then(res => {
               const data = res?.data?.updateVendorAddress;
-              if (!data?.status) return setIsError(true);
-            })
-            .catch(err => {
-              setIsError(true);
+              if (!data?.status) return InternalErrorMessage();
             })
             .finally(res => {
               setIsLoading(false);

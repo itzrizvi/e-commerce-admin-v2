@@ -64,13 +64,9 @@ export default function ViewPO() {
       })
       .then(res => {
         const data = res?.data?.getSinglePurchaseOrder;
-        if (!data.status) return InternalErrorMessage()
+        if (!data?.status) return InternalErrorMessage()
         setSinglePO({ data: data?.data, isLoading: false, message: data?.message });
       })
-      .catch(err => {
-        console.log(err);
-        setSinglePO({ data: {}, isLoading: false, error: 'Something went worng' });
-      });
   }, [params?.id]);
 
   useEffect(() => {
@@ -87,7 +83,7 @@ export default function ViewPO() {
       })
       .then(res => {
         const data = res?.data?.getPOStatusList;
-        if (!data.status) return InternalErrorMessage();
+        if (!data?.status) return InternalErrorMessage();
         setPOStatus(data?.data);
       });
   }, []);
@@ -116,7 +112,7 @@ export default function ViewPO() {
       })
       .then(res => {
         const data = res?.data?.getPOInvoiceList;
-        if (!data.status) return InternalErrorMessage();
+        if (!data?.status) return InternalErrorMessage();
         setInvoiceList(data?.data);
       })
       .finally(() => setTabLoading(false));
@@ -146,7 +142,7 @@ export default function ViewPO() {
       })
       .then(res => {
         const data = res?.data?.getPOMFGDOCList;
-        if (!data.status) return InternalErrorMessage();
+        if (!data?.status) return InternalErrorMessage();
         setMfgList(data?.data);
       })
       .finally(() => setTabLoading(false));
@@ -175,7 +171,7 @@ export default function ViewPO() {
       })
       .then(res => {
         const data = res?.data?.getPOActivityList;
-        if (!data.status) return InternalErrorMessage();
+        if (!data?.status) return InternalErrorMessage();
         setActivityHistory(data?.data);
       })
       .finally(() => setTabLoading(false));
@@ -206,7 +202,7 @@ export default function ViewPO() {
           })
           .then(res => {
             const data = res?.data?.poSendToVendor;
-            if (!data.status) return InternalErrorMessage();
+            if (!data?.status) return InternalErrorMessage();
             Modal.success({
               content: 'PO send successfully.',
               onOk: () => window.location.reload(),
@@ -241,7 +237,7 @@ export default function ViewPO() {
           })
           .then(res => {
             const data = res?.data?.requestTracking;
-            if (!data.status) return InternalErrorMessage();
+            if (!data?.status) return InternalErrorMessage();
             Modal.success({
               content: 'Request tracking number send successfully.',
             });
@@ -284,7 +280,7 @@ export default function ViewPO() {
           })
           .then(res => {
             const data = res?.data?.createPOComment;
-            if (!data.status) return InternalErrorMessage();
+            if (!data?.status) return InternalErrorMessage();
             Modal.success({
               content: data.message,
             });
@@ -338,7 +334,7 @@ export default function ViewPO() {
           })
           .then(res => {
             const data = res?.data?.updatePOStatus;
-            if (!data.status) return InternalErrorMessage();
+            if (!data?.status) return InternalErrorMessage();
             Modal.success({
               content: `Status has been changed successfully.`,
               onOk: () => window.location.reload(),
@@ -653,7 +649,7 @@ export default function ViewPO() {
                 })
                 .then(res => {
                   const data = res?.data?.resendPOLink;
-                  if (!data.status) return InternalErrorMessage();
+                  if (!data?.status) return InternalErrorMessage();
                   setOpenSendPOLinkModalOpen(false);
                   setCustomEmailForSendPoLink(false);
                   Modal.success({
@@ -724,7 +720,7 @@ export default function ViewPO() {
                 })
                 .then(res => {
                   const data = res?.data?.resendPOAttachment;
-                  if (!data.status) return InternalErrorMessage();
+                  if (!data?.status) return InternalErrorMessage();
                   setOpenSendPOModalOpen(false);
                   setCustomEmailForSendPoToVendor(false);
                   Modal.success({

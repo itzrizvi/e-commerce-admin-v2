@@ -14,6 +14,7 @@ import Moment from 'react-moment';
 import apolloClient from '../../apollo';
 import { useSelector } from 'react-redux';
 import { productAvailabilityStatusQuery } from '../../apollo/productAvailabilityStatus';
+import InternalErrorMessage from '../../components/esential/InternalErrorMessage';
 
 
 const ListProductAvailabilityStatus = () => {
@@ -75,10 +76,8 @@ const ListProductAvailabilityStatus = () => {
             }
         }).then(res => {
             const data = res?.data?.getAllProductAvailabilityStatus
-            if (!data?.status) return
+            if (!data?.status) return InternalErrorMessage();
             setAvailability(s => ({ ...s, data: data?.data, error: '' }))
-        }).catch(err => {
-            setAvailability(s => ({ ...s, error: 'Something went Wrong.!! ' }))
         }).finally(() => {
             setAvailability(s => ({ ...s, isLoading: false }))
         })

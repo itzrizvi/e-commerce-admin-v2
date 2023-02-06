@@ -14,6 +14,7 @@ import Moment from 'react-moment';
 import apolloClient from '../../apollo';
 import { productConditionQuery } from '../../apollo/productCondition';
 import { useSelector } from 'react-redux';
+import InternalErrorMessage from '../../components/esential/InternalErrorMessage';
 
 
 const ListCondition = () => {
@@ -75,10 +76,8 @@ const ListCondition = () => {
             }
         }).then(res => {
             const data = res?.data?.getAllProductCondition
-            if (!data?.status) return
+            if (!data?.status) return InternalErrorMessage();
             setCondition(s => ({ ...s, data: data?.data, error: '' }))
-        }).catch(err => {
-            setCondition(s => ({ ...s, error: 'Something went Wrong.!! ' }))
         }).finally(() => {
             setCondition(s => ({ ...s, isLoading: false }))
         })

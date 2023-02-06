@@ -37,9 +37,7 @@ const ListEmail = () => {
         const data = res?.data?.getEmailTempHeaderFooterList;
         setHeaderFooter(s => ({ ...s, data: data?.data, error: '' }));
       })
-      .catch(err => {
-        setHeaderFooter(s => ({ ...s, error: 'Something went Wrong.!! ' }));
-      })
+
       .finally(() => {
         setHeaderFooter(s => ({ ...s, loading: false }));
       });

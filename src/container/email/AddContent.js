@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
-import { Row, Col, Form, Input, Select, Spin, Switch } from 'antd';
+import { Row, Col, Form, Input, Select, Spin, Switch, message } from 'antd';
 import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
 import { Cards } from '../../components/cards/frame/cards-frame';
 import { Button } from '../../components/buttons/buttons';
 import { Link, useHistory } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { toast } from 'react-toastify';
 import apolloClient from '../../apollo';
 import { viewPermission } from '../../utility/utility';
 import ReactQuill, { Quill } from 'react-quill';
@@ -15,6 +14,7 @@ import { EmailTemplateQuery } from '../../apollo/email';
 import ImageResize from 'quill-image-resize-module-react';
 import htmlEditButton from 'quill-html-edit-button';
 import { useEffect } from 'react';
+import InternalErrorMessage from '../../components/esential/InternalErrorMessage';
 Quill.register('modules/imageResize', ImageResize);
 Quill.register('modules/htmlEditButton', htmlEditButton);
 
@@ -86,14 +86,11 @@ const AddContent = () => {
       })
       .then(res => {
         const data = res?.data?.createEmailTemplate;
-        if (!data?.status) return toast.error('Something Went wrong !!');
+        if (!data?.status) return InternalErrorMessage();
         setTimeout(() => {
           history.push('/admin/email/content/list');
         }, 1000);
-        toast.success(data?.message);
-      })
-      .catch(err => {
-        toast.error('Something Went wrong !!');
+        message.success(data?.message);
       })
       .finally(() => setIsLoading(false));
   };

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Row,
   Col,
@@ -15,6 +15,7 @@ import {
   Tabs,
   Modal,
   Badge,
+  message,
 } from 'antd';
 import FeatherIcon from 'feather-icons-react';
 import { PageHeader } from '../../components/page-headers/page-headers';
@@ -24,7 +25,6 @@ import { Button } from '../../components/buttons/buttons';
 import { Link, useHistory, useParams } from 'react-router-dom';
 import apolloClient, { apolloUploadClient, customerQuery } from '../../utility/apollo';
 import { customerMutation } from '../../apollo/customer';
-import { toast } from 'react-toastify';
 import { ellipsis, viewPermission } from '../../utility/utility';
 import { errorImageSrc, renderImage } from '../../utility/images';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
@@ -34,6 +34,7 @@ import { orderQuery } from '../../apollo/order';
 import { addressSchema } from '../../apollo/address';
 import { strCamelCase } from '../../utility/stringModify';
 import InternalErrorMessage from '../../components/esential/InternalErrorMessage';
+import configMessage from '../../config/config_message';
 const { Text, Paragraph } = Typography;
 const prod_initial = {
   id: '',
@@ -94,7 +95,7 @@ const UpdateOrder = () => {
       })
       .then(res => {
         const data = res?.data?.getShippingMethodListPublic;
-        if (!data.status) return InternalErrorMessage();
+        if (!data?.status) return InternalErrorMessage();
         setShippingMethod(data?.data);
       });
 
@@ -117,7 +118,7 @@ const UpdateOrder = () => {
       })
       .then(res => {
         const data = res.data.getSingleOrderAdmin;
-        if (!data.status) return InternalErrorMessage();
+        if (!data?.status) return InternalErrorMessage();
         setSingleOrder({ data: data.data, isLoading: false });
         const billing = [];
         const shipping = [];
@@ -169,7 +170,7 @@ const UpdateOrder = () => {
       })
       .then(res => {
         const data = res?.data?.getOrderStatusList;
-        if (!data.status) return InternalErrorMessage();
+        if (!data?.status) return InternalErrorMessage();
         const order_status_list = data?.data?.map(item => ({
           ...item,
           value: item.id,
@@ -188,7 +189,7 @@ const UpdateOrder = () => {
       })
       .then(res => {
         const data = res.data.getCountryList;
-        if (!data.status) return InternalErrorMessage();
+        if (!data?.status) return InternalErrorMessage();
         setCountries(data?.data);
       });
     // Get Account List for Shipping Method
@@ -201,7 +202,7 @@ const UpdateOrder = () => {
       })
       .then(res => {
         const data = res.data.getShippingAccountListAdmin;
-        if (!data?.status) return true;
+        if (!data?.status) return InternalErrorMessage();
         setShippingMethodAccountList(data?.data);
       });
   }, []);
@@ -223,7 +224,7 @@ const UpdateOrder = () => {
       })
       .then(res => {
         const data = res?.data?.getStateList;
-        if (!data?.status) return;
+        if (!data?.status) return InternalErrorMessage();
         setStates(data?.data);
       });
   }, [selectedCountryCode]);
@@ -265,14 +266,11 @@ const UpdateOrder = () => {
       })
       .then(res => {
         const data = res?.data?.updateOrder;
-        if (!data?.status) return toast.error(data?.message);
-        toast.success(data.message);
+        if (!data?.status) return InternalErrorMessage();
+        message.success(data.message);
         setTimeout(() => {
           history.push('/admin/order/list');
         }, 3000);
-      })
-      .catch(err => {
-        toast.error('Something Went wrong !!');
       })
       .finally(() => setIsLoading(false));
   };
@@ -311,7 +309,7 @@ const UpdateOrder = () => {
                 })
                 .then(res => {
                   const data = res?.data?.getSearchedProducts;
-                  if (!data.status) return InternalErrorMessage();
+                  if (!data?.status) return InternalErrorMessage();
                   if (data?.data.length === 0) return setProductFound(false);
                   setProductOption(
                     data.data.map(product => ({
@@ -334,7 +332,7 @@ const UpdateOrder = () => {
             for (const item of selectedProduct) {
               if (item.id === data.id) {
                 setSelectedProduct(prevState => prevState.filter(value => value.id !== lastInitProductId));
-                return toast.info('Duplicate Product Found!');
+                return message.info(configMessage.PRODUCT_DUPLICATE);
               }
             }
 
@@ -438,9 +436,9 @@ const UpdateOrder = () => {
             setDiscount(data.data.coupon_amount);
           }
           setSelectedCouponCode(data?.data?.id);
-          toast.success(data.message);
+          message.success(data.message);
         } else {
-          toast.error(data.message);
+          message.error(data.message);
         }
       });
   };
@@ -533,7 +531,7 @@ const UpdateOrder = () => {
         })
         .then(res => {
           const data = res?.data?.updateCustomerAddress;
-          if (!data?.status) return;
+          if (!data?.status) return InternalErrorMessage();
           setChangeAddress(true);
           setAddressModalOpen(false);
         });
@@ -561,7 +559,7 @@ const UpdateOrder = () => {
         .then(res => {
           const data =
             type === 'billing' ? res?.data?.addCustomerBillingAddress : res?.data?.addCustomerShippingAddress;
-          if (!data?.status) return;
+          if (!data?.status) return InternalErrorMessage();
           setChangeAddress(true);
           setAddressModalOpen(false);
         });
@@ -605,7 +603,7 @@ const UpdateOrder = () => {
         })
         .then(res => {
           const data = res?.data?.getSingleCustomer;
-          if (!data?.status) return;
+          if (!data?.status) return InternalErrorMessage();
           const shipping = [];
           const billing = [];
           setSelectedBillingAddress(null);
@@ -702,7 +700,7 @@ const UpdateOrder = () => {
                                           })
                                           .then(res => {
                                             const data = res.data.getSearchedCustomers;
-                                            if (!data.status) return InternalErrorMessage();
+                                            if (!data?.status) return InternalErrorMessage();
                                             const options = data?.data?.map(item => ({
                                               label: item?.email + ' - ' + item?.first_name + ' ' + item?.last_name,
                                               value: item.id,
@@ -1112,7 +1110,7 @@ const UpdateOrder = () => {
                                           if (e.target.value.length === 0) {
                                             setSelectedCouponCode('');
                                             setDiscount(0);
-                                            toast.warn('Voucher Removed!');
+                                            message.warning('Voucher Removed!');
                                           }
                                         }}
                                       />

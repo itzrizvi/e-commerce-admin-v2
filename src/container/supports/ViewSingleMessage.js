@@ -6,7 +6,6 @@ import { Cards } from '../../components/cards/frame/cards-frame';
 import apolloClient from '../../apollo';
 import { contactUsQueries } from '../../apollo/contactUs';
 import Cookies from 'js-cookie';
-import { toast } from 'react-toastify';
 import { useLocation } from 'react-router-dom';
 import queryString from 'query-string'
 import { renderImage } from '../../utility/images';
@@ -31,13 +30,9 @@ const ViewSingleMessage = () => {
             })
             .then(res => {
                 const data = res?.data?.getSingleContactUsMsg;
-                if (!data.status) InternalErrorMessage();
+                if (!data?.status) InternalErrorMessage();
                 setSingleMessage({ data: data.data, isLoading: false })
 
-            })
-            .catch(err => {
-                console.log('Error on get single message', err);
-                setSingleMessage({ data: {}, isLoading: false })
             })
             .finally(() => {
 

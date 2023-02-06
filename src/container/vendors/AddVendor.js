@@ -152,15 +152,10 @@ const AddVendor = () => {
       })
       .then(res => {
         const data = res?.data?.createVendor;
-        if (!data.status) return InternalErrorMessage();
+        if (!data?.status) return InternalErrorMessage();
         setVendorId(data.id);
         setOperation(true);
       })
-      .catch(err => {
-        setIsLoading(false);
-        console.log('got error on add vendor', err);
-        setIsError(true);
-      });
   };
 
   useEffect(() => {
@@ -216,11 +211,8 @@ const AddVendor = () => {
             })
             .then(res => {
               const data = res?.data?.createContactPerson;
-              if (!data?.status) return setIsError(true);
+              if (!data?.status) return InternalErrorMessage();
             })
-            .catch(err => {
-              setIsError(true);
-            });
         } else {
           apolloClient
             .mutate({
@@ -241,10 +233,7 @@ const AddVendor = () => {
             })
             .then(res => {
               const data = res?.data?.updateVendorAddress;
-              if (!data?.status) return setIsError(true);
-            })
-            .catch(err => {
-              setIsError(true);
+              if (!data?.status) return InternalErrorMessage();
             })
             .finally(res => {
               setIsLoading(false);

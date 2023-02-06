@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Col, Spin, Input, Table, Select, Tooltip, DatePicker, Checkbox, Modal } from 'antd';
+import { Row, Col, Spin, Input, Table, Select, Tooltip, DatePicker, Checkbox, Modal, message } from 'antd';
 import FeatherIcon from 'feather-icons-react';
 import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
@@ -18,7 +18,6 @@ import {
 } from '@ant-design/icons';
 import config from '../../config/config';
 import apolloClient from '../../utility/apollo';
-import { toast } from 'react-toastify';
 import { checkPermission, viewPermission } from '../../utility/utility';
 import { useSelector } from 'react-redux';
 import { poQuery } from '../../apollo/po';
@@ -183,7 +182,7 @@ const ListPO = () => {
               </Tooltip>,
             )}
         </>
-      )
+      ),
     },
   ];
 
@@ -201,11 +200,8 @@ const ListPO = () => {
       })
       .then(res => {
         const data = res?.data?.getPOStatusList;
-        if (!data.status) return InternalErrorMessage();
+        if (!data?.status) return InternalErrorMessage();
         setPOStatus(data);
-      })
-      .catch(err => {
-        setPOStatus(s => ({ ...s, error: 'Something went Wrong.!! ' }));
       })
       .finally(() => {
         setPOStatus(s => ({ ...s, loading: false }));
@@ -224,11 +220,8 @@ const ListPO = () => {
       })
       .then(res => {
         const data = res?.data?.getPONumbers;
-        if (!data.status) return InternalErrorMessage();
+        if (!data?.status) return InternalErrorMessage();
         setPONumbers(data);
-      })
-      .catch(err => {
-        setPONumbers(s => ({ ...s, error: 'Something went Wrong.!! ' }));
       })
       .finally(() => {
         setPONumbers(s => ({ ...s, loading: false }));
@@ -284,11 +277,8 @@ const ListPO = () => {
       })
       .then(res => {
         const data = res?.data?.getPurchaseOrderList;
-        if (!data.status) return InternalErrorMessage();
+        if (!data?.status) return InternalErrorMessage();
         setPO(data);
-      })
-      .catch(err => {
-        setPO(s => ({ ...s, error: 'Something went Wrong.!! ' }));
       })
       .finally(() => {
         setPO(s => ({ ...s, loading: false }));
@@ -327,12 +317,9 @@ const ListPO = () => {
       })
       .then(res => {
         const data = res?.data?.createReceiving;
-        if (!data.status) return InternalErrorMessage();
-        toast.success(data.message);
+        if (!data?.status) return InternalErrorMessage();
+        message.success(data.message);
         history.push(`/admin/rp/edit?id=${data?.id}`);
-      })
-      .catch(err => {
-        console.log('error on adding customer', err);
       });
   };
 
@@ -404,11 +391,8 @@ const ListPO = () => {
           })
           .then(res => {
             const data = res?.data?.updatePOStatus;
-            if (!data.status) return InternalErrorMessage();
+            if (!data?.status) return InternalErrorMessage();
             statusUpdate(record.po_number);
-          })
-          .catch(err => {
-            console.log('got error on add vendor', err);
           })
           .finally(() => {
             setIsLoading(false);
@@ -446,7 +430,7 @@ const ListPO = () => {
           })
           .then(res => {
             const data = res?.data?.poSendToVendor;
-            if (!data.status) return InternalErrorMessage();
+            if (!data?.status) return InternalErrorMessage();
             Modal.success({
               content: `${record.po_number} send successfully.`,
               onOk: () => {
@@ -540,12 +524,7 @@ const ListPO = () => {
                       />
                     </Col>
                     <Col span={6}>
-                      <Button
-                        size="large"
-                        type="primary"
-                        disabled={searchDisable}
-                        onClick={searchPOAdmin}
-                      >
+                      <Button size="large" type="primary" disabled={searchDisable} onClick={searchPOAdmin}>
                         Search
                       </Button>
                     </Col>
@@ -611,7 +590,7 @@ const ListPO = () => {
                                   })
                                   .then(res => {
                                     const data = res?.data?.getSearchedProducts;
-                                    if (!data.status) return InternalErrorMessage();
+                                    if (!data?.status) return InternalErrorMessage();
                                     setProductOption(
                                       data.data.map(product => ({
                                         label:

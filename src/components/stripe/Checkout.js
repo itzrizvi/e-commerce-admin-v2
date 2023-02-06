@@ -11,6 +11,7 @@ import { useState } from 'react';
 import amexLogo from './icon/amex.svg';
 import visaLogo from './icon/visa.svg';
 import masterCardLogo from './icon/mc.svg';
+import InternalErrorMessage from '../esential/InternalErrorMessage';
 
 const useOptions = () => {
   const options = useMemo(
@@ -76,14 +77,11 @@ export default function Checkout({
       })
       .then(async res => {
         const data = res?.data?.stripePaymentIntent;
-        if (!data?.status) return;
+        if (!data?.status) return InternalErrorMessage();
         const cardElement = elements.getElement(CardNumberElement);
         setClientSecret(data?.data?.clientSecret);
         return await stripe.createToken(cardElement);
       })
-      .catch(err => {
-        console.log(err);
-      });
   };
 
   const finalPaymentChild = async () => {

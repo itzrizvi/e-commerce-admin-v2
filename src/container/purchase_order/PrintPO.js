@@ -34,12 +34,8 @@ export default function PrintPO() {
       })
       .then(res => {
         const data = res?.data?.getSinglePurchaseOrder;
-        if (!data.status) return InternalErrorMessage();
+        if (!data?.status) return InternalErrorMessage();
         setSinglePO({ data: data?.data, isLoading: false, message: data?.message });
-      })
-      .catch(err => {
-        console.log(err);
-        setSinglePO({ data: {}, isLoading: false, error: 'Something went worng' });
       })
       .finally(() => {
         setSinglePO(s => ({ ...s, isLoading: false }));

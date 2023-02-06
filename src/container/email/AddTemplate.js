@@ -1,16 +1,16 @@
 import React, { useState } from 'react';
-import { Row, Col, Form, Input, Spin, Select } from 'antd';
+import { Row, Col, Form, Input, Spin, Select, message } from 'antd';
 import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
 import { Cards } from '../../components/cards/frame/cards-frame';
 import { Button } from '../../components/buttons/buttons';
 import { Link, useHistory } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { toast } from 'react-toastify';
 import apolloClient from '../../apollo';
 import { viewPermission } from '../../utility/utility';
 import { EmailTemplateQuery } from '../../apollo/email';
 import { useEffect } from 'react';
+import InternalErrorMessage from '../../components/esential/InternalErrorMessage';
 
 const AddTemplate = () => {
   viewPermission('email-template');
@@ -49,14 +49,11 @@ const AddTemplate = () => {
       })
       .then(res => {
         const data = res?.data?.addEmailTemplateOnList;
-        if (!data?.status) return toast.error('Something Went wrong !!');
+        if (!data?.status) return InternalErrorMessage();
         setTimeout(() => {
           history.push('/admin/email/template/list');
         }, 1000);
-        toast.success(data?.message);
-      })
-      .catch(err => {
-        toast.error('Something Went wrong !!');
+        message.success(data?.message);
       })
       .finally(() => setIsLoading(false));
   };
@@ -76,10 +73,7 @@ const AddTemplate = () => {
         const data = res?.data?.getEmailTemplateList;
         setEmailTemplate(data?.data);
       })
-      .catch(err => {
-        setEmailTemplate([]);
-        console.log("🚀 ~ file: AddTemplate.js:83 ~ useEffect ~ err", err)
-      });
+
   }, []);
 
   return (

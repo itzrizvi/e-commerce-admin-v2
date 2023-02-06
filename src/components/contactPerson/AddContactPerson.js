@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 import apolloClient from '../../apollo';
 import { contactPersonsSchema } from '../../apollo/contactPerson';
+import InternalErrorMessage from '../esential/InternalErrorMessage';
 
 const formItemLayout = {
   labelCol: {
@@ -47,7 +48,7 @@ export default function AddContactPerson({
       })
       .then(res => {
         const data = res?.data?.createContactPerson;
-        if (!data?.status) return;
+        if (!data?.status) return InternalErrorMessage();
         setCPSuccess(true);
         setContactPersonAddModalOpen(false);
       })

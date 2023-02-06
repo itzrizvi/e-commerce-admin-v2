@@ -1,19 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import {
-  Row,
-  Col,
-  Form,
-  Input,
-  Switch,
-  Card,
-  Table,
-  Steps,
-  Avatar,
-  Typography,
-  Upload,
-  Divider,
-  message,
-} from 'antd';
+import { Row, Col, Form, Input, Switch, Card, Table, Steps, Avatar, Typography, Upload, Divider, message } from 'antd';
 import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
 import { Cards } from '../../components/cards/frame/cards-frame';
@@ -141,7 +127,7 @@ const AddOrder = () => {
       })
       .then(res => {
         const data = res.data.getShippingAccountListAdmin;
-        if (!data?.status) return true;
+        if (!data?.status) return InternalErrorMessage();
         setShippingMethodAccountList(data?.data);
       });
 
@@ -158,12 +144,9 @@ const AddOrder = () => {
       })
       .then(res => {
         const data = res?.data?.getShippingMethodListAdmin;
-        if (!data.status) return InternalErrorMessage();
+        if (!data?.status) return InternalErrorMessage();
         setShippingMethod(data?.data);
         setSelectedShippingMethod(data?.data?.filter(item => item.isDefault === true)[0]?.id);
-      })
-      .catch(err => {
-        console.log(err);
       });
 
     // Load Payment Method
@@ -178,11 +161,8 @@ const AddOrder = () => {
       })
       .then(res => {
         const data = res?.data?.getPaymentMethodListPublic;
-        if (!data.status) return InternalErrorMessage();
+        if (!data?.status) return InternalErrorMessage();
         setPaymentMethod(data?.data);
-      })
-      .catch(err => {
-        console.log(err);
       });
   }, []);
 
@@ -233,7 +213,7 @@ const AddOrder = () => {
       })
       .then(async res => {
         const data = res?.data?.createOrderByAdmin;
-        if (!data?.status) return message.error(data?.message);
+        if (!data?.status) return InternalErrorMessage();
         if (selectedPaymentMethod?.name?.toLowerCase() === 'credit card') {
           const cardPayment = await finalPayment.current();
           if (cardPayment.error) {
@@ -261,14 +241,11 @@ const AddOrder = () => {
                 })
                 .then(res => {
                   const data = res?.data?.stripePaymentIntentFinalized;
-                  if (!data?.status) return;
+                  if (!data?.status) return InternalErrorMessage();
                   message.success(data?.message);
                   setTimeout(() => {
                     history.push('/admin/order/list');
                   }, 3000);
-                })
-                .catch(err => {
-                  console.log(err);
                 });
             }
           }
@@ -278,9 +255,6 @@ const AddOrder = () => {
             history.push('/admin/order/list');
           }, 3000);
         }
-      })
-      .catch(err => {
-        message.error(err);
       })
       .finally(() => setIsLoading(false));
   };
@@ -455,7 +429,7 @@ const AddOrder = () => {
       })
       .then(res => {
         const data = res?.data?.getAddressListByCustomerID;
-        if (!data?.status) return;
+        if (!data?.status) return InternalErrorMessage();
         setSelectedCustomer(prev => ({ ...prev, addresses: data?.data }));
         const selected_shipping_address = data?.data.filter(item => item.isDefault && item.type === 'shipping').shift();
         const selected_billing_address = data?.data.filter(item => item.isDefault && item.type === 'billing').shift();
@@ -487,7 +461,7 @@ const AddOrder = () => {
       })
       .then(res => {
         const data = res.data.getContactPerson;
-        if (!data.status) return InternalErrorMessage();
+        if (!data?.status) return InternalErrorMessage();
         setSelectedCustomer(prev => ({ ...prev, contactPersons: data?.data }));
       });
   }, [cpSuccess]);
@@ -518,7 +492,7 @@ const AddOrder = () => {
       })
       .then(res => {
         const data = type === 'billing' ? res?.data?.addCustomerBillingAddress : res?.data?.addCustomerShippingAddress;
-        if (!data?.status) return;
+        if (!data?.status) return InternalErrorMessage();
         if (type === 'billing') setAddAddressBillingModalOpen(false);
         else setAddAddressShippingModalOpen(false);
         setChangeAddress(prev => !prev);
@@ -586,7 +560,7 @@ const AddOrder = () => {
       })
       .then(res => {
         const data = res?.data?.updateCustomerAddress;
-        if (!data?.status) return;
+        if (!data?.status) return InternalErrorMessage();
         setChangeAddress(prev => !prev);
         if (type === 'billing') setUpdateAddressBillingModalOpen(false);
         else setUpdateAddressShippingModalOpen(false);
@@ -611,7 +585,7 @@ const AddOrder = () => {
     selectedBillingAddress?.id,
     selectedShippingAddress?.id,
     selectedContactPerson?.id,
-    selectedShippingAccount?.id
+    selectedShippingAccount?.id,
   ]);
 
   return (
@@ -770,7 +744,12 @@ const AddOrder = () => {
                                             </Row>
                                           </Form.Item>
                                           {/* Customer Billing Address End */}
-                                          <Form.Item name="person_id" label="Customer Contact" labelAlign="left" style={{ margin: 0 }}>
+                                          <Form.Item
+                                            name="person_id"
+                                            label="Customer Contact"
+                                            labelAlign="left"
+                                            style={{ margin: 0 }}
+                                          >
                                             <Row gutter={10}>
                                               <Col span={24}>
                                                 {selectedContactPerson ? (
@@ -869,7 +848,12 @@ const AddOrder = () => {
                                               </Col>
                                             </Row>
                                           </Form.Item>
-                                          <Form.Item name="shipping_account_id" label="Shipping Account" labelAlign="left" style={{ margin: 0 }}>
+                                          <Form.Item
+                                            name="shipping_account_id"
+                                            label="Shipping Account"
+                                            labelAlign="left"
+                                            style={{ margin: 0 }}
+                                          >
                                             <Row gutter={10}>
                                               <Col span={24}>
                                                 {selectedShippingAccount ? (
@@ -929,8 +913,13 @@ const AddOrder = () => {
                                           <Form.Item labelAlign="left" name="po_number" label="PO Number">
                                             <Input placeholder="PO Number" style={{ height: config.INPUT_HEIGHT }} />
                                           </Form.Item>
-                                          <Form.Item labelAlign="left" name="note" label="Note" style={{marginBottom: 10}}>
-                                            <Input.TextArea  placeholder="Note" autoSize />
+                                          <Form.Item
+                                            labelAlign="left"
+                                            name="note"
+                                            label="Note"
+                                            style={{ marginBottom: 10 }}
+                                          >
+                                            <Input.TextArea placeholder="Note" autoSize />
                                           </Form.Item>
                                         </td>
                                         <td width="50%">

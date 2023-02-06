@@ -1,19 +1,17 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Col, Spin, Input, Table, Switch, Select } from 'antd';
-import FeatherIcon from 'feather-icons-react';
+import { Row, Col, Spin, Input, Table } from 'antd';
 import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
 import { Cards } from '../../components/cards/frame/cards-frame';
-import { Button } from '../../components/buttons/buttons';
 import { Link } from 'react-router-dom';
 import FontAwesome from 'react-fontawesome';
 import { SearchOutlined } from '@ant-design/icons';
 import config from '../../config/config';
-import apolloClient, { customerMutation } from '../../utility/apollo';
-import { toast } from 'react-toastify';
+import apolloClient from '../../utility/apollo';
 import { viewPermission } from '../../utility/utility';
 import { useSelector } from 'react-redux';
 import { receivingProductQuery } from './../../apollo/receiving_product/index';
+import InternalErrorMessage from '../../components/esential/InternalErrorMessage';
 
 const ListRP = () => {
   viewPermission('receiving-product');
@@ -147,7 +145,7 @@ const ListRP = () => {
       })
       .then(res => {
         const data = res?.data?.getReceivingProductList;
-        if (!data?.status) return;
+        if (!data?.status) return InternalErrorMessage();
         const mod_data = data?.data.map(item => {
           return {
             id: item.id,
@@ -160,9 +158,6 @@ const ListRP = () => {
           };
         });
         setRP(s => ({ ...s, data: mod_data, error: '' }));
-      })
-      .catch(err => {
-        setRP(s => ({ ...s, error: 'Something went Wrong.!! ' }));
       })
       .finally(() => {
         setRP(s => ({ ...s, isLoading: false }));

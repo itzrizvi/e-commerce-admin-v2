@@ -17,7 +17,6 @@ import { apolloUploadClient, authQuery, productMutation, productQuery, utilityQu
 import PartsOfProductTab from './addProducts/PartsOfProductTab';
 import { viewPermission } from '../../utility/utility';
 import { Link, useHistory, useLocation } from 'react-router-dom';
-import { toast } from 'react-toastify';
 import queryString from 'query-string';
 import InternalErrorMessage from '../../components/esential/InternalErrorMessage';
 
@@ -54,7 +53,7 @@ const AddProduct = () => {
       })
       .then(res => {
         const data = res?.data?.getSingleProduct;
-        if (!data.status) return InternalErrorMessage();
+        if (!data?.status) return InternalErrorMessage();
         setSingleProduct({ data: data?.data, isLoading: false });
         setLongDescription(RichTextEditor.createValueFromString(data?.data?.prod_long_desc, 'html'));
         setProd_long_desc(data?.data?.prod_long_desc);
@@ -137,9 +136,6 @@ const AddProduct = () => {
         setSelectedConditionID(data?.data?.productCondition?.id)
         setSelectedProductRepID(data?.data?.representative?.id)
       })
-      .catch(err => {
-        console.log('error on loading porduct,\n', err);
-      });
 
 
 
@@ -243,9 +239,6 @@ const AddProduct = () => {
           setCategories(arrData);
         }
       })
-      .catch(err => {
-        setBrand(s => ({ ...s, error: 'Something went Wrong.!! ' }));
-      })
       .finally(() => {
         setBrand(s => ({ ...s, loading: false }));
       });
@@ -264,9 +257,6 @@ const AddProduct = () => {
       .then(res => {
         const data = res?.data?.getAllProductCondition;
         setProductCondition(data)
-      })
-      .catch(err => {
-        setProductCondition(s => ({ ...s, error: 'Something went Wrong.!! ' }));
       })
       .finally(() => {
         setProductCondition(s => ({ ...s, loading: false }));
@@ -287,9 +277,6 @@ const AddProduct = () => {
         const data = res?.data?.getAllStaff;
         setRepresentative(data)
       })
-      .catch(err => {
-        setRepresentative(s => ({ ...s, error: 'Something went Wrong.!! ' }));
-      })
       .finally(() => {
         setRepresentative(s => ({ ...s, loading: false }));
       });
@@ -308,9 +295,6 @@ const AddProduct = () => {
       .then(res => {
         const data = res?.data?.getAllProductAvailabilityStatus;
         setAvailabilityStatus(data)
-      })
-      .catch(err => {
-        setAvailabilityStatus(s => ({ ...s, error: 'Something went Wrong.!! ' }));
       })
       .finally(() => {
         setAvailabilityStatus(s => ({ ...s, loading: false }));
@@ -331,9 +315,6 @@ const AddProduct = () => {
         const data = res?.data?.getWeightClassList;
         setWeightClassList(data)
       })
-      .catch(err => {
-        setWeightClassList(s => ({ ...s, error: 'Something went Wrong.!! ' }));
-      })
       .finally(() => {
         setWeightClassList(s => ({ ...s, loading: false }));
       });
@@ -352,9 +333,6 @@ const AddProduct = () => {
       .then(res => {
         const data = res?.data?.getDimensionClassList;
         setDimensionClassList(data)
-      })
-      .catch(err => {
-        setDimensionClassList(s => ({ ...s, error: 'Something went Wrong.!! ' }));
       })
       .finally(() => {
         setDimensionClassList(s => ({ ...s, loading: false }));
@@ -415,11 +393,8 @@ const AddProduct = () => {
       })
       .then(res => {
         const data = res?.data?.getProductList;
-        if (!data?.status) return;
+        if (!data?.status) return InternalErrorMessage();
         setProducts(s => ({ ...s, data: data?.data, error: '' }));
-      })
-      .catch(err => {
-        setProducts(s => ({ ...s, error: 'Something went Wrong.!! ' }));
       })
       .finally(() => {
         setProducts(s => ({ ...s, isLoading: false }));
@@ -459,7 +434,7 @@ const AddProduct = () => {
       }
       return { ...attributes };
     });
-    if (!isAttrCorrect && isAttribute) return toast.warning('Please fill all Attribute field correctly');
+    if (!isAttrCorrect && isAttribute) return message.warning('Please fill all attribute field correctly');
 
     let isDiscount = true;
     let idDiscountCorrect = true;
@@ -504,7 +479,7 @@ const AddProduct = () => {
         discount_enddate,
       };
     });
-    if (!idDiscountCorrect && isDiscount) return toast.warning('Please fill all Discount field correctly');
+    if (!idDiscountCorrect && isDiscount) return message.warning('Please fill all discount field correctly');
 
     const related_product = relatedProducts.map(item => item.uid);
     const partof_product = selectedPartsOfProducts.map(item => {
@@ -570,7 +545,7 @@ const AddProduct = () => {
       data.prod_gallery = gallaryImages.map(item => item.file);
       // Validataion for add only
       if (!prod_thumbnail) {
-        return toast.warning('Please select a Feature image');
+        return message.warning('Please select a feature image');
       }
 
       apolloUploadClient
@@ -599,15 +574,11 @@ const AddProduct = () => {
         })
         .then(res => {
           const data = res?.data?.addProduct;
-          if (!data.status) return InternalErrorMessage();
+          if (!data?.status) return InternalErrorMessage();
           setTimeout(() => {
             history.push('/admin/products/list');
           }, 1000);
-          toast.success(data.message);
-        })
-        .catch(err => {
-          console.log('add Prod err:\n', err);
-          return toast.error('Something Went wrong !!');
+          message.success(data.message);
         })
         .finally(() => {
           setIsLoading(false);
@@ -643,14 +614,11 @@ const AddProduct = () => {
         })
         .then(res => {
           const data = res?.data?.updateProduct;
-          if (!data.status) return InternalErrorMessage();
+          if (!data?.status) return InternalErrorMessage();
           setTimeout(() => {
             history.push('/admin/products/list');
           }, 1000);
-          toast.success(data.message);
-        })
-        .catch(err => {
-          console.log('add Prod err:\n', err);
+          message.success(data.message);
         })
         .finally(() => {
           setIsLoading(false);
@@ -681,10 +649,6 @@ const AddProduct = () => {
                   form={form}
                   name="addRole"
                   onFinish={handleSubmit}
-                  onFinishFailed={errorInfo => {
-                    console.log('form error info:\n', errorInfo);
-                    toast.warning('Please fill all required data in all tab');
-                  }}
                   labelCol={{ span: 4 }}
                   initialValues={
                     params.id && {

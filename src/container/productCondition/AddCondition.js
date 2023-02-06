@@ -1,15 +1,15 @@
-import React, { useEffect, useState } from 'react';
-import { Row, Col, Form, Input, Switch, Select, Upload, InputNumber, Spin } from 'antd';
+import React, { useState } from 'react';
+import { Row, Col, Form, Input, message } from 'antd';
 import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
 import { Cards } from '../../components/cards/frame/cards-frame';
 import { Button } from '../../components/buttons/buttons';
 import { Link, useHistory } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { toast } from 'react-toastify';
 import { productConditionQuery } from '../../apollo/productCondition';
 import apolloClient from '../../apollo';
 import { viewPermission } from '../../utility/utility';
+import InternalErrorMessage from '../../components/esential/InternalErrorMessage';
 
 const AddCondition = () => {
   viewPermission('product-condition');
@@ -47,14 +47,11 @@ const AddCondition = () => {
       })
       .then(res => {
         const data = res?.data?.addProductCondition;
-        if (!data?.status) return toast.error('Something Went wrong !!');
+        if (!data?.status) return InternalErrorMessage();
         setTimeout(() => {
           history.push('/admin/product-condition/list');
         }, 1000);
-        toast.success(data?.message);
-      })
-      .catch(err => {
-        toast.error('Something Went wrong !!');
+        message.success(data?.message);
       })
       .finally(() => setLoading(false));
   };

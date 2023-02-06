@@ -26,7 +26,7 @@ const BillingAdderess = ({
       })
       .then(res => {
         const data = res.data.getCountryList;
-        if (!data.status) return InternalErrorMessage();
+        if (!data?.status) return InternalErrorMessage();
         setCountries(data?.data);
       });
 
@@ -47,7 +47,7 @@ const BillingAdderess = ({
       })
       .then(res => {
         const data = res?.data?.getStateList;
-        if (!data?.status) return;
+        if (!data?.status) return InternalErrorMessage();
         setNewInitialData({ data: { ...initialAddressData, states: data?.data }, loading: false });
         setBillingAddresses(
           billingAddresses.map(item => {

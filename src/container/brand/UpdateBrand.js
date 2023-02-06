@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Col, Form, Input, Switch, Select, Upload, InputNumber, Spin } from 'antd';
+import { Row, Col, Form, Input, Switch, Select, Upload, InputNumber, Spin, message } from 'antd';
 import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
 import { Cards } from '../../components/cards/frame/cards-frame';
 import { Button } from '../../components/buttons/buttons';
 import { Link, useHistory, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { toast } from 'react-toastify';
 import { PlusOutlined } from '@ant-design/icons';
 import { brandQuery } from '../../apollo/brand';
 import apolloClient, { apolloUploadClient } from '../../apollo';
@@ -15,6 +14,7 @@ import { errorImageSrc, renderImage } from '../../utility/images';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
 import { viewPermission } from '../../utility/utility';
 import InternalErrorMessage from '../../components/esential/InternalErrorMessage';
+import configMessage from '../../config/config_message';
 
 const UpdateBrand = () => {
   viewPermission('manufacture');
@@ -75,23 +75,20 @@ const UpdateBrand = () => {
       .then(res => {
         // console.log(res);
         const data = res?.data?.updateBrand;
-        if (!data?.status) return toast.error('Something Went wrong !!');
+        if (!data?.status) return InternalErrorMessage();
         setTimeout(() => {
           history.push('/admin/brand/list');
         }, 1000);
-        toast.success(data?.message);
-      })
-      .catch(err => {
-        toast.error('Something Went wrong !!');
+        message.success(data?.message);
       })
       .finally(() => setIsLoading(false));
   };
 
   const beforeImageUpload = file => {
     const isJpg = file.type === 'image/jpeg';
-    if (!isJpg) toast.error('You can only upload JPG file!');
+    if (!isJpg) message.error(configMessage.ONLY_JPG_FILE_UPLOAD);
     const isLt2M = file.size / 1024 / 1024 < 1;
-    if (!isLt2M) toast.error('Image must smaller than 1MB!');
+    if (!isLt2M) message.error(configMessage.FILE_MAX_1MB);
 
     if (isJpg && isLt2M) {
       setThumbnail(URL.createObjectURL(file));
@@ -124,10 +121,6 @@ const UpdateBrand = () => {
         const data = res?.data?.getParentCategories?.categories;
         setCategories(data);
       })
-      .catch(err => {
-        setCategories([]);
-        console.log(err);
-      });
     apolloClient
       .query({
         query: brandQuery.GET_SINGLE_BRAND,
@@ -145,7 +138,7 @@ const UpdateBrand = () => {
       })
       .then(res => {
         const data = res?.data?.getSingleBrand;
-        if (!data.status) return InternalErrorMessage();
+        if (!data?.status) return InternalErrorMessage();
         setSingleBrand({ data: data?.data, loading: false, error: '' });
         const inputSelectedCategories = [];
         data?.data?.categories.map(item => {
@@ -161,10 +154,6 @@ const UpdateBrand = () => {
         });
         setOrder(data?.data?.brand_sort_order);
       })
-      .catch(err => {
-        console.log(err);
-        setSingleBrand({ data: {}, loading: false, error: 'Something went worng' });
-      });
   }, []);
 
   return (

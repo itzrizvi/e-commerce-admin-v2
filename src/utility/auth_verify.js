@@ -1,7 +1,6 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { withRouter  } from "react-router-dom";
-import { toast } from 'react-toastify';
 import apolloClient from '../apollo';
 import { authQuery } from '../apollo/auth';
 import { logOut } from '../redux/authentication/actionCreator';
@@ -28,8 +27,6 @@ const AuthVerify = ({ history }) => {
         if(!stataus){
           dispatch(logOut());
         }
-      }).catch(err => {
-         toast.error(err)
       })
     }
   });

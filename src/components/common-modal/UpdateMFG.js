@@ -1,8 +1,7 @@
 import { InboxOutlined } from '@ant-design/icons';
-import { Button, Col, Form, Input, message, Modal, Row, Upload } from 'antd';
-import React, { useEffect, useState } from 'react';
+import { Button, Col, Form, message, Modal, Row, Upload } from 'antd';
+import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
-import { toast } from 'react-toastify';
 import { apolloUploadClient } from '../../apollo';
 import { poQuery } from '../../apollo/po';
 import configMessage from '../../config/config_message';
@@ -16,7 +15,7 @@ export default function UpdateMFG({ mfg, updateMfgModalOpen, setUpdateMfgModalOp
 
   /* ------------------------- Add Address Form Submit ------------------------ */
   const handleSubmit = async () => {
-    if (!mfgFile) return toast.error('Please select mfg doc file first.');
+    if (!mfgFile) return message.error(configMessage.FILE_NOT_EXIST);
     setSubmitting(true);
     const { id, po_id } = mfg;
     apolloUploadClient
@@ -38,7 +37,7 @@ export default function UpdateMFG({ mfg, updateMfgModalOpen, setUpdateMfgModalOp
       })
       .then(res => {
         const data = res?.data?.updatePOMFGDOC;
-        if (!data.status) return InternalErrorMessage();
+        if (!data?.status) return InternalErrorMessage();
         setChangeMfg(prev => !prev);
         setUpdateMfgModalOpen(false);
         setMfgFile(null);

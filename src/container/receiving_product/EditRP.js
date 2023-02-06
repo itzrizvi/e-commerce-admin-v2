@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Col, Form, Spin, Tabs, Select, Table } from 'antd';
+import { Row, Col, Form, Spin, Tabs, Select, Table, message } from 'antd';
 import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
 import { Cards } from '../../components/cards/frame/cards-frame';
@@ -7,7 +7,6 @@ import { Button } from '../../components/buttons/buttons';
 import { Link, useHistory, useLocation } from 'react-router-dom';
 import queryString from 'query-string';
 import apolloClient from '../../utility/apollo';
-import { toast } from 'react-toastify';
 import { viewPermission } from '../../utility/utility';
 import Products from './Products';
 import { useSelector } from 'react-redux';
@@ -57,16 +56,12 @@ const EditRP = () => {
       })
       .then(res => {
         const data = res?.data?.getSingleReceivingProduct;
-        if (!data.status) return InternalErrorMessage();
+        if (!data?.status) return InternalErrorMessage();
         setSingleRP({ data: data?.data, isLoading: false, message: data.message });
         setProductItem(data?.data?.receivingitems.map(item => ({ ...item, receiving_quantity: 0, new_serials: [] })));
         form.setFieldsValue({
           status: data?.data?.status,
         });
-      })
-      .catch(err => {
-        console.log(err);
-        setSingleRP({ data: {}, isLoading: false, error: 'Something went worng' });
       })
       .finally(() => {
         setSingleRP(s => ({ ...s, isLoading: false }));
@@ -89,7 +84,7 @@ const EditRP = () => {
       })
       .then(res => {
         const data = res?.data?.getReceivingHistory;
-        if (!data?.status) return;
+        if (!data?.status) return InternalErrorMessage();
         setHistoryData(data?.data);
       });
   }, []);
@@ -99,9 +94,9 @@ const EditRP = () => {
     for (let i of productItem) {
       if (i.new_serials.length > 0 || i.product.is_serial) {
         if (i.new_serials.length !== parseInt(i.receiving_quantity)) {
-          return toast.error(`${i.product.prod_sku} Serial Is Miss Match!`);
+          return message.error(`${i.product.prod_sku} serial is miss match.`);
         } else if (i.new_serials.length > i.remaining_quantity) {
-          return toast.error(`${i.product.prod_sku} Serial Can Not Cross The Remaining Quantity!`);
+          return message.error(`${i.product.prod_sku} serial can not cross the remaining quantity.`);
         }
       }
     }
@@ -157,14 +152,11 @@ const EditRP = () => {
       })
       .then(res => {
         const data = res?.data?.updateReceiving;
-        if (!data.status) return InternalErrorMessage();
+        if (!data?.status) return InternalErrorMessage();
         setTimeout(() => {
           history.push('/admin/rp/list');
         }, 1000);
-        toast.success(data.message);
-      })
-      .catch(err => {
-        console.log('got error on updateStatus', err);
+        message.success(data.message);
       })
       .finally(() => {
         setIsLoading(false);
