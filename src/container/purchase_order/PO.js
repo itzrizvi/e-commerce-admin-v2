@@ -442,6 +442,7 @@ const PO = () => {
   /* ------------------------ Get Single PO Order Start ----------------------- */
   useEffect(() => {
     if (!id) return;
+    setSinglePO(s => ({ ...s, isLoading: true }));
     apolloClient
       .query({
         query: poQuery.GET_SINGLE_PO,
@@ -543,7 +544,7 @@ const PO = () => {
                     <Row>
                       <Col span={24}>
                         <div className="steps-content">
-                          <Products {...{ products, setProducts, setProductSearchModalOpen }} />
+                          <Products {...{ products, setProducts, setProductSearchModalOpen, loading: singlePO.isLoading }} />
                           <table className="table table-responsive purchase_order_vendor_table">
                             <thead>
                               <tr>

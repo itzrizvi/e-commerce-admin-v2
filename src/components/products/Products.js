@@ -5,7 +5,7 @@ import config from '../../config/config';
 
 import AddButton from '../buttons/AddButton';
 
-const Products = ({ products, setProducts, setProductSearchModalOpen }) => {
+const Products = ({ products, setProducts, setProductSearchModalOpen, loading = false }) => {
   const column = [
     {
       title: 'Part No',
@@ -126,6 +126,7 @@ const Products = ({ products, setProducts, setProductSearchModalOpen }) => {
               columns={column}
               dataSource={products}
               pagination={false}
+              loading={loading}
               rowKey="id"
               summary={() => (
                 <Table.Summary fixed="bottom">
