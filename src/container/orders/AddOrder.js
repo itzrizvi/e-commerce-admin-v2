@@ -928,7 +928,7 @@ const AddOrder = () => {
                                           <Form.Item labelAlign="left" name="po_number" label="PO Number">
                                             <Input placeholder="PO Number" style={{ height: config.INPUT_HEIGHT }} />
                                           </Form.Item>
-                                          <Form.Item labelAlign="left" name="note" label="Note">
+                                          <Form.Item labelAlign="left" name="note" label="Note" style={{marginBottom: 10}}>
                                             <Input.TextArea  placeholder="Note" autoSize />
                                           </Form.Item>
                                         </td>
