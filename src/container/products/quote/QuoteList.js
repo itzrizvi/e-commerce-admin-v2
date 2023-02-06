@@ -11,12 +11,12 @@ import { quoteQuery } from '../../../apollo/quote';
 import { useSelector } from 'react-redux';
 import Moment from 'react-moment';
 import FeatherIcon from 'feather-icons-react';
-const { RangePicker } = DatePicker;
 import { viewPermission } from '../../../utility/utility';
 import config from '../../../config/config';
 import Cookies from 'js-cookie';
 import moment from 'moment';
 import InternalErrorMessage from '../../../components/esential/InternalErrorMessage';
+const { RangePicker } = DatePicker;
 
 let checkPoint = false;
 

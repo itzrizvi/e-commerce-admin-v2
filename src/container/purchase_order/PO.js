@@ -10,7 +10,6 @@ import apolloClient, { vendorMutation } from '../../utility/apollo';
 import { poQuery } from '../../apollo/po';
 import { viewPermission } from '../../utility/utility';
 import { useSelector } from 'react-redux';
-const { TextArea } = Input;
 import { orderQuery } from '../../apollo/order';
 import { methodQuery } from '../../apollo/method';
 import ProductSearch from '../../components/searchModule/ProductSearch';
@@ -31,6 +30,7 @@ import config from '../../config/config';
 import InternalErrorMessage from '../../components/esential/InternalErrorMessage';
 import configMessage from '../../config/config_message';
 const { confirm } = Modal;
+const { TextArea } = Input;
 
 const PO = () => {
   const history = useHistory();

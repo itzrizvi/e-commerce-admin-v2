@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Col, Form, Input, Switch, Tabs, Spin, Modal, Alert, Card, Typography, Badge } from 'antd';
+import { Row, Col, Form, Input, Switch, Tabs, Spin, Modal, Alert, Card, Typography, Badge, message } from 'antd';
 import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
 import { Cards } from '../../components/cards/frame/cards-frame';
@@ -12,7 +12,6 @@ import { Button } from '../../components/buttons/buttons';
 import { useSelector } from 'react-redux';
 import { customerMutation } from '../../apollo/customer';
 import { contactPersonsSchema } from '../../apollo/contactPerson';
-import FeatherIcon from 'feather-icons-react';
 import InternalErrorMessage from '../../components/esential/InternalErrorMessage';
 
 const formItemLayout = {
@@ -57,8 +56,6 @@ const EditUser = () => {
   const [personType, setPersonType] = useState('Add');
   const [personCheckBox, setPersonCheckBox] = useState(true);
   const [selectedPersonID, setSelectedPersonID] = useState(null);
-  // Message
-  const [message, setMessage] = useState(null);
 
   useEffect(() => {
     if (!params?.id) return;
@@ -88,7 +85,7 @@ const EditUser = () => {
           last_name: data?.data?.last_name,
           email: data?.data?.email,
         });
-        data?.data?.addresses?.forEach(address => {
+        data.data.addresses.forEach(address => {
           const { __typename, type, createdAt, updatedAt, ...rest } = address;
           if (address.type === 'shipping') {
             if (address.isDefault) setDefaultShipping(address.id);
@@ -105,7 +102,7 @@ const EditUser = () => {
         setContactPersons(contact_person);
         setShippingAddress(shipping);
         setBillingAddress(billing);
-      })
+      });
   }, [params?.id]);
 
   const handleSubmit = values => {
@@ -115,7 +112,7 @@ const EditUser = () => {
       const checkFalse = !(id && address1 && country && city && state && zip_code);
       return checkFalse;
     });
-    if (notValidate?.id) return setMessage({ type: 'warning', message: 'Enter Billing Address Correctly!' });
+    if (notValidate?.id) return message.warning('Enter Billing Address Correctly!');
 
     // validate shippingAddresses.
     const notValidate1 = shippingAddress.find(item => {
@@ -123,7 +120,7 @@ const EditUser = () => {
       const checkFalse = !(id && address1 && country && city && state && zip_code);
       return checkFalse;
     });
-    if (notValidate1?.id) return setMessage({ type: 'warning', message: 'Enter Shipping Address Correctly!' });
+    if (notValidate1?.id) return message.warning('Enter Shipping Address Correctly!');
     const variables = {
       data: { ...values, user_status: userStatus, send_mail: true, id: parseInt(params?.id) },
     };
@@ -212,7 +209,7 @@ const EditUser = () => {
             .then(res => {
               const data = !params?.id ? res?.data?.createContactPerson : res?.data?.updateContactPerson;
               if (!data?.status) return InternalErrorMessage();
-            })
+            });
         } else {
           setIsLoading(true);
           apolloClient
@@ -240,7 +237,7 @@ const EditUser = () => {
               setIsLoading(false);
               if (type === 'shipping') {
                 if (!isError) {
-                  setMessage({ type: 'success', message: 'Customer Updated Successfully.' });
+                  message.success('Customer Updated Successfully.');
                   setTimeout(() => {
                     history.push('/admin/customers/list');
                   }, [2000]);
@@ -312,17 +309,6 @@ const EditUser = () => {
         title={`Manage Customer | Edit Customer ${singleUser.isLoading ? '' : `(${singleUser?.data?.email})`}`}
       />
       <Main>
-        <Row align="middle" justify="center" style={{ margin: 0, padding: 0 }}>
-          {message && (
-            <Alert
-              style={{ width: '50%', marginBottom: 10 }}
-              message={message?.message}
-              type={message?.type}
-              showIcon
-              closable
-            />
-          )}
-        </Row>
         <Row gutter={25}>
           <Col sm={24} xs={24}>
             <Cards headless>
@@ -347,7 +333,7 @@ const EditUser = () => {
                             rules={[{ required: true, max: maxLength, message: 'Please Enter First Name' }]}
                             name="first_name"
                             label="First Name"
-                            labelCol={{ style: { width: "40%" } }}
+                            labelCol={{ style: { width: '40%' } }}
                             initialValue={singleUser?.data?.first_name}
                           >
                             <Row>
@@ -355,7 +341,6 @@ const EditUser = () => {
                                 <Input placeholder="Enter First Name" defaultValue={singleUser?.data?.first_name} />
                               </Col>
                             </Row>
-
                           </Form.Item>
                         </Col>
                       </Row>
@@ -366,7 +351,7 @@ const EditUser = () => {
                             rules={[{ required: true, max: maxLength, message: 'Please Enter Last Name' }]}
                             name="last_name"
                             label="Last Name"
-                            labelCol={{ style: { width: "40%" } }}
+                            labelCol={{ style: { width: '40%' } }}
                             initialValue={singleUser?.data?.last_name}
                           >
                             <Row>
@@ -380,13 +365,14 @@ const EditUser = () => {
 
                       <Row gutter={25}>
                         <Col span={10}>
-                          <Form.Item
-                            label="Company Name"
-                            name="company_name"
-                            labelCol={{ style: { width: "40%" } }}>
+                          <Form.Item label="Company Name" name="company_name" labelCol={{ style: { width: '40%' } }}>
                             <Row>
                               <Col span={20}>
-                                <Input type="text" defaultValue={singleUser?.data?.company_name} placeholder="Enter Company Name" />
+                                <Input
+                                  type="text"
+                                  defaultValue={singleUser?.data?.company_name}
+                                  placeholder="Enter Company Name"
+                                />
                               </Col>
                             </Row>
                           </Form.Item>
@@ -395,9 +381,7 @@ const EditUser = () => {
 
                       <Row gutter={25}>
                         <Col span={10}>
-                          <Form.Item
-                            label="Email"
-                            labelCol={{ style: { width: "40%" } }}>
+                          <Form.Item label="Email" labelCol={{ style: { width: '40%' } }}>
                             <Row>
                               <Col span={20}>
                                 <Input type="email" disabled defaultValue={singleUser?.data?.email} />
@@ -409,13 +393,14 @@ const EditUser = () => {
 
                       <Row gutter={25}>
                         <Col span={10}>
-                          <Form.Item
-                            label="Phone"
-                            name="phone"
-                            labelCol={{ style: { width: "40%" } }}>
+                          <Form.Item label="Phone" name="phone" labelCol={{ style: { width: '40%' } }}>
                             <Row>
                               <Col span={20}>
-                                <Input type="text" defaultValue={singleUser?.data?.phone} placeholder="Enter Phone Number" />
+                                <Input
+                                  type="text"
+                                  defaultValue={singleUser?.data?.phone}
+                                  placeholder="Enter Phone Number"
+                                />
                               </Col>
                             </Row>
                           </Form.Item>
@@ -424,13 +409,14 @@ const EditUser = () => {
 
                       <Row gutter={25}>
                         <Col span={10}>
-                          <Form.Item
-                            label="Fax"
-                            name="fax"
-                            labelCol={{ style: { width: "40%" } }}>
+                          <Form.Item label="Fax" name="fax" labelCol={{ style: { width: '40%' } }}>
                             <Row>
                               <Col span={20}>
-                                <Input type="text" defaultValue={singleUser?.data?.fax} placeholder="Enter Fax Number" />
+                                <Input
+                                  type="text"
+                                  defaultValue={singleUser?.data?.fax}
+                                  placeholder="Enter Fax Number"
+                                />
                               </Col>
                             </Row>
                           </Form.Item>
@@ -545,13 +531,7 @@ const EditUser = () => {
           onCancel={() => setPersonModalOpen(false)}
           okText="Save"
         >
-          <Form
-            preserve={false}
-            style={{ width: '100%' }}
-            form={personForm}
-            name="personForm"
-            layout="horizontal"
-          >
+          <Form preserve={false} style={{ width: '100%' }} form={personForm} name="personForm" layout="horizontal">
             <Form.Item
               {...formItemLayout}
               rules={[{ required: true, message: 'Please Enter Name' }]}

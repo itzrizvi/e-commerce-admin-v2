@@ -5,7 +5,6 @@ import { Main } from '../styled';
 import { Cards } from '../../components/cards/frame/cards-frame';
 import { Button } from '../../components/buttons/buttons';
 import RichTextEditor from 'react-rte';
-const { TextArea } = Input;
 import style from './products.module.css';
 import AttributeTab from './addProducts/AttributeTab';
 import DiscountTab from './addProducts/DiscountTab';
@@ -19,6 +18,7 @@ import { viewPermission } from '../../utility/utility';
 import { Link, useHistory, useLocation } from 'react-router-dom';
 import queryString from 'query-string';
 import InternalErrorMessage from '../../components/esential/InternalErrorMessage';
+const { TextArea } = Input;
 
 const AddProduct = () => {
   viewPermission('product');

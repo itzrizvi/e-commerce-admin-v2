@@ -1,7 +1,6 @@
 import React from 'react';
-import { Upload } from 'antd';
 import FeatherIcon from 'feather-icons-react';
-import { Link, NavLink, useRouteMatch } from 'react-router-dom';
+import { NavLink, useRouteMatch } from 'react-router-dom';
 import propTypes from 'prop-types';
 import { ProfileAuthorBox } from './style';
 import Heading from '../../../../components/heading/heading';

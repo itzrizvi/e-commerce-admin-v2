@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Row, Col, Form, Input, Switch, Tabs, Steps, Alert, Card, Modal, Typography, Badge } from 'antd';
+import { Row, Col, Form, Input, Switch, Steps, Card, Modal, Typography, Badge, message } from 'antd';
 import { PageHeader } from '../../components/page-headers/page-headers';
 import { Main } from '../styled';
 import { Cards } from '../../components/cards/frame/cards-frame';
@@ -38,7 +38,6 @@ const AddUser = () => {
   const [personType, setPersonType] = useState('Add');
   const [isError, setIsError] = useState(false);
   const [current, setCurrent] = useState(0);
-  const [message, setMessage] = useState(null);
   const [contactPersons, setContactPersons] = useState([]);
   const [personCheckBox, setPersonCheckBox] = useState(true);
   const [personModalOpen, setPersonModalOpen] = useState(false);
@@ -176,7 +175,7 @@ const AddUser = () => {
               setIsLoading(false);
               if (type === 'shipping') {
                 if (!isError) {
-                  setMessage({ type: 'success', message: 'User Created Successfully' });
+                  message.success('User Created Successfully');
                   setTimeout(() => {
                     history.push('/admin/customers/list');
                   }, [2000]);
@@ -219,7 +218,7 @@ const AddUser = () => {
           const checkFalse = !(id && address1 && country && city && state && zip_code);
           return checkFalse;
         });
-        if (notValidate?.id) return setMessage({ type: 'warning', message: 'Enter Billing Address Correctly.' });
+        if (notValidate?.id) return message.warning('Enter Billing Address Correctly.');
       } else if (current === 2) {
         // validate shippingAddresses.
         const notValidate1 = shippingAddress.find(item => {
@@ -227,7 +226,7 @@ const AddUser = () => {
           const checkFalse = !(id && address1 && country && city && state && zip_code);
           return checkFalse;
         });
-        if (notValidate1?.id) return setMessage({ type: 'warning', message: 'Enter Shipping Address Correctly.' });
+        if (notValidate1?.id) return message.warning('Enter Shipping Address Correctly.');
       } else if (current === 3) {
       }
       setCurrent(current + 1);
@@ -269,17 +268,6 @@ const AddUser = () => {
     <>
       <PageHeader title="Add Customer" />
       <Main>
-        <Row align="middle" justify="center" style={{ margin: 0, padding: 0 }}>
-          {message && (
-            <Alert
-              style={{ width: '50%', marginBottom: 10 }}
-              message={message?.message}
-              type={message?.type}
-              showIcon
-              closable
-            />
-          )}
-        </Row>
         <Form
           style={{ width: '100%' }}
           form={form}

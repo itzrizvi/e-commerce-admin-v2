@@ -26,20 +26,6 @@ export const poQuery = {
       }
     }
   `,
-  GET_PO_STATUS_LIST: gql`
-    query getPOStatusList {
-      getPOStatusList {
-        message
-        status
-        tenant_id
-        data {
-          id
-          name
-          slug
-        }
-      }
-    }
-  `,
   GET_PO_NUMBER_LIST: gql`
     query getPONumbers {
       getPONumbers {
@@ -376,15 +362,6 @@ export const poQuery = {
           isDefault
           status
         }
-      }
-    }
-  `,
-  UPDATE_PO_STATUS: gql`
-    mutation updatePOStatus($data: POStatusChangeInput) {
-      updatePOStatus(data: $data) {
-        message
-        status
-        tenant_id
       }
     }
   `,

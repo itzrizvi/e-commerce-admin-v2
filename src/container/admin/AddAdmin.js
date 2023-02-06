@@ -14,7 +14,6 @@ import { viewPermission } from '../../utility/utility';
 import config from '../../config/config';
 import InternalErrorMessage from '../../components/esential/InternalErrorMessage';
 import configMessage from '../../config/config_message';
-const { Paragraph } = Typography;
 
 const AddAdmin = () => {
   viewPermission('user');
@@ -24,7 +23,6 @@ const AddAdmin = () => {
   const maxLength = 30;
   const [userStatus, setUserStatus] = useState(true);
   const [selectedRoles, setSelectedRoles] = useState([]);
-  const [sendEmail, setSendEmail] = useState(true);
   const [singleUser, setSingleUser] = useState({ data: {}, isLoading: true });
 
   const [roles, setRoles] = useState({
@@ -149,7 +147,7 @@ const AddAdmin = () => {
           last_name,
           role_ids: selectedRoles.map(item => ({ role_id: item })),
           user_status: userStatus,
-          sendEmail,
+          sendEmail: true,
         },
       };
 

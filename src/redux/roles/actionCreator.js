@@ -6,10 +6,6 @@ import actions from './actions';
 const {
   rolesReadBegin,
   rolesReadSuccess,
-  rolesReadErr,
-  roleAddBegin,
-  roleAddSuccess,
-  roleAddError
 } = actions;
 
 const rolesDataRead = () => {

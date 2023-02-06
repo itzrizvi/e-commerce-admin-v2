@@ -74,7 +74,7 @@ const AddVendor = () => {
           const checkFalse = !(id && address1 && country && city && state && zip_code);
           return checkFalse;
         });
-        if (notValidate?.id) return setMessage({ type: 'warning', message: 'Enter Billing Address Correctly.' });
+        if (notValidate?.id) return message.warning('Enter Billing Address Correctly.');
       } else if (current === 2) {
         // validate shippingAddresses.
         const notValidate1 = shippingAddresses.find(item => {
@@ -82,7 +82,7 @@ const AddVendor = () => {
           const checkFalse = !(id && address1 && country && city && state && zip_code);
           return checkFalse;
         });
-        if (notValidate1?.id) return setMessage({ type: 'warning', message: 'Enter Shipping Address Correctly.' });
+        if (notValidate1?.id) return message.warning('Enter Shipping Address Correctly.');
       } else if (current === 3) {
       }
       setCurrent(current + 1);
@@ -118,8 +118,6 @@ const AddVendor = () => {
   const [shippingAddresses, setShippingAddresses] = useState([]);
   // ============+ for billing END +====================
 
-  // Message
-  const [message, setMessage] = useState(null);
 
   const handleSubmit = () => {
     const values = form.getFieldsValue(true);
@@ -155,7 +153,7 @@ const AddVendor = () => {
         if (!data?.status) return InternalErrorMessage();
         setVendorId(data.id);
         setOperation(true);
-      })
+      });
   };
 
   useEffect(() => {
@@ -212,7 +210,7 @@ const AddVendor = () => {
             .then(res => {
               const data = res?.data?.createContactPerson;
               if (!data?.status) return InternalErrorMessage();
-            })
+            });
         } else {
           apolloClient
             .mutate({
@@ -239,7 +237,7 @@ const AddVendor = () => {
               setIsLoading(false);
               if (type === 'shipping') {
                 if (!isError) {
-                  setMessage({ type: 'success', message: 'Vendor Added Successfully.' });
+                  message.success('Vendor Added Successfully.');
                   setTimeout(() => {
                     history.push('/admin/vendor/list');
                   }, [2000]);
@@ -277,17 +275,6 @@ const AddVendor = () => {
     <>
       <PageHeader title="Add Vendor" />
       <Main>
-        <Row align="middle" justify="center" style={{ margin: 0, padding: 0 }}>
-          {message && (
-            <Alert
-              style={{ width: '50%', marginBottom: 10 }}
-              message={message?.message}
-              type={message?.type}
-              showIcon
-              closable
-            />
-          )}
-        </Row>
         <Row gutter={25}>
           <Col sm={24} xs={24}>
             <Cards headless>
@@ -409,7 +396,7 @@ const AddVendor = () => {
                           </Row>
                           <Row gutter={25}>
                             {contactPersons.map(item => (
-                              <Col key={item.id} sm={24} md={12} lg={8} style={{marginTop: 20}}>
+                              <Col key={item.id} sm={24} md={12} lg={8} style={{ marginTop: 20 }}>
                                 <Card style={{ border: '1px solid #ddd' }}>
                                   <Typography.Paragraph>{item.name}</Typography.Paragraph>
                                   <Typography.Paragraph>{item.email}</Typography.Paragraph>
@@ -496,13 +483,7 @@ const AddVendor = () => {
           onCancel={() => setPersonModalOpen(false)}
           okText="Save"
         >
-          <Form
-            preserve={false}
-            style={{ width: '100%' }}
-            form={personForm}
-            name="personForm"
-            layout="horizontal"
-          >
+          <Form preserve={false} style={{ width: '100%' }} form={personForm} name="personForm" layout="horizontal">
             <Form.Item
               {...formItemLayout}
               rules={[{ required: true, message: 'Please Enter Name' }]}

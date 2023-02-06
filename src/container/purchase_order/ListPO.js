@@ -6,7 +6,6 @@ import { Main } from '../styled';
 import { Cards } from '../../components/cards/frame/cards-frame';
 import { Button } from '../../components/buttons/buttons';
 import { Link, useHistory } from 'react-router-dom';
-const { confirm } = Modal;
 import {
   CheckCircleOutlined,
   CloseCircleOutlined,
@@ -24,9 +23,10 @@ import { poQuery } from '../../apollo/po';
 import { receivingProductQuery } from '../../apollo/receiving_product';
 import Moment from 'react-moment';
 import moment from 'moment';
-const { RangePicker } = DatePicker;
 import { productSchema } from '../../apollo/product';
 import InternalErrorMessage from '../../components/esential/InternalErrorMessage';
+const { confirm } = Modal;
+const { RangePicker } = DatePicker;
 
 let checkPoint = false;
 const ListPO = () => {

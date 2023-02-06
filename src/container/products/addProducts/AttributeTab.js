@@ -4,6 +4,7 @@ import { UploadOutlined } from '@ant-design/icons';
 import FeatherIcon from 'feather-icons-react';
 import apolloClient, { attributeQuery } from '../../../utility/apollo';
 import Cookies from 'js-cookie';
+import InternalErrorMessage from '../../../components/esential/InternalErrorMessage';
 const { Option } = Select;
 
 const AttributeTab = ({ attributesTableData, setAttributesTableData }) => {

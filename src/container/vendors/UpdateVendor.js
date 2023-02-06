@@ -46,8 +46,6 @@ const UpdateVendor = () => {
   const token = useSelector(state => state.auth.token);
   const [personCheckBox, setPersonCheckBox] = useState(true);
   const [selectedPersonID, setSelectedPersonID] = useState(null);
-  // Message
-  const [message, setMessage] = useState(null);
 
   /* -------------------------- Step From Data Start -------------------------- */
   const steps = [
@@ -240,7 +238,7 @@ const UpdateVendor = () => {
             .then(res => {
               const data = !params?.id ? res?.data?.createContactPerson : res?.data?.updateContactPerson;
               if (!data?.status) return InternalErrorMessage();
-            })
+            });
         } else {
           apolloClient
             .mutate({
@@ -267,7 +265,7 @@ const UpdateVendor = () => {
               setIsLoading(false);
               if (type === 'shipping') {
                 if (!isError) {
-                  setMessage({ type: 'success', message: `Vendor ${params?.id ? 'Updated' : 'Added'} Successfully.` });
+                  message.success(`Vendor ${params?.id ? 'Updated' : 'Added'} Successfully.`);
                   setTimeout(() => {
                     history.push('/admin/vendor/list');
                   }, [2000]);
@@ -338,17 +336,6 @@ const UpdateVendor = () => {
         title={`Manage Vendor | Edit ${singleVendor.data.company_name ? `(${singleVendor.data.company_name})` : ''}`}
       />
       <Main>
-        <Row align="middle" justify="center" style={{ margin: 0, padding: 0 }}>
-          {message && (
-            <Alert
-              style={{ width: '50%', marginBottom: 10 }}
-              message={message?.message}
-              type={message?.type}
-              showIcon
-              closable
-            />
-          )}
-        </Row>
         <Row gutter={25}>
           <Col sm={24} xs={24}>
             <Cards headless>
@@ -564,13 +551,7 @@ const UpdateVendor = () => {
           onCancel={() => setPersonModalOpen(false)}
           okText="Save"
         >
-          <Form
-            preserve={false}
-            style={{ width: '100%' }}
-            form={personForm}
-            name="personForm"
-            layout="horizontal"
-          >
+          <Form preserve={false} style={{ width: '100%' }} form={personForm} name="personForm" layout="horizontal">
             <Form.Item
               {...formItemLayout}
               rules={[{ required: true, message: 'Please Enter Name' }]}
